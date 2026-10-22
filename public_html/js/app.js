@@ -14,7 +14,7 @@
     freePracticePerDay: 20,
     trialDays: 14,
     contactEmail: 'info@smetko.com',
-    questionsPerMission: 8,
+    questionsPerMission: 10,
     quickSeconds: 60
   };
 

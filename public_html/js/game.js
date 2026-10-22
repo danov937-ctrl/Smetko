@@ -18,7 +18,8 @@
   var B = S.Books;
   function bookId(g) { var b = G.state.books || {}; return b[g || st.grade] || 'mon'; }
   function curBook() { return B.get(st.grade, bookId()); }
-  function advKey(g, id) { id = id || bookId(g); return String(g || st.grade) + (id === 'mon' ? '' : '-' + id); }
+  // „.2“ = мисиите по уроци (от 10.2026); старите звезди остават в статистиката, но не се смесват с новата карта
+  function advKey(g, id) { id = id || bookId(g); return String(g || st.grade) + '-' + id + '.2'; }
   function shortLabel(t) { return t.length > 34 ? t.slice(0, 32).replace(/[\s,.:–-]+$/, '') + '…' : t; }
   var play = null;          // текуща игра
   var timers = [];
@@ -104,8 +105,14 @@
     return s;
   }
 
-  function renderMap() {
-    var book = curBook(), key = advKey(), levels = book.missions, n = levels.length, stars = G.stars(key);
+  var CH = 16; // мисии в една част на картата
+  function renderMap(chapter) {
+    var book = curBook(), key = advKey(), all = book.missions, N = all.length, stars = G.stars(key);
+    var gcur = 0; for (var q = 0; q < N; q++) { if (G.isUnlocked(key, q)) gcur = q; }
+    var nch = Math.ceil(N / CH);
+    if (chapter === undefined || chapter === null) chapter = Math.floor(gcur / CH);
+    chapter = Math.max(0, Math.min(nch - 1, chapter)); st.chapter = chapter;
+    var off = chapter * CH, levels = all.slice(off, off + CH), n = levels.length;
     MAP_H = Math.max(1180, 250 + n * 82);
     $('#map').style.aspectRatio = MAP_W + ' / ' + MAP_H;
     var pts = levels.map(function (_, i) { return nodePos(i, n); });
@@ -114,27 +121,40 @@
       '<path d="' + d + '" stroke="#D9B77A" stroke-width="34" fill="none" stroke-linecap="round"/>' +
       '<path d="' + d + '" stroke="#F6DFAE" stroke-width="24" fill="none" stroke-linecap="round"/>' +
       '<path d="' + d + '" stroke="#fff" stroke-width="4" stroke-dasharray="2 14" fill="none" stroke-linecap="round" opacity=".9"/></svg>';
-    var current = 0;
-    for (var i = 0; i < n; i++) { if (G.isUnlocked(key, i)) current = i; }
+    var current = Math.max(0, Math.min(n - 1, gcur - off));
     var html = svg, total = 0;
-    levels.forEach(function (lv, i) {
-      var p = pts[i], s = stars[i] || 0; total += s;
+    for (var t = 0; t < N; t++) total += stars[t] || 0;
+    levels.forEach(function (lv, li) {
+      var i = off + li, p = pts[li], s = stars[i] || 0;
       var unlocked = G.isUnlocked(key, i);
       var paid = S.config.paywall && !S.hasAccess() && i >= S.config.freeAdventureLevels;
       var cls = 'map-node ' + (p.x > 200 ? 'left-label' : 'right-label');
       if (!unlocked || paid) cls += ' locked'; else if (s > 0) cls += ' done';
-      if (i === current && !paid) cls += ' current';
+      if (i === gcur && !paid) cls += ' current';
       var starStr = s ? '<span class="n-stars">' + '★★★'.slice(0, s) + '<span style="opacity:.35">' + '★★★'.slice(0, 3 - s) + '</span></span>' : '';
       html += '<button class="' + cls + '" data-i="' + i + '" style="left:' + (p.x / MAP_W * 100) + '%;top:' + (p.y / MAP_H * 100) + '%;" aria-label="Мисия ' + (i + 1) + ': ' + lv[0] + (unlocked ? '' : ' (заключена)') + '" title="' + lv[0] + '">' +
         ((!unlocked || paid) ? '<span class="lock">🔒</span>' : (i + 1)) + starStr + '<span class="n-label">' + shortLabel(lv[0]) + '</span></button>';
     });
     var cp = pts[current];
-    html += '<div class="map-owl" data-owl="hello" style="left:' + (cp.x / MAP_W * 100 + 9) + '%;top:' + (cp.y / MAP_H * 100 - 2) + '%"></div>';
+    if (gcur >= off && gcur < off + n) html += '<div class="map-owl" data-owl="hello" style="left:' + (cp.x / MAP_W * 100 + 9) + '%;top:' + (cp.y / MAP_H * 100 - 2) + '%"></div>';
     var map = $('#map');
     map.innerHTML = html;
     S.renderOwls(map);
     $('#map-title').textContent = E.GRADES[st.grade].name + ' · ' + (book.id === 'mon' ? 'по програмата' : book.publisher);
-    $('#map-stars').textContent = '★ ' + total + ' / ' + (n * 3);
+    $('#map-stars').textContent = '★ ' + total + ' / ' + (N * 3);
+    var chBox = $('#map-chapters');
+    if (!chBox) { chBox = document.createElement('div'); chBox.id = 'map-chapters'; chBox.className = 'map-chapters'; map.parentNode.insertBefore(chBox, map); }
+    var chHtml = '';
+    for (var c = 0; c < nch; c++) {
+      var cs = 0, cdone = 0, from = c * CH, to = Math.min(N, from + CH);
+      for (var k = from; k < to; k++) { cs += stars[k] || 0; if (stars[k]) cdone++; }
+      var locked = !G.isUnlocked(key, from);
+      chHtml += '<button class="ch' + (c === chapter ? ' on' : '') + (cdone === to - from ? ' full' : '') + (locked ? ' lk' : '') + '" data-ch="' + c + '" aria-pressed="' + (c === chapter) + '" title="Уроци ' + (from + 1) + '–' + to + '">' +
+        '<b>' + (locked ? '🔒' : c + 1) + '</b><small>' + (from + 1) + '–' + to + '</small>' + (cs ? '<i>★' + cs + '</i>' : '') + '</button>';
+    }
+    chBox.innerHTML = '<span class="ch-l">Части:</span>' + chHtml;
+    $$('[data-ch]', chBox).forEach(function (b) { b.addEventListener('click', function () { A.click(); renderMap(+b.dataset.ch); window.scrollTo({ top: Math.max(0, chBox.getBoundingClientRect().top + window.scrollY - 90), behavior: 'smooth' }); }); });
+    var onb = $('.ch.on', chBox); if (onb && onb.scrollIntoView) try { chBox.scrollLeft = onb.offsetLeft - chBox.clientWidth / 2 + onb.clientWidth / 2; } catch (e) {}
     $$('.map-node', map).forEach(function (b) {
       b.addEventListener('click', function () {
         var i = +b.dataset.i;
@@ -158,7 +178,7 @@
     if (!m) { renderMap(); return; }
     if (missionLocked(i)) { renderMap(); S.accessModal(); return; } // платените мисии – само с код/абонамент
     if (!G.isUnlocked(advKey(), i)) { renderMap(); S.toast('🔒 Първо мини мисия ' + i + '!'); return; }
-    startPlay({ mode: 'adventure', book: book, mission: m, topic: book.id === 'mon' ? (m[4] || 'mix') : 'book', level: m[2], missionIdx: i, title: m[0] });
+    startPlay({ mode: 'adventure', book: book, mission: m, topic: 'book', level: m[2], missionIdx: i, title: m[0] });
   }
 
   function startPlay(opts) {
@@ -211,7 +231,7 @@
   function nextQuestion() {
     if (!play) return;
     var t, tries = 0;
-    do { t = st.skill ? E.generateSkill(play.grade, st.skill, play.level) : (play.mission && play.book && play.book.id !== 'mon') ? E.generateFrom(play.grade, play.mission[1], play.level) : E.generate(play.grade, play.topic, play.level); tries++; } while (t.q === play.lastQ && tries < 6);
+    do { t = st.skill ? E.generateSkill(play.grade, st.skill, play.level) : (play.mission && play.mission[1]) ? E.generateFrom(play.grade, play.mission[1], play.level) : E.generate(play.grade, play.topic, play.level); tries++; } while (t.q === play.lastQ && tries < 6);
     play.task = t; S._task = t; play.lastQ = t.q; play.input = ''; play.busy = false; play.waitNext = false; play.qStart = Date.now();
     var qc = $('#qcard'); qc.classList.remove('ok', 'bad');
     var html = '';

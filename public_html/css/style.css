@@ -818,3 +818,14 @@ table.liga-table tr.gap td { text-align: center; color: var(--muted); padding: 2
 .liga-promo { margin-top: 22px; background: linear-gradient(135deg, #FFF4D6, #FFE7C2); }
 .liga-promo h3 { margin: 0 0 6px; }
 .liga-promo p { margin: 0; }
+/* части на картата с мисии */
+.map-chapters { display: flex; gap: 8px; overflow-x: auto; padding: 6px 2px 12px; margin: 0 0 6px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; align-items: stretch; }
+.map-chapters .ch-l { align-self: center; font-weight: 900; color: var(--navy); white-space: nowrap; padding-right: 2px; }
+.map-chapters .ch { flex: none; min-width: 64px; border: 2px solid var(--line); background: #fff; border-radius: 16px; padding: 6px 8px; cursor: pointer; font: inherit; color: var(--navy); display: grid; justify-items: center; line-height: 1.1; gap: 1px; }
+.map-chapters .ch b { font-size: 1.1rem; font-weight: 900; }
+.map-chapters .ch small { font-size: .7rem; font-weight: 800; color: var(--muted); }
+.map-chapters .ch i { font-style: normal; font-size: .72rem; font-weight: 900; color: #E0A500; }
+.map-chapters .ch.on { border-color: var(--orange); background: #FFF4E8; box-shadow: 0 3px 0 var(--orange-dark); }
+.map-chapters .ch.full { background: #EAF6E9; border-color: #BFE5BC; }
+.map-chapters .ch.on.full { border-color: var(--orange); }
+.map-chapters .ch.lk { opacity: .6; }

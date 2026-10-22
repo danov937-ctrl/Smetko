@@ -1,12 +1,12 @@
 /* Сметко — Service Worker: офлайн игра и бързо зареждане.
    При всяка промяна на файловете увеличете VERSION, за да се обнови кешът. */
-const VERSION = 'smetko-v7';
+const VERSION = 'smetko-v8';
 const CORE = [
   '/', '/game.html', '/achievements.html', '/pricing.html', '/about.html', '/uchilishta.html', '/rabotni-listove.html',
   '/kod.html', '/klasaciya.html', '/liga.html', '/class-1.html', '/class-2.html', '/class-3.html', '/class-4.html', '/404.html',
-  '/css/style.css?v=7', '/css/animations.css?v=7',
-  '/js/owl.js?v=7', '/js/gamification.js?v=7', '/js/audio.js?v=7', '/js/math-engine.js?v=7', '/js/textbooks.js?v=7',
-  '/js/access.js?v=7', '/js/app.js?v=7', '/js/game.js?v=7', '/js/achievements.js?v=7', '/js/tools.js?v=7', '/js/league.js?v=7',
+  '/css/style.css?v=8', '/css/animations.css?v=8',
+  '/js/owl.js?v=8', '/js/gamification.js?v=8', '/js/audio.js?v=8', '/js/math-engine.js?v=8', '/js/textbooks.js?v=8',
+  '/js/access.js?v=8', '/js/app.js?v=8', '/js/game.js?v=8', '/js/achievements.js?v=8', '/js/tools.js?v=8', '/js/league.js?v=8',
   '/assets/images/landscape.svg', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/manifest.json'
 ];
 
