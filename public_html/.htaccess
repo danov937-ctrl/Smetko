@@ -1,0 +1,75 @@
+# ============================================================
+#  Сметко — настройки за Apache (SuperHosting.bg)
+# ============================================================
+
+Options -Indexes
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+AddDefaultCharset UTF-8
+
+# ---------- HTTPS и без www ----------
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} off [OR]
+  RewriteCond %{HTTP_HOST} ^www\. [NC]
+  RewriteRule ^ https://smetko.com%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ---------- Типове файлове ----------
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType application/json .json
+  AddType image/svg+xml .svg
+  AddType font/woff2 .woff2
+  AddType text/javascript .js
+</IfModule>
+
+# ---------- Компресия ----------
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/javascript application/javascript application/json application/manifest+json image/svg+xml
+</IfModule>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json application/manifest+json image/svg+xml text/plain application/xml
+</IfModule>
+
+# ---------- Кеширане ----------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 week"
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType audio/mpeg "access plus 1 year"
+  ExpiresByType application/json "access plus 1 day"
+</IfModule>
+
+<IfModule mod_headers.c>
+  # CSS/JS се зареждат с ?v=1 — при промяна сменете номера в HTML
+  <FilesMatch "\.(css|js|svg|png|webp|woff2|mp3|ogg)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  # Service Worker и манифест винаги свежи
+  <FilesMatch "^(sw\.js|manifest\.json)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+
+  # Сигурност
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+</IfModule>
+
+# Скрий служебни файлове
+<FilesMatch "^\.(?!well-known)">
+  Require all denied
+</FilesMatch>

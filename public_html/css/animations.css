@@ -1,0 +1,19 @@
+/* Сметко — анимации (само transform и opacity за плавност) */
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes pop { 0% { opacity: 0; transform: scale(.6); } 70% { opacity: 1; transform: scale(1.06); } 100% { transform: scale(1); } }
+@keyframes hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-8px); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-10px); } 40% { transform: translateX(10px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
+@keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
+@keyframes floatUp { 0% { opacity: 0; transform: translateY(10px) scale(.8); } 20% { opacity: 1; transform: translateY(0) scale(1.1); } 100% { opacity: 0; transform: translateY(-40px) scale(1); } }
+@keyframes drift { from { transform: translateX(0); } to { transform: translateX(60px); } }
+@keyframes screenIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes wave { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-14deg); } }
+@keyframes bounceIn { 0% { transform: scale(.3); opacity: 0; } 50% { transform: scale(1.08); opacity: 1; } 70% { transform: scale(.95); } 100% { transform: scale(1); } }
+
+.owl-svg .owl-wave { transform-box: fill-box; transform-origin: 50% 90%; animation: wave 1.2s ease-in-out infinite; }
+.owl-jump { animation: hop .45s ease; }
+.bounce-in { animation: bounceIn .55s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}

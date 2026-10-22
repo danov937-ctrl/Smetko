@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Игра — Сметко</title>
+<meta name="description" content="Играй математически мисии, бързо смятане и тренировка за 1.–4. клас.">
+<link rel="canonical" href="https://smetko.com/game.html">
+<meta name="theme-color" content="#4FB8FA">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Сметко">
+<meta property="og:title" content="Игра — Сметко">
+<meta property="og:description" content="Играй математически мисии, бързо смятане и тренировка за 1.–4. клас.">
+<meta property="og:url" content="https://smetko.com/game.html">
+<meta property="og:image" content="https://smetko.com/assets/images/og-image.png">
+<meta property="og:locale" content="bg_BG">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap&amp;subset=cyrillic" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=1">
+<link rel="stylesheet" href="css/animations.css?v=1">
+</head>
+<body class="game-page">
+<a class="skip" href="#main">Към съдържанието</a>
+<header class="site-header game-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" aria-label="Сметко — начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
+    <nav class="nav" aria-label="Основно меню"><a href="game.html" aria-current="page">Мисии</a><a href="index.html#klasove">Класове</a><a href="achievements.html">Постижения</a><a href="about.html#roditeli">За родители</a><a href="about.html#uchiteli">За учители</a><a href="pricing.html">Цени</a></nav>
+    <div class="header-actions">
+      <button class="icon-btn" id="sound-btn" aria-label="Звук">🔊</button><a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
+      <button class="btn btn-teal btn-sm btn-login" data-login>Вход</button>
+      <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
+    </div>
+  </div>
+  <nav class="mobile-nav" aria-label="Мобилно меню"><a href="game.html" aria-current="page">Мисии</a><a href="index.html#klasove">Класове</a><a href="achievements.html">Постижения</a><a href="about.html#roditeli">За родители</a><a href="about.html#uchiteli">За учители</a><a href="pricing.html">Цени</a><a href="#" data-login>Вход за родители и учители</a></nav>
+</header>
+
+<main id="main">
+<noscript><div class="noscript">За да играете, моля, включете JavaScript в браузъра.</div></noscript>
+
+<section class="screen" id="screen-setup" aria-label="Избор на игра">
+  <div class="game-wrap">
+    <div class="today">
+      <div class="owl" data-owl="hello"></div>
+      <div class="goal"><div id="rank-name">Ниво 1: Новак</div><div id="goal-text" style="font-size:.9rem;color:var(--muted)">Днешна цел</div><div class="goal-bar"><i id="goal-bar"></i></div></div>
+      <div class="streak">🔥<b id="streak-num">0</b>дни</div>
+    </div>
+    <div class="panel">
+      <div class="step-label">1. Избери клас</div>
+      <div class="grade-tabs">
+        <button class="grade-tab" data-g="1"><b>1</b>клас</button>
+        <button class="grade-tab" data-g="2"><b>2</b>клас</button>
+        <button class="grade-tab" data-g="3"><b>3</b>клас</button>
+        <button class="grade-tab" data-g="4"><b>4</b>клас</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="step-label">2. Избери игра</div>
+      <div class="modes">
+        <button class="mode-btn" data-mode="adventure"><span class="m-ico">🗺️</span><b>Приключение</b><small>12 мисии към върха</small></button>
+        <button class="mode-btn" data-mode="quick"><span class="m-ico">⚡</span><b>Бързо сметни</b><small>60 секунди, нов рекорд</small></button>
+        <button class="mode-btn" data-mode="practice"><span class="m-ico">🧘</span><b>Тренировка</b><small>Без часовник</small></button>
+      </div>
+      <div id="topic-wrap" style="margin-top:18px">
+        <div class="step-label">3. Избери тема</div>
+        <div class="topic-chips" id="topic-chips"></div>
+      </div>
+      <div class="start-row"><button class="btn btn-lg" id="start-btn">Започни!</button></div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-map" aria-label="Карта на мисиите">
+  <div class="game-wrap">
+    <div class="map-head"><button class="icon-btn" id="map-back" aria-label="Назад">←</button><h2 id="map-title">Приключение</h2><span class="map-stars" id="map-stars">★ 0</span></div>
+    <div class="map" id="map"></div>
+  </div>
+</section>
+
+<section class="screen" id="screen-play" aria-label="Игра">
+  <div class="game-wrap">
+    <div class="play-top">
+      <button class="icon-btn" id="exit-btn" aria-label="Изход">✕</button>
+      <div class="progress" id="progress"><i></i></div>
+      <span class="timer-num" id="timer-num" hidden>60</span>
+      <button class="btn btn-sm btn-purple" id="end-btn" hidden style="margin-left:auto">Край</button>
+    </div>
+    <div class="score"><span class="pill" id="play-mode">Игра</span><span class="pill combo" id="combo"></span><span class="pill" id="level-pill">Ниво 1</span><span class="pill" id="pts">★ 0</span></div>
+    <div class="stage"><div class="owl" id="play-owl" data-owl="hello"></div><div class="bubble" id="bubble" aria-live="polite">Да започваме!</div></div>
+    <div class="qcard" id="qcard"><div id="qbody"></div></div>
+    <div class="keypad" id="keypad">
+      <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
+      <button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
+      <button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>
+      <button class="key del" data-k="del" aria-label="Изтрий">⌫</button><button class="key" data-k="0">0</button><button class="key ok" data-k="ok" aria-label="Провери">✓</button>
+    </div>
+    <div class="choices" id="choices" hidden>
+      <button class="key" data-k="&lt;" aria-label="по-малко">&lt;</button><button class="key" data-k="=" aria-label="равно">=</button><button class="key" data-k="&gt;" aria-label="по-голямо">&gt;</button>
+    </div>
+    <div class="next-row" id="next-row" hidden><button class="btn btn-green btn-lg" id="next-btn">Напред →</button></div>
+  </div>
+</section>
+
+<section class="screen" id="screen-result" aria-label="Резултат">
+  <div class="game-wrap"><div class="panel result" id="result"></div></div>
+</section>
+</main>
+<script src="js/owl.js?v=1" defer></script>
+<script src="js/gamification.js?v=1" defer></script>
+<script src="js/audio.js?v=1" defer></script>
+<script src="js/math-engine.js?v=1" defer></script>
+<script src="js/app.js?v=1" defer></script>
+<script src="js/game.js?v=1" defer></script>
+</body>
+</html>

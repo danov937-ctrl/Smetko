@@ -1,0 +1,22 @@
+{
+  "name": "Сметко — математика като игра",
+  "short_name": "Сметко",
+  "description": "Математически игри и мисии за 1.–4. клас.",
+  "lang": "bg",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#4FB8FA",
+  "theme_color": "#4FB8FA",
+  "categories": ["education", "kids", "games"],
+  "icons": [
+    { "src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Бързо сметни", "url": "/game.html?mode=quick&start=0", "icons": [{ "src": "/assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Приключение", "url": "/game.html?mode=adventure&start=0", "icons": [{ "src": "/assets/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
