@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '9'
+VER = '11'
 EMAIL = 'info@smetko.com'
 
 # Данни за търговеца — попълват се след регистрация на фирмата (търсете „[ПОПЪЛНЕТЕ“ във всички файлове)
@@ -69,7 +69,7 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
           <a href="achievements.html"><b>Моите постижения</b><small>Точки, значки и моят клас</small></a>
           <a href="klasaciya.html"><b>Класация на класа</b><small>За учителя – с код и ПИН</small></a>
         </div></div>
-      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">За учители <span class="chev">▾</span></button>
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">Учители <span class="chev">▾</span></button>
         <div class="dd-panel">
           <a href="uchilishta.html"><b>Сметко в училище</b><small>Кодове за класа и документи</small></a>
           <a href="klasaciya.html"><b>Класация на класа</b><small>С кода и ПИН-а от картичката</small></a>
@@ -77,7 +77,14 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
           <a href="uchilishta.html#domashna"><b>Линк за домашна</b><small>Конкретна тема с един линк</small></a>
           <a href="about.html#uchiteli"><b>Как работи в клас</b><small>Идеи за часа по математика</small></a>
         </div></div>
-      <a href="about.html#roditeli" data-nav="parents">За родители</a>
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="parents">Родители <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="about.html#roditeli"><b>За родители</b><small>Как Сметко помага на детето</small></a>
+          <a href="otchet.html"><b>Отчет за родителя</b><small>Напредък, силни и слаби теми</small></a>
+          <a href="za-nas.html"><b>За нас</b><small>Кои сме и защо направихме Сметко</small></a>
+          <a href="novini.html"><b>Новини</b><small>Какво ново има</small></a>
+        </div></div>
+      <a href="blog/" data-nav="blog">Блог</a>
       <a href="pricing.html" data-nav="pricing">Цени</a>
     </nav>'''
 
@@ -87,9 +94,13 @@ MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
     <a href="liga.html">🏆 Обща класация</a>
     <a href="achievements.html">⭐ Моите постижения</a>
     <a href="kod.html">🔑 Въведи код за достъп</a>
+    <a href="novini.html">📰 Новини <b class="m-news" data-news-count hidden></b></a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
     <a href="about.html#roditeli">👨‍👩‍👧 За родители</a>
+    <a href="otchet.html">📊 Отчет за родителя</a>
+    <a href="blog/">✍️ Блог</a>
+    <a href="za-nas.html">🦉 За нас</a>
     <a href="pricing.html">💶 Цени</a>
     <div class="m-auth"><a class="btn btn-ghost" href="kod.html" data-code-link>Имам код</a><a class="btn btn-teal" href="pricing.html">Абонамент</a></div>
   </nav>'''
@@ -105,7 +116,7 @@ def header(active='', over=False, game=False):
     {LOGO}
     {nav}
     <div class="header-actions">
-      {snd}<a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
+      {snd}<a class="news-bell" href="novini.html" title="Новини" aria-label="Новини">🔔<b data-news-count hidden></b></a><a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
       <a class="link-login" href="kod.html" data-code-link>Имам код</a>
       <a class="btn btn-teal btn-sm btn-register" href="pricing.html">Абонамент</a>
       <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
@@ -132,10 +143,14 @@ FOOTER = '''<footer class="site-footer">
       </ul></div>
       <div><h4>За възрастните</h4><ul>
         <li><a href="about.html#roditeli">За родители</a></li>
+        <li><a href="otchet.html">Отчет за родителя</a></li>
+        <li><a href="blog/">Блог</a></li>
+        <li><a href="za-nas.html">За нас</a></li>
         <li><a href="uchilishta.html">За учители и училища</a></li>
         <li><a href="rabotni-listove.html">Работни листове</a></li>
         <li><a href="pricing.html">Цени</a></li>
         <li><a href="kod.html">Въведи код</a></li>
+        <li><a href="novini.html">Новини</a></li>
       </ul></div>
       <div><h4>Правна информация</h4><ul>
         <li><a href="terms.html">Общи условия</a></li>

@@ -80,6 +80,9 @@ const NAV = [
     ['porachki.php', '🧾', 'Поръчки'],
     ['uchilishta.php', '🏫', 'Училища'],
     ['klasacii.php', '🏆', 'Класации'],
+    ['predizvikatelstvo.php', '⚡', 'Предизвикателство'],
+    ['novini.php', '📰', 'Новини'],
+    ['blog.php', '✍️', 'Блог'],
     ['uchebnici.php', '📚', 'Учебници'],
     ['nastroyki.php', '⚙️', 'Настройки'],
     ['arhiv.php', '💾', 'Архив'],
@@ -131,7 +134,7 @@ function page(string $title, string $body, string $actions = ''): void {
     $cur = basename($_SERVER['SCRIPT_NAME'] ?? 'index.php');
     $nav = '';
     foreach (NAV as $i => [$f, $ico, $name]) {
-        if ($i === 6) $nav .= '<div class="sep"></div>';
+        if ($f === 'nastroyki.php') $nav .= '<div class="sep"></div>';
         $nav .= '<a href="' . $f . '"' . ($f === $cur ? ' class="on"' : '') . '><span>' . $ico . '</span>' . $name . '</a>';
     }
     $nav .= '<div class="sep"></div><a href="../" target="_blank"><span>🌐</span>Сайтът ↗</a><a href="?action=logout"><span>🚪</span>Изход</a>';

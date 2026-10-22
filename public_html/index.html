@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=9">
-<link rel="stylesheet" href="css/animations.css?v=9">
+<link rel="stylesheet" href="css/style.css?v=11">
+<link rel="stylesheet" href="css/animations.css?v=11">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "Сметко", "url": "https://smetko.com", "logo": "https://smetko.com/assets/icons/icon-512.png", "email": "info@smetko.com"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Сметко", "url": "https://smetko.com", "applicationCategory": "EducationalApplication", "operatingSystem": "Всички (уеб браузър)", "inLanguage": "bg", "educationalLevel": "1.–4. клас", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "По кой учебник са задачите?", "acceptedAnswer": {"@type": "Answer", "text": "Детето избира своя учебник и получава по една мисия за всеки урок от годишното разпределение – между 110 и 136 мисии за година, с уроците в същия ред. Ако учебникът още го няма в списъка, мисиите следват учебната програма на МОН – общият ред, по който работят всички одобрени учебници."}}, {"@type": "Question", "name": "Безплатен ли е Сметко?", "acceptedAnswer": {"@type": "Answer", "text": "Има безплатен план: „Бързо сметни“, първите 3 мисии от всеки клас и 20 задачи на ден в „Тренировка“. Пълният достъп се отключва с код от учителя или с абонамент. Вижте цените."}}, {"@type": "Question", "name": "Как се използва код за достъп?", "acceptedAnswer": {"@type": "Answer", "text": "Отворете smetko.com/kod и въведете кода от картичката. Пълният достъп се включва веднага на това устройство. Всеки код е еднократен – активира се само на едно устройство."}}, {"@type": "Question", "name": "Трябва ли регистрация?", "acceptedAnswer": {"@type": "Answer", "text": "Не. Децата играят веднага, без имейл и без парола. Прогресът се пази на устройството, а с код за клас резултатите влизат и в класацията на класа – само с прякор."}}, {"@type": "Question", "name": "Има ли реклами?", "acceptedAnswer": {"@type": "Answer", "text": "Не. Сметко е чиста детска среда, без рекламни банери и без проследяване."}}, {"@type": "Question", "name": "На какво устройство работи?", "acceptedAnswer": {"@type": "Answer", "text": "На телефон, таблет, компютър и интерактивна дъска, направо в браузъра. Може да се добави на началния екран като приложение и работи и без интернет."}}, {"@type": "Question", "name": "Как може училището ни да се включи?", "acceptedAnswer": {"@type": "Answer", "text": "Вижте Сметко за училища: всеки ученик получава картичка с личен еднократен код, а учителят – картичка с ПИН за класацията на класа. Там са и образците на документите."}}]}</script>
@@ -48,7 +48,7 @@
           <a href="achievements.html"><b>Моите постижения</b><small>Точки, значки и моят клас</small></a>
           <a href="klasaciya.html"><b>Класация на класа</b><small>За учителя – с код и ПИН</small></a>
         </div></div>
-      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">За учители <span class="chev">▾</span></button>
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">Учители <span class="chev">▾</span></button>
         <div class="dd-panel">
           <a href="uchilishta.html"><b>Сметко в училище</b><small>Кодове за класа и документи</small></a>
           <a href="klasaciya.html"><b>Класация на класа</b><small>С кода и ПИН-а от картичката</small></a>
@@ -56,11 +56,18 @@
           <a href="uchilishta.html#domashna"><b>Линк за домашна</b><small>Конкретна тема с един линк</small></a>
           <a href="about.html#uchiteli"><b>Как работи в клас</b><small>Идеи за часа по математика</small></a>
         </div></div>
-      <a href="about.html#roditeli" data-nav="parents">За родители</a>
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="parents">Родители <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="about.html#roditeli"><b>За родители</b><small>Как Сметко помага на детето</small></a>
+          <a href="otchet.html"><b>Отчет за родителя</b><small>Напредък, силни и слаби теми</small></a>
+          <a href="za-nas.html"><b>За нас</b><small>Кои сме и защо направихме Сметко</small></a>
+          <a href="novini.html"><b>Новини</b><small>Какво ново има</small></a>
+        </div></div>
+      <a href="blog/" data-nav="blog">Блог</a>
       <a href="pricing.html" data-nav="pricing">Цени</a>
     </nav>
     <div class="header-actions">
-      <a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
+      <a class="news-bell" href="novini.html" title="Новини" aria-label="Новини">🔔<b data-news-count hidden></b></a><a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
       <a class="link-login" href="kod.html" data-code-link>Имам код</a>
       <a class="btn btn-teal btn-sm btn-register" href="pricing.html">Абонамент</a>
       <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
@@ -72,9 +79,13 @@
     <a href="liga.html">🏆 Обща класация</a>
     <a href="achievements.html">⭐ Моите постижения</a>
     <a href="kod.html">🔑 Въведи код за достъп</a>
+    <a href="novini.html">📰 Новини <b class="m-news" data-news-count hidden></b></a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
     <a href="about.html#roditeli">👨‍👩‍👧 За родители</a>
+    <a href="otchet.html">📊 Отчет за родителя</a>
+    <a href="blog/">✍️ Блог</a>
+    <a href="za-nas.html">🦉 За нас</a>
     <a href="pricing.html">💶 Цени</a>
     <div class="m-auth"><a class="btn btn-ghost" href="kod.html" data-code-link>Имам код</a><a class="btn btn-teal" href="pricing.html">Абонамент</a></div>
   </nav>
@@ -109,6 +120,8 @@
   <path d="M-20 300 C 400 284 1040 284 1460 300 Z" fill="#fff"/>
 </svg>
 </section>
+
+<section class="ch-strip"><div class="wrap"><div class="ch-card" data-challenge-card hidden></div></div></section>
 
 <section class="how2" id="kak-raboti">
   <div class="wrap">
@@ -201,9 +214,9 @@
   <div class="wrap">
     <div class="section-head"><h2 class="lined">Честни цени</h2><p>Безплатен план за всички. Пълен достъп с код от учителя или с абонамент.</p></div>
     <div class="plans three">
-      <div class="plan"><h3>1 месец</h3><div class="who">Без обвързване</div><div class="price"><span data-price="month">2.99</span> € <small>/ месец</small></div><div class="per">&nbsp;</div><ul><li>Всички мисии по учебника</li><li>Неограничена тренировка</li><li>Всички значки и нива</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
-      <div class="plan featured"><span class="ribbon">Препоръчан</span><h3>Учебна година</h3><div class="who">15 септември – 30 юни</div><div class="price"><span data-price="schoolYear">15</span> € <small>/ година</small></div><div class="per"><span data-per="schoolYear">≈ 1.58 € на месец</span></div><ul><li>Всичко от месечния план</li><li>Без плащане през лятото</li><li>Подходящ за подарък</li></ul><a class="btn" href="pricing.html">Детайли</a></div>
-      <div class="plan"><h3>Цял клас</h3><div class="who">До 30 ученици + картичка за учителя</div><div class="price"><span data-price="class">75</span> € <small>/ уч. година</small></div><div class="per"><span data-per="class">≈ 2.50 € на ученик</span></div><ul><li>Всичко за всяко дете</li><li>Класация на класа</li><li>Фактура</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
+      <div class="plan"><h3><span class="plan-ico">🦉</span> <span data-plan="single">Бухалче</span><small class="plan-kind">Индивидуален</small></h3><div class="who">1 дете + отчет за родителя</div><div class="price"><span data-price="single12">18</span> € <small>/ 1 година</small></div><div class="per">или <span data-price="single6">10</span> € за 6 месеца</div><ul><li>Всички мисии по учебника</li><li>Неограничена тренировка</li><li>Отчет за родителя</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
+      <div class="plan featured"><span class="ribbon">Най-изгоден</span><h3><span class="plan-ico">🏡</span> <span data-plan="family">Гнездо</span><small class="plan-kind">Семеен</small></h3><div class="who">До 4 деца + родител</div><div class="price"><span data-price="family12">30</span> € <small>/ 1 година</small></div><div class="per">или <span data-price="family6">18</span> € за 6 месеца</div><ul><li>Отделен код за всяко дете</li><li>Отчет за всяко дете</li><li>Подходящ за подарък</li></ul><a class="btn" href="pricing.html">Детайли</a></div>
+      <div class="plan"><h3><span class="plan-ico">🐦</span> <span data-plan="class">Ято</span><small class="plan-kind">Цял клас</small></h3><div class="who">30 ученици + 1 + 2 учители</div><div class="price"><span data-price="class12">80</span> € <small>/ 1 година</small></div><div class="per">или <span data-price="class6">45</span> € за 6 месеца</div><ul><li>Класация на класа</li><li>Отчет по теми за учителя</li><li>Фактура</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
     </div>
   </div>
 </section>
@@ -241,10 +254,14 @@
       </ul></div>
       <div><h4>За възрастните</h4><ul>
         <li><a href="about.html#roditeli">За родители</a></li>
+        <li><a href="otchet.html">Отчет за родителя</a></li>
+        <li><a href="blog/">Блог</a></li>
+        <li><a href="za-nas.html">За нас</a></li>
         <li><a href="uchilishta.html">За учители и училища</a></li>
         <li><a href="rabotni-listove.html">Работни листове</a></li>
         <li><a href="pricing.html">Цени</a></li>
         <li><a href="kod.html">Въведи код</a></li>
+        <li><a href="novini.html">Новини</a></li>
       </ul></div>
       <div><h4>Правна информация</h4><ul>
         <li><a href="terms.html">Общи условия</a></li>
@@ -257,10 +274,11 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=9" defer></script>
-<script src="js/gamification.js?v=9" defer></script>
-<script src="js/audio.js?v=9" defer></script>
-<script src="js/access.js?v=9" defer></script>
-<script src="js/app.js?v=9" defer></script>
+<script src="js/owl.js?v=11" defer></script>
+<script src="js/gamification.js?v=11" defer></script>
+<script src="js/audio.js?v=11" defer></script>
+<script src="js/access.js?v=11" defer></script>
+<script src="js/challenge.js?v=11" defer></script>
+<script src="js/app.js?v=11" defer></script>
 </body>
 </html>

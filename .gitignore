@@ -4,3 +4,5 @@ node_modules/
 public_html/api/data/*
 !public_html/api/data/.htaccess
 __pycache__/
+public_html/uploads/*
+!public_html/uploads/.htaccess

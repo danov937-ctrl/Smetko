@@ -11,11 +11,16 @@ if ($action === 'prices') {
     foreach (array_keys(DEFAULT_CONFIG['prices']) as $k) { $v = $num($k, 0, 100000, $c['prices'][$k]); $c['prices'][$k] = rtrim(rtrim(number_format($v, 2, '.', ''), '0'), '.'); }
     save_site_config($c); audit('Цени', json_encode($c['prices'], JSON_UNESCAPED_UNICODE)); flash('Цените са запазени и вече се виждат на сайта.'); go('nastroyki.php#prices');
 }
+if ($action === 'names') {
+    foreach (array_keys(DEFAULT_CONFIG['planNames']) as $k) { $v = mb_substr(post($k), 0, 30); $c['planNames'][$k] = $v !== '' ? $v : DEFAULT_CONFIG['planNames'][$k]; }
+    save_site_config($c); audit('Имена на плановете', implode(', ', $c['planNames'])); flash('Имената на плановете са запазени.'); go('nastroyki.php#names');
+}
 if ($action === 'plan') {
     $c['paywall'] = !empty($_POST['paywall']);
     $c['freeMissions'] = (int)$num('freeMissions', 0, 200, 3);
     $c['freePractice'] = (int)$num('freePractice', 1, 1000, 20);
     $c['questions'] = (int)$num('questions', 5, 30, 10);
+    $c['diplomas'] = in_array(post('diplomas'), ['auto', 'on', 'off'], true) ? post('diplomas') : 'auto';
     save_site_config($c); audit('Безплатен план', ($c['paywall'] ? 'платен достъп' : 'всичко безплатно') . " · мисии {$c['freeMissions']} · задачи {$c['freePractice']} · въпроси {$c['questions']}"); flash('Запазено.'); go('nastroyki.php#plan');
 }
 if ($action === 'banner') {
@@ -50,12 +55,16 @@ $P = $c['prices']; $B = $c['banner']; $C = $c['company'];
 $pf = fn($k, $l) => '<label>' . $l . '<input name="' . $k . '" inputmode="decimal" value="' . h($P[$k]) . '"></label>';
 $f = fn($a) => '<form method="post" class="card" id="' . $a . '">' . csrf_field() . '<input type="hidden" name="action" value="' . ($a === 'security' ? 'password' : $a) . '">';
 $body = '<p class="hint">Промените се прилагат на сайта веднага (при следващо отваряне на страница). Не е нужно нищо да качвате.</p>';
-$body .= $f('prices') . '<h2>💶 Цени</h2><div class="grid g4">' . $pf('month', '1 месец (€)') . $pf('schoolYear', 'Учебна година (€)') . $pf('year', '1 година (€)') . $pf('family', 'Семеен (€)') . $pf('class', 'Цял клас (€)') .
-    $pf('disc3', 'Отстъпка за 3+ класа (%)') . $pf('disc8', 'Отстъпка за 8+ класа (%)') . '</div><p class="hint">„На месец“, „на ученик“ и „на дете“ на страницата с цените се преизчисляват автоматично.</p><button>💾 Запази цените</button></form>';
+$body .= $f('prices') . '<h2>💶 Цени</h2><div class="grid g4">' . $pf('single6', '🦉 Индивидуален · 6 месеца (€)') . $pf('single12', '🦉 Индивидуален · 1 година (€)') . $pf('family6', '🏡 Семеен · 6 месеца (€)') . $pf('family12', '🏡 Семеен · 1 година (€)') .
+    $pf('class6', '🐦 Цял клас · 6 месеца (€)') . $pf('class12', '🐦 Цял клас · 1 година (€)') . $pf('disc3', 'Отстъпка за 3+ класа (%)') . $pf('disc8', 'Отстъпка за 8+ класа (%)') . '</div><p class="hint">„На месец“, „на дете“ и „на ученик“ на страницата с цените се преизчисляват автоматично.</p><button>💾 Запази цените</button></form>';
+$N = $c['planNames'];
+$nf = fn($k, $l) => '<label>' . $l . '<input name="' . $k . '" maxlength="30" value="' . h($N[$k]) . '"></label>';
+$body .= $f('names') . '<h2>🏷️ Имена на плановете</h2><div class="grid g4">' . $nf('free', '🐣 Безплатно') . $nf('single', '🦉 Индивидуален') . $nf('family', '🏡 Семеен') . $nf('class', '🐦 Цял клас') . $nf('school', '🌳 Училище') . '</div><p class="hint">Показват се на страницата с цените и в прозореца за абонамент.</p><button>💾 Запази имената</button></form>';
 $body .= $f('plan') . '<h2>🎁 Безплатен план</h2><label class="chk"><input type="checkbox" name="paywall" value="1"' . ($c['paywall'] ? ' checked' : '') . '> Пълният достъп е платен (махнете отметката, за да е всичко безплатно – напр. за промоция)</label><div class="grid g3">' .
     '<label>Безплатни мисии в началото на всеки учебник<input type="number" name="freeMissions" min="0" max="200" value="' . (int)$c['freeMissions'] . '"></label>' .
     '<label>Безплатни задачи на ден в „Тренировка“<input type="number" name="freePractice" min="1" max="1000" value="' . (int)$c['freePractice'] . '"></label>' .
-    '<label>Задачи в една мисия<input type="number" name="questions" min="5" max="30" value="' . (int)$c['questions'] . '"></label></div><button>💾 Запази</button></form>';
+    '<label>Задачи в една мисия<input type="number" name="questions" min="5" max="30" value="' . (int)$c['questions'] . '"></label>' .
+    '<label>🎓 Грамоти за учители и родители<select name="diplomas">' . implode('', array_map(fn($k, $v) => '<option value="' . $k . '"' . ($c['diplomas'] === $k ? ' selected' : '') . '>' . $v . '</option>', ['auto', 'on', 'off'], ['Автоматично: 1 юни – 30 септември', 'Отворени сега', 'Затворени'])) . '</select></label></div><button>💾 Запази</button></form>';
 $col = ''; foreach (['orange' => 'оранжев', 'blue' => 'син', 'green' => 'зелен', 'red' => 'червен', 'purple' => 'лилав'] as $k => $v) $col .= '<option value="' . $k . '"' . ($B['color'] === $k ? ' selected' : '') . '>' . $v . '</option>';
 $body .= $f('banner') . '<h2>📣 Банер най-отгоре на сайта</h2><label class="chk"><input type="checkbox" name="on" value="1"' . ($B['on'] ? ' checked' : '') . '> Показвай банера</label><div class="grid g4">' .
     '<label class="wide">Текст<input name="text" maxlength="200" value="' . h($B['text']) . '" placeholder="🎄 Коледна промоция: учебна година за 12 €!"></label>' .

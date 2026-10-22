@@ -9,14 +9,16 @@ $st = db()->prepare("SELECT * FROM codes WHERE batch_id = ? AND revoked = 0 ORDE
 $codes = $st->fetchAll();
 $site = 'smetko.com';
 $cards = '';
+$tn = 0;
 foreach ($codes as $i => $c) {
     $exp = date('d.m.Y', strtotime($c['expires_at']));
     $isT = ($c['role'] ?? '') === 'teacher';
+    if ($isT) $tn++;
     $qr = '<div class="qr" data-qr="https://' . $site . '/kod.html?c=' . h(urlencode($c['code'])) . '"></div>';
     if ($isT) { // картичка за учителя: личен код + ПИН за класацията
         $cards .= '<div class="card t-teach">
       <div class="sky"><div class="cl c1"></div><div class="cl c2"></div><div class="owl" data-owl="think"></div>
-        <div class="brand"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></div><div class="slogan">Картичка за учителя</div></div>
+        <div class="brand"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></div><div class="slogan">' . ($tn === 1 ? 'Картичка за учителя' : 'Картичка за помощен учител') . '</div></div>
       <div class="body">
         <div class="ttl">Класация на класа</div>
         <div class="tk"><div><small>Код на учителя</small><b>' . h($c['code']) . '</b></div><div><small>ПИН</small><b>' . h($c['pin']) . '</b></div></div>
@@ -38,6 +40,7 @@ foreach ($codes as $i => $c) {
         <div class="what">' . h($what) . '</div>
         <div class="row"><ol><li>Отвори <b>' . $site . '/kod</b></li><li>Въведи кода' . ($isClass ? ' и прякор' : '') . '</li><li>Играй до <b>' . $exp . '</b></li></ol>' . $qr . '</div>' .
         ($isClass ? '<div class="pin">🏆 Точките ти влизат в класацията на класа.<small>Прякор без фамилия · пълен достъп до всички мисии и игри</small></div>' : '') .
+        (!$isClass && $c['pin'] ? '<div class="pin">👨‍👩‍👧 ПИН за родителя: <b>' . h($c['pin']) . '</b><small>Отчет за напредъка от всеки телефон: ' . $site . '/otchet</small></div>' : '') .
         ($c['label'] ? '<div class="lbl">' . h($c['label']) . '</div>' : '') . '
       </div></div>';
 }

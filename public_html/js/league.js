@@ -13,7 +13,7 @@
 
   var q = { scope: 'schools', period: 'week', grade: 0 };
   try { var saved = JSON.parse(localStorage.getItem('smetko.liga') || 'null'); if (saved) { q.scope = saved.scope || q.scope; q.period = saved.period || q.period; q.grade = +saved.grade || 0; } } catch (e) {}
-  if (/^#(schools|classes|teachers|students)$/.test(location.hash)) q.scope = location.hash.slice(1);
+  if (/^#(schools|classes|teachers|students|challenge)$/.test(location.hash)) q.scope = location.hash.slice(1);
 
   var EMPTY = {
     schools: 'Още няма училище в класацията за този период. Училище влиза в класацията с поне 5 ученици с код.',
@@ -67,12 +67,32 @@
     $$('[data-period]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.period === q.period)); });
     $('#liga-grade').value = String(q.grade);
     var my = ++seq;
+    $('.liga-filters .seg').style.visibility = q.scope === 'challenge' ? 'hidden' : '';
+    if (q.scope === 'challenge') { loadChallenge(my); return; }
     $('#liga-out').classList.add('loading');
     if (!S.Access || !S.Access.online) { $('#liga-out').innerHTML = '<div class="panel" style="text-align:center"><p class="lead-dark">Класацията е достъпна на smetko.com с интернет връзка.</p></div>'; return; }
     S.Access.league({ scope: q.scope, period: q.period, grade: q.grade }).then(function (j) {
       if (my !== seq) return;
       $('#liga-out').classList.remove('loading'); render(j); mine(j);
     }).catch(function (e) { if (my === seq) $('#liga-out').innerHTML = '<div class="panel" style="text-align:center"><p class="lead-dark">' + esc(e.message) + '</p></div>'; });
+  }
+
+  function loadChallenge(my) {
+    var g = q.grade || (S.Game && S.Game.state.lastGrade) || 1, out = $('#liga-out');
+    if (!S.Challenge) return;
+    S.Challenge.load().then(function (info) {
+      var t = info.grades[g], m = S.Challenge.my(g);
+      var head = '<div class="ch-card" style="margin-bottom:16px"><div class="ch-ico">🥇</div><div class="ch-txt"><small>Седмица ' + info.week.slice(-2) + ' · ' + g + '. клас' + (q.grade ? '' : ' (изберете клас горе)') + '</small><b>' + esc(t.title) + '</b><span>Цел: ' + info.goal + ' верни за 60 секунди · остават ' + S.Challenge.daysLeft() + ' дни' + (m.best ? ' · твоят рекорд: ' + m.best : '') + '</span></div><a class="btn btn-sm" href="game.html?mode=challenge&grade=' + g + '">Играй</a></div>';
+      return S.Challenge.board(g).then(function (j) {
+        if (my !== seq) return;
+        $('#liga-mine').innerHTML = '';
+        if (j.locked) { out.innerHTML = head + '<div class="panel liga-locked"><h3>Класацията на седмицата е за играчи с код</h3><p>Играй предизвикателството и сравни резултата си с ученици от цялата страна.</p><p><a class="btn btn-green" href="kod.html">🔑 Въведи код</a></p></div>'; return; }
+        if (!j.list.length) { out.innerHTML = head + '<div class="panel" style="text-align:center"><p class="lead-dark">Още никой не е играл тази седмица. Бъди първият!</p></div>'; return; }
+        out.innerHTML = head + '<div class="table-wrap"><table class="compare board liga-table"><tbody>' + j.list.map(function (r) {
+          return '<tr class="' + (r.mine ? 'me' : '') + '"><td class="pl">' + r.place + '</td><td><b>' + esc(r.name) + '</b>' + (r.mine ? ' <span class="tag">ти</span>' : '') + '<small class="liga-sub">' + [r['class'], r.school, r.town].filter(Boolean).map(esc).join(' · ') + '</small></td><td class="sc">' + r.best + '<small>верни за 60 с</small></td></tr>';
+        }).join('') + '</tbody></table></div><p class="hint" style="margin-top:12px;text-align:center">Нова тема всеки понеделник. Броят се най-добрите резултати за седмицата.</p>';
+      });
+    }).catch(function (e) { if (my === seq) out.innerHTML = '<div class="panel" style="text-align:center"><p class="lead-dark">' + esc(e.message) + '</p></div>'; });
   }
 
   document.addEventListener('DOMContentLoaded', function () {

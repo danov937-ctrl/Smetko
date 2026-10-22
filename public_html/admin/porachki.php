@@ -6,9 +6,10 @@ require_admin();
 $pdo = db();
 $cfg = site_config();
 $P = $cfg['prices'];
-$PLANS = [ // име => [ключ за цена, единица]
-    'Цял клас' => ['class', 'клас'], '1 месец' => ['month', 'абонамент'], 'Учебна година' => ['schoolYear', 'абонамент'],
-    '1 година' => ['year', 'абонамент'], 'Семеен' => ['family', 'семейство'], 'Друго' => ['', 'бр.'],
+$PLANS = [ // име => [ключ за цена, единица, ключ за името на плана]
+    'Цял клас · 1 година' => ['class12', 'клас', 'class'], 'Цял клас · 6 месеца' => ['class6', 'клас', 'class'],
+    'Индивидуален · 1 година' => ['single12', 'абонамент', 'single'], 'Индивидуален · 6 месеца' => ['single6', 'абонамент', 'single'],
+    'Семеен · 1 година' => ['family12', 'семейство', 'family'], 'Семеен · 6 месеца' => ['family6', 'семейство', 'family'], 'Друго' => ['', 'бр.', ''],
 ];
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
@@ -72,9 +73,10 @@ if ($action === 'proforma' && $id) {
 
 /* ---------- форма: нова / редакция ---------- */
 if ($id || isset($_GET['new'])) {
-    $o = ['client' => '', 'contact' => '', 'email' => '', 'phone' => '', 'school_id' => null, 'plan' => 'Цял клас', 'qty' => 1, 'amount' => '', 'status' => 'new', 'invoice' => '', 'paid_at' => '', 'notes' => '', 'batch_id' => null, 'created_at' => now()];
+    $o = ['client' => '', 'contact' => '', 'email' => '', 'phone' => '', 'school_id' => null, 'plan' => 'Цял клас · 1 година', 'qty' => 1, 'amount' => '', 'status' => 'new', 'invoice' => '', 'paid_at' => '', 'notes' => '', 'batch_id' => null, 'created_at' => now()];
     if ($id) { $st = $pdo->prepare('SELECT * FROM orders WHERE id = ?'); $st->execute([$id]); $o = $st->fetch() ?: go('porachki.php'); }
-    $popts = ''; foreach ($PLANS as $name => [$key, $unit]) $popts .= '<option value="' . h($name) . '" data-price="' . h($key ? $P[$key] : '') . '" data-unit="' . h($unit) . '"' . ($o['plan'] === $name ? ' selected' : '') . '>' . h($name) . ($key ? ' – ' . h($P[$key]) . ' €' : '') . '</option>';
+    $PN = $cfg['planNames'];
+    $popts = ''; foreach ($PLANS as $name => [$key, $unit, $pk]) $popts .= '<option value="' . h($name) . '" data-price="' . h($key ? ($P[$key] ?? '') : '') . '" data-unit="' . h($unit) . '"' . ($o['plan'] === $name ? ' selected' : '') . '>' . h(($pk && !empty($PN[$pk]) ? $PN[$pk] . ' – ' : '') . $name) . ($key ? ' – ' . h($P[$key] ?? '') . ' €' : '') . '</option>';
     $sopts = ''; foreach (ORDER_STATUS as $k => [$t, $c]) $sopts .= '<option value="' . $k . '"' . ($o['status'] === $k ? ' selected' : '') . '>' . h($t) . '</option>';
     $body = '<form method="post" class="card">' . csrf_field() . '<input type="hidden" name="action" value="save"><input type="hidden" name="id" value="' . $id . '">' .
         '<h2>' . ($id ? 'Поръчка #' . $id . ' <small class="muted">от ' . fdate($o['created_at']) . '</small>' : 'Нова поръчка') . '</h2><div class="grid g3">' .
@@ -88,7 +90,7 @@ if ($id || isset($_GET['new'])) {
         '<label class="wide">Бележки<textarea name="notes" maxlength="2000">' . h($o['notes']) . '</textarea></label></div>' .
         '<p class="hint" id="calc"></p><div class="row"><button>💾 Запази</button><a class="btn ghost" href="porachki.php">Отказ</a></div></form>' .
         '<script>(function(){var pl=document.getElementById("plan"),q=document.getElementById("qty"),d=document.getElementById("disc"),a=document.getElementById("amount"),c=document.getElementById("calc"),d3=' . (float)$P['disc3'] . ',d8=' . (float)$P['disc8'] . ',touched=' . ($id ? 'true' : 'false') . ';' .
-        'function opt(){return pl.options[pl.selectedIndex];}function auto(){if(opt().value==="Цял клас"){var n=+q.value;d.value=n>=8?d8:(n>=3?d3:0);}}' .
+        'function opt(){return pl.options[pl.selectedIndex];}function auto(){if(opt().value.indexOf("Цял клас")===0){var n=+q.value;d.value=n>=8?d8:(n>=3?d3:0);}}' .
         'function calc(){var p=parseFloat(opt().dataset.price||0),n=+q.value||1,ds=+d.value||0;document.getElementById("qlbl").textContent="Брой ("+opt().dataset.unit+")";if(!p){c.textContent="Въведете сумата ръчно.";return;}var s=Math.round(p*n*(100-ds))/100;c.textContent=n+" × "+p+" €"+(ds?" − "+ds+"%":"")+" = "+s.toFixed(2)+" €";if(!touched)a.value=s.toFixed(2);}' .
         'pl.addEventListener("change",function(){touched=false;auto();calc();});q.addEventListener("input",function(){touched=false;auto();calc();});d.addEventListener("input",function(){touched=false;calc();});a.addEventListener("input",function(){touched=true;});auto();calc();})();</script>';
     if ($id) {

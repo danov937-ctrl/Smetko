@@ -60,7 +60,9 @@
     lastSync = Date.now();
     var stars = 0, missions = 0;
     for (var k in s.adventure) for (var i in s.adventure[k]) { stars += s.adventure[k][i]; if (s.adventure[k][i]) missions++; }
-    post('sync.php', { token: a.token, nickname: s.nickname || '', grade: s.lastGrade || 0, points: s.points || 0, correct: s.correct || 0, answered: s.answered || 0, stars: stars, missions: missions }).catch(function () {});
+    var days = {}, dk = Object.keys(s.days || {}).sort().slice(-28); dk.forEach(function (k) { days[k] = s.days[k]; });
+    post('sync.php', { token: a.token, nickname: s.nickname || '', grade: s.lastGrade || 0, points: s.points || 0, correct: s.correct || 0, answered: s.answered || 0, stars: stars, missions: missions,
+      stats: { s: s.skills || {}, d: days }, ch: s.challenge && s.challenge.week ? s.challenge : null }).catch(function () {});
   }
 
   function classBoard() { var a = access(); return a ? post('class.php', { token: a.token }) : Promise.reject(new Error('Няма код за клас.')); }

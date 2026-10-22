@@ -115,10 +115,10 @@
     var pod = '<div class="podium">' + [1, 0, 2].map(function (i) { var r = top[i]; if (!r) return '<div class="pod empty"></div>'; return '<div class="pod p' + (i + 1) + (r.me ? ' me' : '') + '"><span class="medal">' + ['🥇', '🥈', '🥉'][i] + '</span><b>' + esc(r.name) + '</b><small>★ ' + r.points + '</small></div>'; }).join('') + '</div>';
     var rows = j.list.map(function (r) {
       var acc = r.answered ? Math.round(r.correct / r.answered * 100) + '%' : '–';
-      return '<tr class="' + (r.me ? 'me' : '') + (r.hidden ? ' hid' : '') + '"><td>' + r.place + '</td><td><b>' + esc(r.name) + '</b>' + (r.me ? ' <span class="tag">ти</span>' : '') + '</td><td>★ ' + r.points + '</td><td>' + r.missions + '</td><td>' + r.stars + '</td>' +
-        (teacher ? '<td>' + (r.correct || 0) + '</td><td>' + acc + '</td><td>' + (r.last ? S.fmtDate(r.last.slice(0, 10)) : '–') + '</td><td class="mono-sm">' + esc(r.code || '') + '</td><td class="nowrap"><button class="btn btn-sm btn-ghost" data-hide="' + r.id + '" data-un="' + (r.hidden ? 1 : 0) + '">' + (r.hidden ? 'Покажи' : 'Скрий') + '</button> <button class="btn btn-sm btn-ghost" data-release="' + r.id + '" data-name="' + esc(r.name) + '" title="При смяна или загуба на устройство">Освободи кода</button></td>' : '') + '</tr>';
+      return '<tr class="' + (r.me ? 'me' : '') + (r.hidden ? ' hid' : '') + '"><td>' + r.place + '</td><td>' + (teacher ? '<button class="linkish" data-rep="' + r.id + '" title="Отчет за ученика"><b>' + esc(r.name) + '</b> 📊</button>' : '<b>' + esc(r.name) + '</b>') + (r.me ? ' <span class="tag">ти</span>' : '') + '</td><td>★ ' + r.points + '</td><td>' + r.missions + '</td><td>' + r.stars + '</td>' +
+        (teacher ? '<td>' + (r.active7 || 0) + '/7</td><td>' + (r.correct || 0) + '</td><td>' + acc + '</td><td>' + (r.last ? S.fmtDate(r.last.slice(0, 10)) : '–') + '</td><td class="mono-sm">' + esc(r.code || '') + '</td><td class="nowrap"><button class="btn btn-sm btn-ghost" data-hide="' + r.id + '" data-un="' + (r.hidden ? 1 : 0) + '">' + (r.hidden ? 'Покажи' : 'Скрий') + '</button> <button class="btn btn-sm btn-ghost" data-release="' + r.id + '" data-name="' + esc(r.name) + '" title="При смяна или загуба на устройство">Освободи кода</button></td>' : '') + '</tr>';
     }).join('');
-    return pod + '<div class="table-wrap"><table class="compare board"><thead><tr><th>#</th><th>Ученик</th><th>Точки</th><th>Мисии</th><th>Звезди</th>' + (teacher ? '<th>Верни</th><th>Точност</th><th>Последно</th><th>Код</th><th></th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+    return pod + '<div class="table-wrap"><table class="compare board"><thead><tr><th>#</th><th>Ученик</th><th>Точки</th><th>Мисии</th><th>Звезди</th>' + (teacher ? '<th>Дни (7)</th><th>Верни</th><th>Точност</th><th>Последно</th><th>Код</th><th></th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
   S.boardTable = boardTable;
   function teacherSet(j) {
@@ -140,8 +140,25 @@
         if (release) S.toast('Кодът е освободен – детето може да го въведе отново на новото устройство.');
         try { if (rem.checked) localStorage.setItem('smetko.board', JSON.stringify({ c: fmtCode(code.value), p: pin.value.trim() })); else localStorage.removeItem('smetko.board'); } catch (e) {}
         out.innerHTML = '<div class="section-head" style="margin-top:30px"><h2 class="lined">' + esc(j.label || 'Класация') + '</h2><p>Активирали кода си: <b>' + j.uses + ' от ' + j.max + '</b> ученици · валидно до ' + S.fmtDate(j.expires) + ' · <button class="btn btn-sm btn-ghost" id="b-refresh">🔄 Обнови</button> <button class="btn btn-sm btn-ghost" onclick="window.print()">🖨️ Печат</button></p></div>' + boardTable(j, true) +
-          teacherSet(j) + '<p class="hint" style="margin-top:14px">Скритите ученици не се виждат от съучениците. Прякорите се избират от децата – ако някой е неподходящ, скрийте го. Всеки код е еднократен; ако дете смени или загуби устройство, натиснете „Освободи кода“ и то го въвежда отново.</p>';
+          '<div id="b-dipl" style="text-align:center;margin-top:18px"></div><div class="section-head" style="margin-top:30px"><h2 class="lined">📊 Отчет по теми</h2><p>Кои теми затрудняват класа – по задачите, решени в Сметко. Натиснете име на ученик за неговия отчет.</p></div><div id="b-topics"></div>' + teacherSet(j) + '<p class="hint" style="margin-top:14px">Скритите ученици не се виждат от съучениците. Прякорите се избират от децата – ако някой е неподходящ, скрийте го. Всеки код е еднократен; ако дете смени или загуби устройство, натиснете „Освободи кода“ и то го въвежда отново.</p>';
         $('b-refresh').addEventListener('click', function () { load(); });
+        if (S.Report) S.Report.topics($('b-topics'), j.topics);
+        var dw = $('b-dipl');
+        if (dw && S.diplomasOpen) {
+          if (S.diplomasOpen()) {
+            dw.innerHTML = '<button class="btn btn-lg btn-green" id="b-dipl-go">🎓 Грамоти за класа</button><p class="hint">Грамота за всеки ученик – I, II и III място в класацията и за постоянство. Имената може да поправите преди печат.</p>';
+            $('b-dipl-go').addEventListener('click', function () {
+              var vis = j.list.filter(function (r) { return !r.hidden; });
+              S.openDiplomas({ kind: 'class', className: j.className ? j.className + ' клас' : '', school: j.school ? j.school.name + (j.school.town ? ', ' + j.school.town : '') : '', sign1: j.teacherName || '',
+                items: vis.map(function (r, i) { var p = i + 1; return { name: r.name, place: p <= 3 && r.points > 0 ? p : 0, line: p <= 3 && r.points > 0 ? 'за ' + ['I', 'II', 'III'][p - 1] + ' място в класацията на класа по математика със Сметко – ' + r.points + ' точки и ' + r.stars + ' звезди' : 'за постоянство и успехи по математика със Сметко – ' + (r.answered || 0) + ' решени задачи и ' + r.stars + ' звезди' }; }) });
+            });
+          } else dw.innerHTML = '<p class="hint">🎓 Грамотите за класа се отварят в края на учебната година (от 1 юни).</p>';
+        }
+        out.querySelectorAll('[data-rep]').forEach(function (b) { b.addEventListener('click', function () {
+          var r = j.list.filter(function (x) { return x.id === +b.getAttribute('data-rep'); })[0]; if (!r || !S.Report) return;
+          var d = S.modal('<div id="rep-m"></div><div class="modal-actions"><button class="btn btn-ghost" onclick="window.print()">🖨️ Печат</button></div>'); d.classList.add('wide-modal');
+          S.Report.render(d.querySelector('#rep-m'), { nickname: r.name, grade: r.grade, answered: r.answered, correct: r.correct, stars: r.stars, missions: r.missions, skills: r.skills, days: r.days });
+        }); });
         var ts = $('ts-form');
         if (ts) ts.addEventListener('submit', function (e) {
           e.preventDefault();

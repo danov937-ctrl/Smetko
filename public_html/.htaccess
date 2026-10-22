@@ -17,6 +17,13 @@ AddDefaultCharset UTF-8
   # Кратки адреси (печатат се на картичките)
   RewriteRule ^kod/?$ /kod.html [L]
   RewriteRule ^klasaciya/?$ /klasaciya.html [L]
+  RewriteRule ^sitemap\.xml$ /sitemap.php [L]
+  RewriteRule ^otchet/?$ /otchet.html [L]
+  RewriteRule ^liga/?$ /liga.html [L]
+  RewriteRule ^novini/?$ /novini.html [L]
+  RewriteRule ^za-nas/?$ /za-nas.html [L]
+  RewriteRule ^blog/?$ /blog/index.php [L]
+  RewriteRule ^blog/([a-z0-9-]+)/?$ /blog/index.php?s=$1 [L,QSA]
   RewriteRule ^admin/?$ /admin/index.php [L,R=302]
 
   # Базата данни никога не се отдава

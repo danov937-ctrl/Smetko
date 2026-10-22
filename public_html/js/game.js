@@ -5,7 +5,8 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
-  var MODE_NAMES = { quick: 'Бързо сметни', adventure: 'Приключение', practice: 'Тренировка' };
+  var MODE_NAMES = { quick: 'Бързо сметни', adventure: 'Приключение', practice: 'Тренировка', challenge: 'Предизвикателство' };
+  function timed(m) { return m === 'quick' || m === 'challenge'; }
   var SAY = {
     ok: ['Браво!', 'Супер!', 'Точно така!', 'Страхотно!', 'Отлично!', 'Уха!', 'Как умееш!', 'Вярно!'],
     combo: ['Комбо! Двойни точки!', 'Огън си! 🔥', 'Не спирай!'],
@@ -48,7 +49,15 @@
     $$('.grade-tab').forEach(function (b) { b.setAttribute('aria-pressed', +b.dataset.g === st.grade ? 'true' : 'false'); });
     $$('.mode-btn').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.mode === st.mode ? 'true' : 'false'); });
     var wrap = $('#topic-wrap'), chips = $('#topic-chips');
-    wrap.hidden = st.mode === 'adventure';
+    wrap.hidden = st.mode === 'adventure' || st.mode === 'challenge';
+    var chb = $('#ch-box');
+    if (chb) {
+      chb.hidden = st.mode !== 'challenge';
+      if (st.mode === 'challenge' && S.Challenge) S.Challenge.load().then(function (j) {
+        var t = j.grades[st.grade], m = S.Challenge.my(st.grade), dl = S.Challenge.daysLeft();
+        chb.innerHTML = '<div class="ch-ico">⚡</div><div class="ch-txt"><small>Тема на седмицата · ' + st.grade + '. клас</small><b>' + t.title + '</b><span>Цел: ' + j.goal + ' верни за 60 секунди · ' + (m.done ? '✅ изпълнено, рекорд ' + m.best : m.best ? 'твоят рекорд: ' + m.best : 'още не си играл') + ' · остават ' + dl + (dl === 1 ? ' ден' : ' дни') + '</span><span class="ch-prize">🎁 +50 точки и значка при изпълнена цел</span></div>';
+      }).catch(function (e) { chb.innerHTML = '<p class="hint">' + e.message + '</p>'; });
+    }
     var topics = E.GRADES[st.grade].topics, valid = st.topic === 'mix';
     var html = '<button class="chip" data-topic="mix">🎲 Всички теми</button>';
     topics.forEach(function (t, i) { if (t.id === st.topic) valid = true; html += '<button class="chip" data-topic="' + t.id + '" title="' + t.name + '"><b>' + (i + 1) + '.</b> ' + t.short + '</button>'; });
@@ -58,7 +67,7 @@
       c.setAttribute('aria-pressed', c.dataset.topic === st.topic ? 'true' : 'false');
       c.addEventListener('click', function () { A.click(); st.topic = c.dataset.topic; renderSetup(); });
     });
-    $('#start-btn').textContent = st.mode === 'adventure' ? 'Към картата →' : 'Започни!';
+    $('#start-btn').textContent = st.mode === 'adventure' ? 'Към картата →' : st.mode === 'challenge' ? 'Приемам предизвикателството! ⚡' : 'Започни!';
     var sel = $('#book-select'), books = B.list(st.grade), cur = bookId();
     sel.innerHTML = books.map(function (b) { return '<option value="' + b.id + '"' + (b.id === cur ? ' selected' : '') + '>' + (b.id === 'mon' ? 'По учебната програма (всички учебници)' : b.publisher + ' – ' + b.title) + '</option>'; }).join('');
     $('#book-wrap').hidden = st.mode !== 'adventure';
@@ -193,18 +202,18 @@
     };
     G.startSession(mode, st.grade, play.topic);
     $('#play-mode').textContent = MODE_NAMES[mode] + (play.title ? ': ' + play.title : '');
-    var pr = $('#progress'); pr.classList.toggle('timer', mode === 'quick'); pr.classList.remove('low');
-    $('#timer-num').hidden = mode !== 'quick';
+    var pr = $('#progress'); pr.classList.toggle('timer', timed(mode)); pr.classList.remove('low');
+    $('#timer-num').hidden = !timed(mode);
     $('#end-btn').hidden = mode !== 'practice';
     $('#progress').hidden = mode === 'practice';
     $('#level-pill').hidden = mode === 'adventure';
     $('#pts').textContent = '★ 0';
     setCombo(0);
     S.setOwl($('#play-owl'), 'hello');
-    bubble(mode === 'quick' ? '60 секунди! Готов ли си? 🚀' : mode === 'adventure' ? 'Мисия ' + (play.missionIdx + 1) + ': ' + play.title + '!' : 'Спокойно, без бързане. Ти можеш!');
+    bubble(mode === 'challenge' ? 'Предизвикателство: ' + play.title + '! 60 секунди ⚡' : mode === 'quick' ? '60 секунди! Готов ли си? 🚀' : mode === 'adventure' ? 'Мисия ' + (play.missionIdx + 1) + ': ' + play.title + '!' : 'Спокойно, без бързане. Ти можеш!');
     show('screen-play');
     updateProgress();
-    if (mode === 'quick') {
+    if (timed(mode)) {
       $('#timer-num').textContent = play.timeLeft;
       play.interval = setInterval(tickTimer, 1000);
     }
@@ -222,7 +231,7 @@
 
   function updateProgress() {
     var w = 0;
-    if (play.mode === 'quick') w = play.timeLeft / S.config.quickSeconds * 100;
+    if (timed(play.mode)) w = play.timeLeft / S.config.quickSeconds * 100;
     else if (play.mode === 'adventure') w = play.idx / play.total * 100;
     $('#progress i').style.width = Math.max(0, w) + '%';
     $('#level-pill').textContent = 'Ниво ' + play.level;
@@ -305,7 +314,7 @@
     if (play.input === '') { var s = $('#slot'); if (s) { s.classList.remove('owl-jump'); void s.offsetWidth; s.classList.add('owl-jump'); } return; }
     play.busy = true;
     var ok = E.check(t, play.input), ms = Date.now() - play.qStart;
-    var res = G.answer({ correct: ok, topic: t.topic, table: t.table, mode: play.mode, grade: play.grade, ms: ms });
+    var res = G.answer({ correct: ok, topic: t.topic, table: t.table, mode: play.mode, grade: play.grade, ms: ms, skill: t.skill });
     var qc = $('#qcard'), ex = $('#explain');
     if (t.kind === 'choice') $$('#choices .key').forEach(function (b) { var v = b.getAttribute('data-k'); if (v === String(t.answer)) b.classList.add('right'); else if (v === play.input) b.classList.add('wrong'); });
     if (ok) {
@@ -316,7 +325,7 @@
       var fp = document.createElement('div'); fp.className = 'float-pts'; fp.textContent = '+' + res.gained; qc.appendChild(fp);
       setCombo(res.combo, res.mult);
       adapt(true);
-      later(goNext, play.mode === 'quick' ? 380 : 650);
+      later(goNext, timed(play.mode) ? 380 : 650);
     } else {
       play.wrong++; play.streak = 0; play.wrongStreak++;
       qc.classList.add('bad'); A.wrong();
@@ -326,7 +335,7 @@
       setCombo(0);
       adapt(false);
       if (play.mode === 'practice') { play.waitNext = true; $('#next-row').hidden = false; $('#next-btn').focus({ preventScroll: true }); }
-      else later(goNext, play.mode === 'quick' ? 1300 : 1700);
+      else later(goNext, timed(play.mode) ? 1300 : 1700);
     }
     $('#pts').textContent = '★ ' + (G.session ? G.session.points : 0);
     S.updateChip();
@@ -345,7 +354,7 @@
     play.idx++;
     updateProgress();
     if (play.mode === 'adventure' && play.idx >= play.total) { finish(); return; }
-    if (play.mode === 'quick' && play.timeLeft <= 0) return;
+    if (timed(play.mode) && play.timeLeft <= 0) return;
     if (play.mode === 'practice' && practiceLimitReached()) { finish(); S.accessModal(); return; }
     if (play.idx % 3 === 0) S.setOwl($('#play-owl'), 'idle');
     nextQuestion();
@@ -390,6 +399,16 @@
       html += '<p class="sub">' + (stars ? 'Мисия ' + (p.missionIdx + 1) + ' „' + p.title + '“' + (stars < 3 ? ' — опитай пак за 3 звезди!' : '') : 'Нужни са ' + Math.ceil(p.total * 0.625) + ' верни от ' + p.total + ', за да продължиш. Опитай пак!') + '</p>';
       html += stats(p.correct + '/' + p.total, 'верни', acc + '%', 'точност', '★ ' + (s.points + stars * 20), 'точки');
       if (stars) html += '<p class="lock-note">Включени ' + (stars * 20) + ' бонус точки за звездите</p>';
+    } else if (p.mode === 'challenge') {
+      var cr = S.Challenge ? S.Challenge.record(p.grade, p.correct) : { best: p.correct }, goal = S.Challenge && S.Challenge.info ? S.Challenge.info.goal : 10;
+      extraBadges = cr.newBadges || [];
+      owlPose = p.correct >= goal ? 'cheer' : 'encourage'; celebrate = cr.first || cr.isRecord;
+      html += '<h2>' + (cr.first ? 'Предизвикателството е изпълнено! 🥇' : p.correct >= goal ? 'Отново успя! ⚡' : 'Още ' + (goal - p.correct) + ' до целта!') + '</h2>';
+      if (cr.isRecord) html += '<div class="record">🏆 Нов личен рекорд за седмицата!</div>';
+      html += '<p class="sub">' + p.title + ' · ' + E.GRADES[p.grade].name + ' · цел ' + goal + ' верни · рекорд ' + cr.best + '</p>';
+      html += stats(p.correct, 'верни за 60 сек.', acc + '%', 'точност', '★ ' + (s.points + (cr.first ? 50 : 0)), 'точки');
+      if (cr.first) html += '<p class="lock-note">Включени 50 бонус точки за изпълнената цел</p>';
+      html += '<div id="ch-board" class="ch-board"></div>';
     } else if (p.mode === 'quick') {
       owlPose = p.correct >= 10 ? 'cheer' : 'happy';
       celebrate = s.isRecord && p.correct > 0;
@@ -419,7 +438,8 @@
       html += '<button class="btn btn-ghost" data-act="map">Към картата</button>';
       if (stars > 0 && !hasNext) html += '<p class="lock-note" style="width:100%">🏔️ Стигна върха на ' + E.GRADES[p.grade].name + '! Опитай следващия клас.</p>';
     } else {
-      html += '<button class="btn btn-lg" data-act="retry">' + (p.mode === 'quick' ? 'Пак! ⚡' : 'Още тренировка') + '</button>';
+      html += '<button class="btn btn-lg" data-act="retry">' + (timed(p.mode) ? 'Пак! ⚡' : 'Още тренировка') + '</button>';
+      if (p.mode === 'challenge') html += '<a class="btn btn-white" href="liga.html#challenge">🏆 Класация на седмицата</a>';
       html += '<button class="btn btn-ghost" data-act="setup">Друга игра</button>';
     }
     html += '</div>';
@@ -435,12 +455,24 @@
         A.click();
         var a = b.dataset.act;
         if (a === 'next') startAdventure(p.missionIdx + 1);
-        else if (a === 'retry') { if (p.mode === 'adventure') startAdventure(p.missionIdx); else startPlay({ mode: p.mode, topic: p.topic }); }
+        else if (a === 'retry') { if (p.mode === 'adventure') startAdventure(p.missionIdx); else if (p.mode === 'challenge') startChallenge(); else startPlay({ mode: p.mode, topic: p.topic }); }
         else if (a === 'map') renderMap();
         else { renderSetup(); show('screen-setup'); }
       });
     });
     setURL();
+    if (p.mode === 'challenge' && S.Challenge) setTimeout(function () { // мястото в класацията на седмицата (след синхронизацията)
+      S.Challenge.board(p.grade).then(function (j) {
+        var el = $('#ch-board'); if (!el) return;
+        if (j.locked) { el.innerHTML = '<p class="hint">С код от учителя ще видиш на кое място си сред всички ученици. <a href="kod.html">Въведи код</a></p>'; return; }
+        if (j.mine) el.innerHTML = '<p class="ch-place">Ти си <b>' + j.mine.place + '-' + (j.mine.place % 10 === 1 && j.mine.place % 100 !== 11 ? 'ви' : j.mine.place % 10 === 2 && j.mine.place % 100 !== 12 ? 'ри' : (j.mine.place % 10 === 7 || j.mine.place % 10 === 8) && Math.floor(j.mine.place / 10) % 10 !== 1 ? 'ми' : 'ти') + '</b> от ' + j.list.length + ' в ' + p.grade + '. клас тази седмица!</p>';
+      }).catch(function () {});
+    }, 1500);
+  }
+  function startChallenge() {
+    if (!S.Challenge) return;
+    S.Challenge.load().then(function (j) { var t = j.grades[st.grade]; startPlay({ mode: 'challenge', mission: [t.title, t.skills, 2], title: t.title, level: 2 }); })
+      .catch(function (e) { S.toast(e.message); });
   }
   function stats(a, al, b, bl, c, cl) {
     return '<div class="result-stats"><div><b>' + a + '</b><span>' + al + '</span></div><div><b>' + b + '</b><span>' + bl + '</span></div><div><b>' + c + '</b><span>' + cl + '</span></div></div>';
@@ -449,7 +481,7 @@
   function exitPlay() {
     if (!play) return;
     if (play.mode === 'practice') { finish(); return; }
-    var wasQuick = play.mode === 'quick';
+    var wasQuick = timed(play.mode);
     if (wasQuick && play.interval) clearInterval(play.interval);
     var d = S.modal('<div data-owl="think"></div><h3>Да спрем ли играта?</h3><p>Ако излезеш сега, ' + (wasQuick ? 'резултатът няма да се запише като рекорд.' : 'мисията няма да е завършена.') + '</p>' +
       '<div class="modal-actions"><button class="btn btn-green" data-close data-resume>Продължи</button><button class="btn btn-ghost" data-quit>Изход</button></div>',
@@ -472,7 +504,7 @@
     $('#book-select').addEventListener('change', function (e) { var s2 = G.state; s2.books = s2.books || {}; s2.books[st.grade] = e.target.value; G.save(); A.click(); });
     $('#start-btn').addEventListener('click', function () {
       A.unlock(); A.click(); setURL();
-      if (st.mode === 'adventure') renderMap(); else startPlay();
+      if (st.mode === 'adventure') renderMap(); else if (st.mode === 'challenge') startChallenge(); else startPlay();
     });
     $('#map-back').addEventListener('click', function () { A.click(); renderSetup(); show('screen-setup'); });
     $('#exit-btn').addEventListener('click', exitPlay);
@@ -511,6 +543,7 @@
     bind();
     renderSetup();
     if (g && m === 'adventure') renderMap();
+    else if (g && m === 'challenge' && q.get('start') !== '0') startChallenge();
     else if (g && MODE_NAMES[m] && q.get('start') !== '0') startPlay();
     else show('screen-setup');
   }

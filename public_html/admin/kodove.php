@@ -28,14 +28,15 @@ if ($action === 'create') {
         ->execute([$label, $type, $exp, now(), $pin, $sid, $cname, $cgrade ?: null, $tname]);
     $bid = (int)$pdo->lastInsertId();
     $ins = $pdo->prepare('INSERT OR IGNORE INTO codes(code, batch_id, type, max_uses, expires_at, pin, label, created_at, role) VALUES(?, ?, ?, 1, ?, ?, ?, ?, ?)');
-    if ($type === 'class') { do { $ins->execute([random_code(), $bid, $type, $exp, $pin, $label, now(), 'teacher']); } while ($ins->rowCount() === 0); }
+    $teachers = $type === 'class' ? 1 + max(0, min(5, (int)($_POST['helpers'] ?? 2))) : 0; // 1 учител + помощници (по подразбиране 2)
+    for ($k = 0; $k < $teachers; $k++) { do { $ins->execute([random_code(), $bid, $type, $exp, $pin, $label, now(), 'teacher']); } while ($ins->rowCount() === 0); }
     $made = 0;
-    while ($made < $count) { $ins->execute([random_code(), $bid, $type, $exp, null, $label, now(), 'student']); $made += $ins->rowCount(); }
+    while ($made < $count) { $ins->execute([random_code(), $bid, $type, $exp, in_array($type, ['single', 'family'], true) ? random_pin() : null, $label, now(), 'student']); $made += $ins->rowCount(); }
     $oid = (int)($_POST['order_id'] ?? 0);
     if ($oid) $pdo->prepare("UPDATE orders SET batch_id = ?, status = CASE WHEN status = 'new' THEN 'codes' ELSE status END WHERE id = ?")->execute([$bid, $oid]);
     $pdo->commit();
     audit('Нови кодове', TYPE_NAMES[$type] . " × $count · $label" . ($oid ? " · поръчка #$oid" : ''));
-    flash($type === 'class' ? "Създадени са $count кода за ученици + 1 код за учителя (ПИН $pin)." : "Създадени са $count кода.");
+    flash($type === 'class' ? "Създадени са $count кода за ученици + " . ($teachers === 1 ? '1 код за учителя' : $teachers . ' кода за учители (1 + ' . ($teachers - 1) . ')') . " (ПИН $pin)." : "Създадени са $count кода.");
     $back($bid);
 }
 $code = post('code'); $bidp = (int)($_POST['batch'] ?? 0);
@@ -116,7 +117,7 @@ if ($bid) {
         $f = '<form method="post" class="inline">' . csrf_field() . '<input type="hidden" name="batch" value="' . $bid . '"><input type="hidden" name="code" value="' . h($r['code']) . '">';
         $btn = $f . ($r['revoked'] ? '<button name="action" value="restore" class="sm ghost">Възстанови</button>' : '<button name="action" value="revoke" class="sm ghost" data-confirm="Да спрем ли кода? Устройството губи достъпа.">Спри</button>') . '</form>' .
             ($r['act'] && !$r['revoked'] ? ' ' . $f . '<button name="action" value="release" class="sm ghost" data-confirm="Да освободим ли кода? Старото устройство губи достъпа, а кодът може да се въведе на едно ново устройство.">Освободи</button></form>' : '');
-        $rows .= '<tr' . ($isT ? ' style="background:#FFF8E6"' : '') . '><td class="mono">' . h($r['code']) . '</td><td>' . ($isT ? '<b>учител</b> · ПИН <span class="mono">' . h($r['pin']) . '</span>' : ($r['type'] === 'class' ? 'ученик' : h(TYPE_NAMES[$r['type']] ?? ''))) . '</td><td>' . fdate($r['act']) . '</td><td>' . h($r['nick'] ?? '') . ((int)$r['flags'] ? ' <span class="tag tr" title="сигнали за неправдоподобни точки">⚠</span>' : '') . '</td><td class="num">' . ($r['act'] ? (int)$r['pts'] : '') . '</td><td>' . fdate($r['last']) . '</td><td>' . $state . '</td><td class="row">' . $btn . '</td></tr>';
+        $rows .= '<tr' . ($isT ? ' style="background:#FFF8E6"' : '') . '><td class="mono">' . h($r['code']) . '</td><td>' . ($isT ? '<b>учител</b> · ПИН <span class="mono">' . h($r['pin']) . '</span>' : ($r['type'] === 'class' ? 'ученик' : h(TYPE_NAMES[$r['type']] ?? '') . ($r['pin'] ? ' · ПИН за родителя <span class="mono">' . h($r['pin']) . '</span>' : ''))) . '</td><td>' . fdate($r['act']) . '</td><td>' . h($r['nick'] ?? '') . ((int)$r['flags'] ? ' <span class="tag tr" title="сигнали за неправдоподобни точки">⚠</span>' : '') . '</td><td class="num">' . ($r['act'] ? (int)$r['pts'] : '') . '</td><td>' . fdate($r['last']) . '</td><td>' . $state . '</td><td class="row">' . $btn . '</td></tr>';
     }
     $order = $pdo->prepare('SELECT id, client FROM orders WHERE batch_id = ?'); $order->execute([$bid]); $order = $order->fetch();
     $f = '<form method="post" class="inline">' . csrf_field() . '<input type="hidden" name="batch" value="' . $bid . '">';
@@ -164,7 +165,9 @@ $oid = (int)($_GET['order'] ?? 0);
 $ord = null;
 if ($oid) { $o = $pdo->prepare('SELECT * FROM orders WHERE id = ?'); $o->execute([$oid]); $ord = $o->fetch() ?: null; }
 $preType = $ord ? (str_contains((string)$ord['plan'], 'клас') ? 'class' : (str_contains((string)$ord['plan'], 'Семеен') ? 'family' : 'single')) : 'class';
-$preCount = $ord ? max(1, (int)$ord['qty'] * ($preType === 'class' ? 25 : ($preType === 'family' ? 4 : 1))) : 25;
+$preExp = school_year_end();
+$preCount = $ord ? max(1, (int)$ord['qty'] * ($preType === 'class' ? 30 : ($preType === 'family' ? 4 : 1))) : 25;
+$preExp = $ord && str_contains((string)$ord['plan'], '6 месеца') ? date('Y-m-d', strtotime('+6 months')) : ($ord && str_contains((string)$ord['plan'], '1 година') ? date('Y-m-d', strtotime('+1 year')) : school_year_end());
 $opt = fn($v, $t) => '<option value="' . $v . '"' . ($v === $preType ? ' selected' : '') . '>' . $t . '</option>';
 $body = '<form method="get" class="card filters noprint"><label>Търсене<input name="q" value="' . h($q) . '" placeholder="код, прякор или бележка"></label><button class="blue">🔍 Търси</button>' . ($q !== '' ? '<a class="btn ghost" href="kodove.php">Изчисти</a>' : '') . '</form>' . $search;
 $body .= '<form method="post" class="card"><h2>Нови кодове' . ($ord ? ' за поръчка #' . $oid . ' – ' . h($ord['client']) : '') . '</h2>' . csrf_field() . '<input type="hidden" name="action" value="create"><input type="hidden" name="order_id" value="' . $oid . '"><div class="grid g4">' .
@@ -172,10 +175,11 @@ $body .= '<form method="post" class="card"><h2>Нови кодове' . ($ord ? 
     '<label><span id="cl">Брой ученици</span><input type="number" name="count" id="u" value="' . $preCount . '" min="1" max="500"></label>' .
     '<span class="forclass" style="display:contents">' . school_fields($pdo, $ord && $ord['school_id'] ? (int)$ord['school_id'] : null) .
     '<label>Клас (напр. 2. б)<input name="class_name" maxlength="20" placeholder="2. б"></label>' .
-    '<label>Учител (по желание)<input name="teacher_name" maxlength="40" placeholder="г-жа Петрова"></label></span>' .
-    '<label>Валидни до<input type="date" name="expires" value="' . school_year_end() . '"></label>' .
+    '<label>Учител (по желание)<input name="teacher_name" maxlength="40" placeholder="г-жа Петрова"></label>' .
+    '<label>Помощни учители (с картичка)<select name="helpers"><option value="2" selected>2 (1 + 2)</option><option value="1">1</option><option value="0">няма</option><option value="3">3</option></select></label></span>' .
+    '<label>Валидни до<input type="date" name="expires" value="' . $preExp . '"></label>' .
     '<label class="wide">Бележка на картичките (празно = „2. б клас · училище, град“)<input name="label" maxlength="120" value="' . h($ord && $preType !== 'class' ? $ord['client'] : '') . '"></label></div>' .
-    '<p class="hint">Всеки код е <b>еднократен</b> – активира се на едно устройство. За клас се създава код за всеки ученик и картичка за учителя (код + ПИН за класацията).</p><button>Създай кодове</button></form>' .
+    '<p class="hint">Всеки код е <b>еднократен</b> – активира се на едно устройство. За клас се създава код за всеки ученик и картички за учителя и помощниците (код + общ ПИН за класацията). Индивидуалните и семейните кодове получават <b>ПИН за родителя</b> за отчета.</p><button>Създай кодове</button></form>' .
     '<script>(function(){var t=document.getElementById("t");function f(){var v=t.value;document.getElementById("cl").textContent={class:"Брой ученици",teacher:"Брой учители",single:"Брой кодове",family:"Брой деца"}[v];document.querySelector(".forclass").style.display=v==="class"?"contents":"none";}t.addEventListener("change",function(){document.getElementById("u").value={class:25,teacher:1,single:1,family:4}[t.value];f();});f();})();</script>';
 $type = in_array($_GET['type'] ?? '', array_keys(TYPE_NAMES), true) ? $_GET['type'] : '';
 $where = $type ? "WHERE b.type = '" . $type . "'" : '';

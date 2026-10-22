@@ -7,6 +7,7 @@ date_default_timezone_set('Europe/Sofia');
 
 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // без O, 0, I, 1, L
 const CODE_PREFIX = 'SMET';
+const SITE_URL = 'https://smetko.com';
 
 function db(): PDO {
     static $pdo = null;
@@ -35,14 +36,93 @@ function db(): PDO {
     foreach (['school_id INTEGER', 'class_name TEXT', 'grade INTEGER', 'teacher_name TEXT', 'public INTEGER DEFAULT 1'] as $col) {
         if (!$has('batches', strtok($col, ' '))) $pdo->exec('ALTER TABLE batches ADD COLUMN ' . $col);
     }
-    foreach (['week TEXT', 'week_base INTEGER DEFAULT 0', 'synced_at INTEGER DEFAULT 0', 'flags INTEGER DEFAULT 0', 'join_base INTEGER DEFAULT 0', 'nick_block INTEGER DEFAULT 0', 'day TEXT', 'day_correct INTEGER DEFAULT 0'] as $col) {
+    foreach (['week TEXT', 'week_base INTEGER DEFAULT 0', 'synced_at INTEGER DEFAULT 0', 'flags INTEGER DEFAULT 0', 'join_base INTEGER DEFAULT 0', 'nick_block INTEGER DEFAULT 0', 'day TEXT', 'day_correct INTEGER DEFAULT 0', 'stats TEXT'] as $col) {
         if (!$has('redemptions', strtok($col, ' '))) $pdo->exec('ALTER TABLE redemptions ADD COLUMN ' . $col);
     }
+    // ПИН за родителя на индивидуалните и семейните кодове (за отчета на smetko.com/otchet.html)
+    $pdo->exec("UPDATE codes SET pin = CAST(1000 + ABS(RANDOM()) % 9000 AS TEXT) WHERE type IN ('single','family') AND (pin IS NULL OR pin = '')");
     $pdo->exec("CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, client TEXT, contact TEXT, email TEXT, phone TEXT, school_id INTEGER,
         plan TEXT, qty INTEGER DEFAULT 1, amount REAL DEFAULT 0, status TEXT DEFAULT 'new', invoice TEXT, paid_at TEXT, batch_id INTEGER, notes TEXT);
       CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, ip TEXT, action TEXT, details TEXT);
+      CREATE TABLE IF NOT EXISTS news (id INTEGER PRIMARY KEY AUTOINCREMENT, emoji TEXT, title TEXT, body TEXT, link TEXT, link_text TEXT, starts TEXT, ends TEXT, active INTEGER DEFAULT 1, popup INTEGER DEFAULT 1, created_at TEXT);
+      CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY AUTOINCREMENT, slug TEXT UNIQUE, title TEXT, excerpt TEXT, body TEXT, emoji TEXT, image TEXT, category TEXT, published INTEGER DEFAULT 0, published_at TEXT, created_at TEXT, updated_at TEXT, views INTEGER DEFAULT 0);
+      CREATE TABLE IF NOT EXISTS challenges (week TEXT, grade INTEGER, title TEXT, skills TEXT, PRIMARY KEY(week, grade));
+      CREATE TABLE IF NOT EXISTS challenge_scores (rid INTEGER, week TEXT, grade INTEGER, best INTEGER, at TEXT, PRIMARY KEY(rid, week, grade));
       CREATE TABLE IF NOT EXISTS books (id INTEGER PRIMARY KEY AUTOINCREMENT, grade INTEGER, bid TEXT UNIQUE, publisher TEXT, title TEXT, source TEXT, lessons TEXT, active INTEGER DEFAULT 1, created_at TEXT);");
     return $pdo;
+}
+
+/* ---------- седмично предизвикателство ---------- */
+const CHALLENGE_GOAL = 10; // верни отговора за 60 секунди = изпълнено предизвикателство
+const CHALLENGE_POOL = [
+    1 => [['Събиране до 10', [['addTo:10', 1]]], ['Изваждане до 10', [['subTo:10', 1]]], ['Числата до 20', [['place20', 1], ['cmp20', 1], ['nextPrev20', 1]]], ['Събиране с преминаване', [['add20x', 1]]],
+          ['Изваждане с преминаване', [['sub20x', 1]]], ['До 20 без преминаване', [['add20no', 1], ['sub20no', 1]]], ['Пари и часовник', [['coins10', 1], ['clockHour', 1]]], ['Кръгли десетици', [['tens100', 1]]]],
+    2 => [['Таблицата за 2 и 3', [['mulDivBy:2,3', 1]]], ['Таблицата за 4 и 5', [['mulDivBy:4,5', 1]]], ['Таблицата за 6', [['mulDivBy:6', 1]]], ['Таблицата за 7', [['mulDivBy:7', 1]]],
+          ['Таблицата за 8 и 9', [['mulDivBy:8,9', 1]]], ['Цялата таблица', [['mulTable', 1], ['divTable', 1]]], ['До 100 с преминаване', [['add100x', 1], ['sub100x', 1]]], ['До 100 без преминаване', [['add100no', 1], ['sub100no', 1]]], ['Неизвестно число', [['unkAddend', 1], ['unkFactor', 1]]]],
+    3 => [['Събиране до 1000', [['add1000x', 1]]], ['Изваждане до 1000', [['sub1000x', 1]]], ['Умножение с едноцифрено', [['mul1d', 1]]], ['Деление с едноцифрено', [['div1d', 1]]],
+          ['Таблицата наизуст', [['mulTable', 1], ['divTable', 1]]], ['Мерни единици', [['units3a', 1], ['units3b', 1]]], ['Числата до 1000', [['place1000', 1], ['cmp1000', 1]]], ['Неизвестно число', [['unkMinuend', 1], ['unkDividend', 1]]]],
+    4 => [['Многоцифрени числа', [['placeBig', 1], ['cmpBig', 1]]], ['Събиране и изваждане', [['addBigX', 1], ['subBigX', 1]]], ['Умножение с едноцифрено', [['mulBig1d', 1]]], ['Деление с едноцифрено', [['divBig1d', 1]]],
+          ['Умножение с двуцифрено', [['mul2d', 1]]], ['Лице на правоъгълник', [['area', 1], ['areaUnits', 1]]], ['Римски цифри', [['romanRead', 1], ['romanWrite', 1]]], ['С 10, 100, 1000', [['mulRound10', 1], ['divRound10', 1]]]],
+];
+function week_of(string $date): string { return date('o-\\WW', strtotime($date)); }
+function challenge_for(string $week, int $grade): array { // ръчно зададено от админ панела или автоматично по ред
+    $st = db()->prepare('SELECT title, skills FROM challenges WHERE week = ? AND grade = ?'); $st->execute([$week, $grade]);
+    if ($r = $st->fetch()) return ['title' => $r['title'], 'skills' => json_decode((string)$r['skills'], true) ?: [], 'custom' => true];
+    $pool = CHALLENGE_POOL[$grade] ?? CHALLENGE_POOL[1];
+    $n = (int)substr($week, -2) + (int)substr($week, 0, 4) * 53;
+    [$t, $s] = $pool[$n % count($pool)];
+    return ['title' => $t, 'skills' => $s, 'custom' => false];
+}
+
+/* ---------- блог ---------- */
+const BLOG_CATS = ['Съвети за родители', 'За учители', 'Математика у дома', 'Новини от Сметко', 'Игри и идеи'];
+function slugify(string $t): string {
+    $tr = ['а'=>'a','б'=>'b','в'=>'v','г'=>'g','д'=>'d','е'=>'e','ж'=>'zh','з'=>'z','и'=>'i','й'=>'y','к'=>'k','л'=>'l','м'=>'m','н'=>'n','о'=>'o','п'=>'p','р'=>'r','с'=>'s','т'=>'t','у'=>'u','ф'=>'f','х'=>'h','ц'=>'ts','ч'=>'ch','ш'=>'sh','щ'=>'sht','ъ'=>'a','ь'=>'y','ю'=>'yu','я'=>'ya'];
+    $s = strtr(mb_strtolower($t), $tr);
+    $s = trim(preg_replace('/[^a-z0-9]+/', '-', $s) ?? '', '-');
+    return substr($s, 0, 70) ?: 'statia';
+}
+/* опростен Markdown → HTML (безопасен: целият текст първо се екранира) */
+function md_inline(string $s): string {
+    $s = preg_replace('/!\[([^\]]*)\]\(((?:https?:\/\/|\/)[^\s)]+)\)/', '<img src="$2" alt="$1" loading="lazy">', $s);
+    $s = preg_replace('/\[([^\]]+)\]\(((?:https?:\/\/|\/|[a-z0-9-]+\.html)[^\s)]*)\)/', '<a href="$2">$1</a>', $s);
+    $s = preg_replace('/\*\*(.+?)\*\*/', '<b>$1</b>', $s);
+    $s = preg_replace('/(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])/u', '<i>$1</i>', $s);
+    return $s;
+}
+function md_to_html(string $md): string {
+    $lines = preg_split('/\r?\n/', htmlspecialchars($md, ENT_QUOTES, 'UTF-8'));
+    $out = []; $list = null; $para = [];
+    $flush = function () use (&$para, &$out) { if ($para) { $out[] = '<p>' . md_inline(implode('<br>', $para)) . '</p>'; $para = []; } };
+    $close = function () use (&$list, &$out) { if ($list) { $out[] = "</$list>"; $list = null; } };
+    foreach ($lines as $l) {
+        $t = trim($l);
+        if ($t === '') { $flush(); $close(); continue; }
+        if (preg_match('/^(#{2,4})\s+(.+)$/', $t, $m)) { $flush(); $close(); $n = strlen($m[1]); $out[] = "<h$n>" . md_inline($m[2]) . "</h$n>"; continue; }
+        if (preg_match('/^&gt;\s?(.*)$/', $t, $m)) { $flush(); $close(); $out[] = '<blockquote>' . md_inline($m[1]) . '</blockquote>'; continue; }
+        if (preg_match('/^[-*•]\s+(.+)$/u', $t, $m)) { $flush(); if ($list !== 'ul') { $close(); $out[] = '<ul>'; $list = 'ul'; } $out[] = '<li>' . md_inline($m[1]) . '</li>'; continue; }
+        if (preg_match('/^\d+[.)]\s+(.+)$/', $t, $m)) { $flush(); if ($list !== 'ol') { $close(); $out[] = '<ol>'; $list = 'ol'; } $out[] = '<li>' . md_inline($m[1]) . '</li>'; continue; }
+        $close(); $para[] = $t;
+    }
+    $flush(); $close();
+    return implode("\n", $out);
+}
+
+/* статистика за отчетите: {s: {умение: [верни, всички]}, d: {дата: [всички, верни]}} */
+function clean_stats($in): ?string {
+    if (!is_array($in)) return null;
+    $s = []; $d = [];
+    foreach ((is_array($in['s'] ?? null) ? $in['s'] : []) as $k => $v) {
+        if (count($s) >= 160 || !preg_match('/^[a-zA-Z0-9]{2,24}$/', (string)$k) || !is_array($v)) continue;
+        $a = max(0, min(100000, (int)($v[1] ?? 0))); $c = max(0, min($a, (int)($v[0] ?? 0)));
+        if ($a) $s[$k] = [$c, $a];
+    }
+    foreach ((is_array($in['d'] ?? null) ? $in['d'] : []) as $k => $v) {
+        if (count($d) >= 60 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$k) || !is_array($v)) continue;
+        $a = max(0, min(5000, (int)($v[0] ?? 0))); $c = max(0, min($a, (int)($v[1] ?? 0)));
+        if ($a) $d[$k] = [$a, $c];
+    }
+    return json_encode(['s' => (object)$s, 'd' => (object)$d]);
 }
 
 function setting(string $k, ?string $default = null): ?string {
@@ -151,10 +231,12 @@ function clean_nick(string $n): string {
 /* ---------- настройки на сайта (редактират се от админ панела) ---------- */
 const DEFAULT_CONFIG = [
     'paywall' => true, 'freeMissions' => 3, 'freePractice' => 20, 'questions' => 10, 'contactEmail' => 'info@smetko.com',
-    'prices' => ['month' => '2.99', 'schoolYear' => '15', 'year' => '18', 'family' => '29', 'class' => '75', 'disc3' => '15', 'disc8' => '25'],
+    'prices' => ['single6' => '10', 'single12' => '18', 'family6' => '18', 'family12' => '30', 'class6' => '45', 'class12' => '80', 'disc3' => '15', 'disc8' => '25'],
+    'planNames' => ['free' => 'Пухче', 'single' => 'Бухалче', 'family' => 'Гнездо', 'class' => 'Ято', 'school' => 'Гора'],
     'banner' => ['on' => false, 'text' => '', 'link' => '', 'linkText' => '', 'color' => 'orange'],
     'company' => ['name' => '', 'eik' => '', 'addr' => '', 'vat' => '', 'date' => '', 'phone' => '', 'iban' => '', 'bank' => '', 'mol' => ''],
     'blockedWords' => '',
+    'diplomas' => 'auto', // грамоти: auto = от 1 юни до 30 септември, on = винаги, off = никога
 ];
 function site_config(): array {
     $c = json_decode((string)setting('site_config', '{}'), true) ?: [];

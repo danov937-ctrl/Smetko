@@ -1,0 +1,5 @@
+# Качени снимки (блог): без изпълнение на скриптове
+Options -Indexes
+<FilesMatch "\.(php|phtml|phar|pl|py|cgi|sh|js|html?)$">
+  Require all denied
+</FilesMatch>

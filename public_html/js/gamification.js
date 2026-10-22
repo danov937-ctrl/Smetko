@@ -32,7 +32,9 @@
     { id: 'stars15', icon: '🌟', name: 'Звездобрец', desc: '15 звезди в Приключение' },
     { id: 'summit', icon: '🏔️', name: 'Покорител на върха', desc: 'Стигнат връх в Приключение' },
     { id: 'daily', icon: '🎯', name: 'Дневна цел', desc: 'Изпълнена дневна цел' },
-    { id: 'practice50', icon: '💪', name: 'Упоритко', desc: '50 верни задачи в Тренировка' }
+    { id: 'practice50', icon: '💪', name: 'Упоритко', desc: '50 верни задачи в Тренировка' },
+    { id: 'challenge', icon: '🥇', name: 'Предизвикател', desc: 'Изпълнено седмично предизвикателство' },
+    { id: 'challenge5', icon: '👑', name: 'Шампион на седмиците', desc: '5 изпълнени седмични предизвикателства' }
   ];
 
   function today() {
@@ -46,7 +48,8 @@
       v: 1, createdAt: today(), points: 0, correct: 0, answered: 0,
       streak: { count: 0, last: null }, daily: { date: today(), count: 0 }, dailyGoal: 20,
       badges: {}, best: {}, adventure: {}, modes: {}, practiceCorrect: 0, tableStreak: 0, maxCombo: 0,
-      lastGrade: null, books: {}, settings: { sound: true }
+      lastGrade: null, books: {}, settings: { sound: true },
+      skills: {}, days: {}, challenge: {}
     };
   }
 
@@ -97,6 +100,10 @@
     if (!session) startSession(opts.mode || 'practice', opts.grade || 1, opts.topic);
     var nb = [], gained = 0, mult = 1, rankBefore = rank().idx;
     state.answered += 1;
+    // статистика за отчетите: по вид задача и по дни
+    var d0 = today(), dd = state.days[d0] = state.days[d0] || [0, 0]; dd[0]++; if (opts.correct) dd[1]++;
+    if (opts.skill) { var sk = state.skills[opts.skill] = state.skills[opts.skill] || [0, 0]; sk[1]++; if (opts.correct) sk[0]++; }
+    var dk = Object.keys(state.days); if (dk.length > 120) { dk.sort(); dk.slice(0, dk.length - 120).forEach(function (k) { delete state.days[k]; }); }
     if (opts.correct) {
       session.combo += 1; session.correct += 1; session.correctTimes.push(Date.now());
       state.correct += 1;
@@ -176,6 +183,7 @@
   window.Smetko.Game = {
     get state() { return state; }, load: load, save: save, rank: rank, RANKS: RANKS, BADGES: BADGES,
     startSession: startSession, answer: answer, addBonus: addBonus, endSession: endSession,
+    awardBadge: function (id) { var nb = []; award(id, nb); save(); return nb; },
     stars: stars, setStars: setStars, totalStars: totalStars, isUnlocked: isUnlocked,
     reset: reset, setSound: setSound, today: today,
     get session() { return session; }

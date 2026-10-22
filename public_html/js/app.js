@@ -37,9 +37,11 @@
     if (!dom) return;
     var P = c.prices || {};
     document.querySelectorAll('[data-price]').forEach(function (el) { var v = P[el.getAttribute('data-price')]; if (v !== undefined && v !== '') el.textContent = String(v).replace('.', '.'); });
-    var per = { schoolYear: [9.5, 'на месец', '≈ '], year: [12, 'на месец', ''], family: [4, 'на дете', '≈ '], 'class': [30, 'на ученик', '≈ '] };
-    document.querySelectorAll('[data-per]').forEach(function (el) { var k = el.getAttribute('data-per'), d = per[k]; if (d && +P[k]) el.textContent = d[2] + money(+P[k] / d[0]) + ' € ' + d[1]; });
+    var per = { single6: [6, 'на месец'], single12: [12, 'на месец'], family6: [4, 'на дете'], family12: [4, 'на дете'], class6: [30, 'на ученик'], class12: [30, 'на ученик'] };
+    document.querySelectorAll('[data-per]').forEach(function (el) { var k = el.getAttribute('data-per'), d = per[k]; if (d && +P[k]) { var v = +P[k] / d[0], r = Math.round(v * 100) / 100; el.textContent = (Math.abs(v - r) > 1e-9 ? '≈ ' : '') + money(r) + ' € ' + d[1]; } });
     document.querySelectorAll('[data-cfg]').forEach(function (el) { var k = el.getAttribute('data-cfg'), v = k === 'freeMissions' ? S.config.freeAdventureLevels : k === 'freePractice' ? S.config.freePracticePerDay : c[k]; if (v !== undefined) el.textContent = v; });
+    var PN = c.planNames || {};
+    document.querySelectorAll('[data-plan]').forEach(function (el) { var v = PN[el.getAttribute('data-plan')]; if (v) el.textContent = v; });
     var co = c.company || {};
     document.querySelectorAll('[data-co]').forEach(function (el) { var v = co[el.getAttribute('data-co')]; if (v) el.innerHTML = escH(v); });
     if (c.contactEmail && c.contactEmail !== 'info@smetko.com') document.querySelectorAll('a[href^="mailto:info@smetko.com"]').forEach(function (a) { a.href = a.href.replace('info@smetko.com', c.contactEmail); if (a.textContent.indexOf('@') > 0) a.textContent = c.contactEmail; });
@@ -95,6 +97,46 @@
     return d;
   };
 
+  /* ---------- НОВИНИ ----------
+     Изскачат при влизане, докато не се натисне „Видях го“. Видяното се пази в браузъра. */
+  var NEWS_SEEN = 'smetko.newsSeen', NEWS_CACHE = 'smetko.news';
+  function seenIds() { try { return JSON.parse(localStorage.getItem(NEWS_SEEN) || '[]'); } catch (e) { return []; } }
+  function markSeen(ids) { var s = seenIds(); ids.forEach(function (id) { if (s.indexOf(id) < 0) s.push(id); }); try { localStorage.setItem(NEWS_SEEN, JSON.stringify(s.slice(-200))); } catch (e) {} updateBell(S.news || []); }
+  function newsCard(n) {
+    return '<article class="news-item"><span class="news-emo">' + escH(n.emoji) + '</span><div><h4>' + escH(n.title) + '</h4>' + (n.body ? '<p>' + escH(n.body).replace(/\n/g, '<br>') + '</p>' : '') +
+      (n.link ? '<a class="btn btn-sm" href="' + escH(n.link) + '">' + escH(n.linkText || 'Виж') + ' →</a>' : '') + '</div></article>';
+  }
+  function updateBell(list) {
+    var seen = seenIds(), n = list.filter(function (x) { return seen.indexOf(x.id) < 0; }).length;
+    document.querySelectorAll('[data-news-count]').forEach(function (el) { el.textContent = n || ''; el.hidden = !n; });
+  }
+  function showNews(list) {
+    S.news = list; updateBell(list);
+    var box = document.getElementById('news-list');
+    if (box) { // страница „Новини“
+      box.innerHTML = list.length ? list.map(newsCard).join('') : '<p class="lead-dark" style="text-align:center">Още няма новини.</p>';
+      markSeen(list.map(function (x) { return x.id; })); return;
+    }
+    if (document.querySelector('dialog[open]') || /[?&]start=1/.test(location.search)) return;
+    var seen = seenIds(), fresh = list.filter(function (x) { return x.popup && seen.indexOf(x.id) < 0; }).slice(0, 3);
+    if (!fresh.length) return;
+    var d = S.modal('<div class="news-pop"><div data-owl="cheer" class="news-owl"></div><h3>' + (fresh.length > 1 ? 'Новини от Сметко' : 'Новина от Сметко') + '</h3>' + fresh.map(newsCard).join('') +
+      '<div class="modal-actions"><button class="btn btn-green" data-seen>✓ Видях го</button></div></div>');
+    d.classList.add('news-modal');
+    d.querySelector('[data-seen]').addEventListener('click', function () { markSeen(fresh.map(function (x) { return x.id; })); d.close(); });
+    d.querySelectorAll('.news-item a').forEach(function (a) { a.addEventListener('click', function () { markSeen(fresh.map(function (x) { return x.id; })); }); });
+  }
+  S.loadNews = function () {
+    var cached = null; try { cached = JSON.parse(localStorage.getItem(NEWS_CACHE) || 'null'); } catch (e) {}
+    if (cached) updateBell(cached);
+    if (!/^https?:$/.test(location.protocol)) { if (cached) showNews(cached); return; }
+    fetch('/api/news.php', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j || !j.ok) return;
+      try { localStorage.setItem(NEWS_CACHE, JSON.stringify(j.news)); } catch (e) {}
+      setTimeout(function () { showNews(j.news); }, 600);
+    }).catch(function () { if (cached) showNews(cached); });
+  };
+
   S.toast = function (html, ms) {
     var t = document.createElement('div');
     t.className = 'toast'; t.innerHTML = html;
@@ -103,9 +145,20 @@
     setTimeout(function () { t.classList.remove('show'); setTimeout(function () { t.remove(); }, 400); }, ms || 2600);
   };
 
+  var PLAN_KEYS = { 'Индивидуален': 'single', 'Семеен': 'family', 'Цял клас': 'class' };
+  var PLAN_DEF = { single: 'Бухалче', family: 'Гнездо', 'class': 'Ято', free: 'Пухче', school: 'Гора' };
+  S.period = 12;
+  document.addEventListener('click', function (e) { // превключвател 1 година / 6 месеца
+    var b = e.target.closest && e.target.closest('[data-period]'); if (!b || !b.closest('.period-toggle')) return;
+    S.period = +b.getAttribute('data-period');
+    document.querySelectorAll('.period-toggle [data-period]').forEach(function (x) { x.setAttribute('aria-pressed', String(+x.getAttribute('data-period') === S.period)); });
+    document.querySelectorAll('.pp[data-p]').forEach(function (x) { x.hidden = +x.getAttribute('data-p') !== S.period; });
+  });
+  S.planName = function (kind) { var k = PLAN_KEYS[kind] || kind; return ((S.siteConfig || {}).planNames || {})[k] || PLAN_DEF[k] || kind; };
   S.subscribeModal = function (planName) {
+    var kind = planName; if (planName) planName = S.planName(planName);
     S.modal(
-      '<div data-owl="happy"></div><h3>' + (planName ? 'Абонамент „' + planName + '“' : 'Отключи пълния достъп') + '</h3>' +
+      '<div data-owl="happy"></div><h3>' + (planName ? 'Абонамент „' + planName + '“' + (kind !== planName ? '<br><small style="font-size:.6em;color:var(--muted)">' + kind + ' · ' + (S.period === 6 ? '6 месеца' : '1 година') + '</small>' : '') : 'Отключи пълния достъп') + '</h3>' +
       '<p>Пълният достъп до всички мисии по учебника и неограничената тренировка се активира с <b>код за достъп</b>. ' +
       'За абонамент пишете ни на <a href="mailto:' + S.config.contactEmail + '">' + S.config.contactEmail + '</a>.</p>' +
       '<div class="modal-actions"><a class="btn btn-green" href="kod.html">Имам код</a></div>'
@@ -157,6 +210,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     S.loadConfig();
+    S.loadNews();
     S.renderOwls();
     updateChip();
     var mb = document.querySelector('.menu-btn'), mn = document.querySelector('.mobile-nav');
