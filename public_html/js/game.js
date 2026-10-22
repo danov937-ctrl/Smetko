@@ -152,8 +152,12 @@
   }
 
   // ---------- ИГРА ----------
+  function missionLocked(i) { return S.config.paywall && !S.hasAccess() && i >= S.config.freeAdventureLevels; }
   function startAdventure(i) {
     var book = curBook(), m = book.missions[i];
+    if (!m) { renderMap(); return; }
+    if (missionLocked(i)) { renderMap(); S.accessModal(); return; } // платените мисии – само с код/абонамент
+    if (!G.isUnlocked(advKey(), i)) { renderMap(); S.toast('🔒 Първо мини мисия ' + i + '!'); return; }
     startPlay({ mode: 'adventure', book: book, mission: m, topic: book.id === 'mon' ? (m[4] || 'mix') : 'book', level: m[2], missionIdx: i, title: m[0] });
   }
 
@@ -389,7 +393,8 @@
     html += '<div class="result-actions">';
     if (p.mode === 'adventure') {
       var nextIdx = p.missionIdx + 1, hasNext = nextIdx < p.book.missions.length;
-      if (stars > 0 && hasNext) html += '<button class="btn btn-green btn-lg" data-act="next">Следваща мисия →</button>';
+      if (stars > 0 && hasNext && missionLocked(nextIdx)) html += '<button class="btn btn-green btn-lg" data-act="next">🔒 Следваща мисия</button><p class="lock-note" style="width:100%">Безплатни са първите ' + S.config.freeAdventureLevels + ' мисии. Следващите се отключват с код от учителя или с абонамент.</p>';
+      else if (stars > 0 && hasNext) html += '<button class="btn btn-green btn-lg" data-act="next">Следваща мисия →</button>';
       html += '<button class="btn ' + (stars > 0 ? 'btn-white' : 'btn-lg') + '" data-act="retry">Опитай пак</button>';
       html += '<button class="btn btn-ghost" data-act="map">Към картата</button>';
       if (stars > 0 && !hasNext) html += '<p class="lock-note" style="width:100%">🏔️ Стигна върха на ' + E.GRADES[p.grade].name + '! Опитай следващия клас.</p>';
