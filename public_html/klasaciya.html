@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=13">
-<link rel="stylesheet" href="css/animations.css?v=13">
+<link rel="stylesheet" href="css/style.css?v=14">
+<link rel="stylesheet" href="css/animations.css?v=14">
 </head>
 <body class="board-page">
 <a class="skip" href="#main">Към съдържанието</a>
@@ -65,17 +65,18 @@
     </nav>
     <div class="header-actions">
       <a class="news-bell" href="novini.html" title="Новини" aria-label="Новини">🔔<b data-news-count hidden></b></a><a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
-      <a class="link-login" href="kod.html" data-code-link>Имам код</a>
-      <a class="btn btn-teal btn-sm btn-register" href="pricing.html">Абонамент</a>
+      <a class="acct-btn" href="vhod.html" data-acct title="Вход за родители и учители" aria-label="Вход"><span class="acct-ico">👤</span><span class="acct-txt">Вход</span></a>
+      <a class="btn btn-teal btn-sm btn-register" href="registracia.html" data-acct-reg>Регистрация</a>
       <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
     </div>
   </div>
   <nav class="mobile-nav" aria-label="Мобилно меню">
+    <div class="m-auth" data-acct-m><a class="btn btn-ghost" href="vhod.html">Вход</a><a class="btn btn-teal" href="registracia.html">Регистрация</a></div>
     <a href="game.html">🎮 Мисии и игри</a>
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
     <a href="liga.html">🏆 Обща класация</a>
     <a href="achievements.html">⭐ Моите постижения</a>
-    <a href="kod.html">🔑 Въведи код за достъп</a>
+    <a href="kod.html" data-code-link>🔑 Въведи код за достъп</a>
     <a href="novini.html">📰 Новини <b class="m-news" data-news-count hidden></b></a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
@@ -84,7 +85,6 @@
     <a href="blog/">✍️ Блог</a>
     <a href="za-nas.html">🦉 За нас</a>
     <a href="pricing.html">💶 Цени</a>
-    <div class="m-auth"><a class="btn btn-ghost" href="kod.html" data-code-link>Имам код</a><a class="btn btn-teal" href="pricing.html">Абонамент</a></div>
   </nav>
 </header>
 <section class="page-hero">
@@ -137,6 +137,7 @@
         <li><a href="uchilishta.html">За учители и училища</a></li>
         <li><a href="rabotni-listove.html">Работни листове</a></li>
         <li><a href="pricing.html">Цени</a></li>
+        <li><a href="vhod.html">Вход</a> · <a href="registracia.html">Регистрация</a></li>
         <li><a href="kod.html">Въведи код</a></li>
         <li><a href="novini.html">Новини</a></li>
       </ul></div>
@@ -151,14 +152,15 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=13" defer></script>
-<script src="js/gamification.js?v=13" defer></script>
-<script src="js/audio.js?v=13" defer></script>
-<script src="js/access.js?v=13" defer></script>
-<script src="js/lesson-map.js?v=13" defer></script>
-<script src="js/report.js?v=13" defer></script>
-<script src="js/diploma.js?v=13" defer></script>
-<script src="js/app.js?v=13" defer></script>
-<script src="js/tools.js?v=13" defer></script>
+<script src="js/owl.js?v=14" defer></script>
+<script src="js/gamification.js?v=14" defer></script>
+<script src="js/audio.js?v=14" defer></script>
+<script src="js/access.js?v=14" defer></script>
+<script src="js/account.js?v=14" defer></script>
+<script src="js/lesson-map.js?v=14" defer></script>
+<script src="js/report.js?v=14" defer></script>
+<script src="js/diploma.js?v=14" defer></script>
+<script src="js/app.js?v=14" defer></script>
+<script src="js/tools.js?v=14" defer></script>
 </body>
 </html>

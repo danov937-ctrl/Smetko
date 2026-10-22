@@ -80,9 +80,19 @@
   function bindCodeInput(inp) {
     inp.addEventListener('input', function () { var v = inp.value; if (!v.replace(/[^A-Za-z0-9]/g, '') || v.replace(/[^A-Za-z0-9]/g, '').toUpperCase() === 'SMET') { inp.value = v.toUpperCase(); return; } inp.value = fmtCode(v); });
   }
+  S.fmtCode = fmtCode;
+  S.bindCodeInput = function (inp) { bindCodeInput(inp); };
   function initCode() {
     var form = $('code-form'), inp = $('code-input'), nick = $('nick-input'), err = $('code-err'), ok = $('code-ok'), btn = $('code-btn');
     bindCodeInput(inp);
+    // родител с акаунт: кодът се свързва с детски профил и важи на всяко устройство
+    var AC = S.Account && S.Account.data, prof = $('code-profile');
+    if (AC && AC.profiles && AC.profiles.length && prof) {
+      prof.innerHTML = AC.profiles.map(function (p) { return '<option value="' + p.id + '"' + (p.id === AC.pid ? ' selected' : '') + '>' + esc(p.avatar + ' ' + p.name + ' · ' + p.grade + '. клас') + '</option>'; }).join('') + '<option value="0">Само на това устройство (без профил)</option>';
+      $('code-profile-wrap').hidden = false;
+      var syncNick = function () { var on = prof.value !== '0'; nick.closest('.nick-wrap').hidden = on; };
+      prof.addEventListener('change', syncNick); syncNick();
+    } else if (AC && $('code-profile-hint')) $('code-profile-hint').hidden = false;
     var q = new URLSearchParams(location.search).get('c'); if (q) inp.value = fmtCode(q);
     if (S.Game && S.Game.state.nickname) nick.value = S.Game.state.nickname;
     function showOk(a, fresh) {
@@ -102,7 +112,8 @@
       var code = fmtCode(inp.value);
       if (code.replace(/[^A-Z0-9]/g, '').length !== 12) { err.textContent = 'Кодът има 8 знака след SMET, напр. SMET-AB2C-D3EF.'; inp.focus(); return; }
       btn.disabled = true; btn.textContent = 'Проверявам…';
-      S.Access.redeem(code, nick.value.trim(), S.Game ? S.Game.state.lastGrade : 0).then(function (j) {
+      var pid = prof && !$('code-profile-wrap').hidden ? +prof.value : 0;
+      (pid ? S.Account.linkCode(pid, code).then(function (j) { return j.access; }) : S.Access.redeem(code, nick.value.trim(), S.Game ? S.Game.state.lastGrade : 0)).then(function (j) {
         showOk(S.Access.get() || j, true);
       }).catch(function (ex) { err.textContent = ex.message; }).then(function () { btn.disabled = false; btn.textContent = 'Активирай'; });
     });

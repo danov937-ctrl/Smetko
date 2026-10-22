@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=13">
-<link rel="stylesheet" href="css/animations.css?v=13">
+<link rel="stylesheet" href="css/style.css?v=14">
+<link rel="stylesheet" href="css/animations.css?v=14">
 </head>
 <body>
 <a class="skip" href="#main">Към съдържанието</a>
@@ -65,17 +65,18 @@
     </nav>
     <div class="header-actions">
       <a class="news-bell" href="novini.html" title="Новини" aria-label="Новини">🔔<b data-news-count hidden></b></a><a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
-      <a class="link-login" href="kod.html" data-code-link>Имам код</a>
-      <a class="btn btn-teal btn-sm btn-register" href="pricing.html">Абонамент</a>
+      <a class="acct-btn" href="vhod.html" data-acct title="Вход за родители и учители" aria-label="Вход"><span class="acct-ico">👤</span><span class="acct-txt">Вход</span></a>
+      <a class="btn btn-teal btn-sm btn-register" href="registracia.html" data-acct-reg>Регистрация</a>
       <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
     </div>
   </div>
   <nav class="mobile-nav" aria-label="Мобилно меню">
+    <div class="m-auth" data-acct-m><a class="btn btn-ghost" href="vhod.html">Вход</a><a class="btn btn-teal" href="registracia.html">Регистрация</a></div>
     <a href="game.html">🎮 Мисии и игри</a>
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
     <a href="liga.html">🏆 Обща класация</a>
     <a href="achievements.html">⭐ Моите постижения</a>
-    <a href="kod.html">🔑 Въведи код за достъп</a>
+    <a href="kod.html" data-code-link>🔑 Въведи код за достъп</a>
     <a href="novini.html">📰 Новини <b class="m-news" data-news-count hidden></b></a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
@@ -84,7 +85,6 @@
     <a href="blog/">✍️ Блог</a>
     <a href="za-nas.html">🦉 За нас</a>
     <a href="pricing.html">💶 Цени</a>
-    <div class="m-auth"><a class="btn btn-ghost" href="kod.html" data-code-link>Имам код</a><a class="btn btn-teal" href="pricing.html">Абонамент</a></div>
   </nav>
 </header>
 
@@ -100,6 +100,7 @@
 <h2>2. Накратко</h2>
 <ul>
 <li><b>Децата играят без регистрация</b> – без имейл, парола, училище или снимка.</li>
+<li><b>Акаунтът за родители и учители е по желание.</b> С него пазим имейла и името на възрастния, детските профили (име или прякор, клас, картинка) и прогреса на профила, за да продължава детето от всяко устройство.</li>
 <li>Прогресът (точки, значки, звезди, рекорди, избран учебник) се пази <b>в браузъра на устройството</b>.</li>
 <li>Само ако е въведен <b>код за достъп</b>, на сървъра се пазят: кодът, случаен идентификатор на устройството и – при код за клас – обобщени резултати и прякор по избор, за да работят класацията на класа и общата класация (училище и клас се въвеждат от учителя или училището).</li>
 <li>Няма реклами, аналитични и проследяващи бисквитки. Не продаваме данни.</li>
@@ -109,13 +110,15 @@
 <tr><th>Данни</th><th>Цел</th><th>Основание</th><th>Срок</th></tr>
 <tr><td>Код за достъп и случаен идентификатор на устройството (не съдържа лична информация)</td><td>Активиране и проверка на пълния достъп, ограничение на броя устройства</td><td>Договор (чл. 6, пар. 1, б. „б“ GDPR)</td><td>До изтичане на кода + 90 дни</td></tr>
 <tr><td>При код за клас: прякор по избор (без фамилия), клас, обобщени резултати (точки, верни отговори, звезди, мисии), последна активност</td><td>Класация на класа, преглед на напредъка от учителя и обща класация: прякорът, класът и училището, както и класирането на училищата и класовете, се виждат само от потребители с активен абонамент (код)</td><td>Договор с училището/учителя; за деца под 14 г. – с информиране и съгласие на родителите, събирано от училището</td><td>До изтичане на кода + 90 дни, след което се изтриват</td></tr>
+<tr><td>Акаунт на родител или учител: имейл, име, парола (пази се само като необратим хеш), дата на регистрация и последен вход; бисквитка за вход</td><td>Вход, възстановяване на паролата, запомнени класове на учителя</td><td>Договор (чл. 6, пар. 1, б. „б“ GDPR)</td><td>Докато акаунтът съществува; изтрива се веднага при изтриване на акаунта</td></tr>
+<tr><td>Детски профили в акаунта: име или прякор по избор (без фамилия), клас, картинка, свързан код и прогресът в играта (точки, звезди, значки, обобщена статистика по теми и дни)</td><td>Продължаване на играта от всяко устройство и отчет за родителя</td><td>Договор с родителя; съгласие на родителя за дете под 14 г. (чл. 25в ЗЗЛД), дадено с въвеждането на профила</td><td>Докато профилът или акаунтът съществува</td></tr>
 <tr><td>Технически сървърни логове и IP адрес при опити за въвеждане на код</td><td>Сигурност, защита от налучкване на кодове</td><td>Легитимен интерес (чл. 6, пар. 1, б. „е“)</td><td>До 24 часа (опити), до 30 дни (логове)</td></tr>
 <tr><td>Имейл кореспонденция и данни за поръчка (име, имейл, фактурни данни)</td><td>Поръчка на кодове, фактуриране, отговор на запитвания</td><td>Договор; законово задължение (счетоводство)</td><td>Според Закона за счетоводството; кореспонденция – до 2 години</td></tr>
 </table>
 <p>Подробните отговори на задачите не се изпращат до сървъра – само обобщени числа.</p>
 <h2>4. Деца</h2>
 <p>Съгласно чл. 25в от Закона за защита на личните данни, при услуги на информационното общество обработването на данни на дете под 14 години е законосъобразно със съгласието на родителя. Затова прякорът е по желание, не изискваме лични данни от децата, а при използване в училище учителят информира родителите (<a href="pismo-roditeli.html">образец на писмо</a>). Когато училище използва кодове за класовете си, училището може да бъде администратор, а Сметко – обработващ данните по <a href="dogovor-danni.html">договор по чл. 28 GDPR</a>.</p>
-<p>Учителят може да скрие ученик от класациите или да изключи целия клас от общата класация, а родителят може да поиска изтриване на данните по всяко време на info@smetko.com.</p>
+<p>Учителят може да скрие ученик от класациите или да изключи целия клас от общата класация, а родителят може да поиска изтриване на данните по всяко време на info@smetko.com. Детски профили се създават само от пълнолетен родител в неговия акаунт; детето не въвежда имейл и не създава акаунт.</p>
 <h2>5. Получатели и трансфери</h2>
 <ul>
 <li><b>Хостинг:</b> <span data-co="name"><mark class="fill">[ПОПЪЛНЕТЕ: наименование на дружеството]</mark></span> използва хостинг доставчик в ЕС (SuperHosting.bg), който обработва логовете от наше име.</li>
@@ -129,7 +132,7 @@
 <h2>7. Сигурност</h2>
 <p>Сайтът работи само през защитена HTTPS връзка. Базата данни е недостъпна отвън, админ панелът е защитен с парола, а опитите за налучкване на кодове и ПИН-ове се ограничават. Не събираме данни, които не са необходими.</p>
 <h2>8. Изтриване на прогреса в играта</h2>
-<p>Прогресът се изтрива от бутона „Изтрий прогреса“ на страница <a href="achievements.html">Постижения</a> или като изчистите данните на сайта в настройките на браузъра.</p>
+<p>Прогресът се изтрива от бутона „Изтрий прогреса“ на страница <a href="achievements.html">Постижения</a> или като изчистите данните на сайта в настройките на браузъра. Детски профил се изтрива от „Моят профил“ → ✏️ → „Изтрий профила“, а целият акаунт – от „Моят профил“ → „Изтриване на акаунта“. Изтриването е окончателно и включва записания на сървъра прогрес.</p>
 
 <p class="doc-actions"><button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Печат / PDF</button> <a class="btn btn-ghost btn-sm" href="pravna-informacia.html">Всички документи</a></p>
 </div></section>
@@ -156,6 +159,7 @@
         <li><a href="uchilishta.html">За учители и училища</a></li>
         <li><a href="rabotni-listove.html">Работни листове</a></li>
         <li><a href="pricing.html">Цени</a></li>
+        <li><a href="vhod.html">Вход</a> · <a href="registracia.html">Регистрация</a></li>
         <li><a href="kod.html">Въведи код</a></li>
         <li><a href="novini.html">Новини</a></li>
       </ul></div>
@@ -170,10 +174,11 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=13" defer></script>
-<script src="js/gamification.js?v=13" defer></script>
-<script src="js/audio.js?v=13" defer></script>
-<script src="js/access.js?v=13" defer></script>
-<script src="js/app.js?v=13" defer></script>
+<script src="js/owl.js?v=14" defer></script>
+<script src="js/gamification.js?v=14" defer></script>
+<script src="js/audio.js?v=14" defer></script>
+<script src="js/access.js?v=14" defer></script>
+<script src="js/account.js?v=14" defer></script>
+<script src="js/app.js?v=14" defer></script>
 </body>
 </html>

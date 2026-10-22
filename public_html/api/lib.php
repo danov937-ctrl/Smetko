@@ -44,6 +44,11 @@ function db(): PDO {
     $pdo->exec("CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, client TEXT, contact TEXT, email TEXT, phone TEXT, school_id INTEGER,
         plan TEXT, qty INTEGER DEFAULT 1, amount REAL DEFAULT 0, status TEXT DEFAULT 'new', invoice TEXT, paid_at TEXT, batch_id INTEGER, notes TEXT);
       CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, ip TEXT, action TEXT, details TEXT);
+      CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, pass TEXT, name TEXT, role TEXT DEFAULT 'parent', created_at TEXT, last_login TEXT, reset_hash TEXT, reset_until INTEGER DEFAULT 0, disabled INTEGER DEFAULT 0);
+      CREATE TABLE IF NOT EXISTS auth_sessions (hash TEXT PRIMARY KEY, account_id INTEGER, created_at TEXT, last_seen TEXT, expires INTEGER, ua TEXT);
+      CREATE TABLE IF NOT EXISTS profiles (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, name TEXT, grade INTEGER, avatar TEXT, device TEXT UNIQUE, code TEXT, state TEXT, rev INTEGER DEFAULT 0, updated_at TEXT, created_at TEXT);
+      CREATE TABLE IF NOT EXISTS account_classes (account_id INTEGER, batch_id INTEGER, code TEXT, created_at TEXT, PRIMARY KEY(account_id, batch_id));
+      CREATE INDEX IF NOT EXISTS idx_prof_acc ON profiles(account_id);
       CREATE TABLE IF NOT EXISTS news (id INTEGER PRIMARY KEY AUTOINCREMENT, emoji TEXT, title TEXT, body TEXT, link TEXT, link_text TEXT, starts TEXT, ends TEXT, active INTEGER DEFAULT 1, popup INTEGER DEFAULT 1, created_at TEXT);
       CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY AUTOINCREMENT, slug TEXT UNIQUE, title TEXT, excerpt TEXT, body TEXT, emoji TEXT, image TEXT, category TEXT, published INTEGER DEFAULT 0, published_at TEXT, created_at TEXT, updated_at TEXT, views INTEGER DEFAULT 0);
       CREATE TABLE IF NOT EXISTS challenges (week TEXT, grade INTEGER, title TEXT, skills TEXT, PRIMARY KEY(week, grade));
@@ -92,6 +97,54 @@ function league_access(array $in): ?array {
         note_attempt('pin_fail');
     }
     return null;
+}
+
+/* ---------- акаунти (родител / учител) ----------
+   Вход с бисквитка smetko_auth (180 дни); в базата се пази само хешът ѝ. */
+const AUTH_COOKIE = 'smetko_auth';
+const AUTH_DAYS = 180;
+function auth_set_cookie(string $v, int $exp): void {
+    setcookie(AUTH_COOKIE, $v, ['expires' => $exp, 'path' => '/', 'secure' => !empty($_SERVER['HTTPS']), 'httponly' => true, 'samesite' => 'Lax']);
+}
+function auth_login(int $aid): void {
+    $tok = bin2hex(random_bytes(32)); $exp = time() + AUTH_DAYS * 86400;
+    db()->prepare('INSERT INTO auth_sessions(hash, account_id, created_at, last_seen, expires, ua) VALUES(?, ?, ?, ?, ?, ?)')
+        ->execute([hash('sha256', $tok), $aid, now(), now(), $exp, mb_substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 160)]);
+    db()->prepare('UPDATE accounts SET last_login = ? WHERE id = ?')->execute([now(), $aid]);
+    auth_set_cookie($tok, $exp);
+    $_COOKIE[AUTH_COOKIE] = $tok; // важи веднага в същата заявка
+}
+function auth_account(): ?array {
+    static $cache = [];
+    $tok = (string)($_COOKIE[AUTH_COOKIE] ?? '');
+    if (array_key_exists($tok, $cache)) return $cache[$tok];
+    $acc = &$cache[$tok]; $acc = null;
+    if (!preg_match('/^[a-f0-9]{64}$/', $tok)) return null;
+    $st = db()->prepare('SELECT a.* FROM auth_sessions s JOIN accounts a ON a.id = s.account_id WHERE s.hash = ? AND s.expires > ? AND a.disabled = 0');
+    $st->execute([hash('sha256', $tok), time()]);
+    $acc = $st->fetch() ?: null;
+    if ($acc) db()->prepare('UPDATE auth_sessions SET last_seen = ? WHERE hash = ?')->execute([now(), hash('sha256', $tok)]);
+    return $acc;
+}
+function auth_logout(): void {
+    $tok = (string)($_COOKIE[AUTH_COOKIE] ?? '');
+    if ($tok !== '') db()->prepare('DELETE FROM auth_sessions WHERE hash = ?')->execute([hash('sha256', $tok)]);
+    auth_set_cookie('', time() - 3600);
+}
+function send_mail(string $to, string $subject, string $text): bool { // обикновен текст, UTF-8
+    $from = (string)(site_config()['contactEmail'] ?? 'info@smetko.com');
+    $h = "From: =?UTF-8?B?" . base64_encode('Сметко') . "?= <$from>\r\nReply-To: $from\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit";
+    return @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $text, $h, '-f' . $from);
+}
+/* достъп на детски профил: кодът е активиран на „устройството“ на профила (единно за всички устройства на детето) */
+function profile_access(array $p): ?array {
+    if (empty($p['code'])) return null;
+    $c = get_code((string)$p['code']);
+    if (!$c) return null;
+    $r = db()->prepare('SELECT id FROM redemptions WHERE code = ? AND device = ?'); $r->execute([$p['code'], $p['device']]);
+    if (!$r->fetchColumn()) return null;
+    return ['code' => $c['code'], 'type' => $c['type'], 'typeName' => TYPE_NAMES[$c['type']] ?? $c['type'], 'role' => $c['role'] ?? 'student', 'expires' => $c['expires_at'],
+        'label' => $c['label'] ?? '', 'token' => make_token($c['code'], (string)$p['device'], $c['expires_at']), 'valid' => !(int)$c['revoked'] && $c['expires_at'] >= today()];
 }
 
 /* ---------- блог ---------- */

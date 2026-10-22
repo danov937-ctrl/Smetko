@@ -1,12 +1,12 @@
 /* Сметко — Service Worker: офлайн игра и бързо зареждане.
    При всяка промяна на файловете увеличете VERSION, за да се обнови кешът. */
-const VERSION = 'smetko-v13';
+const VERSION = 'smetko-v14';
 const CORE = [
   '/', '/game.html', '/achievements.html', '/pricing.html', '/about.html', '/uchilishta.html', '/rabotni-listove.html',
-  '/kod.html', '/klasaciya.html', '/liga.html', '/otchet.html', '/za-nas.html', '/novini.html', '/class-1.html', '/class-2.html', '/class-3.html', '/class-4.html', '/404.html',
-  '/css/style.css?v=13', '/css/animations.css?v=13',
-  '/js/owl.js?v=13', '/js/gamification.js?v=13', '/js/audio.js?v=13', '/js/math-engine.js?v=13', '/js/lesson-map.js?v=13', '/js/textbooks.js?v=13',
-  '/js/access.js?v=13', '/js/app.js?v=13', '/js/game.js?v=13', '/js/achievements.js?v=13', '/js/tools.js?v=13', '/js/league.js?v=13', '/js/report.js?v=13',
+  '/kod.html', '/klasaciya.html', '/liga.html', '/otchet.html', '/za-nas.html', '/novini.html', '/vhod.html', '/registracia.html', '/profil.html', '/class-1.html', '/class-2.html', '/class-3.html', '/class-4.html', '/404.html',
+  '/css/style.css?v=14', '/css/animations.css?v=14',
+  '/js/owl.js?v=14', '/js/gamification.js?v=14', '/js/audio.js?v=14', '/js/math-engine.js?v=14', '/js/lesson-map.js?v=14', '/js/textbooks.js?v=14',
+  '/js/access.js?v=14', '/js/account.js?v=14', '/js/app.js?v=14', '/js/game.js?v=14', '/js/achievements.js?v=14', '/js/tools.js?v=14', '/js/league.js?v=14', '/js/report.js?v=14',
   '/assets/images/landscape.svg', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/manifest.json'
 ];
 

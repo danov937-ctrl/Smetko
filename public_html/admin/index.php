@@ -18,6 +18,7 @@ $k = [
     'd30' => (int)$one('SELECT COUNT(*) FROM redemptions WHERE last_seen >= ?', [$ago(30)]),
     'new7' => (int)$one('SELECT COUNT(*) FROM redemptions WHERE created_at >= ?', [$ago(7)]),
     'schools' => (int)$one('SELECT COUNT(*) FROM schools'),
+    'accounts' => (int)$one('SELECT COUNT(*) FROM accounts'), 'acc7' => (int)$one("SELECT COUNT(*) FROM accounts WHERE created_at >= datetime('now', '-7 days')"),
     'classes' => (int)$one("SELECT COUNT(*) FROM batches WHERE type = 'class'"),
     'answers' => (int)$one('SELECT COALESCE(SUM(answered), 0) FROM redemptions'),
     'flags' => (int)$one('SELECT COUNT(*) FROM redemptions WHERE flags > 0 AND hidden = 0'),
@@ -31,6 +32,7 @@ $body = '<div class="kpis">' .
     $kpi($k['d1'], 'играли днес') . $kpi($k['d7'], 'играли за 7 дни') . $kpi($k['d30'], 'играли за 30 дни') .
     $kpi(number_format($k['answers'], 0, '.', ' '), 'решени задачи') .
     $kpi($k['schools'] . ' / ' . $k['classes'], 'училища / класа') .
+    $kpi('<a href="akaunti.php">' . $k['accounts'] . '</a>', 'акаунта (родители и учители)', $k['acc7'] ? '+' . $k['acc7'] . ' за 7 дни' : '') .
     $kpi(money($k['rev_m']), 'приходи този месец') . $kpi(money($k['rev_y']), 'приходи тази уч. година') .
     $kpi('<a href="porachki.php?status=open">' . $k['unpaid'] . '</a>', 'неприключени поръчки') .
     $kpi('<a href="klasacii.php">' . $k['flags'] . '</a>', '⚠ за проверка') . '</div>';

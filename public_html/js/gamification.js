@@ -1,6 +1,6 @@
 /* Сметко — точки, нива, значки, серии и прогрес.
-   Всичко се пази локално в браузъра (localStorage), без лични данни.
-   По-късно, с профилите за родители/учители, същите данни ще се синхронизират със сървъра. */
+   Пази се локално в браузъра (localStorage). С акаунт за родител прогресът на детския профил
+   се записва и на сървъра (js/account.js чрез Smetko.onSave) и детето продължава от всяко устройство. */
 (function () {
   'use strict';
   var KEY = 'smetko.v1';
@@ -56,13 +56,21 @@
   var state;
   function load() {
     try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { state = null; }
+    return normalize();
+  }
+  function normalize() {
     var base = fresh();
     if (!state || typeof state !== 'object') state = base;
     for (var k in base) if (!(k in state)) state[k] = base[k];
     if (state.daily.date !== today()) state.daily = { date: today(), count: 0 };
     return state;
   }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* частен режим */ } }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* частен режим */ }
+    var S = window.Smetko; if (S && S.onSave) try { S.onSave(); } catch (e) {}
+  }
+  /* смяна на целия прогрес (избран детски профил / изход от акаунта) */
+  function replace(obj) { state = obj && typeof obj === 'object' ? obj : null; normalize(); session = null; save(); }
 
   function rank(points) {
     points = points === undefined ? state.points : points;
@@ -189,7 +197,7 @@
     startSession: startSession, answer: answer, addBonus: addBonus, endSession: endSession,
     awardBadge: function (id) { var nb = []; award(id, nb); save(); return nb; },
     earns: earns, stars: stars, setStars: setStars, totalStars: totalStars, isUnlocked: isUnlocked,
-    reset: reset, setSound: setSound, today: today,
+    reset: reset, replace: replace, fresh: fresh, setSound: setSound, today: today,
     get session() { return session; }
   };
 })();

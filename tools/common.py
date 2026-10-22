@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '13'
+VER = '14'
 EMAIL = 'info@smetko.com'
 
 # Данни за търговеца — попълват се след регистрация на фирмата (търсете „[ПОПЪЛНЕТЕ“ във всички файлове)
@@ -89,11 +89,12 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
     </nav>'''
 
 MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
+    <div class="m-auth" data-acct-m><a class="btn btn-ghost" href="vhod.html">Вход</a><a class="btn btn-teal" href="registracia.html">Регистрация</a></div>
     <a href="game.html">🎮 Мисии и игри</a>
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
     <a href="liga.html">🏆 Обща класация</a>
     <a href="achievements.html">⭐ Моите постижения</a>
-    <a href="kod.html">🔑 Въведи код за достъп</a>
+    <a href="kod.html" data-code-link>🔑 Въведи код за достъп</a>
     <a href="novini.html">📰 Новини <b class="m-news" data-news-count hidden></b></a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
@@ -102,7 +103,6 @@ MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
     <a href="blog/">✍️ Блог</a>
     <a href="za-nas.html">🦉 За нас</a>
     <a href="pricing.html">💶 Цени</a>
-    <div class="m-auth"><a class="btn btn-ghost" href="kod.html" data-code-link>Имам код</a><a class="btn btn-teal" href="pricing.html">Абонамент</a></div>
   </nav>'''
 
 
@@ -117,8 +117,8 @@ def header(active='', over=False, game=False):
     {nav}
     <div class="header-actions">
       {snd}<a class="news-bell" href="novini.html" title="Новини" aria-label="Новини">🔔<b data-news-count hidden></b></a><a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
-      <a class="link-login" href="kod.html" data-code-link>Имам код</a>
-      <a class="btn btn-teal btn-sm btn-register" href="pricing.html">Абонамент</a>
+      <a class="acct-btn" href="vhod.html" data-acct title="Вход за родители и учители" aria-label="Вход"><span class="acct-ico">👤</span><span class="acct-txt">Вход</span></a>
+      <a class="btn btn-teal btn-sm btn-register" href="registracia.html" data-acct-reg>Регистрация</a>
       <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
     </div>
   </div>
@@ -149,6 +149,7 @@ FOOTER = '''<footer class="site-footer">
         <li><a href="uchilishta.html">За учители и училища</a></li>
         <li><a href="rabotni-listove.html">Работни листове</a></li>
         <li><a href="pricing.html">Цени</a></li>
+        <li><a href="vhod.html">Вход</a> · <a href="registracia.html">Регистрация</a></li>
         <li><a href="kod.html">Въведи код</a></li>
         <li><a href="novini.html">Новини</a></li>
       </ul></div>
@@ -167,8 +168,8 @@ FOOTER = '''<footer class="site-footer">
 
 
 def scripts(extra=()):
-    base = ['js/owl.js', 'js/gamification.js', 'js/audio.js', 'js/access.js', 'js/app.js']
-    order = base[:4] + [e for e in extra if e not in ('js/game.js', 'js/achievements.js', 'js/tools.js')] + ['js/app.js'] + \
+    base = ['js/owl.js', 'js/gamification.js', 'js/audio.js', 'js/access.js', 'js/account.js', 'js/app.js']
+    order = base[:5] + [e for e in extra if e not in ('js/game.js', 'js/achievements.js', 'js/tools.js')] + ['js/app.js'] + \
         [e for e in extra if e in ('js/game.js', 'js/achievements.js', 'js/tools.js')]
     return ''.join(f'<script src="{s}?v={VER}" defer></script>\n' for s in order) + '</body>\n</html>\n'
 

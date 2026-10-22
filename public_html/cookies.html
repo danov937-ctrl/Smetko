@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=13">
-<link rel="stylesheet" href="css/animations.css?v=13">
+<link rel="stylesheet" href="css/style.css?v=14">
+<link rel="stylesheet" href="css/animations.css?v=14">
 </head>
 <body>
 <a class="skip" href="#main">Към съдържанието</a>
@@ -65,17 +65,18 @@
     </nav>
     <div class="header-actions">
       <a class="news-bell" href="novini.html" title="Новини" aria-label="Новини">🔔<b data-news-count hidden></b></a><a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
-      <a class="link-login" href="kod.html" data-code-link>Имам код</a>
-      <a class="btn btn-teal btn-sm btn-register" href="pricing.html">Абонамент</a>
+      <a class="acct-btn" href="vhod.html" data-acct title="Вход за родители и учители" aria-label="Вход"><span class="acct-ico">👤</span><span class="acct-txt">Вход</span></a>
+      <a class="btn btn-teal btn-sm btn-register" href="registracia.html" data-acct-reg>Регистрация</a>
       <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
     </div>
   </div>
   <nav class="mobile-nav" aria-label="Мобилно меню">
+    <div class="m-auth" data-acct-m><a class="btn btn-ghost" href="vhod.html">Вход</a><a class="btn btn-teal" href="registracia.html">Регистрация</a></div>
     <a href="game.html">🎮 Мисии и игри</a>
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
     <a href="liga.html">🏆 Обща класация</a>
     <a href="achievements.html">⭐ Моите постижения</a>
-    <a href="kod.html">🔑 Въведи код за достъп</a>
+    <a href="kod.html" data-code-link>🔑 Въведи код за достъп</a>
     <a href="novini.html">📰 Новини <b class="m-news" data-news-count hidden></b></a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
@@ -84,7 +85,6 @@
     <a href="blog/">✍️ Блог</a>
     <a href="za-nas.html">🦉 За нас</a>
     <a href="pricing.html">💶 Цени</a>
-    <div class="m-auth"><a class="btn btn-ghost" href="kod.html" data-code-link>Имам код</a><a class="btn btn-teal" href="pricing.html">Абонамент</a></div>
   </nav>
 </header>
 
@@ -96,12 +96,18 @@
 <p class="meta">Последна актуализация: <span data-co="date"><mark class="fill">[ПОПЪЛНЕТЕ: дата]</mark></span></p>
 <h2>Използваме ли бисквитки?</h2>
 <p>Сметко <b>не използва бисквитки</b> за реклама, анализ или проследяване. Затова не показваме банер за съгласие.</p>
+<table class="info-table">
+<tr><th>Бисквитка</th><th>Какво пази</th><th>Защо</th><th>Срок</th></tr>
+<tr><td><code>smetko_auth</code></td><td>Случаен ключ за вход (на сървъра се пази само негов хеш)</td><td>Строго необходима – само ако сте влезли в акаунт за родител или учител</td><td>180 дни или до изход</td></tr>
+</table>
 <h2>Локално хранилище (localStorage)</h2>
 <table class="info-table">
 <tr><th>Ключ</th><th>Какво пази</th><th>Защо</th><th>Срок</th></tr>
 <tr><td><code>smetko.v1</code></td><td>Точки, значки, звезди, рекорди, избран учебник, настройка за звук; при въведен код – данни за достъпа, случаен идентификатор на устройството и прякор</td><td>Строго необходимо за работата на играта, поискана от потребителя</td><td>Докато не го изтриете</td></tr>
+<tr><td><code>smetko.acct</code></td><td>Име и роля в акаунта, детските профили и кой профил играе на устройството</td><td>Строго необходимо – само при вход в акаунт</td><td>До изход от акаунта</td></tr>
+<tr><td><code>smetko.board</code>, <code>smetko.cfg</code>, <code>smetko.news…</code></td><td>Запомнен клас на учителя, настройки на сайта, видени новини</td><td>Удобство и работа без интернет</td><td>Докато не ги изтриете</td></tr>
 </table>
-<p>Съгласно чл. 4а от Закона за електронните съобщения и Директива 2002/58/ЕО за съхраняване на информация, която е строго необходима за услуга, изрично поискана от потребителя, не се изисква съгласие. Данните не напускат устройството ви.</p>
+<p>Съгласно чл. 4а от Закона за електронните съобщения и Директива 2002/58/ЕО за съхраняване на информация, която е строго необходима за услуга, изрично поискана от потребителя, не се изисква съгласие. Без акаунт тези данни не напускат устройството ви; с акаунт прогресът на избрания детски профил се записва и на сървъра (виж <a href="privacy-policy.html">Политиката за поверителност</a>).</p>
 <h2>Кеш за работа без интернет</h2>
 <p>Сайтът използва Service Worker, за да запази файловете на играта (страници, стилове, скриптове) и да работи без интернет. Той не съдържа лични данни.</p>
 <h2>Външни ресурси</h2>
@@ -134,6 +140,7 @@
         <li><a href="uchilishta.html">За учители и училища</a></li>
         <li><a href="rabotni-listove.html">Работни листове</a></li>
         <li><a href="pricing.html">Цени</a></li>
+        <li><a href="vhod.html">Вход</a> · <a href="registracia.html">Регистрация</a></li>
         <li><a href="kod.html">Въведи код</a></li>
         <li><a href="novini.html">Новини</a></li>
       </ul></div>
@@ -148,10 +155,11 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=13" defer></script>
-<script src="js/gamification.js?v=13" defer></script>
-<script src="js/audio.js?v=13" defer></script>
-<script src="js/access.js?v=13" defer></script>
-<script src="js/app.js?v=13" defer></script>
+<script src="js/owl.js?v=14" defer></script>
+<script src="js/gamification.js?v=14" defer></script>
+<script src="js/audio.js?v=14" defer></script>
+<script src="js/access.js?v=14" defer></script>
+<script src="js/account.js?v=14" defer></script>
+<script src="js/app.js?v=14" defer></script>
 </body>
 </html>

@@ -172,7 +172,7 @@
       '<div class="modal-actions"><a class="btn btn-green" href="kod.html">Въведи код</a><a class="btn btn-ghost" href="pricing.html">Цени</a></div>'
     );
   };
-  S.loginModal = function () { location.href = 'kod.html'; };
+  S.loginModal = function () { location.href = 'vhod.html'; };
 
   /* ---------- Конфети ---------- */
   S.confetti = function (count) {
