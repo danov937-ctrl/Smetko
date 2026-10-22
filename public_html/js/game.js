@@ -177,7 +177,7 @@
     $('#pts').textContent = '★ 0';
     setCombo(0);
     S.setOwl($('#play-owl'), 'hello');
-    bubble(mode === 'quick' ? '60 секунди! Готов ли си? 🚀' : mode === 'adventure' ? 'Мисия ' + (play.missionIdx + 1) + ': ' + play.title + '!' : 'Спокойно, без часовник. Ти можеш!');
+    bubble(mode === 'quick' ? '60 секунди! Готов ли си? 🚀' : mode === 'adventure' ? 'Мисия ' + (play.missionIdx + 1) + ': ' + play.title + '!' : 'Спокойно, без бързане. Ти можеш!');
     show('screen-play');
     updateProgress();
     if (mode === 'quick') {
