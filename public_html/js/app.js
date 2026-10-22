@@ -62,9 +62,8 @@
     S.modal(
       '<div data-owl="happy"></div><h3>' + (planName ? 'Абонамент „' + planName + '“' : 'Отключи пълния достъп') + '</h3>' +
       '<p>Пълният достъп до всички мисии по учебника и неограничената тренировка се активира с <b>код за достъп</b>. ' +
-      'Поръчайте код по имейл и ще го получите до 1 работен ден. Учителите получават кодове за целия клас.</p>' +
-      '<div class="modal-actions"><a class="btn btn-green" href="kod.html">Имам код</a>' +
-      '<a class="btn" href="mailto:' + S.config.contactEmail + '?subject=' + encodeURIComponent('Код за достъп до Сметко' + (planName ? ': ' + planName : '')) + '">Поръчай код</a></div>'
+      'За абонамент пишете ни на <a href="mailto:' + S.config.contactEmail + '">' + S.config.contactEmail + '</a>.</p>' +
+      '<div class="modal-actions"><a class="btn btn-green" href="kod.html">Имам код</a></div>'
     );
   };
   S.accessModal = function () {

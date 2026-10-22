@@ -342,7 +342,7 @@ paid = '<li>Мисии по учебника за всички класове</l
 pricing = head('Цени и абонаменти – Сметко', 'Абонаменти за Сметко: 1 месец 2.99 €, учебна година 15 €, година 18 €, семеен 29 €, клас 75 €. Отстъпки за училища.',
                'pricing.html', [crumbs([('Начало', ''), ('Цени', 'pricing.html')]), faq_ld(FAQ_PRICE)]) + header('pricing') + page_hero(
     'Цени и абонаменти', 'По-малко от цената на една тетрадка на месец. Без реклами. Пълният достъп се активира с код.', 'Цени', 'happy',
-    '<div class="hero-cta"><a class="btn btn-lg btn-green" href="kod.html">🔑 Имам код</a><a class="btn btn-white" href="mailto:info@smetko.com?subject=Код%20за%20достъп%20до%20Сметко">Поръчай код</a></div>') + f'''
+    '<div class="hero-cta"><a class="btn btn-lg btn-green" href="kod.html">🔑 Имам код</a></div>') + f'''
 <main id="main">
 <section class="section">
   <div class="wrap">
@@ -477,7 +477,7 @@ write('achievements.html', ach)
 school = head('Сметко за училища – кодове за класа, класации, работни листове', 'Сметко за начални учители: код за целия клас, класация с ПИН, домашни с линк, работни листове и документи за училището.',
               'uchilishta.html', [crumbs([('Начало', ''), ('За училища', 'uchilishta.html')])]) + header() + page_hero(
     'Сметко за училища', 'Един код за целия клас, класация за учителя, домашни с линк и работни листове – по учебника, по който работите.', 'За училища', 'hero',
-    '<div class="hero-cta"><a class="btn btn-lg" href="mailto:info@smetko.com?subject=Кодове%20за%20класа%20–%20Сметко">Поръчай кодове</a><a class="btn btn-white" href="klasaciya.html">Класация на класа</a></div>') + """
+    '<div class="hero-cta"><a class="btn btn-lg" href="klasaciya.html">Класация на класа</a><a class="btn btn-white" href="rabotni-listove.html">Работни листове</a></div>') + """
 <main id="main">
 <section class="section">
   <div class="wrap">
