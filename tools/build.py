@@ -60,7 +60,7 @@ BOOKS = {1: ['Просвета', 'Просвета Плюс', 'Бит и Тех�
 
 FAQ_INDEX = [
     ('По кой учебник са задачите?', 'Детето избира своя учебник и получава <b>по една мисия за всеки урок</b> от годишното разпределение – между 110 и 136 мисии за година, с уроците в същия ред. Ако учебникът още го няма в списъка, мисиите следват учебната програма на МОН – общият ред, по който работят всички одобрени учебници.'),
-    ('Безплатен ли е Сметко?', 'Има безплатен план: „Бързо сметни“, първите 3 мисии от всеки клас и 20 задачи на ден в „Тренировка“. Пълният достъп се отключва с код от учителя или с абонамент. Вижте <a href="pricing.html">цените</a>.'),
+    ('Безплатен ли е Сметко?', 'Има безплатен план: „Бързо сметни“, първите <span data-cfg="freeMissions">3</span> мисии от всеки клас и <span data-cfg="freePractice">20</span> задачи на ден в „Тренировка“. Пълният достъп се отключва с код от учителя или с абонамент. Вижте <a href="pricing.html">цените</a>.'),
     ('Как се използва код за достъп?', 'Отворете <a href="kod.html">smetko.com/kod</a> и въведете кода от картичката. Пълният достъп се включва веднага на това устройство. Всеки код е еднократен – активира се само на едно устройство.'),
     ('Трябва ли регистрация?', 'Не. Децата играят веднага, без имейл и без парола. Прогресът се пази на устройството, а с код за клас резултатите влизат и в класацията на класа – само с прякор.'),
     ('Има ли реклами?', 'Не. Сметко е чиста детска среда, без рекламни банери и без проследяване.'),
@@ -177,9 +177,9 @@ index = head('Сметко – математика като игра за 1.–
   <div class="wrap">
     <div class="section-head"><h2 class="lined">Честни цени</h2><p>Безплатен план за всички. Пълен достъп с код от учителя или с абонамент.</p></div>
     <div class="plans three">
-      <div class="plan"><h3>1 месец</h3><div class="who">Без обвързване</div><div class="price">2.99 € <small>/ месец</small></div><div class="per">&nbsp;</div><ul><li>Всички мисии по учебника</li><li>Неограничена тренировка</li><li>Всички значки и нива</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
-      <div class="plan featured"><span class="ribbon">Препоръчан</span><h3>Учебна година</h3><div class="who">15 септември – 30 юни</div><div class="price">15 € <small>/ година</small></div><div class="per">≈ 1.58 € на месец</div><ul><li>Всичко от месечния план</li><li>Без плащане през лятото</li><li>Подходящ за подарък</li></ul><a class="btn" href="pricing.html">Детайли</a></div>
-      <div class="plan"><h3>Цял клас</h3><div class="who">До 30 ученици + картичка за учителя</div><div class="price">75 € <small>/ уч. година</small></div><div class="per">≈ 2.50 € на ученик</div><ul><li>Всичко за всяко дете</li><li>Класация на класа</li><li>Фактура</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
+      <div class="plan"><h3>1 месец</h3><div class="who">Без обвързване</div><div class="price"><span data-price="month">2.99</span> € <small>/ месец</small></div><div class="per">&nbsp;</div><ul><li>Всички мисии по учебника</li><li>Неограничена тренировка</li><li>Всички значки и нива</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
+      <div class="plan featured"><span class="ribbon">Препоръчан</span><h3>Учебна година</h3><div class="who">15 септември – 30 юни</div><div class="price"><span data-price="schoolYear">15</span> € <small>/ година</small></div><div class="per"><span data-per="schoolYear">≈ 1.58 € на месец</span></div><ul><li>Всичко от месечния план</li><li>Без плащане през лятото</li><li>Подходящ за подарък</li></ul><a class="btn" href="pricing.html">Детайли</a></div>
+      <div class="plan"><h3>Цял клас</h3><div class="who">До 30 ученици + картичка за учителя</div><div class="price"><span data-price="class">75</span> € <small>/ уч. година</small></div><div class="per"><span data-per="class">≈ 2.50 € на ученик</span></div><ul><li>Всичко за всяко дете</li><li>Класация на класа</li><li>Фактура</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
     </div>
   </div>
 </section>
@@ -279,7 +279,7 @@ game = head('Игра – Сметко', 'Играй математически 
   <div class="game-wrap"><div class="panel result" id="result"></div></div>
 </section>
 </main>
-''' + scripts(['js/math-engine.js', 'js/textbooks.js', 'js/game.js'])
+''' + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/game.js'])
 write('game.html', game)
 
 # ================= class pages =================
@@ -333,9 +333,9 @@ for g, d in GRADES.items():
 FAQ_PRICE = [
     ('Как се плаща?', 'Абонаментът се поръчва по имейл на <a href="mailto:info@smetko.com">info@smetko.com</a> и се активира с код за достъп, който получавате до 1 работен ден. Плащането е по банков път, а училищата получават фактура. Плащане с карта направо от сайта предстои.'),
     ('Как работи кодът за клас?', 'Всеки ученик получава картичка с личен код и го въвежда веднъж на <a href="kod.html">smetko.com/kod</a>. Кодовете са еднократни – всеки се активира на едно устройство. Учителят получава своя картичка с код и ПИН и вижда класацията на целия клас на <a href="klasaciya.html">smetko.com/klasaciya</a>.'),
-    ('Има ли безплатен план?', 'Да. Безплатно са „Бързо сметни“ за всички класове, първите 3 мисии от всеки клас, 20 задачи на ден в „Тренировка“ и работните листове.'),
+    ('Има ли безплатен план?', 'Да. Безплатно са „Бързо сметни“ за всички класове, първите <span data-cfg="freeMissions">3</span> мисии от всеки клас, <span data-cfg="freePractice">20</span> задачи на ден в „Тренировка“ и работните листове.'),
     ('Подновява ли се абонаментът автоматично?', 'Месечният абонамент се подновява всеки месец и може да се спре по всяко време. Годишният и този за учебна година не се подновяват автоматично. Ще ви напомним преди изтичането им.'),
-    ('Как плащат училищата?', 'С фактура и банков превод. За 3 или повече класа има 15% отстъпка, а за 8 или повече класа – 25%.'),
+    ('Как плащат училищата?', 'С фактура и банков превод. За 3 или повече класа има <span data-price="disc3">15</span>% отстъпка, а за 8 или повече класа – <span data-price="disc8">25</span>%.'),
     ('Мога ли да се откажа?', 'Да. Правата ви при отказ са описани в <a href="terms.html">Общите условия</a>, а формулярът за отказ е <a href="otkaz.html">тук</a>.'),
 ]
 paid = '<li>Мисии по учебника за всички класове</li><li>Неограничена тренировка</li><li>Всички значки и нива</li>'
@@ -349,13 +349,13 @@ pricing = head('Цени и абонаменти – Сметко', 'Абона�
     <div class="section-head"><h2 class="lined">За едно дете</h2></div>
     <div class="plans">
       <div class="plan"><h3>Безплатно</h3><div class="who">Да опознаете Сметко</div><div class="price">0 €</div><div class="per">завинаги</div>
-        <ul><li>„Бързо сметни“ за всички класове</li><li>Първите 3 мисии от всеки клас</li><li>Тренировка до 20 задачи на ден</li><li class="no">Всички мисии по учебника</li></ul>
+        <ul><li>„Бързо сметни“ за всички класове</li><li>Първите <span data-cfg="freeMissions">3</span> мисии от всеки клас</li><li>Тренировка до <span data-cfg="freePractice">20</span> задачи на ден</li><li class="no">Всички мисии по учебника</li></ul>
         <a class="btn btn-white" href="game.html">Играй сега</a></div>
-      <div class="plan"><h3>1 месец</h3><div class="who">Без обвързване</div><div class="price">2.99 € <small>/ месец</small></div><div class="per">спирате по всяко време</div>
+      <div class="plan"><h3>1 месец</h3><div class="who">Без обвързване</div><div class="price"><span data-price="month">2.99</span> € <small>/ месец</small></div><div class="per">спирате по всяко време</div>
         <ul>{paid}</ul><button class="btn btn-white" data-subscribe="1 месец">Избирам</button></div>
-      <div class="plan featured"><span class="ribbon">Препоръчан</span><h3>Учебна година</h3><div class="who">15 септември – 30 юни</div><div class="price">15 € <small>/ година</small></div><div class="per">≈ 1.58 € на месец</div>
+      <div class="plan featured"><span class="ribbon">Препоръчан</span><h3>Учебна година</h3><div class="who">15 септември – 30 юни</div><div class="price"><span data-price="schoolYear">15</span> € <small>/ година</small></div><div class="per"><span data-per="schoolYear">≈ 1.58 € на месец</span></div>
         <ul>{paid}<li>Без плащане през лятото</li></ul><button class="btn" data-subscribe="Учебна година">Избирам</button></div>
-      <div class="plan"><h3>1 година</h3><div class="who">12 месеца, с лятото</div><div class="price">18 € <small>/ година</small></div><div class="per">1.50 € на месец</div>
+      <div class="plan"><h3>1 година</h3><div class="who">12 месеца, с лятото</div><div class="price"><span data-price="year">18</span> € <small>/ година</small></div><div class="per"><span data-per="year">1.50 € на месец</span></div>
         <ul>{paid}<li>Лятна тренировка преди новия клас</li></ul><button class="btn btn-white" data-subscribe="1 година">Избирам</button></div>
     </div>
   </div>
@@ -364,12 +364,12 @@ pricing = head('Цени и абонаменти – Сметко', 'Абона�
   <div class="wrap">
     <div class="section-head"><h2 class="lined">За семейства, класове и училища</h2></div>
     <div class="plans three">
-      <div class="plan"><h3>Семеен</h3><div class="who">До 4 деца + 1 родителски профил</div><div class="price">29 € <small>/ година</small></div><div class="per">≈ 7.25 € на дете</div>
+      <div class="plan"><h3>Семеен</h3><div class="who">До 4 деца + 1 родителски профил</div><div class="price"><span data-price="family">29</span> € <small>/ година</small></div><div class="per"><span data-per="family">≈ 7.25 € на дете</span></div>
         <ul>{paid}<li>По един код за всяко дете</li><li>Валиден 12 месеца</li></ul><button class="btn btn-white" data-subscribe="Семеен">Избирам</button></div>
-      <div class="plan featured"><span class="ribbon">За учители</span><h3>Цял клас</h3><div class="who">Код за всеки ученик (до 30) + картичка за учителя</div><div class="price">75 € <small>/ учебна година</small></div><div class="per">2.50 € на ученик</div>
+      <div class="plan featured"><span class="ribbon">За учители</span><h3>Цял клас</h3><div class="who">Код за всеки ученик (до 30) + картичка за учителя</div><div class="price"><span data-price="class">75</span> € <small>/ учебна година</small></div><div class="per"><span data-per="class">2.50 € на ученик</span></div>
         <ul>{paid}<li>Класация и резултати на класа</li><li>Картички с кодове за печат</li><li>Фактура</li></ul><button class="btn" data-subscribe="Цял клас">Избирам</button></div>
-      <div class="plan"><h3>Училище</h3><div class="who">Няколко класа или цялото училище</div><div class="price" style="font-size:2rem">по запитване</div><div class="per">до −25% отстъпка</div>
-        <ul><li>−15% за 3 или повече класа</li><li>−25% за 8 или повече класа</li><li>Фактура и банков превод</li><li>Картички за всеки клас</li></ul><a class="btn btn-blue" href="uchilishta.html">Сметко за училища</a></div>
+      <div class="plan"><h3>Училище</h3><div class="who">Няколко класа или цялото училище</div><div class="price" style="font-size:2rem">по запитване</div><div class="per">до −<span data-price="disc8">25</span>% отстъпка</div>
+        <ul><li>−<span data-price="disc3">15</span>% за 3 или повече класа</li><li>−<span data-price="disc8">25</span>% за 8 или повече класа</li><li>Фактура и банков превод</li><li>Картички за всеки клас</li></ul><a class="btn btn-blue" href="uchilishta.html">Сметко за училища</a></div>
     </div>
     <p class="price-note">Всички цени са в евро. Информацията за ДДС ще бъде посочена след регистрацията на търговеца.</p>
   </div>
@@ -470,7 +470,7 @@ ach = head('Постижения и класации – Сметко', 'Точ�
   </div>
 </section>
 </main>
-''' + FOOTER + scripts(['js/math-engine.js', 'js/textbooks.js', 'js/tools.js', 'js/achievements.js'])
+''' + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/tools.js', 'js/achievements.js'])
 write('achievements.html', ach)
 
 # ================= uchilishta.html (училища) =================
@@ -526,7 +526,7 @@ school = head('Сметко за училища – кодове за класа
   </div>
 </section>
 </main>
-""" + FOOTER + scripts(['js/math-engine.js', 'js/textbooks.js', 'js/tools.js'])
+""" + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/tools.js'])
 write('uchilishta.html', school)
 
 # ================= kod.html (въвеждане на код) =================
@@ -637,7 +637,7 @@ ws = head('Работни листове по математика 1.–4. кл�
 </section>
 <section class="ws-sheet-wrap"><div class="ws-sheet" id="ws-sheet"></div><div class="ws-sheet ws-answers" id="ws-key"></div></section>
 </main>
-''' + FOOTER + scripts(['js/math-engine.js', 'js/textbooks.js', 'js/tools.js'])
+''' + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/tools.js'])
 write('rabotni-listove.html', ws)
 
 # ================= 404 =================

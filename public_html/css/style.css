@@ -829,3 +829,8 @@ table.liga-table tr.gap td { text-align: center; color: var(--muted); padding: 2
 .map-chapters .ch.full { background: #EAF6E9; border-color: #BFE5BC; }
 .map-chapters .ch.on.full { border-color: var(--orange); }
 .map-chapters .ch.lk { opacity: .6; }
+/* банер от админ панела */
+.site-banner { position: relative; z-index: 60; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 9px 44px 9px 16px; font-weight: 800; font-size: .95rem; text-align: center; color: #fff; background: var(--orange); }
+.site-banner.blue { background: var(--blue-dark); } .site-banner.green { background: var(--green-dark); } .site-banner.red { background: var(--red-dark); } .site-banner.purple { background: var(--purple-dark); }
+.site-banner a { color: #fff; text-decoration: underline; font-weight: 900; }
+.site-banner button { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,.2); color: #fff; border: 0; width: 28px; height: 28px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; line-height: 1; }

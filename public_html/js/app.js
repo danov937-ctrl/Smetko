@@ -20,6 +20,51 @@
 
   if (!S.hasAccess) S.hasAccess = function () { return !S.config.paywall; }; // истинската проверка е в access.js
 
+  /* ---------- НАСТРОЙКИ ОТ АДМИН ПАНЕЛА ----------
+     /api/config.php връща цени, банер, безплатен план и данни на фирмата.
+     Пазят се в браузъра, за да работят и без интернет; обновяват се при всяко отваряне. */
+  var CFG_KEY = 'smetko.cfg';
+  function escH(x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function money(x) { var n = Math.round(x * 100) / 100; return (n % 1 ? n.toFixed(2) : String(n)); }
+  function applyCfg(c, dom) {
+    if (!c) return;
+    if (typeof c.paywall === 'boolean') S.config.paywall = c.paywall;
+    if (+c.freeMissions >= 0 && c.freeMissions !== '') S.config.freeAdventureLevels = +c.freeMissions;
+    if (+c.freePractice > 0) S.config.freePracticePerDay = +c.freePractice;
+    if (c.contactEmail) S.config.contactEmail = c.contactEmail;
+    if (+c.questions >= 5) S.config.questionsPerMission = +c.questions;
+    S.siteConfig = c;
+    if (!dom) return;
+    var P = c.prices || {};
+    document.querySelectorAll('[data-price]').forEach(function (el) { var v = P[el.getAttribute('data-price')]; if (v !== undefined && v !== '') el.textContent = String(v).replace('.', '.'); });
+    var per = { schoolYear: [9.5, 'на месец', '≈ '], year: [12, 'на месец', ''], family: [4, 'на дете', '≈ '], 'class': [30, 'на ученик', '≈ '] };
+    document.querySelectorAll('[data-per]').forEach(function (el) { var k = el.getAttribute('data-per'), d = per[k]; if (d && +P[k]) el.textContent = d[2] + money(+P[k] / d[0]) + ' € ' + d[1]; });
+    document.querySelectorAll('[data-cfg]').forEach(function (el) { var k = el.getAttribute('data-cfg'), v = k === 'freeMissions' ? S.config.freeAdventureLevels : k === 'freePractice' ? S.config.freePracticePerDay : c[k]; if (v !== undefined) el.textContent = v; });
+    var co = c.company || {};
+    document.querySelectorAll('[data-co]').forEach(function (el) { var v = co[el.getAttribute('data-co')]; if (v) el.innerHTML = escH(v); });
+    if (c.contactEmail && c.contactEmail !== 'info@smetko.com') document.querySelectorAll('a[href^="mailto:info@smetko.com"]').forEach(function (a) { a.href = a.href.replace('info@smetko.com', c.contactEmail); if (a.textContent.indexOf('@') > 0) a.textContent = c.contactEmail; });
+    var b = c.banner || {}, old = document.getElementById('site-banner');
+    if (old) old.remove();
+    var bid = 'b' + String(b.text || '').length + (b.text || '').slice(0, 12);
+    var closed = false; try { closed = localStorage.getItem('smetko.banner') === bid; } catch (e) {}
+    if (b.on && b.text && !closed) {
+      var el = document.createElement('div'); el.id = 'site-banner'; el.className = 'site-banner ' + (b.color || 'orange');
+      el.innerHTML = '<span>' + escH(b.text) + (b.link ? ' <a href="' + escH(b.link) + '">' + escH(b.linkText || 'Научи повече') + ' →</a>' : '') + '</span><button aria-label="Затвори">×</button>';
+      el.querySelector('button').addEventListener('click', function () { el.remove(); try { localStorage.setItem('smetko.banner', bid); } catch (e) {} });
+      document.body.insertBefore(el, document.body.firstChild);
+    }
+  }
+  try { applyCfg(JSON.parse(localStorage.getItem(CFG_KEY) || 'null'), false); } catch (e) {}
+  S.loadConfig = function () {
+    try { applyCfg(JSON.parse(localStorage.getItem(CFG_KEY) || 'null'), true); } catch (e) {}
+    if (!/^https?:$/.test(location.protocol)) return;
+    fetch('/api/config.php', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j || !j.ok) return;
+      try { localStorage.setItem(CFG_KEY, JSON.stringify(j.config)); } catch (e) {}
+      applyCfg(j.config, true);
+    }).catch(function () {});
+  };
+
   /* ---------- Сметко ---------- */
   S.renderOwls = function (root) {
     if (!S.owl) return;
@@ -111,6 +156,7 @@
   S.updateChip = updateChip;
 
   document.addEventListener('DOMContentLoaded', function () {
+    S.loadConfig();
     S.renderOwls();
     updateChip();
     var mb = document.querySelector('.menu-btn'), mn = document.querySelector('.mobile-nav');

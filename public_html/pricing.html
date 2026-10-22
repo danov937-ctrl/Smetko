@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=8">
-<link rel="stylesheet" href="css/animations.css?v=8">
+<link rel="stylesheet" href="css/style.css?v=9">
+<link rel="stylesheet" href="css/animations.css?v=9">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Начало", "item": "https://smetko.com/"}, {"@type": "ListItem", "position": 2, "name": "Цени", "item": "https://smetko.com/pricing.html"}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Как се плаща?", "acceptedAnswer": {"@type": "Answer", "text": "Абонаментът се поръчва по имейл на info@smetko.com и се активира с код за достъп, който получавате до 1 работен ден. Плащането е по банков път, а училищата получават фактура. Плащане с карта направо от сайта предстои."}}, {"@type": "Question", "name": "Как работи кодът за клас?", "acceptedAnswer": {"@type": "Answer", "text": "Всеки ученик получава картичка с личен код и го въвежда веднъж на smetko.com/kod. Кодовете са еднократни – всеки се активира на едно устройство. Учителят получава своя картичка с код и ПИН и вижда класацията на целия клас на smetko.com/klasaciya."}}, {"@type": "Question", "name": "Има ли безплатен план?", "acceptedAnswer": {"@type": "Answer", "text": "Да. Безплатно са „Бързо сметни“ за всички класове, първите 3 мисии от всеки клас, 20 задачи на ден в „Тренировка“ и работните листове."}}, {"@type": "Question", "name": "Подновява ли се абонаментът автоматично?", "acceptedAnswer": {"@type": "Answer", "text": "Месечният абонамент се подновява всеки месец и може да се спре по всяко време. Годишният и този за учебна година не се подновяват автоматично. Ще ви напомним преди изтичането им."}}, {"@type": "Question", "name": "Как плащат училищата?", "acceptedAnswer": {"@type": "Answer", "text": "С фактура и банков превод. За 3 или повече класа има 15% отстъпка, а за 8 или повече класа – 25%."}}, {"@type": "Question", "name": "Мога ли да се откажа?", "acceptedAnswer": {"@type": "Answer", "text": "Да. Правата ви при отказ са описани в Общите условия, а формулярът за отказ е тук."}}]}</script>
 </head>
@@ -97,13 +97,13 @@
     <div class="section-head"><h2 class="lined">За едно дете</h2></div>
     <div class="plans">
       <div class="plan"><h3>Безплатно</h3><div class="who">Да опознаете Сметко</div><div class="price">0 €</div><div class="per">завинаги</div>
-        <ul><li>„Бързо сметни“ за всички класове</li><li>Първите 3 мисии от всеки клас</li><li>Тренировка до 20 задачи на ден</li><li class="no">Всички мисии по учебника</li></ul>
+        <ul><li>„Бързо сметни“ за всички класове</li><li>Първите <span data-cfg="freeMissions">3</span> мисии от всеки клас</li><li>Тренировка до <span data-cfg="freePractice">20</span> задачи на ден</li><li class="no">Всички мисии по учебника</li></ul>
         <a class="btn btn-white" href="game.html">Играй сега</a></div>
-      <div class="plan"><h3>1 месец</h3><div class="who">Без обвързване</div><div class="price">2.99 € <small>/ месец</small></div><div class="per">спирате по всяко време</div>
+      <div class="plan"><h3>1 месец</h3><div class="who">Без обвързване</div><div class="price"><span data-price="month">2.99</span> € <small>/ месец</small></div><div class="per">спирате по всяко време</div>
         <ul><li>Мисии по учебника за всички класове</li><li>Неограничена тренировка</li><li>Всички значки и нива</li></ul><button class="btn btn-white" data-subscribe="1 месец">Избирам</button></div>
-      <div class="plan featured"><span class="ribbon">Препоръчан</span><h3>Учебна година</h3><div class="who">15 септември – 30 юни</div><div class="price">15 € <small>/ година</small></div><div class="per">≈ 1.58 € на месец</div>
+      <div class="plan featured"><span class="ribbon">Препоръчан</span><h3>Учебна година</h3><div class="who">15 септември – 30 юни</div><div class="price"><span data-price="schoolYear">15</span> € <small>/ година</small></div><div class="per"><span data-per="schoolYear">≈ 1.58 € на месец</span></div>
         <ul><li>Мисии по учебника за всички класове</li><li>Неограничена тренировка</li><li>Всички значки и нива</li><li>Без плащане през лятото</li></ul><button class="btn" data-subscribe="Учебна година">Избирам</button></div>
-      <div class="plan"><h3>1 година</h3><div class="who">12 месеца, с лятото</div><div class="price">18 € <small>/ година</small></div><div class="per">1.50 € на месец</div>
+      <div class="plan"><h3>1 година</h3><div class="who">12 месеца, с лятото</div><div class="price"><span data-price="year">18</span> € <small>/ година</small></div><div class="per"><span data-per="year">1.50 € на месец</span></div>
         <ul><li>Мисии по учебника за всички класове</li><li>Неограничена тренировка</li><li>Всички значки и нива</li><li>Лятна тренировка преди новия клас</li></ul><button class="btn btn-white" data-subscribe="1 година">Избирам</button></div>
     </div>
   </div>
@@ -112,12 +112,12 @@
   <div class="wrap">
     <div class="section-head"><h2 class="lined">За семейства, класове и училища</h2></div>
     <div class="plans three">
-      <div class="plan"><h3>Семеен</h3><div class="who">До 4 деца + 1 родителски профил</div><div class="price">29 € <small>/ година</small></div><div class="per">≈ 7.25 € на дете</div>
+      <div class="plan"><h3>Семеен</h3><div class="who">До 4 деца + 1 родителски профил</div><div class="price"><span data-price="family">29</span> € <small>/ година</small></div><div class="per"><span data-per="family">≈ 7.25 € на дете</span></div>
         <ul><li>Мисии по учебника за всички класове</li><li>Неограничена тренировка</li><li>Всички значки и нива</li><li>По един код за всяко дете</li><li>Валиден 12 месеца</li></ul><button class="btn btn-white" data-subscribe="Семеен">Избирам</button></div>
-      <div class="plan featured"><span class="ribbon">За учители</span><h3>Цял клас</h3><div class="who">Код за всеки ученик (до 30) + картичка за учителя</div><div class="price">75 € <small>/ учебна година</small></div><div class="per">2.50 € на ученик</div>
+      <div class="plan featured"><span class="ribbon">За учители</span><h3>Цял клас</h3><div class="who">Код за всеки ученик (до 30) + картичка за учителя</div><div class="price"><span data-price="class">75</span> € <small>/ учебна година</small></div><div class="per"><span data-per="class">2.50 € на ученик</span></div>
         <ul><li>Мисии по учебника за всички класове</li><li>Неограничена тренировка</li><li>Всички значки и нива</li><li>Класация и резултати на класа</li><li>Картички с кодове за печат</li><li>Фактура</li></ul><button class="btn" data-subscribe="Цял клас">Избирам</button></div>
-      <div class="plan"><h3>Училище</h3><div class="who">Няколко класа или цялото училище</div><div class="price" style="font-size:2rem">по запитване</div><div class="per">до −25% отстъпка</div>
-        <ul><li>−15% за 3 или повече класа</li><li>−25% за 8 или повече класа</li><li>Фактура и банков превод</li><li>Картички за всеки клас</li></ul><a class="btn btn-blue" href="uchilishta.html">Сметко за училища</a></div>
+      <div class="plan"><h3>Училище</h3><div class="who">Няколко класа или цялото училище</div><div class="price" style="font-size:2rem">по запитване</div><div class="per">до −<span data-price="disc8">25</span>% отстъпка</div>
+        <ul><li>−<span data-price="disc3">15</span>% за 3 или повече класа</li><li>−<span data-price="disc8">25</span>% за 8 или повече класа</li><li>Фактура и банков превод</li><li>Картички за всеки клас</li></ul><a class="btn btn-blue" href="uchilishta.html">Сметко за училища</a></div>
     </div>
     <p class="price-note">Всички цени са в евро. Информацията за ДДС ще бъде посочена след регистрацията на търговеца.</p>
   </div>
@@ -139,7 +139,7 @@
     </table></div>
   </div>
 </section>
-<section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Въпроси за плащането</h2></div><div class="faq"><details><summary>Как се плаща?</summary><p>Абонаментът се поръчва по имейл на <a href="mailto:info@smetko.com">info@smetko.com</a> и се активира с код за достъп, който получавате до 1 работен ден. Плащането е по банков път, а училищата получават фактура. Плащане с карта направо от сайта предстои.</p></details><details><summary>Как работи кодът за клас?</summary><p>Всеки ученик получава картичка с личен код и го въвежда веднъж на <a href="kod.html">smetko.com/kod</a>. Кодовете са еднократни – всеки се активира на едно устройство. Учителят получава своя картичка с код и ПИН и вижда класацията на целия клас на <a href="klasaciya.html">smetko.com/klasaciya</a>.</p></details><details><summary>Има ли безплатен план?</summary><p>Да. Безплатно са „Бързо сметни“ за всички класове, първите 3 мисии от всеки клас, 20 задачи на ден в „Тренировка“ и работните листове.</p></details><details><summary>Подновява ли се абонаментът автоматично?</summary><p>Месечният абонамент се подновява всеки месец и може да се спре по всяко време. Годишният и този за учебна година не се подновяват автоматично. Ще ви напомним преди изтичането им.</p></details><details><summary>Как плащат училищата?</summary><p>С фактура и банков превод. За 3 или повече класа има 15% отстъпка, а за 8 или повече класа – 25%.</p></details><details><summary>Мога ли да се откажа?</summary><p>Да. Правата ви при отказ са описани в <a href="terms.html">Общите условия</a>, а формулярът за отказ е <a href="otkaz.html">тук</a>.</p></details></div></div></section>
+<section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Въпроси за плащането</h2></div><div class="faq"><details><summary>Как се плаща?</summary><p>Абонаментът се поръчва по имейл на <a href="mailto:info@smetko.com">info@smetko.com</a> и се активира с код за достъп, който получавате до 1 работен ден. Плащането е по банков път, а училищата получават фактура. Плащане с карта направо от сайта предстои.</p></details><details><summary>Как работи кодът за клас?</summary><p>Всеки ученик получава картичка с личен код и го въвежда веднъж на <a href="kod.html">smetko.com/kod</a>. Кодовете са еднократни – всеки се активира на едно устройство. Учителят получава своя картичка с код и ПИН и вижда класацията на целия клас на <a href="klasaciya.html">smetko.com/klasaciya</a>.</p></details><details><summary>Има ли безплатен план?</summary><p>Да. Безплатно са „Бързо сметни“ за всички класове, първите <span data-cfg="freeMissions">3</span> мисии от всеки клас, <span data-cfg="freePractice">20</span> задачи на ден в „Тренировка“ и работните листове.</p></details><details><summary>Подновява ли се абонаментът автоматично?</summary><p>Месечният абонамент се подновява всеки месец и може да се спре по всяко време. Годишният и този за учебна година не се подновяват автоматично. Ще ви напомним преди изтичането им.</p></details><details><summary>Как плащат училищата?</summary><p>С фактура и банков превод. За 3 или повече класа има <span data-price="disc3">15</span>% отстъпка, а за 8 или повече класа – <span data-price="disc8">25</span>%.</p></details><details><summary>Мога ли да се откажа?</summary><p>Да. Правата ви при отказ са описани в <a href="terms.html">Общите условия</a>, а формулярът за отказ е <a href="otkaz.html">тук</a>.</p></details></div></div></section>
 </main>
 <footer class="site-footer">
   <div class="wrap">
@@ -173,10 +173,10 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=8" defer></script>
-<script src="js/gamification.js?v=8" defer></script>
-<script src="js/audio.js?v=8" defer></script>
-<script src="js/access.js?v=8" defer></script>
-<script src="js/app.js?v=8" defer></script>
+<script src="js/owl.js?v=9" defer></script>
+<script src="js/gamification.js?v=9" defer></script>
+<script src="js/audio.js?v=9" defer></script>
+<script src="js/access.js?v=9" defer></script>
+<script src="js/app.js?v=9" defer></script>
 </body>
 </html>

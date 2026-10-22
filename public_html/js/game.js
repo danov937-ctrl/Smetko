@@ -515,4 +515,6 @@
     else show('screen-setup');
   }
   document.addEventListener('DOMContentLoaded', init);
+  // нов учебник от админ панела → обнови списъка, ако детето още избира
+  document.addEventListener('smetko:books', function () { var sc = document.getElementById('screen-setup'); if (sc && sc.classList.contains('active')) renderSetup(); });
 })();

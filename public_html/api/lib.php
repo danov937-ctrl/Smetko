@@ -38,6 +38,10 @@ function db(): PDO {
     foreach (['week TEXT', 'week_base INTEGER DEFAULT 0', 'synced_at INTEGER DEFAULT 0', 'flags INTEGER DEFAULT 0', 'join_base INTEGER DEFAULT 0', 'nick_block INTEGER DEFAULT 0', 'day TEXT', 'day_correct INTEGER DEFAULT 0'] as $col) {
         if (!$has('redemptions', strtok($col, ' '))) $pdo->exec('ALTER TABLE redemptions ADD COLUMN ' . $col);
     }
+    $pdo->exec("CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, client TEXT, contact TEXT, email TEXT, phone TEXT, school_id INTEGER,
+        plan TEXT, qty INTEGER DEFAULT 1, amount REAL DEFAULT 0, status TEXT DEFAULT 'new', invoice TEXT, paid_at TEXT, batch_id INTEGER, notes TEXT);
+      CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, ip TEXT, action TEXT, details TEXT);
+      CREATE TABLE IF NOT EXISTS books (id INTEGER PRIMARY KEY AUTOINCREMENT, grade INTEGER, bid TEXT UNIQUE, publisher TEXT, title TEXT, source TEXT, lessons TEXT, active INTEGER DEFAULT 1, created_at TEXT);");
     return $pdo;
 }
 
@@ -140,7 +144,33 @@ function clean_device(string $d): string { return preg_match('/^[a-f0-9-]{16,64}
 function clean_nick(string $n): string {
     $n = trim(preg_replace('/\s+/u', ' ', $n) ?? '');
     $n = preg_replace('/[^\p{L}\p{N} .\-]/u', '', $n) ?? '';
-    return mb_substr($n, 0, 20);
+    $n = mb_substr($n, 0, 20);
+    return ($n !== '' && blocked_nick($n)) ? '' : $n;
+}
+
+/* ---------- настройки на сайта (редактират се от админ панела) ---------- */
+const DEFAULT_CONFIG = [
+    'paywall' => true, 'freeMissions' => 3, 'freePractice' => 20, 'questions' => 10, 'contactEmail' => 'info@smetko.com',
+    'prices' => ['month' => '2.99', 'schoolYear' => '15', 'year' => '18', 'family' => '29', 'class' => '75', 'disc3' => '15', 'disc8' => '25'],
+    'banner' => ['on' => false, 'text' => '', 'link' => '', 'linkText' => '', 'color' => 'orange'],
+    'company' => ['name' => '', 'eik' => '', 'addr' => '', 'vat' => '', 'date' => '', 'phone' => '', 'iban' => '', 'bank' => '', 'mol' => ''],
+    'blockedWords' => '',
+];
+function site_config(): array {
+    $c = json_decode((string)setting('site_config', '{}'), true) ?: [];
+    $out = DEFAULT_CONFIG;
+    foreach ($out as $k => $v) {
+        if (!array_key_exists($k, $c)) continue;
+        $out[$k] = is_array($v) ? array_merge($v, is_array($c[$k]) ? $c[$k] : []) : $c[$k];
+    }
+    return $out;
+}
+function save_site_config(array $c): void { set_setting('site_config', json_encode($c, JSON_UNESCAPED_UNICODE)); }
+function blocked_nick(string $n): bool { // забранени думи в прякорите (списък от админ панела)
+    $words = array_filter(array_map('trim', preg_split('/[,\n]+/u', (string)(site_config()['blockedWords'] ?? '')) ?: []));
+    $low = mb_strtolower($n);
+    foreach ($words as $w) if ($w !== '' && mb_strpos($low, mb_strtolower($w)) !== false) return true;
+    return false;
 }
 
 const TYPE_NAMES = ['class' => 'Клас', 'teacher' => 'Учител', 'single' => 'Индивидуален', 'family' => 'Семеен'];

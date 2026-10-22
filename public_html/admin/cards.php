@@ -1,13 +1,8 @@
 <?php
 /* Картички с кодове за печат: A4, 4 картички (A6) на страница. */
 declare(strict_types=1);
-require __DIR__ . '/../api/lib.php';
-session_name('smetko_admin');
-session_set_cookie_params(['lifetime' => 0, 'path' => '/admin/', 'secure' => !empty($_SERVER['HTTPS']), 'httponly' => true, 'samesite' => 'Strict']);
-session_start();
-if (empty($_SESSION['admin'])) { header('Location: ./'); exit; }
-header('Cache-Control: no-store');
-function h($s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+require __DIR__ . '/_lib.php';
+require_admin();
 
 $bid = (int)($_GET['batch'] ?? 0);
 $st = db()->prepare("SELECT * FROM codes WHERE batch_id = ? AND revoked = 0 ORDER BY CASE WHEN role = 'teacher' THEN 0 ELSE 1 END, created_at, code"); $st->execute([$bid]);

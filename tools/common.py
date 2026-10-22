@@ -5,15 +5,15 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '8'
+VER = '9'
 EMAIL = 'info@smetko.com'
 
 # Данни за търговеца — попълват се след регистрация на фирмата (търсете „[ПОПЪЛНЕТЕ“ във всички файлове)
-F_NAME = '<mark class="fill">[ПОПЪЛНЕТЕ: наименование на дружеството]</mark>'
-F_EIK = '<mark class="fill">[ПОПЪЛНЕТЕ: ЕИК]</mark>'
-F_ADDR = '<mark class="fill">[ПОПЪЛНЕТЕ: седалище и адрес на управление]</mark>'
-F_VAT = '<mark class="fill">[ПОПЪЛНЕТЕ: ДДС номер, ако има регистрация]</mark>'
-F_DATE = '<mark class="fill">[ПОПЪЛНЕТЕ: дата]</mark>'
+F_NAME = '<span data-co="name"><mark class="fill">[ПОПЪЛНЕТЕ: наименование на дружеството]</mark></span>'
+F_EIK = '<span data-co="eik"><mark class="fill">[ПОПЪЛНЕТЕ: ЕИК]</mark></span>'
+F_ADDR = '<span data-co="addr"><mark class="fill">[ПОПЪЛНЕТЕ: седалище и адрес на управление]</mark></span>'
+F_VAT = '<span data-co="vat"><mark class="fill">[ПОПЪЛНЕТЕ: ДДС номер, ако има регистрация]</mark></span>'
+F_DATE = '<span data-co="date"><mark class="fill">[ПОПЪЛНЕТЕ: дата]</mark></span>'
 
 LOGO = ('<a class="logo" href="index.html" aria-label="Сметко – начало"><span class="owl-mini" data-owl="idle"></span>'
         '<span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>')
