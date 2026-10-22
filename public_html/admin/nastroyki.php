@@ -34,6 +34,12 @@ if ($action === 'contact') {
     if (!filter_var($e, FILTER_VALIDATE_EMAIL)) { flash('Невалиден имейл.', 'err'); go('nastroyki.php#contact'); }
     $c['contactEmail'] = $e; save_site_config($c); audit('Имейл за контакт', $e); flash('Запазено.'); go('nastroyki.php#contact');
 }
+if ($action === 'test_mail') {
+    $to = (string)$c['contactEmail'];
+    $ok = mail_admin_text($to, '✅ Тестово писмо от Сметко', "Здравейте!\n\nАко четете това писмо във „Входящи“ (а не в „Спам“), имейлите на сайта работят: писмата за добре дошли, новите пароли и поръчките.\n\nАко е в „Спам“: cPanel → Имейл → Email Deliverability → до smetko.com натиснете Repair (Поправи).\n\nЕкипът на Сметко\nsmetko.com", 'Имейлите работят! 🎉');
+    audit('Тестово писмо', $to . ($ok ? '' : ' (неуспешно)'));
+    flash($ok ? "Изпратено до $to. Проверете „Входящи“ и „Спам“." : 'Сървърът не успя да изпрати писмото.', $ok ? 'ok' : 'err'); go('nastroyki.php#contact');
+}
 if ($action === 'company') {
     foreach (array_keys(DEFAULT_CONFIG['company']) as $k) $c['company'][$k] = mb_substr(post($k), 0, 200);
     save_site_config($c); audit('Данни на фирмата', $c['company']['name'] . ' ' . $c['company']['eik']); flash('Данните на фирмата са запазени – вече се показват в правните документи.'); go('nastroyki.php#company');
@@ -70,7 +76,7 @@ $body .= $f('banner') . '<h2>📣 Банер най-отгоре на сайта
     '<label class="wide">Текст<input name="text" maxlength="200" value="' . h($B['text']) . '" placeholder="🎄 Коледна промоция: учебна година за 12 €!"></label>' .
     '<label>Връзка (по желание)<input name="link" maxlength="300" value="' . h($B['link']) . '" placeholder="pricing.html"></label><label>Текст на връзката<input name="linkText" maxlength="40" value="' . h($B['linkText']) . '" placeholder="Виж цените"></label>' .
     '<label>Цвят<select name="color">' . $col . '</select></label></div><p class="hint">Посетителят може да затвори банера; при нов текст той се показва отново.</p><button>💾 Запази банера</button></form>';
-$body .= $f('contact') . '<h2>✉️ Имейл за контакт</h2><div class="grid g2"><label>Имейл, който се показва на сайта<input type="email" name="contactEmail" value="' . h($c['contactEmail']) . '"></label></div><button>💾 Запази</button></form>';
+$body .= $f('contact') . '<h2>✉️ Имейл за контакт</h2><div class="grid g2"><label>Имейл, който се показва на сайта<input type="email" name="contactEmail" value="' . h($c['contactEmail']) . '"></label></div><div class="row"><button>💾 Запази</button><button class="ghost" name="action" value="test_mail">✉️ Изпрати тестово писмо</button></div><p class="hint">От този адрес сайтът праща писмата (добре дошли, нова парола, поръчки). Пощата трябва да съществува в cPanel.</p></form>';
 $cf = fn($k, $l, $ph = '') => '<label>' . $l . '<input name="' . $k . '" maxlength="200" value="' . h($C[$k]) . '" placeholder="' . h($ph) . '"></label>';
 $body .= $f('company') . '<h2>🏢 Данни на фирмата</h2><p class="hint">Показват се в Общите условия, Политиката за поверителност и другите документи на мястото на „[ПОПЪЛНЕТЕ…]“, и в проформите.</p><div class="grid g3">' .
     $cf('name', 'Наименование', 'Сметко ЕООД') . $cf('eik', 'ЕИК', '123456789') . $cf('vat', 'ДДС номер (ако има)', 'BG123456789') . '<label class="wide">Седалище и адрес на управление<input name="addr" maxlength="200" value="' . h($C['addr']) . '"></label>' .

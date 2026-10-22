@@ -134,11 +134,6 @@ function auth_logout(): void {
     if ($tok !== '') db()->prepare('DELETE FROM auth_sessions WHERE hash = ?')->execute([hash('sha256', $tok)]);
     auth_set_cookie('', time() - 3600);
 }
-function send_mail(string $to, string $subject, string $text): bool { // обикновен текст, UTF-8
-    $from = (string)(site_config()['contactEmail'] ?? 'info@smetko.com');
-    $h = "From: =?UTF-8?B?" . base64_encode('Сметко') . "?= <$from>\r\nReply-To: $from\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit";
-    return @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $text, $h, '-f' . $from);
-}
 /* достъп на детски профил: кодът е активиран на „устройството“ на профила (единно за всички устройства на детето) */
 function profile_access(array $p): ?array {
     if (empty($p['code'])) return null;
@@ -332,3 +327,4 @@ function blocked_nick(string $n): bool { // забранени думи в пр�
 }
 
 const TYPE_NAMES = ['class' => 'Клас', 'teacher' => 'Учител', 'single' => 'Индивидуален', 'family' => 'Семеен'];
+require_once __DIR__ . '/mail.php';

@@ -65,7 +65,7 @@ if ($action === 'send_mail' && $id) {
     $o = $pdo->prepare('SELECT * FROM orders WHERE id = ?'); $o->execute([$id]); $o = $o->fetch();
     $txt = trim((string)($_POST['text'] ?? ''));
     if (!$o || !filter_var($o['email'], FILTER_VALIDATE_EMAIL) || $txt === '') { flash('Няма валиден имейл или текст.', 'err'); go('porachki.php?id=' . $id); }
-    $ok = send_mail((string)$o['email'], 'Сметко – кодове за достъп (поръчка № ' . str_pad((string)$id, 6, '0', STR_PAD_LEFT) . ')', mb_substr($txt, 0, 20000));
+    $ok = mail_admin_text((string)$o['email'], 'Сметко – кодове за достъп (поръчка № ' . str_pad((string)$id, 6, '0', STR_PAD_LEFT) . ')', mb_substr($txt, 0, 20000), 'Вашият достъп до Сметко 🔑');
     if ($ok) $pdo->prepare("UPDATE orders SET status = CASE WHEN status IN ('new', 'codes') THEN 'sent' ELSE status END WHERE id = ?")->execute([$id]);
     audit('Имейл до клиент', "#$id → {$o['email']}" . ($ok ? '' : ' (неуспешно)'));
     flash($ok ? 'Имейлът е изпратен на ' . $o['email'] . '.' : 'Имейлът не тръгна – копирайте текста и го изпратете от пощата си.', $ok ? 'ok' : 'err');

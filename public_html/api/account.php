@@ -88,9 +88,7 @@ case 'register':
     $pdo->prepare('INSERT INTO accounts(email, pass, name, role, created_at) VALUES(?, ?, ?, ?, ?)')->execute([$email, password_hash($pass, PASSWORD_DEFAULT), $name, $role, now()]);
     $aid = (int)$pdo->lastInsertId();
     auth_login($aid);
-    send_mail($email, 'Добре дошли в Сметко!', "Здравейте, $name!\n\nАкаунтът ви в Сметко е създаден.\n" .
-        ($role === 'teacher' ? "Добавете класа си с кода и ПИН-а от картичката: " . SITE_URL . "/profil.html\n" : "Добавете профил за детето си и започнете: " . SITE_URL . "/profil.html\n") .
-        "\nАко не сте създавали акаунт, просто игнорирайте това писмо.\n\nЕкипът на Сметко\n" . SITE_URL);
+    mail_welcome($email, $name, $role);
     json_out(acc_me(auth_account()));
 
 case 'login':
@@ -114,7 +112,7 @@ case 'forgot': // винаги един и същ отговор – не изд
     if ($a = $st->fetch()) {
         $tok = bin2hex(random_bytes(24));
         $pdo->prepare('UPDATE accounts SET reset_hash = ?, reset_until = ? WHERE id = ?')->execute([hash('sha256', $tok), time() + 3600, (int)$a['id']]);
-        send_mail($email, 'Нова парола за Сметко', "Здравейте, {$a['name']}!\n\nЗа да зададете нова парола, отворете тази връзка (важи 1 час):\n" . SITE_URL . "/zabravena-parola.html?t=$tok\n\nАко не сте поискали нова парола, игнорирайте писмото – старата си остава.\n\nЕкипът на Сметко");
+        mail_reset($email, (string)$a['name'], SITE_URL . "/zabravena-parola.html?t=$tok");
     }
     json_out(['ok' => true]);
 

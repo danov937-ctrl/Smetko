@@ -13,7 +13,7 @@ $back = fn() => go('akaunti.php?id=' . $id);
 if ($acc && $action === 'reset_link') {
     $tok = bin2hex(random_bytes(24));
     $pdo->prepare('UPDATE accounts SET reset_hash = ?, reset_until = ? WHERE id = ?')->execute([hash('sha256', $tok), time() + 86400, $id]);
-    $sent = send_mail($acc['email'], 'Нова парола за Сметко', "Здравейте, {$acc['name']}!\n\nЗа да зададете нова парола, отворете тази връзка (важи 24 часа):\n" . SITE_URL . "/zabravena-parola.html?t=$tok\n\nЕкипът на Сметко");
+    $sent = mail_reset((string)$acc['email'], (string)$acc['name'], SITE_URL . '/zabravena-parola.html?t=' . $tok, 24);
     audit('Връзка за нова парола', $acc['email'] . ($sent ? ' (изпратена)' : ' (имейлът не тръгна)'));
     $_SESSION['reset_link'] = SITE_URL . '/zabravena-parola.html?t=' . $tok;
     flash($sent ? 'Изпратихме връзка за нова парола на ' . $acc['email'] . '. Може да я копирате и по-долу.' : 'Имейлът не тръгна – копирайте връзката по-долу и я изпратете ръчно.', $sent ? 'ok' : 'err');

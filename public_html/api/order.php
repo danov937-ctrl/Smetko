@@ -61,16 +61,10 @@ $no = str_pad((string)$id, 6, '0', STR_PAD_LEFT);
 $m = fn($x) => number_format($x, 2, '.', ' ') . ' €';
 $bank = !empty($co['iban']) && !empty($co['name']) ? ['name' => $co['name'], 'iban' => $co['iban'], 'bank' => $co['bank'] ?? '', 'reason' => 'Поръчка ' . $no] : null;
 
-// писмо до администратора
-send_mail((string)$cfg['contactEmail'], "Нова поръчка №$no – $pname ($planTxt) – " . $m($amount),
-    "Нова поръчка от сайта:\n\n№ $no\nПлан: $pname – $planTxt × $qty\nСума: " . $m($amount) . ($disc ? " (отстъпка $disc%)" : '') . "\n\nКлиент: $client\nИме: $name\nИмейл: $email\nТелефон: " . ($phone ?: '–') . "\n" .
-    ($plan === 'class' ? "Класове: " . ($classes ?: '–') . "\n" : '') . ($invTxt ? "$invTxt\n" : '') . ($notes !== '' ? "Бележка: $notes\n" : '') .
-    "\nОтворете я в админ панела: " . SITE_URL . "/admin/porachki.php?id=$id\n");
-// потвърждение до клиента
-send_mail($email, "Поръчка №$no в Сметко", "Здравейте, $name!\n\nБлагодарим за поръчката на абонамент „{$pname}“ ($planTxt" . ($qty > 1 ? " × $qty" : '') . ").\n\nСума за плащане: " . $m($amount) . "\n\n" .
-    ($bank ? "Плащане по банков път:\nПолучател: {$bank['name']}\nIBAN: {$bank['iban']}" . ($bank['bank'] ? " ({$bank['bank']})" : '') . "\nОснование: {$bank['reason']}\n\nСлед като плащането пристигне, ще ви изпратим " . ($plan === 'class' ? 'кодовете и картичките за класа' : 'кода за достъп') . " на този имейл (обикновено до 1 работен ден).\n"
-        : "До 1 работен ден ще ви изпратим проформа фактура с данните за плащане. След плащането получавате " . ($plan === 'class' ? 'кодовете и картичките за класа' : 'кода за достъп') . " на този имейл.\n") .
-    ($plan !== 'class' ? "\nСъвет: направете си безплатен акаунт на " . SITE_URL . "/registracia.html и въведете кода в профила на детето – така той важи на всички негови устройства.\n" : "\nКласацията и отчетите за класа ще отваряте на " . SITE_URL . "/klasaciya.html с кода на учителя и ПИН-а.\n") .
-    "\nАко имате въпроси, просто отговорете на това писмо.\n\nЕкипът на Сметко\n" . SITE_URL);
+// писма: до администратора и потвърждение до клиента
+$od = ['no' => $no, 'name' => $name, 'email' => $email, 'pname' => $pname, 'planTxt' => $planTxt, 'qty' => $qty, 'amount' => $amount, 'disc' => $disc, 'plan' => $plan, 'bank' => $bank];
+mail_order_admin((string)$cfg['contactEmail'], $od, ['Клиент' => $client, 'Име' => $name, 'Имейл' => $email, 'Телефон' => $phone ?: '–', 'Класове' => $plan === 'class' ? ($classes ?: '–') : '',
+    'Фактура' => $invTxt ? preg_replace('/^Фактура: /u', '', $invTxt) : '', 'Бележка' => $notes, 'Акаунт' => $acc ? (string)$acc['email'] : ''], SITE_URL . "/admin/porachki.php?id=$id");
+mail_order_client($od);
 
 json_out(['ok' => true, 'id' => $id, 'no' => $no, 'amount' => $amount, 'discount' => $disc, 'plan' => $pname, 'period' => $period, 'qty' => $qty, 'bank' => $bank]);
