@@ -17,7 +17,7 @@ AddDefaultCharset UTF-8
   # Кратки адреси (печатат се на картичките)
   RewriteRule ^kod/?$ /kod.html [L]
   RewriteRule ^klasaciya/?$ /klasaciya.html [L]
-  RewriteRule ^admin$ /admin/ [L,R=301]
+  RewriteRule ^admin/?$ /admin/index.php [L,R=302]
 
   # Базата данни никога не се отдава
   RewriteRule ^api/data/ - [F,L]
