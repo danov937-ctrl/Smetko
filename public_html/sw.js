@@ -1,12 +1,12 @@
 /* Сметко — Service Worker: офлайн игра и бързо зареждане.
    При всяка промяна на файловете увеличете VERSION, за да се обнови кешът. */
-const VERSION = 'smetko-v14';
+const VERSION = 'smetko-v15';
 const CORE = [
   '/', '/game.html', '/achievements.html', '/pricing.html', '/about.html', '/uchilishta.html', '/rabotni-listove.html',
   '/kod.html', '/klasaciya.html', '/liga.html', '/otchet.html', '/za-nas.html', '/novini.html', '/vhod.html', '/registracia.html', '/profil.html', '/class-1.html', '/class-2.html', '/class-3.html', '/class-4.html', '/404.html',
-  '/css/style.css?v=14', '/css/animations.css?v=14',
-  '/js/owl.js?v=14', '/js/gamification.js?v=14', '/js/audio.js?v=14', '/js/math-engine.js?v=14', '/js/lesson-map.js?v=14', '/js/textbooks.js?v=14',
-  '/js/access.js?v=14', '/js/account.js?v=14', '/js/app.js?v=14', '/js/game.js?v=14', '/js/achievements.js?v=14', '/js/tools.js?v=14', '/js/league.js?v=14', '/js/report.js?v=14',
+  '/css/style.css?v=15', '/css/animations.css?v=15',
+  '/js/owl.js?v=15', '/js/gamification.js?v=15', '/js/audio.js?v=15', '/js/math-engine.js?v=15', '/js/lesson-map.js?v=15', '/js/textbooks.js?v=15',
+  '/js/access.js?v=15', '/js/account.js?v=15', '/js/app.js?v=15', '/js/game.js?v=15', '/js/achievements.js?v=15', '/js/tools.js?v=15', '/js/league.js?v=15', '/js/report.js?v=15', '/js/homework.js?v=15', '/js/challenge.js?v=15',
   '/assets/images/landscape.svg', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/manifest.json'
 ];
 

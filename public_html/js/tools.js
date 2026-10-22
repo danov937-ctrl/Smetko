@@ -141,6 +141,45 @@
       '<label class="check"><input type="checkbox" id="ts-public"' + (j['public'] !== false ? ' checked' : '') + '> Класът участва в общата класация (учениците се виждат само с прякор, клас и училище и само от играчи с код)</label>' +
       '<button class="btn btn-sm" type="submit">Запази</button></div></form>';
   }
+  /* домашни с краен срок: задаване и резултати (учител) */
+  function hwPost(d) {
+    return fetch('/api/homework.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d), credentials: 'same-origin' })
+      .then(function (r) { return r.json(); }).then(function (x) { if (!x.ok) throw new Error(x.error || 'Грешка.'); return x; });
+  }
+  function ymdPlus(n) { var d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function homework(code, pin, board) {
+    var box = $('b-hw'); if (!box) return;
+    var grade = board.grade || (board.className && /^[1-4]/.test(board.className) ? +board.className[0] : 0) || (S.Game && S.Game.state.lastGrade) || 1;
+    function draw(r) {
+      var opts = [1, 2, 3, 4].map(function (g) { return '<option value="' + g + '"' + (g === grade ? ' selected' : '') + '>' + g + '. клас</option>'; }).join('');
+      var list = r.list.map(function (h) {
+        var late = h.due < r.today;
+        return '<details class="hw-row panel"><summary><span class="hw-ttl"><b>' + esc(h.title) + '</b><small>' + h.grade + '. клас · ' + h.count + ' задачи · трудност ' + h.level + ' · срок ' + S.fmtDate(h.due) + (late ? ' (мина)' : '') + '</small></span><span class="hw-cnt' + (h.doneCount === r.total && r.total ? ' all' : '') + '">' + h.doneCount + ' / ' + r.total + ' готови</span></summary>' +
+          (h.students.length ? '<div class="table-wrap"><table class="compare"><thead><tr><th>Ученик</th><th>Резултат</th><th>Опити</th><th>Кога</th></tr></thead><tbody>' + h.students.map(function (x) {
+            return '<tr class="' + (x.done ? '' : 'hid') + '"><td><b>' + esc(x.name) + '</b></td><td>' + (x.done ? x.correct + ' / ' + h.count + ' <span class="hint">(' + Math.round(x.correct / h.count * 100) + '%)</span>' : '<span class="hint">още не</span>') + '</td><td>' + (x.tries || '–') + '</td><td>' + (x.at ? S.fmtDate(x.at.slice(0, 10)) + ' ' + x.at.slice(11, 16) + (x.late ? ' <span class="tag">след срока</span>' : '') : '–') + '</td></tr>';
+          }).join('') + '</tbody></table></div>' : '<p class="hint">Още никой ученик не е въвел кода си.</p>') +
+          '<p class="ws-actions"><a class="btn btn-sm btn-ghost" href="game.html?grade=' + h.grade + '&mode=practice&topic=' + encodeURIComponent(h.topic) + '" target="_blank">👀 Пробвай темата</a><button class="btn btn-sm btn-ghost" data-hw-del="' + h.id + '">🗑 Изтрий</button></p></details>';
+      }).join('');
+      box.innerHTML = '<form class="panel tool-panel" id="hw-form"><div class="tool-grid hw-grid"><label>Клас<select class="input" id="hwf-grade">' + opts + '</select></label><label>Тема<select class="input" id="hwf-topic">' + topicOptions(grade, true) + '</select></label>' +
+        '<label>Задачи<select class="input" id="hwf-count"><option>10</option><option selected>15</option><option>20</option><option>30</option></select></label><label>Трудност<select class="input" id="hwf-level"><option value="1">1 – лесно</option><option value="2" selected>2 – средно</option><option value="3">3 – трудно</option></select></label>' +
+        '<label>Срок<input class="input" type="date" id="hwf-due" min="' + ymdPlus(0) + '" max="' + ymdPlus(90) + '" value="' + ymdPlus(3) + '"></label></div>' +
+        '<div class="ws-actions"><span class="hint">Учениците я виждат в „Играй“ и на началната страница.</span><button class="btn" type="submit">📚 Задай домашна</button></div><p class="code-err" id="hwf-err" role="alert"></p></form>' +
+        (list || '<p class="hint" style="text-align:center">Още няма зададени домашни.</p>');
+      $('hwf-grade').addEventListener('change', function () { grade = +this.value; $('hwf-topic').innerHTML = topicOptions(grade, true); });
+      $('hw-form').addEventListener('submit', function (e) {
+        e.preventDefault(); $('hwf-err').textContent = '';
+        var t = $('hwf-topic'), b = this.querySelector('button[type=submit]'); b.disabled = true;
+        hwPost({ code: code, pin: pin, action: 'create', grade: +$('hwf-grade').value, topic: t.value, title: t.value === 'mix' ? 'Смесени задачи · ' + $('hwf-grade').value + '. клас' : t.options[t.selectedIndex].text.replace(/^\d+\.\s*/, ''), count: +$('hwf-count').value, level: +$('hwf-level').value, due: $('hwf-due').value })
+          .then(function (x) { S.toast('✅ Домашната е зададена'); draw(x); }).catch(function (ex) { $('hwf-err').textContent = ex.message; b.disabled = false; });
+      });
+      box.querySelectorAll('[data-hw-del]').forEach(function (b) { b.addEventListener('click', function () {
+        if (!b.dataset.sure) { b.dataset.sure = '1'; b.textContent = 'Сигурни ли сте?'; return; }
+        hwPost({ code: code, pin: pin, action: 'delete', id: +b.getAttribute('data-hw-del') }).then(draw).catch(function (ex) { S.toast(ex.message); });
+      }); });
+    }
+    box.innerHTML = '<p class="hint">Зареждам…</p>';
+    hwPost({ code: code, pin: pin, action: 'list' }).then(function (r) { if (r.grade) grade = r.grade; draw(r); }).catch(function (ex) { box.innerHTML = '<p class="code-err">' + esc(ex.message) + '</p>'; });
+  }
   function initBoard() {
     var form = $('board-form'), code = $('b-code'), pin = $('b-pin'), err = $('b-err'), out = $('board-out'), rem = $('b-remember');
     bindCodeInput(code);
@@ -151,9 +190,10 @@
         if (release) S.toast('Кодът е освободен – детето може да го въведе отново на новото устройство.');
         try { if (rem.checked) localStorage.setItem('smetko.board', JSON.stringify({ c: fmtCode(code.value), p: pin.value.trim() })); else localStorage.removeItem('smetko.board'); } catch (e) {}
         out.innerHTML = '<div class="section-head" style="margin-top:30px"><h2 class="lined">' + esc(j.label || 'Класация') + '</h2><p>Активирали кода си: <b>' + j.uses + ' от ' + j.max + '</b> ученици · валидно до ' + S.fmtDate(j.expires) + ' · <button class="btn btn-sm btn-ghost" id="b-refresh">🔄 Обнови</button> <button class="btn btn-sm btn-ghost" onclick="window.print()">🖨️ Печат</button></p></div>' + boardTable(j, true) +
-          '<div id="b-dipl" style="text-align:center;margin-top:18px"></div><div class="section-head" style="margin-top:30px"><h2 class="lined">📊 Отчет по теми</h2><p>Кои теми затрудняват класа – по задачите, решени в Сметко. Натиснете име на ученик за неговия отчет.</p></div><div id="b-topics"></div>' + teacherSet(j) + '<p class="hint" style="margin-top:14px">Скритите ученици не се виждат от съучениците. Прякорите се избират от децата – ако някой е неподходящ, скрийте го. Всеки код е еднократен; ако дете смени или загуби устройство, натиснете „Освободи кода“ и то го въвежда отново.</p>';
+          '<div id="b-dipl" style="text-align:center;margin-top:18px"></div><div class="section-head" style="margin-top:30px"><h2 class="lined">📊 Отчет по теми</h2><p>Кои теми затрудняват класа – по задачите, решени в Сметко. Натиснете име на ученик за неговия отчет.</p></div><div id="b-topics"></div><div class="section-head" style="margin-top:30px"><h2 class="lined">📚 Домашни</h2><p>Задайте тема, брой задачи и срок – учениците виждат домашната в играта, а вие – кой я е предал и с колко верни.</p></div><div id="b-hw"></div>' + teacherSet(j) + '<p class="hint" style="margin-top:14px">Скритите ученици не се виждат от съучениците. Прякорите се избират от децата – ако някой е неподходящ, скрийте го. Всеки код е еднократен; ако дете смени или загуби устройство, натиснете „Освободи кода“ и то го въвежда отново.</p>';
         $('b-refresh').addEventListener('click', function () { load(); });
         if (S.Report) S.Report.topics($('b-topics'), j.topics);
+        homework(fmtCode(code.value), pin.value.trim(), j);
         var dw = $('b-dipl');
         if (dw && S.diplomasOpen) {
           if (S.diplomasOpen()) {

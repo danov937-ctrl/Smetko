@@ -5,7 +5,8 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
-  var MODE_NAMES = { quick: 'Бързо сметни', adventure: 'Приключение', practice: 'Тренировка', challenge: 'Предизвикателство' };
+  var MODE_NAMES = { quick: 'Бързо сметни', adventure: 'Приключение', practice: 'Тренировка', challenge: 'Предизвикателство', homework: 'Домашна' };
+  function fixed(m) { return m === 'adventure' || m === 'homework'; } // с точен брой задачи
   function timed(m) { return m === 'quick' || m === 'challenge'; }
   var SAY = {
     ok: ['Браво!', 'Супер!', 'Точно така!', 'Страхотно!', 'Отлично!', 'Уха!', 'Как умееш!', 'Вярно!'],
@@ -196,7 +197,7 @@
     var mode = opts.mode || st.mode;
     play = {
       mode: mode, grade: st.grade, topic: opts.topic || st.topic || 'mix', level: opts.level || 1,
-      missionIdx: opts.missionIdx, title: opts.title, book: opts.book, mission: opts.mission, key: advKey(), total: mode === 'adventure' ? S.config.questionsPerMission : 0,
+      missionIdx: opts.missionIdx, title: opts.title, book: opts.book, mission: opts.mission, key: advKey(), hw: opts.hw, total: mode === 'adventure' ? S.config.questionsPerMission : mode === 'homework' ? opts.hw.count : 0,
       idx: 0, correct: 0, wrong: 0, streak: 0, wrongStreak: 0, input: '', busy: false, waitNext: false,
       timeLeft: S.config.quickSeconds, task: null, lastQ: ''
     };
@@ -206,11 +207,11 @@
     $('#timer-num').hidden = !timed(mode);
     $('#end-btn').hidden = mode !== 'practice';
     $('#progress').hidden = mode === 'practice';
-    $('#level-pill').hidden = mode === 'adventure';
+    $('#level-pill').hidden = fixed(mode);
     $('#pts').textContent = '★ 0'; $('#pts').hidden = !G.earns();
     setCombo(0);
     S.setOwl($('#play-owl'), 'hello');
-    bubble(mode === 'challenge' ? 'Предизвикателство: ' + play.title + '! 60 секунди ⚡' : mode === 'quick' ? '60 секунди! Готов ли си? 🚀' : mode === 'adventure' ? 'Мисия ' + (play.missionIdx + 1) + ': ' + play.title + '!' : 'Спокойно, без бързане. Ти можеш!');
+    bubble(mode === 'challenge' ? 'Предизвикателство: ' + play.title + '! 60 секунди ⚡' : mode === 'quick' ? '60 секунди! Готов ли си? 🚀' : mode === 'adventure' ? 'Мисия ' + (play.missionIdx + 1) + ': ' + play.title + '!' : mode === 'homework' ? 'Домашна: ' + play.total + ' задачи. Без бързане! 📚' : 'Спокойно, без бързане. Ти можеш!');
     show('screen-play');
     updateProgress();
     if (timed(mode)) {
@@ -232,7 +233,7 @@
   function updateProgress() {
     var w = 0;
     if (timed(play.mode)) w = play.timeLeft / S.config.quickSeconds * 100;
-    else if (play.mode === 'adventure') w = play.idx / play.total * 100;
+    else if (fixed(play.mode)) w = play.idx / play.total * 100;
     $('#progress i').style.width = Math.max(0, w) + '%';
     $('#level-pill').textContent = 'Трудност ' + play.level;
   }
@@ -353,7 +354,7 @@
     if (!play) return;
     play.idx++;
     updateProgress();
-    if (play.mode === 'adventure' && play.idx >= play.total) { finish(); return; }
+    if (fixed(play.mode) && play.idx >= play.total) { finish(); return; }
     if (timed(play.mode) && play.timeLeft <= 0) return;
     if (play.mode === 'practice' && practiceLimitReached()) { finish(); S.accessModal(); return; }
     if (play.idx % 3 === 0) S.setOwl($('#play-owl'), 'idle');
@@ -409,6 +410,13 @@
       html += stats(p.correct, 'верни за 60 сек.', acc + '%', 'точност', '★ ' + (s.points + (cr.first ? 50 : 0)), 'точки');
       if (cr.first) html += '<p class="lock-note">Включени 50 бонус точки за изпълнената цел</p>';
       html += '<div id="ch-board" class="ch-board"></div>';
+    } else if (p.mode === 'homework') {
+      var hwOk = p.correct >= Math.ceil(p.total * 0.8);
+      owlPose = hwOk ? 'cheer' : 'happy'; celebrate = hwOk;
+      html += '<h2>' + (p.correct === p.total ? 'Домашната е перфектна! 🌟' : hwOk ? 'Браво, домашната е готова! 📚' : 'Домашната е готова!') + '</h2>';
+      html += '<p class="sub">' + p.hw.title + ' · ' + E.GRADES[p.grade].name + '</p>';
+      html += stats(p.correct + '/' + p.total, 'верни', acc + '%', 'точност', '★ ' + s.points, 'точки');
+      html += '<p class="hw-sent" id="hw-sent">⏳ Изпращам на учителя…</p>';
     } else if (p.mode === 'quick') {
       owlPose = p.correct >= 10 ? 'cheer' : 'happy';
       celebrate = s.isRecord && p.correct > 0;
@@ -438,7 +446,7 @@
       html += '<button class="btn btn-ghost" data-act="map">Към картата</button>';
       if (stars > 0 && !hasNext) html += '<p class="lock-note" style="width:100%">🏔️ Стигна върха на ' + E.GRADES[p.grade].name + '! Опитай следващия клас.</p>';
     } else {
-      html += '<button class="btn btn-lg" data-act="retry">' + (timed(p.mode) ? 'Пак! ⚡' : 'Още тренировка') + '</button>';
+      html += '<button class="btn btn-lg" data-act="retry">' + (timed(p.mode) ? 'Пак! ⚡' : p.mode === 'homework' ? 'Реши пак (пази се най-добрият резултат)' : 'Още тренировка') + '</button>';
       if (p.mode === 'challenge') html += '<a class="btn btn-white" href="liga.html#challenge">🏆 Класация на седмицата</a>';
       html += '<button class="btn btn-ghost" data-act="setup">Друга игра</button>';
     }
@@ -455,12 +463,15 @@
         A.click();
         var a = b.dataset.act;
         if (a === 'next') startAdventure(p.missionIdx + 1);
-        else if (a === 'retry') { if (p.mode === 'adventure') startAdventure(p.missionIdx); else if (p.mode === 'challenge') startChallenge(); else startPlay({ mode: p.mode, topic: p.topic }); }
+        else if (a === 'retry') { if (p.mode === 'adventure') startAdventure(p.missionIdx); else if (p.mode === 'challenge') startChallenge(); else if (p.mode === 'homework') startHomework(p.hw); else startPlay({ mode: p.mode, topic: p.topic }); }
         else if (a === 'map') renderMap();
         else { renderSetup(); show('screen-setup'); }
       });
     });
     setURL();
+    if (p.mode === 'homework' && S.Homework) S.Homework.submit(p.hw.id, p.correct, p.correct + p.wrong).then(function (j) {
+      var el = $('#hw-sent'); if (el) el.innerHTML = '✅ Изпратена на учителя' + (j.tries > 1 ? ' · най-добър резултат: ' + j.best + ' от ' + p.total : '') + (j.late ? ' <small>(след срока)</small>' : '');
+    }).catch(function (e) { var el = $('#hw-sent'); if (el) { el.className = 'hw-sent err'; el.textContent = '⚠ ' + e.message + ' Опитай пак, когато има интернет.'; } });
     if (p.mode === 'challenge' && S.Challenge) setTimeout(function () { // мястото в класацията на седмицата (след синхронизацията)
       S.Challenge.board(p.grade).then(function (j) {
         var el = $('#ch-board'); if (!el) return;
@@ -468,6 +479,11 @@
         if (j.mine) el.innerHTML = '<p class="ch-place">Ти си <b>' + j.mine.place + '-' + (j.mine.place % 10 === 1 && j.mine.place % 100 !== 11 ? 'ви' : j.mine.place % 10 === 2 && j.mine.place % 100 !== 12 ? 'ри' : (j.mine.place % 10 === 7 || j.mine.place % 10 === 8) && Math.floor(j.mine.place / 10) % 10 !== 1 ? 'ми' : 'ти') + '</b> от ' + j.list.length + ' в ' + p.grade + '. клас тази седмица!</p>';
       }).catch(function () {});
     }, 1500);
+  }
+  function startHomework(h) {
+    if (!h) return;
+    st.grade = h.grade; st.skill = null;
+    startPlay({ mode: 'homework', hw: h, topic: h.topic, level: h.level, title: h.title });
   }
   function startChallenge() {
     if (!S.Challenge) return;
@@ -540,12 +556,19 @@
     var q = new URLSearchParams(location.search);
     var g = +q.get('grade'), m = q.get('mode'), t = q.get('topic');
     st.grade = (g >= 1 && g <= 4) ? g : (G.state.lastGrade || 1);
-    st.mode = MODE_NAMES[m] ? m : 'adventure';
+    st.mode = MODE_NAMES[m] && m !== 'homework' ? m : 'adventure';
     st.topic = t || 'mix';
     st.skill = q.get('skill') || null;
     var qb = q.get('book'); if (qb && st.grade) { G.state.books = G.state.books || {}; G.state.books[st.grade] = qb; G.save(); }
     bind();
     renderSetup();
+    var hw = +q.get('hw');
+    if (hw && S.Homework) {
+      show('screen-setup');
+      S.Homework.find(hw).then(function (h) { if (h) startHomework(h); else S.toast(S.Access && S.Access.isClass() ? 'Тази домашна вече не е активна.' : 'Домашните са за ученици с код за клас.'); });
+      return;
+    }
+    if (m === 'homework') m = null;
     if (g && m === 'adventure') renderMap();
     else if (g && m === 'challenge' && q.get('start') !== '0') startChallenge();
     else if (g && MODE_NAMES[m] && q.get('start') !== '0') startPlay();

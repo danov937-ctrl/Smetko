@@ -44,6 +44,9 @@ function db(): PDO {
     $pdo->exec("CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, client TEXT, contact TEXT, email TEXT, phone TEXT, school_id INTEGER,
         plan TEXT, qty INTEGER DEFAULT 1, amount REAL DEFAULT 0, status TEXT DEFAULT 'new', invoice TEXT, paid_at TEXT, batch_id INTEGER, notes TEXT);
       CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, ip TEXT, action TEXT, details TEXT);
+      CREATE TABLE IF NOT EXISTS homework (id INTEGER PRIMARY KEY AUTOINCREMENT, batch_id INTEGER, grade INTEGER, topic TEXT, title TEXT, count INTEGER, level INTEGER DEFAULT 2, due TEXT, created_at TEXT);
+      CREATE INDEX IF NOT EXISTS idx_hw_batch ON homework(batch_id, due);
+      CREATE TABLE IF NOT EXISTS homework_done (hw_id INTEGER, rid INTEGER, correct INTEGER, answered INTEGER, tries INTEGER DEFAULT 1, done_at TEXT, PRIMARY KEY(hw_id, rid));
       CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, pass TEXT, name TEXT, role TEXT DEFAULT 'parent', created_at TEXT, last_login TEXT, reset_hash TEXT, reset_until INTEGER DEFAULT 0, disabled INTEGER DEFAULT 0);
       CREATE TABLE IF NOT EXISTS auth_sessions (hash TEXT PRIMARY KEY, account_id INTEGER, created_at TEXT, last_seen TEXT, expires INTEGER, ua TEXT);
       CREATE TABLE IF NOT EXISTS profiles (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, name TEXT, grade INTEGER, avatar TEXT, device TEXT UNIQUE, code TEXT, state TEXT, rev INTEGER DEFAULT 0, updated_at TEXT, created_at TEXT);
