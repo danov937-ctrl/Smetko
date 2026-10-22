@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '6'
+VER = '7'
 EMAIL = 'info@smetko.com'
 
 # Данни за търговеца — попълват се след регистрация на фирмата (търсете „[ПОПЪЛНЕТЕ“ във всички файлове)
@@ -63,7 +63,12 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
           <a href="class-3.html"><b>3. клас</b><small>До 1000, умножение и деление</small></a>
           <a href="class-4.html"><b>4. клас</b><small>Многоцифрени числа, лице, тела</small></a>
         </div></div>
-      <a href="achievements.html" data-nav="ach">Класации</a>
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="ach">Класации <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="liga.html"><b>Обща класация</b><small>Училища, класове, учители, ученици</small></a>
+          <a href="achievements.html"><b>Моите постижения</b><small>Точки, значки и моят клас</small></a>
+          <a href="klasaciya.html"><b>Класация на класа</b><small>За учителя – с код и ПИН</small></a>
+        </div></div>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">За учители <span class="chev">▾</span></button>
         <div class="dd-panel">
           <a href="uchilishta.html"><b>Сметко в училище</b><small>Кодове за класа и документи</small></a>
@@ -79,7 +84,8 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
 MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
     <a href="game.html">🎮 Мисии и игри</a>
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
-    <a href="achievements.html">🏆 Класации и постижения</a>
+    <a href="liga.html">🏆 Обща класация</a>
+    <a href="achievements.html">⭐ Моите постижения</a>
     <a href="kod.html">🔑 Въведи код за достъп</a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>

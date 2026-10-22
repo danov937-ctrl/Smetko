@@ -783,3 +783,38 @@ table.board td, table.board th { white-space: nowrap; }
 /* класация: код на ученика и бутони (учител) */
 .board .mono-sm { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .78rem; font-weight: 700; color: var(--muted, #5B6B8C); white-space: nowrap; }
 .board .nowrap { white-space: nowrap; }
+/* ===== обща класация ===== */
+.liga-controls { display: grid; gap: 14px; margin-bottom: 18px; padding: 14px; }
+.liga-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; background: var(--bg-soft); border-radius: 18px; padding: 5px; }
+.liga-tabs button { border: 0; background: transparent; border-radius: 14px; padding: 10px 4px; font: inherit; font-weight: 900; color: var(--navy); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 1.25rem; line-height: 1.1; }
+.liga-tabs button span { font-size: .82rem; }
+.liga-tabs button[aria-selected="true"] { background: #fff; box-shadow: var(--shadow-sm); color: var(--blue-dark); }
+.liga-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.seg { display: inline-flex; background: var(--bg-soft); border-radius: 999px; padding: 4px; }
+.seg button { border: 0; background: transparent; border-radius: 999px; padding: 8px 14px; font: inherit; font-weight: 800; color: var(--muted); cursor: pointer; font-size: .92rem; }
+.seg button[aria-pressed="true"] { background: var(--orange); color: #fff; box-shadow: 0 3px 0 var(--orange-dark); }
+.liga-grade { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; color: var(--navy); }
+.liga-grade select { font: inherit; font-weight: 800; color: var(--navy); border: 2px solid var(--line); border-radius: 12px; padding: 7px 10px; background: #fff; }
+.liga-note { display: flex; gap: 10px; align-items: center; background: var(--cream); border-radius: 16px; padding: 12px 16px; margin: 0 0 16px; font-weight: 700; color: var(--ink); }
+.liga-note.me { background: #EAF6E9; }
+.liga-note a { font-weight: 900; }
+#liga-out.loading { opacity: .55; transition: opacity .2s; }
+table.liga-table td { white-space: normal; vertical-align: middle; }
+table.liga-table td.pl { width: 44px; font-weight: 900; font-size: 1.1rem; color: var(--navy); text-align: center; }
+table.liga-table tr:nth-child(-n+3) td.pl { color: var(--orange); }
+table.liga-table b { font-size: 1.02rem; }
+.liga-sub { display: block; color: var(--muted); font-weight: 700; font-size: .82rem; margin-top: 2px; }
+table.liga-table td.sc { text-align: right; font-weight: 900; font-size: 1.15rem; color: var(--navy); white-space: nowrap; }
+table.liga-table td.sc small { display: block; font-size: .7rem; font-weight: 700; color: var(--muted); }
+table.liga-table tr.gap td { text-align: center; color: var(--muted); padding: 2px; }
+.liga-locked { text-align: center; max-width: 560px; margin: 0 auto; }
+.liga-locked [data-owl] { width: 120px; margin: 0 auto; }
+@media (max-width: 520px) { .liga-filters { justify-content: center; } .seg button { padding: 8px 11px; font-size: .86rem; } .liga-tabs button span { font-size: .74rem; } }
+/* настройки на учителя в класацията */
+.teach-set { display: grid; gap: 10px; margin: 18px 0; padding: 16px; }
+.teach-set .row2 { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.teach-set label { display: grid; gap: 4px; font-weight: 800; color: var(--navy); flex: 1 1 220px; }
+.teach-set label.check { display: flex; align-items: center; gap: 8px; flex: 1 1 100%; font-weight: 700; }
+.liga-promo { margin-top: 22px; background: linear-gradient(135deg, #FFF4D6, #FFE7C2); }
+.liga-promo h3 { margin: 0 0 6px; }
+.liga-promo p { margin: 0; }

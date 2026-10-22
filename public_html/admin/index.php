@@ -17,6 +17,27 @@ function csrf_ok(): bool { return isset($_POST['csrf']) && hash_equals($_SESSION
 function go(string $q = ''): void { header('Location: ./' . $q); exit; }
 // Ключ за първоначална настройка (пази се само хешът; самият ключ е даден на собственика)
 const SETUP_KEY_HASH = 'a05b48a0679ebe9e9bf783406cd9e83ac058473dfb79059735d2a5e3fd47c268';
+function school_from_post(PDO $pdo): ?int { // избрано или ново училище
+    $sid = (int)($_POST['school_id'] ?? 0);
+    $name = mb_substr(trim((string)($_POST['school_name'] ?? '')), 0, 120);
+    if ($sid === -1 || ($sid === 0 && $name !== '')) {
+        if ($name === '') return null;
+        $town = mb_substr(trim((string)($_POST['school_town'] ?? '')), 0, 60);
+        $q = $pdo->prepare('SELECT id FROM schools WHERE lower(name) = lower(?) AND lower(town) = lower(?)'); $q->execute([$name, $town]);
+        if ($id = $q->fetchColumn()) return (int)$id;
+        $pdo->prepare('INSERT INTO schools(name, town, created_at) VALUES(?, ?, ?)')->execute([$name, $town, now()]);
+        return (int)$pdo->lastInsertId();
+    }
+    return $sid > 0 ? $sid : null;
+}
+function school_fields(PDO $pdo, ?int $sel = null): string {
+    $opts = '<option value="0">– без училище (родители) –</option>';
+    foreach ($pdo->query('SELECT id, name, town FROM schools ORDER BY town, name') as $sc) $opts .= '<option value="' . (int)$sc['id'] . '"' . ((int)$sc['id'] === $sel ? ' selected' : '') . '>' . h($sc['name'] . ($sc['town'] ? ', ' . $sc['town'] : '')) . '</option>';
+    $opts .= '<option value="-1">+ ново училище…</option>';
+    return '<label>Училище<select name="school_id" class="sch">' . $opts . '</select></label>' .
+        '<label class="newsch" hidden>Име на училището<input name="school_name" maxlength="120" placeholder="ОУ „Иван Вазов“"></label>' .
+        '<label class="newsch" hidden>Населено място<input name="school_town" maxlength="60" placeholder="Пловдив"></label>';
+}
 function school_year_end(): string { $y = (int)date('Y'); if ((int)date('n') >= 7) $y++; return $y . '-06-30'; }
 
 $hash = setting('admin_hash');
@@ -64,8 +85,17 @@ if ($action === 'create') {
     $exp = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($_POST['expires'] ?? '')) ? $_POST['expires'] : school_year_end();
     $label = mb_substr(trim((string)($_POST['label'] ?? '')), 0, 120);
     $pdo->beginTransaction();
+    $sid = school_from_post($pdo);
+    $cname = mb_substr(trim((string)($_POST['class_name'] ?? '')), 0, 20);
+    $cgrade = max(0, min(4, (int)($_POST['grade'] ?? 0)));
+    if (!$cgrade && preg_match('/^([1-4])/', $cname, $m)) $cgrade = (int)$m[1];
+    $tname = mb_substr(trim((string)($_POST['teacher_name'] ?? '')), 0, 40);
+    if ($label === '' && $type === 'class') {
+        $sn = $sid ? $pdo->query('SELECT name, town FROM schools WHERE id = ' . (int)$sid)->fetch() : null;
+        $label = trim(($cname ? $cname . ' клас' : '') . ($sn ? ' · ' . $sn['name'] . ($sn['town'] ? ', ' . $sn['town'] : '') : ''), ' ·');
+    }
     $pin = $type === 'class' ? random_pin() : null; // един ПИН за целия клас
-    $pdo->prepare('INSERT INTO batches(label, type, max_uses, expires_at, created_at, pin) VALUES(?, ?, ?, ?, ?, ?)')->execute([$label, $type, $uses, $exp, now(), $pin]);
+    $pdo->prepare('INSERT INTO batches(label, type, max_uses, expires_at, created_at, pin, school_id, class_name, grade, teacher_name, public) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)')->execute([$label, $type, $uses, $exp, now(), $pin, $sid, $cname, $cgrade ?: null, $tname]);
     $bid = (int)$pdo->lastInsertId();
     $ins = $pdo->prepare('INSERT OR IGNORE INTO codes(code, batch_id, type, max_uses, expires_at, pin, label, created_at, role) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)');
     if ($type === 'class') { do { $ins->execute([random_code(), $bid, $type, $uses, $exp, $pin, $label, now(), 'teacher']); } while ($ins->rowCount() === 0); }
@@ -81,6 +111,21 @@ if ($action === 'revoke' || $action === 'restore') {
 if ($action === 'release') { // освобождава кода: детето го въвежда отново на ново устройство
     $pdo->prepare('DELETE FROM redemptions WHERE code = ?')->execute([(string)($_POST['code'] ?? '')]);
     $_SESSION['msg'] = 'Кодът е освободен и може да се въведе отново на едно устройство.'; go('?batch=' . (int)($_POST['batch'] ?? 0));
+}
+if ($action === 'info') { // училище, клас, учител на партида
+    $b = (int)($_POST['batch'] ?? 0);
+    $sid = school_from_post($pdo);
+    $cname = mb_substr(trim((string)($_POST['class_name'] ?? '')), 0, 20);
+    $cgrade = max(0, min(4, (int)($_POST['grade'] ?? 0)));
+    if (!$cgrade && preg_match('/^([1-4])/', $cname, $m)) $cgrade = (int)$m[1];
+    $pdo->prepare('UPDATE batches SET school_id = ?, class_name = ?, grade = ?, teacher_name = ?, public = ? WHERE id = ?')
+        ->execute([$sid, $cname, $cgrade ?: null, mb_substr(trim((string)($_POST['teacher_name'] ?? '')), 0, 40), empty($_POST['public']) ? 0 : 1, $b]);
+    $_SESSION['msg'] = 'Данните за класа са запазени.'; go('?batch=' . $b);
+}
+if ($action === 'hide' || $action === 'unhide') { // модерация на прякори в общата класация
+    $pdo->prepare('UPDATE redemptions SET hidden = ? WHERE id = ?')->execute([$action === 'hide' ? 1 : 0, (int)($_POST['rid'] ?? 0)]);
+    if ($action === 'hide' && !empty($_POST['rename'])) $pdo->prepare("UPDATE redemptions SET nickname = NULL, hidden = 0, nick_block = 1 WHERE id = ?")->execute([(int)$_POST['rid']]);
+    $_SESSION['msg'] = $action === 'hide' ? 'Ученикът е скрит от класациите.' : 'Ученикът е видим отново.'; go('?view=league');
 }
 if ($action === 'extend') {
     $exp = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($_POST['expires'] ?? '')) ? $_POST['expires'] : null;
@@ -109,8 +154,21 @@ $html = '<div class="top"><h1>Сметко · Кодове за достъп</h1
 if ($msg) $html .= '<p class="ok">' . h($msg) . '</p>';
 $html .= '<div class="stats"><div><b>' . (int)$stats['codes'] . '</b>кода</div><div><b>' . (int)$stats['active'] . '</b>валидни</div><div><b>' . (int)$stats['devices'] . '</b>активирани</div></div>';
 
+$html .= '<nav class="tabs"><a class="btn ' . (($_GET['view'] ?? '') === 'league' ? 'ghost' : '') . '" href="./">🔑 Кодове</a> <a class="btn ' . (($_GET['view'] ?? '') === 'league' ? '' : 'ghost') . '" href="?view=league">🏆 Обща класация</a> <a class="btn ghost" href="../liga.html" target="_blank">Виж сайта ↗</a></nav>';
 $bid = (int)($_GET['batch'] ?? 0);
-if ($bid) {
+if (($_GET['view'] ?? '') === 'league') {
+    $rows = '';
+    $st = $pdo->query("SELECT r.id, r.nickname, r.points - COALESCE(r.join_base,0) AS pts, r.correct, r.answered, r.flags, r.hidden, r.last_seen, b.class_name, b.label, s.name AS sname, s.town
+        FROM redemptions r JOIN codes c ON c.code = r.code JOIN batches b ON b.id = c.batch_id LEFT JOIN schools s ON s.id = b.school_id
+        WHERE COALESCE(c.role,'student') <> 'teacher' ORDER BY r.flags > 0 DESC, pts DESC LIMIT 300");
+    foreach ($st as $r) {
+        $f = '<form method="post" class="inline"><input type="hidden" name="csrf" value="' . csrf() . '"><input type="hidden" name="rid" value="' . (int)$r['id'] . '">';
+        $btn = $r['hidden'] ? $f . '<button name="action" value="unhide" class="sm ghost">Покажи</button></form>'
+            : $f . '<button name="action" value="hide" class="sm ghost">Скрий</button></form> ' . $f . '<input type="hidden" name="rename" value="1"><button name="action" value="hide" class="sm ghost" title="Скрива и изтрива прякора">Изтрий прякора</button></form>';
+        $rows .= '<tr' . ($r['hidden'] ? ' style="opacity:.5"' : '') . '><td><b>' . h($r['nickname'] ?: '–') . '</b></td><td>' . h(trim(($r['class_name'] ?? '') . ' ' . ($r['sname'] ? '· ' . $r['sname'] . ', ' . $r['town'] : ($r['label'] ?? '')))) . '</td><td>' . (int)$r['pts'] . '</td><td>' . (int)$r['correct'] . ' / ' . (int)$r['answered'] . '</td><td>' . ((int)$r['flags'] ? '<span class="tag red">⚠ ' . (int)$r['flags'] . '</span>' : '') . '</td><td>' . h(substr((string)$r['last_seen'], 0, 10)) . '</td><td>' . $btn . '</td></tr>';
+    }
+    $html .= '<div class="box"><h2>Ученици в класациите</h2><p class="hint">Първо са учениците със ⚠ (сървърът е отрязал неправдоподобни точки). „Скрий“ маха ученика от всички класации; „Изтрий прякора“ го показва като „Играч“.</p><div class="tw"><table><thead><tr><th>Прякор</th><th>Клас / училище</th><th>Точки</th><th>Верни / всички</th><th>Сигнали</th><th>Последно</th><th></th></tr></thead><tbody>' . ($rows ?: '<tr><td colspan="7">Още няма ученици.</td></tr>') . '</tbody></table></div></div>';
+} elseif ($bid) {
     $b = $pdo->prepare('SELECT * FROM batches WHERE id = ?'); $b->execute([$bid]); $b = $b->fetch();
     if ($b) {
         $st = $pdo->prepare("SELECT c.*, (SELECT MIN(created_at) FROM redemptions r WHERE r.code = c.code) AS act, (SELECT MAX(last_seen) FROM redemptions r WHERE r.code = c.code) AS last, (SELECT nickname FROM redemptions r WHERE r.code = c.code LIMIT 1) AS nick FROM codes c WHERE c.batch_id = ? ORDER BY CASE WHEN c.role = 'teacher' THEN 0 ELSE 1 END, c.created_at, c.code");
@@ -128,6 +186,11 @@ if ($bid) {
         $html .= '<div class="box"><p><a href="./">← Всички партиди</a></p><h2>' . h($b['label'] ?: 'Партида #' . $bid) . '</h2><p>' . h(TYPE_NAMES[$b['type']] ?? $b['type']) . ' · <b>еднократни кодове</b> (всеки се активира на едно устройство) · активирани <b>' . $used . ' от ' . $total . '</b> · валидни до <b>' . h(date('d.m.Y', strtotime($b['expires_at']))) . '</b>' .
             ($b['type'] === 'class' && !empty($b['pin']) ? '<br>ПИН на учителя за класацията: <b class="mono">' . h($b['pin']) . '</b>' : '') . '</p>' .
             '<p class="actions"><a class="btn" target="_blank" href="cards.php?batch=' . $bid . '">🖨️ Картички за печат</a> <a class="btn ghost" href="?action=csv&amp;batch=' . $bid . '">⬇️ CSV (Excel)</a></p>' .
+            ($b['type'] === 'class' ? '<details class="sub"' . (empty($b['school_id']) ? ' open' : '') . '><summary>🏫 Училище, клас и учител (за общата класация)' . (empty($b['school_id']) ? ' – <b class="warn">попълнете</b>' : '') . '</summary><form method="post"><input type="hidden" name="csrf" value="' . csrf() . '"><input type="hidden" name="action" value="info"><input type="hidden" name="batch" value="' . $bid . '"><div class="grid">' .
+                school_fields($pdo, $b['school_id'] ? (int)$b['school_id'] : null) .
+                '<label>Клас (напр. 2. б)<input name="class_name" maxlength="20" value="' . h($b['class_name'] ?? '') . '"></label>' .
+                '<label>Учител (по желание)<input name="teacher_name" maxlength="40" value="' . h($b['teacher_name'] ?? '') . '" placeholder="г-жа Петрова"></label>' .
+                '<label class="chk"><input type="checkbox" name="public" value="1"' . ((int)($b['public'] ?? 1) ? ' checked' : '') . '> Участва в общата класация</label></div><button class="sm">Запази</button></form></details>' : '') .
             '<form method="post" class="inline"><input type="hidden" name="csrf" value="' . csrf() . '"><input type="hidden" name="action" value="extend"><input type="hidden" name="batch" value="' . $bid . '">Нова валидност: <input type="date" name="expires" value="' . h($b['expires_at']) . '"> <button class="sm">Запази</button></form>' .
             '<p class="hint">„Освободи“ – ако дете смени или загуби устройство: старото губи достъпа, а кодът може да се въведе отново веднъж.</p><div class="tw"><table><thead><tr><th>Код</th><th>За</th><th>Активиран</th><th>Прякор</th><th>Последно</th><th>Статус</th><th></th></tr></thead><tbody>' . $rows . '</tbody></table></div></div>';
     }
@@ -135,10 +198,13 @@ if ($bid) {
     $html .= '<form method="post" class="box"><h2>Нови кодове</h2><input type="hidden" name="csrf" value="' . csrf() . '"><input type="hidden" name="action" value="create"><div class="grid">' .
         '<label>Вид<select name="type" id="t"><option value="class">Клас – код за всеки ученик + картичка за учителя с ПИН</option><option value="teacher">Учител – личен достъп</option><option value="single">Индивидуален – за едно дете</option><option value="family">Семеен – по един код на дете</option></select></label>' .
         '<label><span id="cl">Брой ученици</span><input type="number" name="count" id="u" value="25" min="1" max="500"></label>' .
+        '<span class="forclass" style="display:contents">' . school_fields($pdo) .
+        '<label>Клас (напр. 2. б)<input name="class_name" maxlength="20" placeholder="2. б"></label>' .
+        '<label>Учител (по желание)<input name="teacher_name" maxlength="40" placeholder="г-жа Петрова"></label></span>' .
         '<label>Валидни до<input type="date" name="expires" value="' . school_year_end() . '"></label>' .
-        '<label class="wide">Бележка – излиза на картичките (напр. „2. б клас · ОУ „Иван Вазов“ · 2026/27“)<input name="label" maxlength="120"></label></div>' .
+        '<label class="wide">Бележка – излиза на картичките (празно = „2. б клас · училище, град“)<input name="label" maxlength="120"></label></div>' .
         '<p class="hint">Всеки код е <b>еднократен</b>: активира се само на едно устройство. За клас се създава по един код за всеки ученик и една картичка за учителя (код + ПИН за класацията на класа).</p><button>Създай кодове</button></form>' .
-        '<script>document.getElementById("t").addEventListener("change",function(e){var v=e.target.value;document.getElementById("u").value={class:25,teacher:1,single:1,family:4}[v];document.getElementById("cl").textContent={class:"Брой ученици",teacher:"Брой учители",single:"Брой кодове",family:"Брой деца"}[v];});</script>';
+        '<script>document.getElementById("t").addEventListener("change",function(e){var v=e.target.value;document.getElementById("u").value={class:25,teacher:1,single:1,family:4}[v];document.getElementById("cl").textContent={class:"Брой ученици",teacher:"Брой учители",single:"Брой кодове",family:"Брой деца"}[v];document.querySelector(".forclass").style.display=v==="class"?"contents":"none";});</script>';
     $rows = '';
     foreach ($pdo->query('SELECT b.*, (SELECT COUNT(*) FROM codes c WHERE c.batch_id = b.id) AS n, (SELECT COUNT(DISTINCT r.code) FROM redemptions r JOIN codes c ON c.code = r.code WHERE c.batch_id = b.id) AS dev FROM batches b ORDER BY b.id DESC') as $b) {
         $rows .= '<tr><td><a href="?batch=' . (int)$b['id'] . '">' . h($b['label'] ?: 'Партида #' . $b['id']) . '</a></td><td>' . h(TYPE_NAMES[$b['type']] ?? $b['type']) . '</td><td>' . (int)$b['n'] . '</td><td>' . (int)$b['dev'] . '</td><td>' . h(date('d.m.Y', strtotime($b['expires_at']))) . '</td><td><a href="cards.php?batch=' . (int)$b['id'] . '" target="_blank">картички</a></td></tr>';
@@ -162,6 +228,6 @@ function page(string $title, string $body): void {
     .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;letter-spacing:.04em}.tag{background:#EEF2F8;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:800}.green{background:#DDF5D8;color:#22762D}.red{background:#FFE1E1;color:#B4232A}
     .stats{display:flex;gap:12px;flex-wrap:wrap}.stats div{background:#fff;border-radius:16px;padding:12px 18px;font-weight:700;box-shadow:0 6px 20px rgba(30,58,138,.07)}.stats b{display:block;font-size:1.6rem}
     .ok{background:#DDF5D8;color:#22762D;padding:10px 14px;border-radius:12px;font-weight:700}.err{background:#FFE1E1;color:#B4232A;padding:10px 14px;border-radius:12px;font-weight:700}
-    summary{cursor:pointer;font-weight:800}.hint{font-size:.88rem;color:#5B6B8C;margin:8px 0}tr.teach td{background:#FFF8E6}</style></head><body><main>' . $body . '</main></body></html>';
+    [hidden]{display:none!important}summary{cursor:pointer;font-weight:800}details.sub{margin:12px 0;padding:10px 14px;background:#F6FAFF;border-radius:12px}.warn{color:#B4232A}.chk{display:flex;align-items:center;gap:8px}.chk input{width:auto}nav.tabs{display:flex;gap:8px;margin:8px 0}.hint{font-size:.88rem;color:#5B6B8C;margin:8px 0}tr.teach td{background:#FFF8E6}</style></head><body><main>' . $body . '</main><script>document.querySelectorAll("select.sch").forEach(function(s){function f(){s.closest("form").querySelectorAll(".newsch").forEach(function(l){l.hidden=s.value!=="-1";});}s.addEventListener("change",f);f();});</script></body></html>';
     exit;
 }

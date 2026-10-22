@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=6">
-<link rel="stylesheet" href="css/animations.css?v=6">
+<link rel="stylesheet" href="css/style.css?v=7">
+<link rel="stylesheet" href="css/animations.css?v=7">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Начало", "item": "https://smetko.com/"}, {"@type": "ListItem", "position": 2, "name": "Цени", "item": "https://smetko.com/pricing.html"}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Как се плаща?", "acceptedAnswer": {"@type": "Answer", "text": "Абонаментът се поръчва по имейл на info@smetko.com и се активира с код за достъп, който получавате до 1 работен ден. Плащането е по банков път, а училищата получават фактура. Плащане с карта направо от сайта предстои."}}, {"@type": "Question", "name": "Как работи кодът за клас?", "acceptedAnswer": {"@type": "Answer", "text": "Всеки ученик получава картичка с личен код и го въвежда веднъж на smetko.com/kod. Кодовете са еднократни – всеки се активира на едно устройство. Учителят получава своя картичка с код и ПИН и вижда класацията на целия клас на smetko.com/klasaciya."}}, {"@type": "Question", "name": "Има ли безплатен план?", "acceptedAnswer": {"@type": "Answer", "text": "Да. Безплатно са „Бързо сметни“ за всички класове, първите 3 мисии от всеки клас, 20 задачи на ден в „Тренировка“ и работните листове."}}, {"@type": "Question", "name": "Подновява ли се абонаментът автоматично?", "acceptedAnswer": {"@type": "Answer", "text": "Месечният абонамент се подновява всеки месец и може да се спре по всяко време. Годишният и този за учебна година не се подновяват автоматично. Ще ви напомним преди изтичането им."}}, {"@type": "Question", "name": "Как плащат училищата?", "acceptedAnswer": {"@type": "Answer", "text": "С фактура и банков превод. За 3 или повече класа има 15% отстъпка, а за 8 или повече класа – 25%."}}, {"@type": "Question", "name": "Мога ли да се откажа?", "acceptedAnswer": {"@type": "Answer", "text": "Да. Правата ви при отказ са описани в Общите условия, а формулярът за отказ е тук."}}]}</script>
 </head>
@@ -41,7 +41,12 @@
           <a href="class-3.html"><b>3. клас</b><small>До 1000, умножение и деление</small></a>
           <a href="class-4.html"><b>4. клас</b><small>Многоцифрени числа, лице, тела</small></a>
         </div></div>
-      <a href="achievements.html" data-nav="ach">Класации</a>
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="ach">Класации <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="liga.html"><b>Обща класация</b><small>Училища, класове, учители, ученици</small></a>
+          <a href="achievements.html"><b>Моите постижения</b><small>Точки, значки и моят клас</small></a>
+          <a href="klasaciya.html"><b>Класация на класа</b><small>За учителя – с код и ПИН</small></a>
+        </div></div>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">За учители <span class="chev">▾</span></button>
         <div class="dd-panel">
           <a href="uchilishta.html"><b>Сметко в училище</b><small>Кодове за класа и документи</small></a>
@@ -63,7 +68,8 @@
   <nav class="mobile-nav" aria-label="Мобилно меню">
     <a href="game.html">🎮 Мисии и игри</a>
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
-    <a href="achievements.html">🏆 Класации и постижения</a>
+    <a href="liga.html">🏆 Обща класация</a>
+    <a href="achievements.html">⭐ Моите постижения</a>
     <a href="kod.html">🔑 Въведи код за достъп</a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
@@ -167,10 +173,10 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=6" defer></script>
-<script src="js/gamification.js?v=6" defer></script>
-<script src="js/audio.js?v=6" defer></script>
-<script src="js/access.js?v=6" defer></script>
-<script src="js/app.js?v=6" defer></script>
+<script src="js/owl.js?v=7" defer></script>
+<script src="js/gamification.js?v=7" defer></script>
+<script src="js/audio.js?v=7" defer></script>
+<script src="js/access.js?v=7" defer></script>
+<script src="js/app.js?v=7" defer></script>
 </body>
 </html>

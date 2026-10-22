@@ -3,6 +3,7 @@
    Базата се създава автоматично в api/data/smetko.sqlite (защитена с .htaccess).
    Тайният ключ се генерира при първо стартиране и се пази в базата – няма тайни в GitHub. */
 declare(strict_types=1);
+date_default_timezone_set('Europe/Sofia');
 
 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // без O, 0, I, 1, L
 const CODE_PREFIX = 'SMET';
@@ -29,6 +30,14 @@ function db(): PDO {
     if (!$has('batches', 'pin')) $pdo->exec('ALTER TABLE batches ADD COLUMN pin TEXT');
     if (!$has('codes', 'role')) $pdo->exec("ALTER TABLE codes ADD COLUMN role TEXT DEFAULT 'student'");
     $pdo->exec('CREATE INDEX IF NOT EXISTS idx_codes_batch ON codes(batch_id)');
+    // училища и общи класации
+    $pdo->exec('CREATE TABLE IF NOT EXISTS schools (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, town TEXT, created_at TEXT)');
+    foreach (['school_id INTEGER', 'class_name TEXT', 'grade INTEGER', 'teacher_name TEXT', 'public INTEGER DEFAULT 1'] as $col) {
+        if (!$has('batches', strtok($col, ' '))) $pdo->exec('ALTER TABLE batches ADD COLUMN ' . $col);
+    }
+    foreach (['week TEXT', 'week_base INTEGER DEFAULT 0', 'synced_at INTEGER DEFAULT 0', 'flags INTEGER DEFAULT 0', 'join_base INTEGER DEFAULT 0', 'nick_block INTEGER DEFAULT 0', 'day TEXT', 'day_correct INTEGER DEFAULT 0'] as $col) {
+        if (!$has('redemptions', strtok($col, ' '))) $pdo->exec('ALTER TABLE redemptions ADD COLUMN ' . $col);
+    }
     return $pdo;
 }
 
@@ -48,6 +57,7 @@ function secret(): string {
 
 function now(): string { return gmdate('Y-m-d H:i:s'); }
 function today(): string { return date('Y-m-d'); }
+function week_key(): string { return date('o-\\WW'); } // седмица от понеделник до неделя, напр. 2026-W43
 function client_ip(): string { return substr((string)($_SERVER['REMOTE_ADDR'] ?? '0'), 0, 64); }
 
 /* ---------- кодове ---------- */

@@ -166,7 +166,7 @@ index = head('Сметко – математика като игра за 1.–
         <li>„Бързо сметни“ на интерактивната дъска</li>
         <li>Линк за домашна по конкретна тема</li>
         <li>Работни листове за печат с отговори</li>
-        <li>Класация на класа с ПИН от картичката</li>
+        <li>Класация на класа и обща класация между училищата</li>
       </ul>
       <a class="btn btn-blue" href="uchilishta.html">Сметко за училища</a>
     </article>
@@ -463,8 +463,8 @@ ach = head('Постижения и класации – Сметко', 'Точ�
 <section class="section soft">
   <div class="wrap prose" style="text-align:center">
     <h2>Класации</h2>
-    <p>С код за клас резултатите ти влизат в класацията на класа. Без код – състезавай се със себе си и побий рекорда си в „Бързо сметни“!</p>
-    <p><a class="btn btn-lg" href="game.html?mode=quick&amp;start=0">⚡ Побий рекорда</a></p>
+    <p>С код резултатите ти влизат в класацията на класа и в <a href="liga.html">общата класация</a> – срещу ученици, класове и училища от цялата страна. Всяка седмица започва нова битка!</p>
+    <p><a class="btn btn-lg" href="liga.html">🏆 Обща класация</a> <a class="btn btn-lg btn-white" href="game.html?mode=quick&amp;start=0">⚡ Побий рекорда</a></p>
     <p class="small-note">Прогресът се пази на това устройство. <button class="btn btn-sm btn-ghost" id="reset-btn">Изтрий прогреса</button></p>
     <p class="small-note"><a href="klasaciya.html">Вход за учител (код + ПИН)</a></p>
   </div>
@@ -488,6 +488,7 @@ school = head('Сметко за училища – кодове за класа
       <div class="card"><b class="n">3</b><h3>Играят по учебника</h3><p>Избират учебника и решават мисиите по уроците – в час и у дома.</p></div>
       <div class="card"><b class="n">4</b><h3>Класация за учителя</h3><p>С кода и ПИН-а от вашата картичка на <a href="klasaciya.html">smetko.com/klasaciya</a> виждате точките, мисиите и точността на всеки. Сменено устройство? Освобождавате кода с един бутон.</p></div>
     </div>
+    <div class="panel liga-promo"><div><h3>🏆 Обща класация между училищата</h3><p>Класовете и училищата се състезават всяка седмица и през цялата година – честно, по <b>точки на ученик</b>. Учителите имат своя класация, а децата виждат на кое място са сред всички ученици. <a href="liga.html">Виж класацията →</a></p></div></div>
     <div class="callout" style="margin-top:24px">Учениците <b>не се регистрират</b> и <b>не въвеждат имейл или фамилия</b>. В класацията се показва само прякор, който детето избира. Подробно: <a href="privacy-policy.html">Политика за поверителност</a>.</div>
   </div>
 </section>
@@ -573,6 +574,46 @@ board = head('Класация на класа – Сметко', 'Класац�
 </main>
 """ + FOOTER + scripts(['js/tools.js'])
 write('klasaciya.html', board)
+
+
+# ================= liga.html (общи класации) =================
+LIGA_FAQ = [
+    ('Как се класират училищата и класовете?', 'По <b>точки на ученик</b>: всички точки на учениците се делят на броя ученици с код. Така малък клас, в който играят всички, може да изпревари голям клас. Училище влиза в класацията с поне 5 ученици с код, а клас – с поне 3.'),
+    ('Кои точки се броят?', 'Само спечелените след въвеждането на кода. „Тази седмица“ започва отначало всеки понеделник, а „Цялата година“ брои точките от 15 септември до 30 юни.'),
+    ('Може ли някой да си „напише“ точки?', 'Сървърът проверява дали точките растат правдоподобно: до 35 точки за верен отговор и не повече от един верен отговор в секунда. Необичайни резултати не влизат в класацията.'),
+    ('Кой вижда прякора на детето?', 'Класацията на учениците е видима само за деца и учители с код. Показват се прякор (без фамилия), клас и училище. Учителят може да скрие ученик или да изключи целия клас от общата класация.'),
+    ('Как да включа класа си?', 'Поръчайте кодове за класа – училището и класът се вписват при създаването им. Вижте <a href="uchilishta.html">Сметко за училища</a>.'),
+]
+liga_pg = head('Обща класация – училища, класове и ученици | Сметко', 'Седмична и годишна класация на училищата, класовете, учителите и учениците, които играят Сметко.', 'liga.html',
+               [crumbs([('Начало', ''), ('Обща класация', 'liga.html')]), faq_ld(LIGA_FAQ)], 'liga-page') + header('ach') + page_hero(
+    'Обща класация', 'Училища, класове, учители и ученици от цялата страна. Всяка седмица започва нова битка!', 'Обща класация', 'cheer',
+    '<div class="hero-cta"><a class="btn btn-lg btn-green" href="game.html">🎮 Играй и печели точки</a><a class="btn btn-white" href="achievements.html#myclass-sec">Моят клас</a></div>') + """
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="liga-controls panel">
+      <div class="liga-tabs" role="tablist" aria-label="Класация">
+        <button role="tab" data-scope="schools" aria-selected="true">🏫 <span>Училища</span></button>
+        <button role="tab" data-scope="classes" aria-selected="false">🎒 <span>Класове</span></button>
+        <button role="tab" data-scope="teachers" aria-selected="false">🧑‍🏫 <span>Учители</span></button>
+        <button role="tab" data-scope="students" aria-selected="false">⭐ <span>Ученици</span></button>
+      </div>
+      <div class="liga-filters">
+        <div class="seg" role="group" aria-label="Период"><button data-period="week" aria-pressed="true">Тази седмица</button><button data-period="all" aria-pressed="false">Цялата година</button></div>
+        <label class="liga-grade">Клас <select id="liga-grade"><option value="0">Всички</option><option value="1">1. клас</option><option value="2">2. клас</option><option value="3">3. клас</option><option value="4">4. клас</option></select></label>
+      </div>
+    </div>
+    <div id="liga-mine"></div>
+    <div id="liga-out" aria-live="polite"><p class="lead-dark" style="text-align:center">Зареждам класацията…</p></div>
+  </div>
+</section>
+<section class="section soft"><div class="wrap">
+  <div class="section-head"><h2 class="lined">Правила</h2></div>
+""" + faq(LIGA_FAQ) + """
+</div></section>
+</main>
+""" + FOOTER + scripts(['js/league.js'])
+write('liga.html', liga_pg)
 
 # ================= rabotni-listove.html =================
 ws = head('Работни листове по математика 1.–4. клас – Сметко', 'Генератор на работни листове по математика за 1.–4. клас по темите на учебната програма, с отговори за учителя. Безплатно, за печат.',

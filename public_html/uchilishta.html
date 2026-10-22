@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=6">
-<link rel="stylesheet" href="css/animations.css?v=6">
+<link rel="stylesheet" href="css/style.css?v=7">
+<link rel="stylesheet" href="css/animations.css?v=7">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Начало", "item": "https://smetko.com/"}, {"@type": "ListItem", "position": 2, "name": "За училища", "item": "https://smetko.com/uchilishta.html"}]}</script>
 </head>
 <body>
@@ -40,7 +40,12 @@
           <a href="class-3.html"><b>3. клас</b><small>До 1000, умножение и деление</small></a>
           <a href="class-4.html"><b>4. клас</b><small>Многоцифрени числа, лице, тела</small></a>
         </div></div>
-      <a href="achievements.html" data-nav="ach">Класации</a>
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="ach">Класации <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="liga.html"><b>Обща класация</b><small>Училища, класове, учители, ученици</small></a>
+          <a href="achievements.html"><b>Моите постижения</b><small>Точки, значки и моят клас</small></a>
+          <a href="klasaciya.html"><b>Класация на класа</b><small>За учителя – с код и ПИН</small></a>
+        </div></div>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">За учители <span class="chev">▾</span></button>
         <div class="dd-panel">
           <a href="uchilishta.html"><b>Сметко в училище</b><small>Кодове за класа и документи</small></a>
@@ -62,7 +67,8 @@
   <nav class="mobile-nav" aria-label="Мобилно меню">
     <a href="game.html">🎮 Мисии и игри</a>
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
-    <a href="achievements.html">🏆 Класации и постижения</a>
+    <a href="liga.html">🏆 Обща класация</a>
+    <a href="achievements.html">⭐ Моите постижения</a>
     <a href="kod.html">🔑 Въведи код за достъп</a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
@@ -94,6 +100,7 @@
       <div class="card"><b class="n">3</b><h3>Играят по учебника</h3><p>Избират учебника и решават мисиите по уроците – в час и у дома.</p></div>
       <div class="card"><b class="n">4</b><h3>Класация за учителя</h3><p>С кода и ПИН-а от вашата картичка на <a href="klasaciya.html">smetko.com/klasaciya</a> виждате точките, мисиите и точността на всеки. Сменено устройство? Освобождавате кода с един бутон.</p></div>
     </div>
+    <div class="panel liga-promo"><div><h3>🏆 Обща класация между училищата</h3><p>Класовете и училищата се състезават всяка седмица и през цялата година – честно, по <b>точки на ученик</b>. Учителите имат своя класация, а децата виждат на кое място са сред всички ученици. <a href="liga.html">Виж класацията →</a></p></div></div>
     <div class="callout" style="margin-top:24px">Учениците <b>не се регистрират</b> и <b>не въвеждат имейл или фамилия</b>. В класацията се показва само прякор, който детето избира. Подробно: <a href="privacy-policy.html">Политика за поверителност</a>.</div>
   </div>
 </section>
@@ -163,13 +170,13 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=6" defer></script>
-<script src="js/gamification.js?v=6" defer></script>
-<script src="js/audio.js?v=6" defer></script>
-<script src="js/access.js?v=6" defer></script>
-<script src="js/math-engine.js?v=6" defer></script>
-<script src="js/textbooks.js?v=6" defer></script>
-<script src="js/app.js?v=6" defer></script>
-<script src="js/tools.js?v=6" defer></script>
+<script src="js/owl.js?v=7" defer></script>
+<script src="js/gamification.js?v=7" defer></script>
+<script src="js/audio.js?v=7" defer></script>
+<script src="js/access.js?v=7" defer></script>
+<script src="js/math-engine.js?v=7" defer></script>
+<script src="js/textbooks.js?v=7" defer></script>
+<script src="js/app.js?v=7" defer></script>
+<script src="js/tools.js?v=7" defer></script>
 </body>
 </html>

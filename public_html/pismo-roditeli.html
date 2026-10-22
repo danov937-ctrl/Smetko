@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=6">
-<link rel="stylesheet" href="css/animations.css?v=6">
+<link rel="stylesheet" href="css/style.css?v=7">
+<link rel="stylesheet" href="css/animations.css?v=7">
 </head>
 <body>
 <a class="skip" href="#main">Към съдържанието</a>
@@ -39,7 +39,12 @@
           <a href="class-3.html"><b>3. клас</b><small>До 1000, умножение и деление</small></a>
           <a href="class-4.html"><b>4. клас</b><small>Многоцифрени числа, лице, тела</small></a>
         </div></div>
-      <a href="achievements.html" data-nav="ach">Класации</a>
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="ach">Класации <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="liga.html"><b>Обща класация</b><small>Училища, класове, учители, ученици</small></a>
+          <a href="achievements.html"><b>Моите постижения</b><small>Точки, значки и моят клас</small></a>
+          <a href="klasaciya.html"><b>Класация на класа</b><small>За учителя – с код и ПИН</small></a>
+        </div></div>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">За учители <span class="chev">▾</span></button>
         <div class="dd-panel">
           <a href="uchilishta.html"><b>Сметко в училище</b><small>Кодове за класа и документи</small></a>
@@ -61,7 +66,8 @@
   <nav class="mobile-nav" aria-label="Мобилно меню">
     <a href="game.html">🎮 Мисии и игри</a>
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
-    <a href="achievements.html">🏆 Класации и постижения</a>
+    <a href="liga.html">🏆 Обща класация</a>
+    <a href="achievements.html">⭐ Моите постижения</a>
     <a href="kod.html">🔑 Въведи код за достъп</a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
@@ -83,7 +89,7 @@
 <ul>
 <li>Достъпът за класа е осигурен от училището – <b>за вас е безплатно</b>. Играта работи на телефон, таблет и компютър, директно в браузъра.</li>
 <li>Децата <b>не се регистрират</b> и <b>не въвеждат имейл, фамилия или други лични данни</b>.</li>
-<li>С кода на класа детето отключва пълния достъп. По желание може да въведе прякор (само име), с който се показва в класацията на класа.</li>
+<li>С кода на класа детето отключва пълния достъп. По желание може да въведе прякор (само име), с който се показва в класацията на класа и в общата класация – само пред деца и учители с код, заедно с класа и училището. Учителят може да скрие детето или да изключи класа от общата класация.</li>
 <li>Няма реклами и няма покупки в играта.</li>
 <li>Препоръчваме 10–15 минути на ден под наблюдението на възрастен.</li>
 </ul>
@@ -130,10 +136,10 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=6" defer></script>
-<script src="js/gamification.js?v=6" defer></script>
-<script src="js/audio.js?v=6" defer></script>
-<script src="js/access.js?v=6" defer></script>
-<script src="js/app.js?v=6" defer></script>
+<script src="js/owl.js?v=7" defer></script>
+<script src="js/gamification.js?v=7" defer></script>
+<script src="js/audio.js?v=7" defer></script>
+<script src="js/access.js?v=7" defer></script>
+<script src="js/app.js?v=7" defer></script>
 </body>
 </html>

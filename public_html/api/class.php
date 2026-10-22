@@ -30,14 +30,19 @@ if ($teacher && isset($in['hide'])) {
     $pdo->prepare('UPDATE redemptions SET hidden = ? WHERE id = ? AND code IN (SELECT code FROM codes WHERE batch_id = ?)')
         ->execute([empty($in['unhide']) ? 1 : 0, (int)$in['hide'], $bid]);
 }
+if ($teacher && isset($in['settings']) && is_array($in['settings'])) { // учителят: име за общата класация и участие
+    $tn = mb_substr(trim(preg_replace('/[^\p{L}\p{N} .\-„“"]/u', '', (string)($in['settings']['teacher_name'] ?? '')) ?? ''), 0, 40);
+    $pdo->prepare('UPDATE batches SET teacher_name = ?, public = ? WHERE id = ?')->execute([$tn, empty($in['settings']['public']) ? 0 : 1, $bid]);
+    $batch = batch_of($code);
+}
 if ($teacher && isset($in['release'])) { // смяна/загуба на устройство: кодът може да се въведе отново веднъж
     $pdo->prepare("DELETE FROM redemptions WHERE id = ? AND code IN (SELECT code FROM codes WHERE batch_id = ? AND COALESCE(role, 'student') <> 'teacher')")
         ->execute([(int)$in['release'], $bid]);
 }
-$st = $pdo->prepare("SELECT r.id, r.code, r.device, r.nickname, r.grade, r.points, r.correct, r.answered, r.stars, r.missions, r.last_seen, r.hidden
+$st = $pdo->prepare("SELECT r.id, r.code, r.device, r.nickname, r.grade, MAX(0, r.points - COALESCE(r.join_base, 0)) AS points, r.correct, r.answered, r.stars, r.missions, r.last_seen, r.hidden
     FROM redemptions r JOIN codes c ON c.code = r.code
     WHERE c.batch_id = ? AND COALESCE(c.role, 'student') <> 'teacher' AND c.revoked = 0
-    ORDER BY r.points DESC, r.correct DESC, r.id");
+    ORDER BY points DESC, r.correct DESC, r.id");
 $st->execute([$bid]);
 $list = [];
 $i = 0;
@@ -49,4 +54,6 @@ foreach ($st->fetchAll() as $r) {
     $list[] = $item;
 }
 $n = $pdo->prepare("SELECT COUNT(*) FROM codes WHERE batch_id = ? AND COALESCE(role, 'student') <> 'teacher' AND revoked = 0"); $n->execute([$bid]);
-json_out(['ok' => true, 'label' => $batch['label'] ?: $row['label'], 'expires' => $row['expires_at'], 'uses' => count($list), 'max' => (int)$n->fetchColumn(), 'teacher' => $teacher, 'list' => $list]);
+$school = null;
+if (!empty($batch['school_id'])) { $q = $pdo->prepare('SELECT name, town FROM schools WHERE id = ?'); $q->execute([(int)$batch['school_id']]); $school = $q->fetch() ?: null; }
+json_out(['ok' => true, 'label' => $batch['label'] ?: $row['label'], 'school' => $school, 'className' => $batch['class_name'] ?? '', 'teacherName' => $batch['teacher_name'] ?? '', 'public' => (int)($batch['public'] ?? 1) === 1, 'expires' => $row['expires_at'], 'uses' => count($list), 'max' => (int)$n->fetchColumn(), 'teacher' => $teacher, 'list' => $list]);

@@ -65,10 +65,12 @@
 
   function classBoard() { var a = access(); return a ? post('class.php', { token: a.token }) : Promise.reject(new Error('Няма код за клас.')); }
   function teacherBoard(code, pin, hide, unhide, release) { var d = { code: code, pin: pin }; if (hide) { d.hide = hide; if (unhide) d.unhide = 1; } if (release) d.release = release; return post('class.php', d); }
+  function league(q) { var a = access(); q = q || {}; if (a) q.token = a.token; return post('league.php', q); }
+  function teacherSettings(code, pin, settings) { return post('class.php', { code: code, pin: pin, settings: settings }); }
   function setNickname(n) { st().nickname = n; save(); sync(true); }
   function forget() { var s = st(); delete s.access; save(); }
 
-  S.Access = { deviceId: deviceId, get: access, isClass: isClass, redeem: redeem, verify: verify, sync: sync, classBoard: classBoard, teacherBoard: teacherBoard, setNickname: setNickname, forget: forget, online: online };
+  S.Access = { deviceId: deviceId, get: access, isClass: isClass, redeem: redeem, verify: verify, sync: sync, classBoard: classBoard, teacherBoard: teacherBoard, league: league, teacherSettings: teacherSettings, setNickname: setNickname, forget: forget, online: online };
   S.hasAccess = function () { return !!access(); };
 
   function fmtDate(d) { var p = String(d).split('-'); return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0] : d; }

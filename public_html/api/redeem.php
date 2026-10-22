@@ -24,7 +24,7 @@ if (!$existing) {
     $pdo->prepare('INSERT INTO redemptions(code, device, created_at, last_seen, nickname, grade) VALUES(?, ?, ?, ?, ?, ?)')->execute([$code, $device, now(), now(), $nick ?: null, $grade ?: null]);
     $pdo->exec('COMMIT');
 } elseif ($nick) {
-    $pdo->prepare('UPDATE redemptions SET nickname = ?, last_seen = ? WHERE code = ? AND device = ?')->execute([$nick, now(), $code, $device]);
+    $pdo->prepare('UPDATE redemptions SET nickname = ?, last_seen = ? WHERE code = ? AND device = ? AND COALESCE(nick_block, 0) = 0')->execute([$nick, now(), $code, $device]);
 }
 json_out([
     'ok' => true, 'code' => $code, 'type' => $row['type'], 'typeName' => TYPE_NAMES[$row['type']] ?? $row['type'],

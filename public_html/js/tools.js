@@ -121,6 +121,15 @@
     return pod + '<div class="table-wrap"><table class="compare board"><thead><tr><th>#</th><th>Ученик</th><th>Точки</th><th>Мисии</th><th>Звезди</th>' + (teacher ? '<th>Верни</th><th>Точност</th><th>Последно</th><th>Код</th><th></th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
   S.boardTable = boardTable;
+  function teacherSet(j) {
+    var where = j.school ? esc(j.school.name) + (j.school.town ? ', ' + esc(j.school.town) : '') : '';
+    return '<form class="panel teach-set" id="ts-form"><h3 style="margin:0">🏆 Обща класация</h3>' +
+      '<p class="hint" style="margin:0">' + (where ? 'Класът участва като <b>' + esc(j.className || 'клас') + ' · ' + where + '</b>. ' : 'Училището на класа още не е въведено – пишете ни на info@smetko.com. ') +
+      'Вижте как се справяте срещу други класове и училища на <a href="liga.html">smetko.com/liga</a>.</p>' +
+      '<div class="row2"><label>Вашето име в класацията на учителите<input class="input" id="ts-name" maxlength="40" placeholder="напр. г-жа Петрова" value="' + esc(j.teacherName || '') + '"></label>' +
+      '<label class="check"><input type="checkbox" id="ts-public"' + (j['public'] !== false ? ' checked' : '') + '> Класът участва в общата класация (учениците се виждат само с прякор, клас и училище и само от играчи с код)</label>' +
+      '<button class="btn btn-sm" type="submit">Запази</button></div></form>';
+  }
   function initBoard() {
     var form = $('board-form'), code = $('b-code'), pin = $('b-pin'), err = $('b-err'), out = $('board-out'), rem = $('b-remember');
     bindCodeInput(code);
@@ -131,8 +140,14 @@
         if (release) S.toast('Кодът е освободен – детето може да го въведе отново на новото устройство.');
         try { if (rem.checked) localStorage.setItem('smetko.board', JSON.stringify({ c: fmtCode(code.value), p: pin.value.trim() })); else localStorage.removeItem('smetko.board'); } catch (e) {}
         out.innerHTML = '<div class="section-head" style="margin-top:30px"><h2 class="lined">' + esc(j.label || 'Класация') + '</h2><p>Активирали кода си: <b>' + j.uses + ' от ' + j.max + '</b> ученици · валидно до ' + S.fmtDate(j.expires) + ' · <button class="btn btn-sm btn-ghost" id="b-refresh">🔄 Обнови</button> <button class="btn btn-sm btn-ghost" onclick="window.print()">🖨️ Печат</button></p></div>' + boardTable(j, true) +
-          '<p class="hint" style="margin-top:14px">Скритите ученици не се виждат от съучениците. Прякорите се избират от децата – ако някой е неподходящ, скрийте го. Всеки код е еднократен; ако дете смени или загуби устройство, натиснете „Освободи кода“ и то го въвежда отново.</p>';
+          teacherSet(j) + '<p class="hint" style="margin-top:14px">Скритите ученици не се виждат от съучениците. Прякорите се избират от децата – ако някой е неподходящ, скрийте го. Всеки код е еднократен; ако дете смени или загуби устройство, натиснете „Освободи кода“ и то го въвежда отново.</p>';
         $('b-refresh').addEventListener('click', function () { load(); });
+        var ts = $('ts-form');
+        if (ts) ts.addEventListener('submit', function (e) {
+          e.preventDefault();
+          S.Access.teacherSettings(fmtCode(code.value), pin.value.trim(), { teacher_name: $('ts-name').value.trim(), 'public': $('ts-public').checked ? 1 : 0 })
+            .then(function () { S.toast('Запазено ✓'); load(); }).catch(function (ex) { S.toast(ex.message); });
+        });
         out.querySelectorAll('[data-hide]').forEach(function (b) { b.addEventListener('click', function () { load(+b.getAttribute('data-hide'), b.getAttribute('data-un') === '1'); }); });
         out.querySelectorAll('[data-release]').forEach(function (b) { b.addEventListener('click', function () {
           var d = S.modal('<div data-owl="think"></div><h3>Да освободим ли кода на ' + esc(b.getAttribute('data-name')) + '?</h3><p>Старото устройство губи достъпа и точките в класацията започват отначало. Кодът може да се въведе отново на <b>едно</b> ново устройство.</p><div class="modal-actions"><button class="btn btn-ghost" data-close>Отказ</button><button class="btn" id="rel-ok">Освободи</button></div>');
