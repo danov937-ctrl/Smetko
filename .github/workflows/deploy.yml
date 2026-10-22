@@ -1,8 +1,9 @@
 # Автоматично качване на сайта в SuperHosting при всяка промяна в клон main.
 # Нужни са 3 тайни (Settings → Secrets and variables → Actions):
-#   FTP_SERVER   – напр. smetko.com (или сървърът от имейла на SuperHosting)
-#   FTP_USERNAME – потребителското име за cPanel
-#   FTP_PASSWORD – паролата за cPanel
+#   FTP_SERVER   – london.superhosting.bg
+#   FTP_USERNAME – FTP акаунт от cPanel → FTP Accounts, напр. github@smetko.com
+#   FTP_PASSWORD – паролата на този FTP акаунт
+# FTP акаунтът е с директория public_html, затова server-dir е ./
 name: Качване в SuperHosting
 
 on:
@@ -29,4 +30,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
           local-dir: ./public_html/
-          server-dir: ./public_html/
+          server-dir: ./
