@@ -780,3 +780,6 @@ table.board tr.me td { background: #EEF6FF; }
 table.board tr.hid td { opacity: .45; }
 table.board td, table.board th { white-space: nowrap; }
 @media print { .board-page #board-form, .board-page .page-hero { display: none !important; } }
+/* класация: код на ученика и бутони (учител) */
+.board .mono-sm { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .78rem; font-weight: 700; color: var(--muted, #5B6B8C); white-space: nowrap; }
+.board .nowrap { white-space: nowrap; }

@@ -1,7 +1,8 @@
 <?php
-/* Класация на класа.
+/* Класация на класа. Един клас = една партида: N еднократни кода за учениците + 1 код за учителя с ПИН.
    Ученик: POST {token} → класацията на неговия клас (само прякори и точки).
-   Учител: POST {code, pin} → пълна таблица; {code, pin, hide: id} → скрива ученик. */
+   Учител: POST {code, pin} → пълна таблица; {code, pin, hide: id[, unhide: 1]} → скрива/показва ученик.
+   (code може да е кодът на учителя или който и да е код от класа; ПИН-ът е общ за партидата.) */
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
 require_post();
@@ -14,24 +15,38 @@ if (!empty($in['token'])) {
 } else {
     if (too_many('pin_fail', 10, 900)) json_out(['ok' => false, 'error' => 'Твърде много грешни опити. Опитай пак след 15 минути.'], 429);
     $code = normalize_code((string)($in['code'] ?? ''));
-    $row = $code ? get_code($code) : null;
-    if (!$row || !$row['pin'] || !hash_equals((string)$row['pin'], trim((string)($in['pin'] ?? '')))) { note_attempt('pin_fail'); json_out(['ok' => false, 'error' => 'Грешен код или ПИН.'], 403); }
+}
+$row = $code ? get_code($code) : null;
+$batch = $row ? batch_of($code) : null;
+if (!$teacher && empty($in['token'])) {
+    $pin = (string)($batch['pin'] ?? '') ?: (string)($row['pin'] ?? ''); // по-старите кодове пазят ПИН-а на самия код
+    if (!$row || $pin === '' || !hash_equals($pin, trim((string)($in['pin'] ?? '')))) { note_attempt('pin_fail'); json_out(['ok' => false, 'error' => 'Грешен код или ПИН.'], 403); }
     $teacher = true;
 }
-$row = get_code($code);
-if (!$row || $row['type'] !== 'class') json_out(['ok' => false, 'error' => 'Класацията е само за кодове за клас.'], 404);
+if (!$row || $row['type'] !== 'class' || !$batch) json_out(['ok' => false, 'error' => 'Класацията е само за кодове за клас.'], 404);
+$bid = (int)$batch['id'];
+$pdo = db();
 if ($teacher && isset($in['hide'])) {
-    db()->prepare('UPDATE redemptions SET hidden = ? WHERE id = ? AND code = ?')->execute([empty($in['unhide']) ? 1 : 0, (int)$in['hide'], $code]);
+    $pdo->prepare('UPDATE redemptions SET hidden = ? WHERE id = ? AND code IN (SELECT code FROM codes WHERE batch_id = ?)')
+        ->execute([empty($in['unhide']) ? 1 : 0, (int)$in['hide'], $bid]);
 }
-$st = db()->prepare('SELECT id, device, nickname, grade, points, correct, answered, stars, missions, last_seen, hidden FROM redemptions WHERE code = ? ORDER BY points DESC, correct DESC');
-$st->execute([$code]);
+if ($teacher && isset($in['release'])) { // смяна/загуба на устройство: кодът може да се въведе отново веднъж
+    $pdo->prepare("DELETE FROM redemptions WHERE id = ? AND code IN (SELECT code FROM codes WHERE batch_id = ? AND COALESCE(role, 'student') <> 'teacher')")
+        ->execute([(int)$in['release'], $bid]);
+}
+$st = $pdo->prepare("SELECT r.id, r.code, r.device, r.nickname, r.grade, r.points, r.correct, r.answered, r.stars, r.missions, r.last_seen, r.hidden
+    FROM redemptions r JOIN codes c ON c.code = r.code
+    WHERE c.batch_id = ? AND COALESCE(c.role, 'student') <> 'teacher' AND c.revoked = 0
+    ORDER BY r.points DESC, r.correct DESC, r.id");
+$st->execute([$bid]);
 $list = [];
 $i = 0;
 foreach ($st->fetchAll() as $r) {
     if (!$teacher && (int)$r['hidden'] === 1) continue;
     $i++;
     $item = ['place' => $i, 'name' => $r['nickname'] ?: 'Играч ' . $i, 'points' => (int)$r['points'], 'stars' => (int)$r['stars'], 'missions' => (int)$r['missions'], 'me' => $me && hash_equals($r['device'], $me)];
-    if ($teacher) $item += ['id' => (int)$r['id'], 'correct' => (int)$r['correct'], 'answered' => (int)$r['answered'], 'grade' => (int)$r['grade'], 'last' => $r['last_seen'], 'hidden' => (int)$r['hidden'] === 1];
+    if ($teacher) $item += ['id' => (int)$r['id'], 'code' => $r['code'], 'correct' => (int)$r['correct'], 'answered' => (int)$r['answered'], 'grade' => (int)$r['grade'], 'last' => $r['last_seen'], 'hidden' => (int)$r['hidden'] === 1];
     $list[] = $item;
 }
-json_out(['ok' => true, 'label' => $row['label'], 'expires' => $row['expires_at'], 'uses' => count($list), 'max' => (int)$row['max_uses'], 'teacher' => $teacher, 'list' => $list]);
+$n = $pdo->prepare("SELECT COUNT(*) FROM codes WHERE batch_id = ? AND COALESCE(role, 'student') <> 'teacher' AND revoked = 0"); $n->execute([$bid]);
+json_out(['ok' => true, 'label' => $batch['label'] ?: $row['label'], 'expires' => $row['expires_at'], 'uses' => count($list), 'max' => (int)$n->fetchColumn(), 'teacher' => $teacher, 'list' => $list]);

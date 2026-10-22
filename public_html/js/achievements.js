@@ -43,7 +43,7 @@
     if (!S.Access || !S.Access.isClass()) return;
     var sec = $('#myclass-sec'), box = $('#myclass'), acc = S.Access.get();
     sec.hidden = false;
-    $('#myclass-sub').innerHTML = 'Код ' + acc.code + (acc.label ? ' · ' + acc.label : '') + ' · <a href="#" id="nick-edit">' + (G.state.nickname ? 'Прякор: ' + G.state.nickname + ' (смени)' : 'Избери прякор') + '</a>';
+    $('#myclass-sub').innerHTML = (acc.role === 'teacher' ? 'Вие сте учител · <a href="klasaciya.html">пълна таблица с ПИН</a> · ' : '') + 'Код ' + acc.code + (acc.label ? ' · ' + acc.label : '') + ' · <a href="#" id="nick-edit">' + (G.state.nickname ? 'Прякор: ' + G.state.nickname + ' (смени)' : 'Избери прякор') + '</a>';
     box.innerHTML = '<p class="lead-dark" style="text-align:center">Зареждам класацията…</p>';
     S.Access.sync(true);
     setTimeout(function () {

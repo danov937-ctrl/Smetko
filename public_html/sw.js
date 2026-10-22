@@ -1,12 +1,12 @@
 /* Сметко — Service Worker: офлайн игра и бързо зареждане.
    При всяка промяна на файловете увеличете VERSION, за да се обнови кешът. */
-const VERSION = 'smetko-v3';
+const VERSION = 'smetko-v4';
 const CORE = [
   '/', '/game.html', '/achievements.html', '/pricing.html', '/about.html', '/uchilishta.html', '/rabotni-listove.html',
   '/kod.html', '/klasaciya.html', '/class-1.html', '/class-2.html', '/class-3.html', '/class-4.html', '/404.html',
-  '/css/style.css?v=3', '/css/animations.css?v=3',
-  '/js/owl.js?v=3', '/js/gamification.js?v=3', '/js/audio.js?v=3', '/js/math-engine.js?v=3', '/js/textbooks.js?v=3',
-  '/js/access.js?v=3', '/js/app.js?v=3', '/js/game.js?v=3', '/js/achievements.js?v=3', '/js/tools.js?v=3',
+  '/css/style.css?v=4', '/css/animations.css?v=4',
+  '/js/owl.js?v=4', '/js/gamification.js?v=4', '/js/audio.js?v=4', '/js/math-engine.js?v=4', '/js/textbooks.js?v=4',
+  '/js/access.js?v=4', '/js/app.js?v=4', '/js/game.js?v=4', '/js/achievements.js?v=4', '/js/tools.js?v=4',
   '/assets/images/landscape.svg', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/manifest.json'
 ];
 

@@ -10,15 +10,30 @@ header('Cache-Control: no-store');
 function h($s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
 $bid = (int)($_GET['batch'] ?? 0);
-$st = db()->prepare('SELECT * FROM codes WHERE batch_id = ? AND revoked = 0 ORDER BY created_at, code'); $st->execute([$bid]);
+$st = db()->prepare("SELECT * FROM codes WHERE batch_id = ? AND revoked = 0 ORDER BY CASE WHEN role = 'teacher' THEN 0 ELSE 1 END, created_at, code"); $st->execute([$bid]);
 $codes = $st->fetchAll();
 $site = 'smetko.com';
 $cards = '';
 foreach ($codes as $i => $c) {
     $exp = date('d.m.Y', strtotime($c['expires_at']));
+    $isT = ($c['role'] ?? '') === 'teacher';
+    $qr = '<div class="qr" data-qr="https://' . $site . '/kod.html?c=' . h(urlencode($c['code'])) . '"></div>';
+    if ($isT) { // картичка за учителя: личен код + ПИН за класацията
+        $cards .= '<div class="card t-teach">
+      <div class="sky"><div class="cl c1"></div><div class="cl c2"></div><div class="owl" data-owl="think"></div>
+        <div class="brand"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></div><div class="slogan">Картичка за учителя</div></div>
+      <div class="body">
+        <div class="ttl">Класация на класа</div>
+        <div class="tk"><div><small>Код на учителя</small><b>' . h($c['code']) . '</b></div><div><small>ПИН</small><b>' . h($c['pin']) . '</b></div></div>
+        <div class="row"><ol><li>Отвори <b>' . $site . '/klasaciya</b></li><li>Въведи кода и ПИН-а</li><li>Виж точките и мисиите на всички ученици</li></ol>' . $qr . '</div>
+        <div class="pin">Кодът важи и като <b>твой пълен достъп</b> на едно устройство (сканирай QR кода).<small>Не показвайте ПИН-а на учениците · валидно до ' . $exp . '</small></div>' .
+        ($c['label'] ? '<div class="lbl">' . h($c['label']) . '</div>' : '') . '
+      </div></div>';
+        continue;
+    }
     $isClass = $c['type'] === 'class';
-    $title = ['class' => 'Код за целия клас', 'teacher' => 'Код за учител', 'single' => 'Подаръчен код', 'family' => 'Семеен код'][$c['type']] ?? 'Код за достъп';
-    $what = $isClass ? 'Пълен достъп за учениците от класа — до ' . (int)$c['max_uses'] . ' устройства.' : 'Пълен достъп до всички мисии и игри — до ' . (int)$c['max_uses'] . ' устройства.';
+    $title = ['class' => 'Код за ученик', 'teacher' => 'Код за учител', 'single' => 'Подаръчен код', 'family' => 'Семеен код'][$c['type']] ?? 'Код за достъп';
+    $what = 'Еднократен код: активира се само на едно устройство. Пази картичката!';
     $cards .= '<div class="card t-' . h($c['type']) . '">
       <div class="sky"><div class="cl c1"></div><div class="cl c2"></div><div class="owl" data-owl="' . ($i % 3 === 0 ? 'hero' : ($i % 3 === 1 ? 'cheer' : 'hello')) . '"></div>
         <div class="brand"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></div><div class="slogan">Математика като игра · 1.–4. клас</div></div>
@@ -26,8 +41,8 @@ foreach ($codes as $i => $c) {
         <div class="ttl">' . h($title) . '</div>
         <div class="code">' . h($c['code']) . '</div>
         <div class="what">' . h($what) . '</div>
-        <div class="row"><ol><li>Отвори <b>' . $site . '/kod</b></li><li>Въведи кода</li><li>Играй до <b>' . $exp . '</b></li></ol><div class="qr" data-qr="https://' . $site . '/kod.html?c=' . h(urlencode($c['code'])) . '"></div></div>' .
-        ($isClass ? '<div class="pin">🔑 ПИН за учителя: <b>' . h($c['pin']) . '</b><small>Класация на класа: ' . $site . '/klasaciya · не показвайте ПИН-а на учениците</small></div>' : '') .
+        <div class="row"><ol><li>Отвори <b>' . $site . '/kod</b></li><li>Въведи кода' . ($isClass ? ' и прякор' : '') . '</li><li>Играй до <b>' . $exp . '</b></li></ol>' . $qr . '</div>' .
+        ($isClass ? '<div class="pin">🏆 Точките ти влизат в класацията на класа.<small>Прякор без фамилия · пълен достъп до всички мисии и игри</small></div>' : '') .
         ($c['label'] ? '<div class="lbl">' . h($c['label']) . '</div>' : '') . '
       </div></div>';
 }
@@ -60,9 +75,16 @@ body { margin: 0; font-family: Nunito, Arial, sans-serif; background: #ccd; colo
 .lbl { font-size: 7pt; color: #8090A8; margin-top: 1.5mm; text-align: right; }
 .t-single .sky, .t-family .sky { background: linear-gradient(180deg, #8E6CF0, #C9B8FF); }
 .t-teacher .sky { background: linear-gradient(180deg, #00A88F, #7FE0CF); }
+.t-teach .sky { background: linear-gradient(180deg, #FF8A2A, #FFC97A); }
+.t-teach .ttl { color: #E06A00; }
+.tk { display: grid; grid-template-columns: 1fr auto; gap: 2mm; margin: 2mm 0; }
+.tk div { background: #FFF4D6; border: 2px solid #FFE3A3; border-radius: 4mm; padding: 1.5mm 3mm; text-align: center; }
+.tk small { display: block; font-size: 7pt; font-weight: 800; color: #8A6A1E; text-transform: uppercase; letter-spacing: .05em; }
+.tk b { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15pt; letter-spacing: .05em; }
+.tk div:last-child b { font-size: 19pt; color: #E06A00; }
 @media print { body { background: #fff; } .bar { display: none; } .sheet { margin: 0; } }
 </style></head><body>
-<div class="bar"><span><?= count($codes) ?> картички · печат на A4, без полета (Margins: None), с фонови цветове</span><button onclick="window.print()">🖨️ Печат</button></div>
+<div class="bar"><span><?= count($codes) ?> картички<?= ($codes && $codes[0]['type'] === 'class') ? ' (първата е за учителя)' : '' ?> · печат на A4, без полета (Margins: None), с фонови цветове</span><button onclick="window.print()">🖨️ Печат</button></div>
 <?php
 $all = array_values(array_filter(explode('<!--CARD-->', str_replace('<div class="card ', '<!--CARD--><div class="card ', $cards))));
 foreach (array_chunk($all, 4) as $page) echo '<div class="sheet">' . implode('', $page) . '</div>';

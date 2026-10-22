@@ -116,23 +116,28 @@
     var rows = j.list.map(function (r) {
       var acc = r.answered ? Math.round(r.correct / r.answered * 100) + '%' : '–';
       return '<tr class="' + (r.me ? 'me' : '') + (r.hidden ? ' hid' : '') + '"><td>' + r.place + '</td><td><b>' + esc(r.name) + '</b>' + (r.me ? ' <span class="tag">ти</span>' : '') + '</td><td>★ ' + r.points + '</td><td>' + r.missions + '</td><td>' + r.stars + '</td>' +
-        (teacher ? '<td>' + (r.correct || 0) + '</td><td>' + acc + '</td><td>' + (r.last ? S.fmtDate(r.last.slice(0, 10)) : '–') + '</td><td><button class="btn btn-sm btn-ghost" data-hide="' + r.id + '" data-un="' + (r.hidden ? 1 : 0) + '">' + (r.hidden ? 'Покажи' : 'Скрий') + '</button></td>' : '') + '</tr>';
+        (teacher ? '<td>' + (r.correct || 0) + '</td><td>' + acc + '</td><td>' + (r.last ? S.fmtDate(r.last.slice(0, 10)) : '–') + '</td><td class="mono-sm">' + esc(r.code || '') + '</td><td class="nowrap"><button class="btn btn-sm btn-ghost" data-hide="' + r.id + '" data-un="' + (r.hidden ? 1 : 0) + '">' + (r.hidden ? 'Покажи' : 'Скрий') + '</button> <button class="btn btn-sm btn-ghost" data-release="' + r.id + '" data-name="' + esc(r.name) + '" title="При смяна или загуба на устройство">Освободи кода</button></td>' : '') + '</tr>';
     }).join('');
-    return pod + '<div class="table-wrap"><table class="compare board"><thead><tr><th>#</th><th>Ученик</th><th>Точки</th><th>Мисии</th><th>Звезди</th>' + (teacher ? '<th>Верни</th><th>Точност</th><th>Последно</th><th></th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+    return pod + '<div class="table-wrap"><table class="compare board"><thead><tr><th>#</th><th>Ученик</th><th>Точки</th><th>Мисии</th><th>Звезди</th>' + (teacher ? '<th>Верни</th><th>Точност</th><th>Последно</th><th>Код</th><th></th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
   S.boardTable = boardTable;
   function initBoard() {
     var form = $('board-form'), code = $('b-code'), pin = $('b-pin'), err = $('b-err'), out = $('board-out'), rem = $('b-remember');
     bindCodeInput(code);
     try { var saved = JSON.parse(localStorage.getItem('smetko.board') || 'null'); if (saved) { code.value = saved.c; pin.value = saved.p; rem.checked = true; } } catch (e) {}
-    function load(hide, un) {
+    function load(hide, un, release) {
       err.textContent = '';
-      S.Access.teacherBoard(fmtCode(code.value), pin.value.trim(), hide, un).then(function (j) {
+      S.Access.teacherBoard(fmtCode(code.value), pin.value.trim(), hide, un, release).then(function (j) {
+        if (release) S.toast('Кодът е освободен – детето може да го въведе отново на новото устройство.');
         try { if (rem.checked) localStorage.setItem('smetko.board', JSON.stringify({ c: fmtCode(code.value), p: pin.value.trim() })); else localStorage.removeItem('smetko.board'); } catch (e) {}
-        out.innerHTML = '<div class="section-head" style="margin-top:30px"><h2 class="lined">' + esc(j.label || 'Класация') + '</h2><p>' + j.uses + ' от ' + j.max + ' устройства · кодът е валиден до ' + S.fmtDate(j.expires) + ' · <button class="btn btn-sm btn-ghost" id="b-refresh">🔄 Обнови</button> <button class="btn btn-sm btn-ghost" onclick="window.print()">🖨️ Печат</button></p></div>' + boardTable(j, true) +
-          '<p class="hint" style="margin-top:14px">Скритите ученици не се виждат от съучениците. Прякорите се избират от децата – ако някой е неподходящ, скрийте го.</p>';
+        out.innerHTML = '<div class="section-head" style="margin-top:30px"><h2 class="lined">' + esc(j.label || 'Класация') + '</h2><p>Активирали кода си: <b>' + j.uses + ' от ' + j.max + '</b> ученици · валидно до ' + S.fmtDate(j.expires) + ' · <button class="btn btn-sm btn-ghost" id="b-refresh">🔄 Обнови</button> <button class="btn btn-sm btn-ghost" onclick="window.print()">🖨️ Печат</button></p></div>' + boardTable(j, true) +
+          '<p class="hint" style="margin-top:14px">Скритите ученици не се виждат от съучениците. Прякорите се избират от децата – ако някой е неподходящ, скрийте го. Всеки код е еднократен; ако дете смени или загуби устройство, натиснете „Освободи кода“ и то го въвежда отново.</p>';
         $('b-refresh').addEventListener('click', function () { load(); });
         out.querySelectorAll('[data-hide]').forEach(function (b) { b.addEventListener('click', function () { load(+b.getAttribute('data-hide'), b.getAttribute('data-un') === '1'); }); });
+        out.querySelectorAll('[data-release]').forEach(function (b) { b.addEventListener('click', function () {
+          var d = S.modal('<div data-owl="think"></div><h3>Да освободим ли кода на ' + esc(b.getAttribute('data-name')) + '?</h3><p>Старото устройство губи достъпа и точките в класацията започват отначало. Кодът може да се въведе отново на <b>едно</b> ново устройство.</p><div class="modal-actions"><button class="btn btn-ghost" data-close>Отказ</button><button class="btn" id="rel-ok">Освободи</button></div>');
+          d.querySelector('#rel-ok').addEventListener('click', function () { d.close(); load(0, false, +b.getAttribute('data-release')); });
+        }); });
       }).catch(function (ex) { err.textContent = ex.message; });
     }
     form.addEventListener('submit', function (e) { e.preventDefault(); load(); });

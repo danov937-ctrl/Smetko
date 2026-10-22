@@ -34,7 +34,7 @@
   function redeem(code, nickname, grade) {
     return post('redeem.php', { code: code, device: deviceId(), nickname: nickname || '', grade: grade || 0 }).then(function (j) {
       var s = st();
-      s.access = { code: j.code, type: j.type, typeName: j.typeName, expires: j.expires, token: j.token, label: j.label || '', checked: today() };
+      s.access = { code: j.code, type: j.type, typeName: j.typeName, role: j.role || 'student', expires: j.expires, token: j.token, label: j.label || '', checked: today() };
       if (nickname) s.nickname = nickname;
       save();
       sync(true);
@@ -47,7 +47,7 @@
     var s = st(), a = s.access;
     if (!a || !online || a.checked === today()) return;
     post('check.php', { token: a.token }).then(function (j) {
-      if (!j.valid) { s.accessLost = a.code; delete s.access; save(); if (S.toast) S.toast('Кодът за достъп вече не е активен.'); }
+      if (!j.valid) { s.accessLost = a.code; delete s.access; save(); if (S.toast) S.toast('Кодът за достъп вече не е активен на това устройство.'); }
       else { a.checked = today(); if (j.expires) a.expires = j.expires; save(); }
     }).catch(function () {});
   }
@@ -64,7 +64,7 @@
   }
 
   function classBoard() { var a = access(); return a ? post('class.php', { token: a.token }) : Promise.reject(new Error('Няма код за клас.')); }
-  function teacherBoard(code, pin, hide, unhide) { var d = { code: code, pin: pin }; if (hide) { d.hide = hide; if (unhide) d.unhide = 1; } return post('class.php', d); }
+  function teacherBoard(code, pin, hide, unhide, release) { var d = { code: code, pin: pin }; if (hide) { d.hide = hide; if (unhide) d.unhide = 1; } if (release) d.release = release; return post('class.php', d); }
   function setNickname(n) { st().nickname = n; save(); sync(true); }
   function forget() { var s = st(); delete s.access; save(); }
 

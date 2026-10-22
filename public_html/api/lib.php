@@ -24,6 +24,11 @@ function db(): PDO {
       CREATE TABLE IF NOT EXISTS attempts (ip TEXT, kind TEXT, ts INTEGER);
       CREATE INDEX IF NOT EXISTS idx_red_code ON redemptions(code);
       CREATE INDEX IF NOT EXISTS idx_att ON attempts(ip, kind, ts);");
+    // миграции: ПИН на ниво партида (клас), роля на кода (ученик/учител)
+    $has = fn(string $t, string $c) => in_array($c, array_column($pdo->query("PRAGMA table_info($t)")->fetchAll(), 'name'), true);
+    if (!$has('batches', 'pin')) $pdo->exec('ALTER TABLE batches ADD COLUMN pin TEXT');
+    if (!$has('codes', 'role')) $pdo->exec("ALTER TABLE codes ADD COLUMN role TEXT DEFAULT 'student'");
+    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_codes_batch ON codes(batch_id)');
     return $pdo;
 }
 
@@ -62,6 +67,12 @@ function random_pin(): string { return (string)random_int(1000, 9999); }
 
 function get_code(string $code): ?array {
     $st = db()->prepare('SELECT * FROM codes WHERE code = ?'); $st->execute([$code]);
+    $r = $st->fetch(); return $r ?: null;
+}
+/* Всеки код е еднократен: активира се на едно устройство. */
+const CODE_DEVICES = 1;
+function batch_of(string $code): ?array {
+    $st = db()->prepare('SELECT b.* FROM batches b JOIN codes c ON c.batch_id = b.id WHERE c.code = ?'); $st->execute([$code]);
     $r = $st->fetch(); return $r ?: null;
 }
 function code_uses(string $code): int {
