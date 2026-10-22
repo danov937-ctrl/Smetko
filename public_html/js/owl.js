@@ -1,130 +1,124 @@
-/* Сметко — бухалът на smetko.com
-   Рисува Сметко като SVG в различни пози.
-   Употреба: <div class="owl" data-pose="hello"></div>  (app.js ги рендерира автоматично)
-   или Smetko.owl('cheer') → SVG низ.
-   Пози: hello (маха), happy (радва се), cheer (празнува), think (мисли), encourage (окуражава), idle */
+/* Сметко — бухалът на smetko.com (SVG с обемни градиенти)
+   Употреба: <div class="owl" data-owl="hero"></div> (app.js ги рисува автоматично) или Smetko.owl('cheer').
+   Пози: hero (молив и книга), hello (маха), happy, cheer (празнува), think, encourage, idle */
 (function () {
   'use strict';
-  var C = {
-    body: '#9A6233', bodyDark: '#7B4A22', face: '#F6DDB4', belly: '#FBEBD0', scallop: '#E3C08F',
-    cap: '#43A84A', capDark: '#2F8A3A', capLight: '#62C266', beak: '#FF9F1C', beakDark: '#E07E00',
-    feet: '#FF9F1C', glass: '#26324F', pupil: '#1D2440', wood: '#C27C3E', woodDark: '#9A5D28'
-  };
-
-  function wing(cx, cy, rot, extra) {
-    return '<g' + (extra || '') + '><g transform="rotate(' + rot + ' ' + cx + ' ' + cy + ')">' +
-      '<ellipse cx="' + cx + '" cy="' + cy + '" rx="19" ry="44" fill="' + C.bodyDark + '"/>' +
-      '<path d="M' + (cx - 9) + ' ' + (cy + 10) + ' q9 8 18 0 M' + (cx - 10) + ' ' + (cy + 24) + ' q10 8 20 0" stroke="' + C.body + '" stroke-width="3" fill="none" stroke-linecap="round"/>' +
-      '</g></g>';
-  }
-
-  function eyes(kind) {
-    var s = '';
-    // бели очи
-    s += '<circle cx="93" cy="112" r="23" fill="#fff"/><circle cx="147" cy="112" r="23" fill="#fff"/>';
-    if (kind === 'happy') {
-      s += '<path d="M80 116 q13 -15 26 0" stroke="' + C.pupil + '" stroke-width="5.5" fill="none" stroke-linecap="round"/>';
-      s += '<path d="M134 116 q13 -15 26 0" stroke="' + C.pupil + '" stroke-width="5.5" fill="none" stroke-linecap="round"/>';
-    } else {
-      var dx = 0, dy = 2;
-      if (kind === 'up') { dx = 4; dy = -6; }
-      s += '<g class="owl-pupils"><circle cx="' + (96 + dx) + '" cy="' + (112 + dy) + '" r="11" fill="' + C.pupil + '"/>' +
-        '<circle cx="' + (144 + dx) + '" cy="' + (112 + dy) + '" r="11" fill="' + C.pupil + '"/>' +
-        '<circle cx="' + (100 + dx) + '" cy="' + (108 + dy) + '" r="4" fill="#fff"/>' +
-        '<circle cx="' + (148 + dx) + '" cy="' + (108 + dy) + '" r="4" fill="#fff"/></g>';
-    }
-    // очила
-    s += '<g fill="none" stroke="' + C.glass + '" stroke-width="5">' +
-      '<circle cx="93" cy="112" r="27"/><circle cx="147" cy="112" r="27"/>' +
-      '<path d="M118 106 q2 -4 4 0"/><path d="M66 106 l-10 -4 M174 106 l10 -4" stroke-linecap="round"/></g>';
-    s += '<path d="M76 92 q8 -6 18 -3" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".55"/>';
-    s += '<path d="M130 92 q8 -6 18 -3" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".55"/>';
-    return s;
-  }
-
-  function abacus() {
-    var beads = ['#FF5A5F', '#FFC531', '#4CBB4A', '#2F80ED'];
-    var s = '<g class="owl-prop">';
-    s += '<rect x="78" y="186" width="84" height="56" rx="8" fill="' + C.wood + '" stroke="' + C.woodDark + '" stroke-width="4"/>';
-    s += '<rect x="86" y="193" width="68" height="42" rx="4" fill="#FFF6E5"/>';
-    for (var r = 0; r < 3; r++) {
-      var y = 202 + r * 12;
-      s += '<line x1="86" y1="' + y + '" x2="154" y2="' + y + '" stroke="' + C.woodDark + '" stroke-width="2"/>';
-      var n = [3, 2, 4][r];
-      for (var b = 0; b < n; b++) {
-        s += '<circle cx="' + (93 + b * 9) + '" cy="' + y + '" r="4.6" fill="' + beads[(r + b) % 4] + '"/>';
-      }
-      s += '<circle cx="' + (146) + '" cy="' + y + '" r="4.6" fill="' + beads[(r + 2) % 4] + '"/>';
-    }
-    s += '</g>';
-    return s;
-  }
-
-  function mouth(kind) {
-    if (kind === 'open') {
-      return '<path d="M110 140 h20 l-10 18 z" fill="' + C.beak + '" stroke="' + C.beakDark + '" stroke-width="2.5" stroke-linejoin="round"/>' +
-        '<path d="M113 146 h14 l-7 8 z" fill="#C2410C"/>';
-    }
-    return '<path d="M110 139 h20 l-10 17 z" fill="' + C.beak + '" stroke="' + C.beakDark + '" stroke-width="2.5" stroke-linejoin="round"/>';
-  }
+  var uid = 0;
 
   function owl(pose) {
     pose = pose || 'hello';
-    var leftWing, rightWing, eyeKind = 'normal', mouthKind = 'closed', prop = false, cheeks = false;
+    var id = 'ow' + (++uid);
+    var g = function (n) { return 'url(#' + id + n + ')'; };
+    var defs = '<defs>' +
+      '<radialGradient id="' + id + 'b" cx="38%" cy="28%" r="80%"><stop offset="0" stop-color="#C08350"/><stop offset=".55" stop-color="#9A6233"/><stop offset="1" stop-color="#6E4220"/></radialGradient>' +
+      '<radialGradient id="' + id + 'f" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="#FFF1D6"/><stop offset="1" stop-color="#EBC994"/></radialGradient>' +
+      '<radialGradient id="' + id + 'y" cx="45%" cy="30%" r="75%"><stop offset="0" stop-color="#FFF8EA"/><stop offset="1" stop-color="#F0D6A8"/></radialGradient>' +
+      '<linearGradient id="' + id + 'c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6FD06A"/><stop offset="1" stop-color="#2F9A3A"/></linearGradient>' +
+      '<linearGradient id="' + id + 'w" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8C5529"/><stop offset="1" stop-color="#5E3517"/></linearGradient>' +
+      '<radialGradient id="' + id + 'e" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#E4EEF8"/></radialGradient>' +
+      '<linearGradient id="' + id + 'k" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFC24B"/><stop offset="1" stop-color="#F08A00"/></linearGradient>' +
+      '</defs>';
+
+    var eye = 'normal', mouth = 'closed', cheeks = false, L = 'down', R = 'down', prop = 'none';
     switch (pose) {
-      case 'cheer':
-        leftWing = wing(42, 120, 38); rightWing = wing(198, 120, -38, ' class="owl-wing-r"');
-        eyeKind = 'happy'; mouthKind = 'open'; cheeks = true; break;
-      case 'happy':
-        leftWing = wing(48, 178, 14); rightWing = wing(192, 178, -14);
-        eyeKind = 'happy'; cheeks = true; prop = true; break;
-      case 'think':
-        leftWing = wing(48, 178, 14);
-        rightWing = '<g transform="rotate(58 165 168)"><ellipse cx="165" cy="168" rx="17" ry="38" fill="' + C.bodyDark + '"/></g>';
-        eyeKind = 'up'; break;
-      case 'encourage':
-        leftWing = wing(48, 178, 14); rightWing = wing(200, 132, -48, ' class="owl-wing-r"');
-        cheeks = true; prop = false; break;
-      case 'idle':
-        leftWing = wing(48, 178, 14); rightWing = wing(192, 178, -14); prop = true; break;
-      default: // hello
-        leftWing = wing(48, 178, 14); rightWing = wing(200, 120, -40, ' class="owl-wing-r owl-wave"');
-        prop = true;
+      case 'hero': R = 'up'; L = 'hold'; prop = 'pencilbook'; cheeks = true; break;
+      case 'cheer': L = 'upL'; R = 'up'; eye = 'happy'; mouth = 'open'; cheeks = true; break;
+      case 'happy': eye = 'happy'; cheeks = true; prop = 'abacus'; L = 'hold'; R = 'holdR'; break;
+      case 'think': R = 'chin'; eye = 'up'; break;
+      case 'encourage': R = 'thumb'; cheeks = true; break;
+      case 'idle': prop = 'abacus'; L = 'hold'; R = 'holdR'; break;
+      default: R = 'wave'; prop = 'abacus'; L = 'hold';
     }
 
-    var s = '<svg class="owl-svg" viewBox="0 0 240 262" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Сметко — бухалът">';
+    var s = '<svg class="owl-svg" viewBox="0 0 260 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Сметко – бухалът">' + defs;
     // сянка
-    s += '<ellipse cx="120" cy="254" rx="62" ry="7" fill="#000" opacity=".12"/>';
+    s += '<ellipse cx="130" cy="270" rx="70" ry="8" fill="#0B2545" opacity=".14"/>';
     // крака
-    s += '<g fill="' + C.feet + '"><ellipse cx="96" cy="247" rx="15" ry="7"/><ellipse cx="144" cy="247" rx="15" ry="7"/></g>';
-    // тяло + глава
-    s += '<ellipse cx="120" cy="178" rx="74" ry="72" fill="' + C.body + '"/>';
-    s += '<circle cx="120" cy="108" r="70" fill="' + C.body + '"/>';
-    // корем с перца
-    s += '<ellipse cx="120" cy="190" rx="50" ry="52" fill="' + C.belly + '"/>';
-    var sc = '';
-    [[100, 168], [120, 168], [140, 168], [90, 186], [110, 186], [130, 186], [150, 186], [100, 204], [120, 204], [140, 204], [110, 222], [130, 222]].forEach(function (p) {
-      sc += '<path d="M' + (p[0] - 6) + ' ' + p[1] + ' q6 6 12 0" stroke="' + C.scallop + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    s += '<g fill="' + g('k') + '"><path d="M96 252 q-14 6 -10 14 q12 2 26 -2 q4 -8 -4 -12 z"/><path d="M164 252 q14 6 10 14 q-12 2 -26 -2 q-4 -8 4 -12 z"/></g>';
+    // тяло
+    s += '<ellipse cx="130" cy="198" rx="74" ry="66" fill="' + g('b') + '"/>';
+    s += '<ellipse cx="130" cy="210" rx="50" ry="50" fill="' + g('y') + '"/>';
+    [[110, 186], [130, 182], [150, 186], [102, 204], [122, 202], [142, 202], [160, 206], [112, 222], [132, 220], [152, 222], [122, 238], [142, 238]].forEach(function (p) {
+      s += '<path d="M' + (p[0] - 6) + ' ' + p[1] + ' q6 6 12 0" stroke="#D9B27C" stroke-width="3" fill="none" stroke-linecap="round"/>';
     });
-    s += sc;
-    // лицев диск
-    s += '<path d="M120 150 C 92 154 58 140 60 110 C 62 84 90 78 120 92 C 150 78 178 84 180 110 C 182 140 148 154 120 150 Z" fill="' + C.face + '"/>';
-    s += eyes(eyeKind);
-    if (cheeks) s += '<circle cx="72" cy="136" r="8" fill="#FF8FA3" opacity=".55"/><circle cx="168" cy="136" r="8" fill="#FF8FA3" opacity=".55"/>';
-    s += mouth(mouthKind);
+    // крила (зад предметите, ако държат)
+    s += wingSVG('L', L, g) + (R === 'holdR' ? wingSVG('R', R, g) : '');
+    // глава
+    s += '<ellipse cx="130" cy="106" rx="86" ry="80" fill="' + g('b') + '"/>';
+    s += '<path d="M60 70 q-6 -26 8 -40 q10 18 24 26 z M200 70 q6 -26 -8 -40 q-10 18 -24 26 z" fill="#7B4A22"/>';
+    // лице
+    s += '<path d="M130 166 C 96 170 52 152 54 116 C 56 84 92 76 130 92 C 168 76 204 84 206 116 C 208 152 164 170 130 166 Z" fill="' + g('f') + '"/>';
+    // очи
+    s += '<circle cx="98" cy="118" r="27" fill="' + g('e') + '"/><circle cx="162" cy="118" r="27" fill="' + g('e') + '"/>';
+    if (eye === 'happy') {
+      s += '<path d="M84 122 q14 -16 28 0 M148 122 q14 -16 28 0" stroke="#1D2440" stroke-width="6" fill="none" stroke-linecap="round"/>';
+    } else {
+      var dx = eye === 'up' ? 4 : 2, dy = eye === 'up' ? -7 : 2;
+      s += '<g class="owl-pupils"><circle cx="' + (100 + dx) + '" cy="' + (118 + dy) + '" r="13" fill="#1D2440"/><circle cx="' + (160 + dx) + '" cy="' + (118 + dy) + '" r="13" fill="#1D2440"/>' +
+        '<circle cx="' + (105 + dx) + '" cy="' + (112 + dy) + '" r="5" fill="#fff"/><circle cx="' + (165 + dx) + '" cy="' + (112 + dy) + '" r="5" fill="#fff"/>' +
+        '<circle cx="' + (96 + dx) + '" cy="' + (123 + dy) + '" r="2" fill="#fff" opacity=".8"/><circle cx="' + (156 + dx) + '" cy="' + (123 + dy) + '" r="2" fill="#fff" opacity=".8"/></g>';
+    }
+    // очила
+    s += '<g fill="none" stroke="#1E2A47" stroke-width="6.5"><circle cx="98" cy="118" r="31"/><circle cx="162" cy="118" r="31"/><path d="M127 112 q3 -5 6 0"/></g>' +
+      '<path d="M67 112 l-12 -5 M193 112 l12 -5" stroke="#1E2A47" stroke-width="6" stroke-linecap="round"/>' +
+      '<path d="M80 98 q10 -8 22 -5 M144 98 q10 -8 22 -5" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>';
+    if (cheeks) s += '<ellipse cx="74" cy="150" rx="10" ry="6" fill="#FF8FA3" opacity=".5"/><ellipse cx="186" cy="150" rx="10" ry="6" fill="#FF8FA3" opacity=".5"/>';
+    // човка
+    if (mouth === 'open') s += '<path d="M118 146 h24 l-12 22 z" fill="' + g('k') + '" stroke="#D86F00" stroke-width="2.5" stroke-linejoin="round"/><path d="M122 153 h16 l-8 9 z" fill="#B23A0C"/>';
+    else s += '<path d="M118 146 q12 -4 24 0 l-12 20 z" fill="' + g('k') + '" stroke="#D86F00" stroke-width="2.5" stroke-linejoin="round"/>';
     // шапка
-    s += '<path d="M54 78 C 54 16 186 16 186 78 Z" fill="' + C.cap + '"/>';
-    s += '<path d="M76 50 C 94 38 118 35 138 39" stroke="' + C.capLight + '" stroke-width="6" fill="none" stroke-linecap="round" opacity=".7"/>';
-    s += '<path d="M52 75 Q120 65 188 75 L188 85 Q120 75 52 85 Z" fill="' + C.capDark + '"/>';
-    s += '<path d="M60 81 Q20 81 18 93 Q22 101 70 93 Z" fill="' + C.capDark + '"/>';
-    s += '<circle cx="120" cy="33" r="6" fill="' + C.capDark + '"/>';
-    // уши-перца под шапката
-    s += '<path d="M55 72 l-10 -14 l18 6 z M185 72 l10 -14 l-18 6 z" fill="' + C.bodyDark + '"/>';
-    s += leftWing;
-    if (prop) s += abacus();
-    s += rightWing;
+    s += '<path d="M54 74 C 54 6 206 6 206 74 Z" fill="' + g('c') + '"/>' +
+      '<path d="M72 44 C 94 26 128 22 150 28" stroke="#A7EBA0" stroke-width="7" fill="none" stroke-linecap="round" opacity=".75"/>' +
+      '<path d="M50 70 Q130 58 210 70 L210 82 Q130 70 50 82 Z" fill="#2A8A35"/>' +
+      '<path d="M60 76 Q16 74 12 88 Q18 98 76 88 Z" fill="#2A8A35"/><path d="M58 78 Q24 78 20 86" stroke="#5FC45E" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="130" cy="22" r="7" fill="#2A8A35"/>';
+    // предмети
+    if (prop === 'abacus') s += abacus();
+    if (prop === 'pencilbook') s += book();
+    if (R !== 'holdR') s += wingSVG('R', R, g);
+    if (prop === 'pencilbook') s += pencil();
     s += '</svg>';
     return s;
+  }
+
+  function wingSVG(side, kind, g) {
+    var w = function (cx, cy, rot, cls) {
+      return '<g' + (cls ? ' class="' + cls + '"' : '') + '><g transform="rotate(' + rot + ' ' + cx + ' ' + cy + ')"><ellipse cx="' + cx + '" cy="' + cy + '" rx="21" ry="46" fill="' + g('w') + '"/>' +
+        '<path d="M' + (cx - 10) + ' ' + (cy + 12) + ' q10 8 20 0 M' + (cx - 11) + ' ' + (cy + 26) + ' q11 8 22 0" stroke="#A86B3C" stroke-width="3" fill="none" stroke-linecap="round"/></g></g>';
+    };
+    if (side === 'L') {
+      if (kind === 'upL') return w(46, 150, 40);
+      if (kind === 'hold') return w(68, 214, 38);
+      return w(58, 200, 14);
+    }
+    if (kind === 'up') return w(214, 140, -40, 'owl-wing-r');
+    if (kind === 'wave') return w(214, 140, -40, 'owl-wing-r owl-wave');
+    if (kind === 'holdR') return w(192, 214, -38);
+    if (kind === 'chin') return '<g transform="rotate(60 178 186)"><ellipse cx="178" cy="186" rx="18" ry="40" fill="' + g('w') + '"/></g>';
+    if (kind === 'thumb') return w(212, 150, -55, 'owl-wing-r');
+    return w(202, 200, -14);
+  }
+
+  function abacus() {
+    var beads = ['#FF5A5F', '#FFC531', '#4CBB4A', '#2F80ED'], s = '<g>';
+    s += '<rect x="86" y="196" width="88" height="58" rx="9" fill="#C27C3E" stroke="#8E5422" stroke-width="4"/><rect x="94" y="203" width="72" height="44" rx="5" fill="#FFF6E5"/>';
+    for (var r = 0; r < 3; r++) {
+      var y = 213 + r * 12;
+      s += '<line x1="94" y1="' + y + '" x2="166" y2="' + y + '" stroke="#8E5422" stroke-width="2"/>';
+      for (var b = 0; b < [3, 2, 4][r]; b++) s += '<circle cx="' + (101 + b * 9.5) + '" cy="' + y + '" r="4.8" fill="' + beads[(r + b) % 4] + '"/>';
+      s += '<circle cx="158" cy="' + y + '" r="4.8" fill="' + beads[(r + 2) % 4] + '"/>';
+    }
+    return s + '</g>';
+  }
+  function book() {
+    return '<g transform="rotate(-8 92 222)"><rect x="56" y="196" width="78" height="56" rx="6" fill="#2E9440"/><rect x="60" y="200" width="70" height="48" rx="4" fill="#43A84A"/>' +
+      '<rect x="130" y="198" width="6" height="52" rx="2" fill="#F4F0E6"/>' +
+      '<text x="95" y="230" text-anchor="middle" font-family="Nunito, Arial, sans-serif" font-weight="900" font-size="17" fill="#fff">1+2=3</text></g>';
+  }
+  function pencil() {
+    return '<g transform="rotate(-28 222 92)"><rect x="214" y="44" width="16" height="82" rx="3" fill="#FFC531"/><rect x="214" y="44" width="5" height="82" fill="#FFD866"/>' +
+      '<rect x="214" y="36" width="16" height="12" rx="3" fill="#FF8FA3"/><rect x="214" y="46" width="16" height="5" fill="#C9CED8"/>' +
+      '<path d="M214 126 l8 18 l8 -18 z" fill="#F6D9B0"/><path d="M219.5 138 l2.5 6 l2.5 -6 z" fill="#1D2B4F"/></g>';
   }
 
   window.Smetko = window.Smetko || {};

@@ -1,0 +1,558 @@
+# -*- coding: utf-8 -*-
+"""Генерира основните страници на smetko.com. Стартиране: python3 tools/build.py"""
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from common import *  # noqa
+import legal  # noqa: правните страници
+
+# ---------------- илюстрации за „Как работи?“ ----------------
+STEP1 = '''<svg viewBox="0 0 220 150" aria-hidden="true"><defs><linearGradient id="s1a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D99A5B"/><stop offset="1" stop-color="#A9672E"/></linearGradient></defs>
+<rect x="62" y="16" width="96" height="124" rx="14" fill="url(#s1a)"/><rect x="72" y="30" width="76" height="100" rx="8" fill="#fff"/><rect x="90" y="8" width="40" height="18" rx="7" fill="#8796B2"/>
+<g stroke-linecap="round" stroke-width="5.5" fill="none"><path d="M82 52 l6 6 l11 -12" stroke="#4CBB4A"/><path d="M82 80 l6 6 l11 -12" stroke="#4CBB4A"/><path d="M82 108 l6 6 l11 -12" stroke="#FFC531"/></g>
+<g fill="#DCE6F5"><rect x="106" y="48" width="32" height="9" rx="4.5"/><rect x="106" y="76" width="26" height="9" rx="4.5"/><rect x="106" y="104" width="30" height="9" rx="4.5"/></g>
+<text x="176" y="60" font-family="Nunito,Arial" font-weight="900" font-size="24" fill="#3299FF">2+3</text><text x="26" y="104" font-family="Nunito,Arial" font-weight="900" font-size="32" fill="#FF5A5F">×</text><text x="182" y="118" font-family="Nunito,Arial" font-weight="900" font-size="30" fill="#4CBB4A">=</text></svg>'''
+STEP2 = '''<svg viewBox="0 0 220 150" aria-hidden="true"><defs><radialGradient id="s2a" cx="40%" cy="30%" r="70%"><stop offset="0" stop-color="#FFE27A"/><stop offset="1" stop-color="#FFB800"/></radialGradient></defs>
+<path d="M110 12 l18 37 40 6 -29 28 7 40 -36 -19 -36 19 7 -40 -29 -28 40 -6z" fill="url(#s2a)" stroke="#E59A00" stroke-width="5" stroke-linejoin="round"/>
+<circle cx="97" cy="72" r="5.5" fill="#1D2440"/><circle cx="123" cy="72" r="5.5" fill="#1D2440"/><path d="M97 87 q13 11 26 0" stroke="#1D2440" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+<g><ellipse cx="38" cy="130" rx="24" ry="8" fill="#E0A500"/><ellipse cx="38" cy="122" rx="24" ry="8" fill="#FFC531" stroke="#E0A500" stroke-width="3"/><ellipse cx="38" cy="111" rx="24" ry="8" fill="#FFC531" stroke="#E0A500" stroke-width="3"/></g>
+<g><ellipse cx="182" cy="132" rx="24" ry="8" fill="#E0A500"/><ellipse cx="182" cy="124" rx="24" ry="8" fill="#FFC531" stroke="#E0A500" stroke-width="3"/></g>
+<circle cx="168" cy="30" r="6" fill="#FF9F1C"/><circle cx="48" cy="36" r="4" fill="#FF5A5F"/><circle cx="190" cy="74" r="4" fill="#4CBB4A"/></svg>'''
+STEP3 = '''<svg viewBox="0 0 220 150" aria-hidden="true"><path d="M16 142 L88 50 L118 86 L150 54 L210 142Z" fill="#8FB7DB"/><path d="M88 50 L74 68 L88 64 L100 74Z M150 54 L138 70 L150 66 L160 74Z" fill="#fff"/>
+<rect x="148" y="18" width="4" height="40" fill="#7B4A22"/><path d="M152 20 L180 29 L152 38Z" fill="#FF5A5F"/>
+<g transform="rotate(35 66 70)"><path d="M66 18 C 83 33 85 72 79 98 L53 98 C 47 72 49 33 66 18Z" fill="#fff" stroke="#3299FF" stroke-width="4"/><circle cx="66" cy="56" r="10" fill="#8ED3FF" stroke="#3299FF" stroke-width="4"/>
+<path d="M53 80 L38 102 L53 98Z M79 80 L94 102 L79 98Z" fill="#FF5A5F"/><path d="M57 100 Q66 128 75 100Z" fill="#FF9F1C"/></g></svg>'''
+
+HILLS = '''<svg class="hero2-land" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <path d="M0 170 L110 92 L200 140 L330 50 L460 150 L560 104 L660 160 L790 74 L920 156 L1030 100 L1140 150 L1260 62 L1370 130 L1440 104 L1440 300 L0 300Z" fill="#B7D7F2"/>
+  <path d="M330 50 L300 74 L318 70 L332 82 L348 70 L362 76Z M790 74 L762 96 L780 92 L794 102 L808 92 L820 97Z M1260 62 L1230 86 L1248 82 L1262 94 L1278 82 L1292 88Z" fill="#fff"/>
+  <path d="M0 214 L100 160 L210 204 L320 146 L440 212 L560 168 L680 216 L800 154 L920 214 L1040 164 L1160 216 L1280 158 L1390 208 L1440 182 L1440 300 L0 300Z" fill="#9CC6EA"/>
+  <path d="M-20 238 C 200 182 380 200 560 230 C 760 262 900 196 1100 206 C 1260 214 1360 196 1460 214 L1460 300 L-20 300Z" fill="#88D43B"/>
+  <path d="M-20 262 C 240 228 460 246 700 262 C 920 278 1120 236 1460 252 L1460 300 L-20 300Z" fill="#A9DF51"/>
+  <path d="M640 300 C 680 276 740 266 790 256 C 840 246 880 244 930 236" stroke="#FFE9B8" stroke-width="20" fill="none" stroke-linecap="round"/>
+  <g fill="#4FAE3C"><circle cx="150" cy="226" r="20"/><circle cx="176" cy="232" r="14"/><circle cx="1110" cy="214" r="22"/><circle cx="1138" cy="222" r="14"/><circle cx="1320" cy="226" r="16"/></g>
+  <g fill="#7B4A22"><rect x="147" y="240" width="6" height="14"/><rect x="1107" y="230" width="6" height="16"/><rect x="1317" y="238" width="6" height="12"/></g>
+  <g fill="#FFC531"><circle cx="300" cy="276" r="4"/><circle cx="520" cy="284" r="4"/><circle cx="1180" cy="272" r="4"/><circle cx="1000" cy="284" r="4"/></g>
+  <g fill="#FF5A5F"><circle cx="340" cy="284" r="4"/><circle cx="1220" cy="282" r="4"/><circle cx="90" cy="286" r="4"/></g>
+  <g fill="#fff"><circle cx="440" cy="278" r="3.5"/><circle cx="860" cy="284" r="3.5"/><circle cx="1380" cy="278" r="3.5"/></g>
+  <path d="M-20 300 C 400 284 1040 284 1460 300 Z" fill="#fff"/>
+</svg>'''
+
+# ---------------- класове (по учебните програми на МОН) ----------------
+GRADES = {
+    1: dict(c='g1', color='#FF5A5F', short=['Числата до 10 и до 20', 'Събиране и изваждане с и без преминаване', 'Кръглите десетици до 100', 'Фигури, сантиметър, часовник, пари'],
+            topics=[('g1t1', 'Числата до 5 и нула'), ('g1t2', 'Числата до 10. Събиране и изваждане до 10'), ('g1t3', 'Числата от 11 до 20'), ('g1t4', 'Събиране и изваждане до 20 без преминаване'), ('g1t5', 'Събиране и изваждане до 20 с преминаване'), ('g1t6', 'Числата 10, 20, 30, … 100')],
+            about='Програмата на МОН за 1. клас има 6 теми, които вървят една след друга: числата до 5 и нула, числата до 10, числата от 11 до 20, събиране и изваждане до 20 без преминаване, после с преминаване, и накрая кръглите десетици до 100. Децата разпознават триъгълник, квадрат, кръг и правоъгълник, мерят отсечки в сантиметри, работят с килограм, монети и банкноти и разчитат часовника в цели часове.',
+            ex=['3 + 2 = ?', '8 − 5 = ?', '13 + 4 = ?', '9 + 6 = ?', '50 + 30 = ?']),
+    2: dict(c='g2', color='#FF9F1C', short=['Числата до 100', 'Събиране и изваждане до 100', 'Цялата таблица за умножение и деление', 'Обиколка, триъгълници, часовник'],
+            topics=[('g2t1', 'Числата до 100'), ('g2t2', 'Събиране и изваждане до 100 без преминаване'), ('g2t3', 'Събиране и изваждане до 100 с преминаване'), ('g2t4', 'Таблично умножение и деление')],
+            about='Във 2. клас темите са 4: числата до 100, събиране и изваждане до 100 без преминаване, после с преминаване, и таблично умножение и деление. Децата учат скоби и ред на действията, неизвестно събираемо и множител, четни и нечетни числа, видовете триъгълници според страните, обиколка, дециметър и метър, минута, денонощие, седмица, месец и година.',
+            ex=['34 + 25 = ?', '72 − 38 = ?', '7 · 8 = ?', '40 − (15 + 5) = ?', '? · 6 = 42']),
+    3: dict(c='g3', color='#4CBB4A', short=['Числата до 1000', 'Събиране и изваждане до 1000', 'Умножение и деление с едноцифрено число', 'Ъгли, части, мерни единици'],
+            topics=[('g3t1', 'Числата до 1000'), ('g3t2', 'Събиране и изваждане до 1000 без преминаване'), ('g3t3', 'Събиране и изваждане до 1000 с преминаване'), ('g3t4', 'Умножение на двуцифрено и трицифрено число с едноцифрено'), ('g3t5', 'Деление на двуцифрено и трицифрено число с едноцифрено')],
+            about='В 3. клас темите са 5: числата до 1000, събиране и изваждане без и с преминаване, умножение и деление на двуцифрено и трицифрено число с едноцифрено. Децата разпознават права, крива линия и лъч, прав, остър и тъп ъгъл, триъгълниците според ъглите, намират половина, трета, четвърт и десета, работят с мм, км, г, т, век и секунда.',
+            ex=['456 + 238 = ?', '703 − 368 = ?', '23 · 4 = ?', '84 : 4 = ?', 'Половината от 18 = ?']),
+    4: dict(c='g4', color='#3299FF', short=['Числата над 1000 и римски цифри', 'Многоцифрени числа – 4 действия', 'Умножение и деление с двуцифрено', 'Лице, градуси, геометрични тела'],
+            topics=[('g4t1', 'Числата над 1000'), ('g4t2', 'Събиране и изваждане на многоцифрени числа без преминаване'), ('g4t3', 'Събиране и изваждане на многоцифрени числа с преминаване'), ('g4t4', 'Умножение на многоцифрено число с едноцифрено'), ('g4t5', 'Деление на многоцифрено число с едноцифрено'), ('g4t6', 'Умножение на многоцифрено число с двуцифрено'), ('g4t7', 'Деление на многоцифрено число с двуцифрено')],
+            about='В 4. клас темите са 7: числата над 1000, събиране и изваждане на многоцифрени числа без и с преминаване, умножение и деление с едноцифрено и с двуцифрено число. Децата пишат римски цифри, мерят ъгли в градуси, разпознават куб, паралелепипед, цилиндър, конус, пирамида и сфера, намират лице на правоъгълник и квадрат и работят с мерните единици за лице.',
+            ex=['4 528 + 3 271 = ?', 'XIV = ?', '2 345 · 3 = ?', '576 : 24 = ?', 'Лице на 8 см × 5 см = ?']),
+}
+BOOKS = {1: ['Бит и Техника', 'Архимед'], 2: ['Бит и Техника'], 3: ['Бит и Техника', 'Просвета'], 4: ['Бит и Техника']}
+
+FAQ_INDEX = [
+    ('По кой учебник са задачите?', 'Детето избира своя учебник и мисиите се подреждат по заглавията на уроците в него. Ако учебникът още го няма в списъка, мисиите следват учебната програма на МОН – общият ред, по който работят всички одобрени учебници.'),
+    ('Безплатен ли е Сметко?', 'По време на пилотния период всички игри са безплатни. После ще има безплатен план и абонаменти с 14 дни пробен период. Вижте <a href="pricing.html">цените</a>.'),
+    ('Трябва ли регистрация?', 'Не. Децата играят веднага, а прогресът се пази на устройството. Профилите за родители и учители с отчети предстоят.'),
+    ('Има ли реклами?', 'Не. Сметко е чиста детска среда, без рекламни банери и без проследяване.'),
+    ('На какво устройство работи?', 'На телефон, таблет, компютър и интерактивна дъска, направо в браузъра. Може да се добави на началния екран като приложение и работи и без интернет.'),
+    ('Как може училището ни да се включи?', 'Вижте <a href="uchilishta.html">пилотната програма за училища</a>. Там са и образците на документите.'),
+]
+
+
+def class_cards():
+    out = ''
+    for g, d in GRADES.items():
+        lis = ''.join(f'<li>{t}</li>' for t in d['short'])
+        out += f'''<article class="card class-card {d['c']}"><div class="cc-num">{g}</div><h3>{g}. клас</h3><ul>{lis}</ul>
+<div class="cc-actions"><a class="btn btn-sm" href="game.html?grade={g}&amp;mode=adventure">Играй</a><a class="btn btn-sm btn-ghost" href="class-{g}.html">Теми</a></div></article>'''
+    return out
+
+
+# ================= index.html =================
+index = head('Сметко – математика като игра за 1.–4. клас',
+             'Онлайн математически игри за 1., 2., 3. и 4. клас по учебната програма на МОН и по уроците в учебника на детето. Мисии, точки и значки – без реклами.',
+             'index.html', [ORG, {"@context": "https://schema.org", "@type": "WebApplication", "name": "Сметко", "url": SITE,
+                                  "applicationCategory": "EducationalApplication", "operatingSystem": "Всички (уеб браузър)", "inLanguage": "bg",
+                                  "educationalLevel": "1.–4. клас", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}}, faq_ld(FAQ_INDEX)],
+             'home') + header(over=True) + f'''
+<main id="main">
+<section class="hero2">
+  <span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span>
+  <div class="wrap hero2-grid">
+    <div class="hero2-copy">
+      <h1>Математика като игра<br>за 1.–4. клас!</h1>
+      <a class="btn btn-xl" href="game.html">Започни мисия</a>
+      <p class="hero2-sub">Започни своето математическо приключение!</p>
+      <div class="hero2-grades" aria-label="Бърз избор на клас"><span>Избери клас:</span>
+        <a class="gpill g1" href="game.html?grade=1&amp;mode=adventure" aria-label="1. клас">1</a><a class="gpill g2" href="game.html?grade=2&amp;mode=adventure" aria-label="2. клас">2</a><a class="gpill g3" href="game.html?grade=3&amp;mode=adventure" aria-label="3. клас">3</a><a class="gpill g4" href="game.html?grade=4&amp;mode=adventure" aria-label="4. клас">4</a>
+      </div>
+    </div>
+    <div class="hero2-owl"><div class="owl" data-owl="hero"></div></div>
+  </div>
+  {HILLS}
+</section>
+
+<section class="how2" id="kak-raboti">
+  <div class="wrap">
+    <h2 class="lined">Как работи?</h2>
+    <div class="steps2">
+      <div class="step2"><div class="step2-img">{STEP1}</div><p class="step2-text"><span>1.</span> Решавай забавни мисии</p></div>
+      <div class="arrow2" aria-hidden="true">›</div>
+      <div class="step2"><div class="step2-img">{STEP2}</div><p class="step2-text"><span>2.</span> Събирай точки и значки</p></div>
+      <div class="arrow2" aria-hidden="true">›</div>
+      <div class="step2"><div class="step2-img">{STEP3}</div><p class="step2-text"><span>3.</span> Печели нови нива!</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section soft">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">По твоя учебник</h2><p>Избираш учебника, по който учиш, и мисиите се подреждат по заглавията на уроците в него.</p></div>
+    <div class="book-strip">
+      <div class="book-card"><b>Учебна програма на МОН</b><small>общ ред за всички учебници</small></div>
+      <div class="book-card"><b>Бит и Техника</b><small>1., 2., 3. и 4. клас</small></div>
+      <div class="book-card"><b>Архимед</b><small>1. клас</small></div>
+      <div class="book-card"><b>Просвета</b><small>3. клас</small></div>
+      <div class="book-card more"><b>Скоро още</b><small>Просвета Плюс, Клет, Анубис, Булвест</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Три начина да играеш</h2><p>За бързи умове, за изследователи и за спокойна тренировка.</p></div>
+    <div class="grid grid-3">
+      <article class="card mode-card quick"><div class="mode-ico">⚡</div><h3>Бързо сметни</h3><p>60 секунди, колкото можеш повече задачи. Бонус за бързина и рекорд за побиване.</p><a class="btn btn-sm" href="game.html?mode=quick&amp;start=0">Играй</a></article>
+      <article class="card mode-card adv"><div class="mode-ico">🗺️</div><h3>Приключение</h3><p>Мисии по пътеката към върха, подредени като уроците в учебника. До 3 звезди на мисия.</p><a class="btn btn-sm btn-green" href="game.html?mode=adventure&amp;start=0">Играй</a></article>
+      <article class="card mode-card prac"><div class="mode-ico">🧘</div><h3>Тренировка</h3><p>Без часовник и без стрес. При грешка Сметко показва правилното решение.</p><a class="btn btn-sm btn-purple" href="game.html?mode=practice&amp;start=0">Играй</a></article>
+    </div>
+  </div>
+</section>
+
+<section class="section soft" id="klasove">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Задачи за всеки клас</h2><p>Темите и редът им следват учебните програми на МОН по математика.</p></div>
+    <div class="grid grid-4">{class_cards()}</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap split">
+    <article class="aud-card parents" id="roditeli">
+      <span class="eyebrow">За родители</span>
+      <h2>Спокойствие за вас, игра за детето</h2>
+      <ul>
+        <li>Без реклами и без събиране на лични данни на детето</li>
+        <li>10 минути на ден затвърждават наученото в училище</li>
+        <li>Същите теми и ред като в учебника на детето</li>
+        <li>Седмичен отчет за напредъка <span class="soon">скоро</span></li>
+      </ul>
+      <a class="btn btn-white" href="about.html#roditeli">Научете повече</a>
+    </article>
+    <article class="aud-card teachers" id="uchiteli">
+      <span class="eyebrow">За учители</span>
+      <h2>Помощник в час и за домашна работа</h2>
+      <ul>
+        <li>„Бързо сметни“ на интерактивната дъска</li>
+        <li>Линк за домашна по конкретна тема</li>
+        <li>Работни листове за печат с отговори</li>
+        <li>Учителски панел и класации на класа <span class="soon">скоро</span></li>
+      </ul>
+      <a class="btn btn-blue" href="uchilishta.html">Сметко в училище</a>
+    </article>
+  </div>
+</section>
+
+<section class="section soft">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Честни цени</h2><p>По време на пилотния период всичко е безплатно. После: безплатен план и абонаменти с 14 дни пробен период.</p></div>
+    <div class="plans three">
+      <div class="plan"><h3>1 месец</h3><div class="who">Без обвързване</div><div class="price">2.99 € <small>/ месец</small></div><div class="per">&nbsp;</div><ul><li>Всички мисии по учебника</li><li>Неограничена тренировка</li><li>Всички значки и нива</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
+      <div class="plan featured"><span class="ribbon">Препоръчан</span><h3>Учебна година</h3><div class="who">15 септември – 30 юни</div><div class="price">15 € <small>/ година</small></div><div class="per">≈ 1.58 € на месец</div><ul><li>Всичко от месечния план</li><li>Без плащане през лятото</li><li>Подходящ за подарък</li></ul><a class="btn" href="pricing.html">Детайли</a></div>
+      <div class="plan"><h3>Цял клас</h3><div class="who">До 30 ученици + учители</div><div class="price">75 € <small>/ уч. година</small></div><div class="per">2.50 € на ученик</div><ul><li>Всичко за всяко дете</li><li>Учителски панел <span class="soon">скоро</span></li><li>Фактура</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Често задавани въпроси</h2></div>
+    {faq(FAQ_INDEX)}
+  </div>
+</section>
+
+<section class="section soft">
+  <div class="wrap">
+    <div class="cta-band">
+      <div class="owl" data-owl="cheer"></div>
+      <div><h2>Готов ли си за първата мисия?</h2><p>Отнема 2 минути. Без регистрация.</p></div>
+      <a class="btn btn-white btn-lg" href="game.html">Започни сега</a>
+    </div>
+  </div>
+</section>
+</main>
+''' + FOOTER + scripts()
+write('index.html', index)
+
+# ================= game.html =================
+game = head('Игра – Сметко', 'Играй математически мисии по учебника, бързо смятане и тренировка за 1.–4. клас.', 'game.html', [], 'game-page') + header(game=True) + '''
+<main id="main">
+<noscript><div class="noscript">За да играете, моля, включете JavaScript в браузъра.</div></noscript>
+
+<section class="screen" id="screen-setup" aria-label="Избор на игра">
+  <div class="game-wrap">
+    <div class="today">
+      <div class="owl" data-owl="hello"></div>
+      <div class="goal"><div id="rank-name">Ниво 1: Новак</div><div id="goal-text" class="goal-text">Днешна цел</div><div class="goal-bar"><i id="goal-bar"></i></div></div>
+      <div class="streak">🔥<b id="streak-num">0</b>дни</div>
+    </div>
+    <div class="panel">
+      <div class="step-label">1. Избери клас</div>
+      <div class="grade-tabs">
+        <button class="grade-tab" data-g="1"><b>1</b>клас</button>
+        <button class="grade-tab" data-g="2"><b>2</b>клас</button>
+        <button class="grade-tab" data-g="3"><b>3</b>клас</button>
+        <button class="grade-tab" data-g="4"><b>4</b>клас</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="step-label">2. Избери игра</div>
+      <div class="modes">
+        <button class="mode-btn" data-mode="adventure"><span class="m-ico">🗺️</span><b>Приключение</b><small>Мисии по учебника</small></button>
+        <button class="mode-btn" data-mode="quick"><span class="m-ico">⚡</span><b>Бързо сметни</b><small>60 секунди, нов рекорд</small></button>
+        <button class="mode-btn" data-mode="practice"><span class="m-ico">🧘</span><b>Тренировка</b><small>Без часовник</small></button>
+      </div>
+      <div id="book-wrap" class="book-wrap">
+        <label class="step-label" for="book-select">3. По кой учебник учиш?</label>
+        <select id="book-select" class="select"></select>
+        <p class="hint">Мисиите се подреждат по заглавията на уроците в учебника. Не намираш своя? Избери „По учебната програма“ – общият ред за всички учебници.</p>
+      </div>
+      <div id="topic-wrap" style="margin-top:18px">
+        <div class="step-label">3. Избери тема</div>
+        <div class="topic-chips" id="topic-chips"></div>
+      </div>
+      <div class="start-row"><button class="btn btn-lg" id="start-btn">Започни!</button></div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-map" aria-label="Карта на мисиите">
+  <div class="game-wrap">
+    <div class="map-head"><button class="icon-btn" id="map-back" aria-label="Назад">←</button><h2 id="map-title">Приключение</h2><span class="map-stars" id="map-stars">★ 0</span></div>
+    <div class="map" id="map"></div>
+  </div>
+</section>
+
+<section class="screen" id="screen-play" aria-label="Игра">
+  <div class="game-wrap">
+    <div class="play-top">
+      <button class="icon-btn" id="exit-btn" aria-label="Изход">✕</button>
+      <div class="progress" id="progress"><i></i></div>
+      <span class="timer-num" id="timer-num" hidden>60</span>
+      <button class="btn btn-sm btn-purple" id="end-btn" hidden style="margin-left:auto">Край</button>
+    </div>
+    <div class="score"><span class="pill" id="play-mode">Игра</span><span class="pill combo" id="combo"></span><span class="pill" id="level-pill">Ниво 1</span><span class="pill" id="pts">★ 0</span></div>
+    <div class="stage"><div class="owl" id="play-owl" data-owl="hello"></div><div class="bubble" id="bubble" aria-live="polite">Да започваме!</div></div>
+    <div class="qcard" id="qcard"><div id="qbody"></div></div>
+    <div class="keypad" id="keypad">
+      <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
+      <button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
+      <button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>
+      <button class="key del" data-k="del" aria-label="Изтрий">⌫</button><button class="key" data-k="0">0</button><button class="key ok" data-k="ok" aria-label="Провери">✓</button>
+    </div>
+    <div class="choices" id="choices" hidden></div>
+    <div class="next-row" id="next-row" hidden><button class="btn btn-green btn-lg" id="next-btn">Напред →</button></div>
+  </div>
+</section>
+
+<section class="screen" id="screen-result" aria-label="Резултат">
+  <div class="game-wrap"><div class="panel result" id="result"></div></div>
+</section>
+</main>
+''' + scripts(['js/math-engine.js', 'js/textbooks.js', 'js/game.js'])
+write('game.html', game)
+
+# ================= class pages =================
+for g, d in GRADES.items():
+    items = ''.join(f'''<a class="topic-item" style="--c:{d['color']}" href="game.html?grade={g}&amp;mode=practice&amp;topic={tid}"><span class="t-ico">{i + 1}</span><span>{name}<small>Тема {i + 1} от програмата · тренировка</small></span><span class="t-go">→</span></a>''' for i, (tid, name) in enumerate(d['topics']))
+    exs = ''.join(f'<li><b>{e}</b></li>' for e in d['ex'])
+    books = ''.join(f'<span class="tag">{b}</span>' for b in BOOKS[g])
+    faqs = [(f'Задачите по кой учебник са?', f'В „Приключение“ детето избира учебника си. За {g}. клас мисиите вече са подредени по уроците на: {", ".join(BOOKS[g])}. За останалите учебници мисиите следват учебната програма на МОН – общия ред на всички одобрени учебници.'),
+            ('Мога ли да тренирам само една тема?', 'Да. Изберете темата от списъка горе. В „Тренировка“ няма часовник, а при грешка Сметко показва правилното решение.'),
+            ('Трудността нагажда ли се?', 'Да. В „Бързо сметни“ и „Тренировка“ задачите стават по-трудни след серия верни отговори и по-лесни след няколко грешки.')]
+    title = f'Математика за {g}. клас – задачи и игри онлайн | Сметко'
+    desc = f'Онлайн задачи по математика за {g}. клас по учебната програма на МОН: ' + ', '.join(t[1] for t in d['topics'][:3]).lower() + '. Мисии по уроците в учебника.'
+    ld = [crumbs([('Начало', ''), (f'{g}. клас', f'class-{g}.html')]),
+          {"@context": "https://schema.org", "@type": "LearningResource", "name": f"Математика за {g}. клас – Сметко", "url": f"{SITE}/class-{g}.html",
+           "inLanguage": "bg", "educationalLevel": f"{g}. клас", "learningResourceType": "Интерактивна игра", "teaches": [t[1] for t in d['topics']],
+           "isAccessibleForFree": True}, faq_ld(faqs)]
+    html = head(title, desc, f'class-{g}.html', ld) + header() + page_hero(
+        f'Математика за {g}. клас', f'Задачи по учебната програма на МОН за {g}. клас. Мисии по уроците в твоя учебник, точки и значки.', f'{g}. клас',
+        ['hello', 'happy', 'think', 'cheer'][g - 1],
+        f'<div class="hero-cta"><a class="btn btn-lg btn-green" href="game.html?grade={g}&amp;mode=adventure">🗺️ Приключение</a><a class="btn btn-white" href="game.html?grade={g}&amp;mode=quick">⚡ Бързо сметни</a></div>') + f'''
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Темите по програмата</h2><p>{len(d['topics'])} теми, в реда на учебната програма на МОН. Избери тема и тренирай без часовник.</p></div>
+    <div class="topic-list">{items}</div>
+  </div>
+</section>
+<section class="section soft">
+  <div class="wrap prose">
+    <h2>Какво учат децата в {g}. клас по математика</h2>
+    <p>{d['about']}</p>
+    <h3>Мисии по учебник</h3>
+    <p>В „Приключение“ избираш учебника си и мисиите носят заглавията на уроците в него. За {g}. клас вече са налични: {books}</p>
+    <h3>Примерни задачи</h3>
+    <ul>{exs}</ul>
+    <div class="callout">Съвет: 10 минути на ден са по-полезни от един час веднъж седмично. Сметко отбелязва поредните дни игра с огънче 🔥.</div>
+  </div>
+</section>
+<section class="section"><div class="wrap"><div class="section-head"><h2 class="lined">Въпроси</h2></div>{faq(faqs)}</div></section>
+<section class="section soft">
+  <div class="wrap" style="text-align:center">
+    <h2>Други класове</h2>
+    <div class="grade-buttons" style="margin:20px auto 0">{''.join(f'<a class="grade-btn g{x}" href="class-{x}.html"><b>{x}</b><small>клас</small></a>' for x in range(1, 5))}</div>
+  </div>
+</section>
+</main>
+''' + FOOTER + scripts()
+    write(f'class-{g}.html', html)
+
+# ================= pricing.html =================
+FAQ_PRICE = [
+    ('Кога започват абонаментите?', 'След пилотния период в училищата и след регистрацията на търговеца. Дотогава всички игри са безплатни. Пишете ни на <a href="mailto:info@smetko.com">info@smetko.com</a> и ще ви уведомим първи.'),
+    ('Има ли безплатен пробен период?', 'Да, 14 дни пълен достъп без плащане след регистрация на родителски или учителски профил.'),
+    ('Подновява ли се абонаментът автоматично?', 'Месечният абонамент се подновява всеки месец и може да се спре по всяко време. Годишният и този за учебна година не се подновяват автоматично. Ще ви напомним преди изтичането им.'),
+    ('Как плащат училищата?', 'С фактура и банков превод. За 3 или повече класа има 15% отстъпка, а за 8 или повече класа – 25%.'),
+    ('Мога ли да се откажа?', 'Да. Правата ви при отказ са описани в <a href="terms.html">Общите условия</a>, а формулярът за отказ е <a href="otkaz.html">тук</a>.'),
+]
+paid = '<li>Мисии по учебника за всички класове</li><li>Неограничена тренировка</li><li>Всички значки и нива</li>'
+pricing = head('Цени и абонаменти – Сметко', 'Абонаменти за Сметко: 1 месец 2.99 €, учебна година 15 €, година 18 €, семеен 29 €, клас 75 €. Отстъпки за училища.',
+               'pricing.html', [crumbs([('Начало', ''), ('Цени', 'pricing.html')]), faq_ld(FAQ_PRICE)]) + header('pricing') + page_hero(
+    'Цени и абонаменти', 'По-малко от цената на една тетрадка на месец. Без реклами, с 14 дни безплатен пробен период.', 'Цени', 'happy',
+    '<div class="callout" style="max-width:640px">🎉 По време на пилотния период <b>всички игри са безплатни</b>.</div>') + f'''
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">За едно дете</h2></div>
+    <div class="plans">
+      <div class="plan"><h3>Безплатно</h3><div class="who">Да опознаете Сметко</div><div class="price">0 €</div><div class="per">завинаги</div>
+        <ul><li>„Бързо сметни“ за всички класове</li><li>Първите 3 мисии от всеки клас</li><li>Тренировка до 20 задачи на ден</li><li class="no">Всички мисии по учебника</li></ul>
+        <a class="btn btn-white" href="game.html">Играй сега</a></div>
+      <div class="plan"><h3>1 месец</h3><div class="who">Без обвързване</div><div class="price">2.99 € <small>/ месец</small></div><div class="per">спирате по всяко време</div>
+        <ul>{paid}</ul><button class="btn btn-white" data-subscribe="1 месец">Избирам</button></div>
+      <div class="plan featured"><span class="ribbon">Препоръчан</span><h3>Учебна година</h3><div class="who">15 септември – 30 юни</div><div class="price">15 € <small>/ година</small></div><div class="per">≈ 1.58 € на месец</div>
+        <ul>{paid}<li>Без плащане през лятото</li></ul><button class="btn" data-subscribe="Учебна година">Избирам</button></div>
+      <div class="plan"><h3>1 година</h3><div class="who">12 месеца, с лятото</div><div class="price">18 € <small>/ година</small></div><div class="per">1.50 € на месец</div>
+        <ul>{paid}<li>Лятна тренировка преди новия клас</li></ul><button class="btn btn-white" data-subscribe="1 година">Избирам</button></div>
+    </div>
+  </div>
+</section>
+<section class="section soft">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">За семейства, класове и училища</h2></div>
+    <div class="plans three">
+      <div class="plan"><h3>Семеен</h3><div class="who">До 4 деца + 1 родителски профил</div><div class="price">29 € <small>/ година</small></div><div class="per">≈ 7.25 € на дете</div>
+        <ul>{paid}<li>Отделен профил за всяко дете</li><li>Седмичен отчет <span class="soon">скоро</span></li></ul><button class="btn btn-white" data-subscribe="Семеен">Избирам</button></div>
+      <div class="plan featured"><span class="ribbon">За учители</span><h3>Цял клас</h3><div class="who">До 30 ученици, 1 основен + 2 гост учители</div><div class="price">75 € <small>/ учебна година</small></div><div class="per">2.50 € на ученик</div>
+        <ul>{paid}<li>Учителски панел и статистика <span class="soon">скоро</span></li><li>Класации и грамоти <span class="soon">скоро</span></li><li>Фактура</li></ul><button class="btn" data-subscribe="Цял клас">Избирам</button></div>
+      <div class="plan"><h3>Училище</h3><div class="who">Няколко класа или цялото училище</div><div class="price" style="font-size:2rem">по запитване</div><div class="per">до −25% отстъпка</div>
+        <ul><li>−15% за 3 или повече класа</li><li>−25% за 8 или повече класа</li><li>Фактура и банков превод</li><li>Безплатен пилотен период</li></ul><a class="btn btn-blue" href="uchilishta.html">Пилотна програма</a></div>
+    </div>
+    <p class="price-note">Всички цени са в евро. Информацията за ДДС ще бъде посочена след регистрацията на търговеца.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Какво включва всеки план</h2></div>
+    <div class="table-wrap"><table class="compare">
+      <thead><tr><th>Възможност</th><th class="c">Безплатно</th><th class="c">Абонамент</th></tr></thead>
+      <tbody>
+        <tr><td>„Бързо сметни“ (60 секунди)</td><td class="c">✓</td><td class="c">✓</td></tr>
+        <tr><td>Мисии в „Приключение“ по учебника</td><td class="c">3 на клас</td><td class="c">всички</td></tr>
+        <tr><td>„Тренировка“ по теми</td><td class="c">20 задачи/ден</td><td class="c">неограничено</td></tr>
+        <tr><td>Работни листове за печат</td><td class="c">✓</td><td class="c">✓</td></tr>
+        <tr><td>Точки, нива и значки</td><td class="c">✓</td><td class="c">✓</td></tr>
+        <tr><td>Без реклами</td><td class="c">✓</td><td class="c">✓</td></tr>
+        <tr><td>Отчет за родителя / учителски панел</td><td class="c">–</td><td class="c">скоро</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+<section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Въпроси за плащането</h2></div>{faq(FAQ_PRICE)}</div></section>
+</main>
+''' + FOOTER + scripts()
+write('pricing.html', pricing)
+
+# ================= about.html =================
+about = head('За родители и учители – Сметко', 'Как Сметко помага на децата да обикнат математиката. Информация за родители и начални учители: безопасност, употреба в час и за домашна работа.',
+             'about.html', [crumbs([('Начало', ''), ('За Сметко', 'about.html')])]) + header('parents') + page_hero(
+    'За Сметко', 'Сметко е бухал с очила и голямо сърце за числата. Мисията му е всяко дете в начален етап да смята уверено и с удоволствие.', 'За Сметко') + '''
+<main id="main">
+<section class="section">
+  <div class="wrap prose">
+    <h2>Защо Сметко?</h2>
+    <p>Математиката в 1.–4. клас се гради като кула: ако таблицата за умножение или преминаването през десетицата не са затвърдени, всичко след тях става по-трудно. А затвърждаването става с упражнение – много и редовно упражнение.</p>
+    <p>Сметко превръща упражнението в игра. Задачите се генерират по темите на учебната програма на МОН, а мисиите следват уроците в учебника, по който учи детето. Затова то упражнява точно това, което учат в клас в момента.</p>
+  </div>
+</section>
+<section class="section soft" id="roditeli">
+  <div class="wrap prose">
+    <span class="eyebrow">За родители</span>
+    <h2>Как да използвате Сметко у дома</h2>
+    <ul>
+      <li><b>Изберете учебника на детето.</b> В „Приключение“ мисиите носят заглавията на уроците от неговия учебник.</li>
+      <li><b>По малко, но всеки ден.</b> 10–15 минути дневно дават повече от един дълъг час седмично.</li>
+      <li><b>Насочете „Тренировка“ към трудната тема.</b> Без часовник и без стрес.</li>
+      <li><b>Похвалете усилието, не само резултата.</b> Сметко окуражава при грешка и показва правилния отговор.</li>
+    </ul>
+    <h3>Безопасност и поверителност</h3>
+    <ul>
+      <li>Няма реклами и няма проследяващи скриптове.</li>
+      <li>Не събираме лични данни на децата. Прогресът се пази само в браузъра на устройството.</li>
+      <li>Когато въведем профили, те ще са на родителя или учителя, а не на детето. Подробно: <a href="privacy-policy.html">Политика за поверителност</a>.</li>
+    </ul>
+  </div>
+</section>
+<section class="section" id="uchiteli">
+  <div class="wrap prose">
+    <span class="eyebrow">За учители</span>
+    <h2>Сметко в класната стая</h2>
+    <ul>
+      <li><b>Загрявка в началото на часа.</b> „Бързо сметни“ на интерактивната дъска – целият клас решава заедно 60 секунди.</li>
+      <li><b>Домашна работа с един линк.</b> Генерирайте линк към тема или мисия от <a href="uchilishta.html#domashna">страницата за училища</a>.</li>
+      <li><b>Работни листове.</b> <a href="rabotni-listove.html">Генерирайте задачи за печат</a> по тема, с отговори за учителя.</li>
+      <li><b>По вашия учебник.</b> Мисиите следват уроците в учебника, по който работи класът.</li>
+    </ul>
+    <p><a class="btn btn-blue" href="uchilishta.html">Пилотна програма за училища</a></p>
+  </div>
+</section>
+<section class="section soft" id="kontakt">
+  <div class="wrap prose" style="text-align:center">
+    <h2>Контакт</h2>
+    <p>Въпроси, идеи, открита грешка в задача? Пишете ни – четем всяко писмо.</p>
+    <p><a class="btn" href="mailto:info@smetko.com">info@smetko.com</a></p>
+  </div>
+</section>
+</main>
+''' + FOOTER + scripts()
+write('about.html', about)
+
+# ================= achievements.html =================
+ach = head('Постижения и класации – Сметко', 'Точки, нива, значки и рекорди в Сметко.', 'achievements.html') + header('ach') + page_hero(
+    'Постижения и класации', '<span id="rank-line">Ниво 1: Новак</span>', 'Постижения', 'cheer',
+    '<div style="max-width:420px"><div class="rank-bar"><i id="rank-bar" style="width:0"></i></div><p class="rank-next" id="rank-next"></p></div>') + '''
+<main id="main">
+<section class="section"><div class="wrap"><div class="stat-row" id="stats"></div></div></section>
+<section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Значки</h2><p id="badge-count"></p></div><div class="badges" id="badges"></div></div></section>
+<section class="section"><div class="wrap"><div class="section-head"><h2 class="lined">Звезди и рекорди</h2><p>Звезди от „Приключение“ и най-добри резултати в „Бързо сметни“.</p></div><div class="grid grid-4" id="grades"></div></div></section>
+<section class="section soft">
+  <div class="wrap prose" style="text-align:center">
+    <h2>Класации</h2>
+    <p>Класациите на класа и училището ще се появят с учителските профили. Дотогава се състезавай със себе си – побий рекорда си в „Бързо сметни“!</p>
+    <p><a class="btn btn-lg" href="game.html?mode=quick&amp;start=0">⚡ Побий рекорда</a></p>
+    <p class="small-note">Прогресът се пази само на това устройство. <button class="btn btn-sm btn-ghost" id="reset-btn">Изтрий прогреса</button></p>
+  </div>
+</section>
+</main>
+''' + FOOTER + scripts(['js/math-engine.js', 'js/textbooks.js', 'js/achievements.js'])
+write('achievements.html', ach)
+
+# ================= uchilishta.html (училища) =================
+school = head('Сметко в училище – пилотна програма', 'Безплатна пилотна програма за начални учители и училища: Сметко в час, домашни с линк, работни листове и образци на документи.',
+              'uchilishta.html', [crumbs([('Начало', ''), ('За училища', 'uchilishta.html')])]) + header() + page_hero(
+    'Сметко в училище', 'Безплатна пилотна програма за начални учители. Тествайте Сметко с класа си и ни помогнете да го направим най-добрия помощник по математика.', 'За училища', 'hero',
+    '<div class="hero-cta"><a class="btn btn-lg" href="mailto:info@smetko.com?subject=Пилотна%20програма%20Сметко">Включете се</a><a class="btn btn-white" href="#dokumenti">Документи</a></div>') + '''
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Как протича пилотът</h2></div>
+    <div class="grid grid-4 steps-num">
+      <div class="card"><b class="n">1</b><h3>Запитване</h3><p>Пишете ни с името на училището, класа и учебника, по който работите.</p></div>
+      <div class="card"><b class="n">2</b><h3>Споразумение</h3><p>Подписваме кратко <a href="dogovor-pilot.html">споразумение за пилотно ползване</a>. Безплатно е.</p></div>
+      <div class="card"><b class="n">3</b><h3>В час и у дома</h3><p>4–8 седмици използвате Сметко в час и за домашна работа.</p></div>
+      <div class="card"><b class="n">4</b><h3>Обратна връзка</h3><p>Кратка анкета за вас и за децата. Подобряваме Сметко по вашите идеи.</p></div>
+    </div>
+    <div class="callout" style="margin-top:24px">В пилотния период децата <b>не създават профили</b> и <b>не въвеждат лични данни</b>. Прогресът се пази само на устройството, на което играят.</div>
+  </div>
+</section>
+<section class="section soft" id="domashna">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Линк за домашна работа</h2><p>Изберете клас, игра и тема или учебник – копирайте линка и го пратете на родителите (например в Школо).</p></div>
+    <div class="panel tool-panel">
+      <div class="tool-grid">
+        <label>Клас<select id="hw-grade" class="select"><option value="1">1. клас</option><option value="2">2. клас</option><option value="3">3. клас</option><option value="4">4. клас</option></select></label>
+        <label>Игра<select id="hw-mode" class="select"><option value="practice">Тренировка по тема</option><option value="adventure">Приключение (мисии по учебник)</option><option value="quick">Бързо сметни (60 сек.)</option></select></label>
+        <label id="hw-topic-l">Тема<select id="hw-topic" class="select"></select></label>
+        <label id="hw-book-l" hidden>Учебник<select id="hw-book" class="select"></select></label>
+      </div>
+      <div class="hw-out"><input id="hw-link" class="input" readonly aria-label="Линк"><button class="btn btn-sm" id="hw-copy">Копирай</button><a class="btn btn-sm btn-ghost" id="hw-open" target="_blank" rel="noopener">Отвори</a></div>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Работни листове</h2><p>Задачи за печат по всяка тема от програмата, с отговори за учителя.</p></div>
+    <p style="text-align:center"><a class="btn btn-lg btn-green" href="rabotni-listove.html">🖨️ Създай работен лист</a></p>
+  </div>
+</section>
+<section class="section soft" id="dokumenti">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Документи за училището</h2><p>Образци, готови за печат. Преди подписване ги прегледайте с юрист или с длъжностното лице по защита на данните на училището.</p></div>
+    <div class="grid grid-3 docs-list">
+      <a class="card doc-card" href="dogovor-pilot.html"><b>📄 Споразумение за пилотно ползване</b><small>Между училището и Сметко – безплатен тестов период</small></a>
+      <a class="card doc-card" href="pismo-roditeli.html"><b>✉️ Информационно писмо до родителите</b><small>С декларация за информираност</small></a>
+      <a class="card doc-card" href="dogovor-danni.html"><b>🔒 Договор за обработване на лични данни</b><small>По чл. 28 от GDPR – при учителски профили</small></a>
+      <a class="card doc-card" href="privacy-policy.html"><b>🛡️ Политика за поверителност</b><small>Какви данни (не) събираме</small></a>
+      <a class="card doc-card" href="terms.html"><b>📘 Общи условия</b><small>Правила за ползване и абонаменти</small></a>
+      <a class="card doc-card" href="pravna-informacia.html"><b>📚 Всички документи</b><small>Правна информация на едно място</small></a>
+    </div>
+  </div>
+</section>
+</main>
+''' + FOOTER + scripts(['js/math-engine.js', 'js/textbooks.js', 'js/tools.js'])
+write('uchilishta.html', school)
+
+# ================= rabotni-listove.html =================
+ws = head('Работни листове по математика 1.–4. клас – Сметко', 'Генератор на работни листове по математика за 1.–4. клас по темите на учебната програма, с отговори за учителя. Безплатно, за печат.',
+          'rabotni-listove.html', [crumbs([('Начало', ''), ('Работни листове', 'rabotni-listove.html')])], 'ws-page') + header() + '''
+<main id="main">
+<section class="section ws-controls">
+  <div class="wrap">
+    <div class="breadcrumbs"><a href="index.html">Начало</a> › Работни листове</div>
+    <h1>Работни листове</h1>
+    <p class="lead-dark">Изберете клас и тема – Сметко генерира задачи за печат. Всеки път са нови.</p>
+    <div class="panel tool-panel">
+      <div class="tool-grid">
+        <label>Клас<select id="ws-grade" class="select"><option value="1">1. клас</option><option value="2">2. клас</option><option value="3">3. клас</option><option value="4">4. клас</option></select></label>
+        <label>Тема<select id="ws-topic" class="select"></select></label>
+        <label>Трудност<select id="ws-level" class="select"><option value="1">Лесно</option><option value="2" selected>Средно</option><option value="3">Трудно</option></select></label>
+        <label>Брой задачи<select id="ws-count" class="select"><option>12</option><option selected>20</option><option>30</option></select></label>
+      </div>
+      <div class="ws-actions"><label class="check"><input type="checkbox" id="ws-answers" checked> Страница с отговори</label><button class="btn btn-sm btn-ghost" id="ws-new">🔄 Нови задачи</button><button class="btn" id="ws-print">🖨️ Печат</button></div>
+    </div>
+  </div>
+</section>
+<section class="ws-sheet-wrap"><div class="ws-sheet" id="ws-sheet"></div><div class="ws-sheet ws-answers" id="ws-key"></div></section>
+</main>
+''' + FOOTER + scripts(['js/math-engine.js', 'js/textbooks.js', 'js/tools.js'])
+write('rabotni-listove.html', ws)
+
+# ================= 404 =================
+nf = head('Страницата не е намерена – Сметко', 'Страницата не е намерена.', '404.html', noindex=True).replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<base href="/">') + header() + page_hero(
+    'Ох! 404', 'Сметко претърси навсякъде, но тази страница я няма. Може би е отлетяла?', '404', 'think',
+    '<div class="hero-cta"><a class="btn btn-lg" href="index.html">Към началото</a><a class="btn btn-white" href="game.html">Играй</a></div>') + '<main id="main"></main>' + FOOTER + scripts()
+write('404.html', nf)
+
+legal.build()
+print('ok')

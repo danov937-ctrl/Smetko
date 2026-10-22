@@ -4,13 +4,14 @@
 <meta charset="utf-8">
 <base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Страницата не е намерена — Сметко</title>
+<title>Страницата не е намерена – Сметко</title>
 <meta name="description" content="Страницата не е намерена.">
+<meta name="robots" content="noindex">
 <link rel="canonical" href="https://smetko.com/404.html">
-<meta name="theme-color" content="#4FB8FA">
+<meta name="theme-color" content="#3299FF">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Сметко">
-<meta property="og:title" content="Страницата не е намерена — Сметко">
+<meta property="og:title" content="Страницата не е намерена – Сметко">
 <meta property="og:description" content="Страницата не е намерена.">
 <meta property="og:url" content="https://smetko.com/404.html">
 <meta property="og:image" content="https://smetko.com/assets/images/og-image.png">
@@ -22,29 +23,58 @@
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap&amp;subset=cyrillic" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=1">
-<link rel="stylesheet" href="css/animations.css?v=1">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=2">
+<link rel="stylesheet" href="css/animations.css?v=2">
 </head>
 <body>
 <a class="skip" href="#main">Към съдържанието</a>
 <header class="site-header">
   <div class="wrap">
-    <a class="logo" href="index.html" aria-label="Сметко — начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
-    <nav class="nav" aria-label="Основно меню"><a href="game.html">Мисии</a><a href="index.html#klasove">Класове</a><a href="achievements.html">Постижения</a><a href="about.html#roditeli">За родители</a><a href="about.html#uchiteli">За учители</a><a href="pricing.html">Цени</a></nav>
+    <a class="logo" href="index.html" aria-label="Сметко – начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
+    <nav class="nav" aria-label="Основно меню">
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">Мисии <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="game.html"><b>Всички игри</b><small>Приключение, Бързо сметни, Тренировка</small></a>
+          <a href="class-1.html"><b>1. клас</b><small>Числата до 20 и кръглите десетици</small></a>
+          <a href="class-2.html"><b>2. клас</b><small>До 100 и таблицата за умножение</small></a>
+          <a href="class-3.html"><b>3. клас</b><small>До 1000, умножение и деление</small></a>
+          <a href="class-4.html"><b>4. клас</b><small>Многоцифрени числа, лице, тела</small></a>
+        </div></div>
+      <a href="achievements.html" data-nav="ach">Класации</a>
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">За учители <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="uchilishta.html"><b>Сметко в училище</b><small>Пилотна програма и документи</small></a>
+          <a href="rabotni-listove.html"><b>Работни листове</b><small>Задачи за печат с отговори</small></a>
+          <a href="uchilishta.html#domashna"><b>Линк за домашна</b><small>Конкретна тема с един линк</small></a>
+          <a href="about.html#uchiteli"><b>Как работи в клас</b><small>Идеи за часа по математика</small></a>
+        </div></div>
+      <a href="about.html#roditeli" data-nav="parents">За родители</a>
+      <a href="pricing.html" data-nav="pricing">Цени</a>
+    </nav>
     <div class="header-actions">
       <a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
-      <button class="btn btn-teal btn-sm btn-login" data-login>Вход</button>
+      <a class="link-login" href="#" data-login>Вход</a>
+      <a class="btn btn-teal btn-sm btn-register" href="#" data-login>Регистрация</a>
       <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
     </div>
   </div>
-  <nav class="mobile-nav" aria-label="Мобилно меню"><a href="game.html">Мисии</a><a href="index.html#klasove">Класове</a><a href="achievements.html">Постижения</a><a href="about.html#roditeli">За родители</a><a href="about.html#uchiteli">За учители</a><a href="pricing.html">Цени</a><a href="#" data-login>Вход за родители и учители</a></nav>
+  <nav class="mobile-nav" aria-label="Мобилно меню">
+    <a href="game.html">🎮 Мисии и игри</a>
+    <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
+    <a href="achievements.html">🏆 Класации и постижения</a>
+    <a href="uchilishta.html">🏫 За учители и училища</a>
+    <a href="rabotni-listove.html">🖨️ Работни листове</a>
+    <a href="about.html#roditeli">👨‍👩‍👧 За родители</a>
+    <a href="pricing.html">💶 Цени</a>
+    <div class="m-auth"><a class="btn btn-ghost" href="#" data-login>Вход</a><a class="btn btn-teal" href="#" data-login>Регистрация</a></div>
+  </nav>
 </header>
-
-<main id="main">
-<section class="page-hero" style="min-height:70vh">
+<section class="page-hero">
+  <span class="cloud c1"></span><span class="cloud c2"></span>
   <div class="wrap">
     <div>
+      <div class="breadcrumbs"><a href="index.html">Начало</a> › 404</div>
       <h1>Ох! 404</h1>
       <p class="lead">Сметко претърси навсякъде, но тази страница я няма. Може би е отлетяла?</p>
       <div class="hero-cta"><a class="btn btn-lg" href="index.html">Към началото</a><a class="btn btn-white" href="game.html">Играй</a></div>
@@ -52,13 +82,12 @@
     <div class="owl" data-owl="think"></div>
   </div>
 </section>
-</main>
-<footer class="site-footer">
+<main id="main"></main><footer class="site-footer">
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <a class="logo" href="index.html" aria-label="Сметко — начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
-        <p style="margin-top:14px">Сметко превръща математиката в игра за децата от 1. до 4. клас: задачи по учебната програма, точки, значки и мисии.</p>
+        <a class="logo" href="index.html" aria-label="Сметко – начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
+        <p style="margin-top:14px">Математика като игра за 1.–4. клас – по учебната програма на МОН и по заглавията на уроците в учебника на детето.</p>
       </div>
       <div><h4>Игри</h4><ul>
         <li><a href="game.html">Мисии</a></li>
@@ -69,23 +98,24 @@
       </ul></div>
       <div><h4>За възрастните</h4><ul>
         <li><a href="about.html#roditeli">За родители</a></li>
-        <li><a href="about.html#uchiteli">За учители</a></li>
-        <li><a href="pricing.html">Цени и абонаменти</a></li>
-        <li><a href="achievements.html">Постижения</a></li>
+        <li><a href="uchilishta.html">За учители и училища</a></li>
+        <li><a href="rabotni-listove.html">Работни листове</a></li>
+        <li><a href="pricing.html">Цени</a></li>
       </ul></div>
-      <div><h4>Информация</h4><ul>
-        <li><a href="about.html">За Сметко</a></li>
-        <li><a href="privacy-policy.html">Поверителност</a></li>
+      <div><h4>Правна информация</h4><ul>
         <li><a href="terms.html">Общи условия</a></li>
+        <li><a href="privacy-policy.html">Поверителност</a></li>
+        <li><a href="cookies.html">Бисквитки и хранилище</a></li>
+        <li><a href="pravna-informacia.html">Всички документи</a></li>
         <li><a href="mailto:info@smetko.com">info@smetko.com</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=1" defer></script>
-<script src="js/gamification.js?v=1" defer></script>
-<script src="js/audio.js?v=1" defer></script>
-<script src="js/app.js?v=1" defer></script>
+<script src="js/owl.js?v=2" defer></script>
+<script src="js/gamification.js?v=2" defer></script>
+<script src="js/audio.js?v=2" defer></script>
+<script src="js/app.js?v=2" defer></script>
 </body>
 </html>

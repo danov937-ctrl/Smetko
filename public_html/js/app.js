@@ -72,8 +72,8 @@
   S.loginModal = function () {
     S.modal(
       '<div data-owl="encourage"></div><h3>Вход за родители и учители</h3>' +
-      '<p>Профилите с отчети за напредъка и учителски панел идват скоро. ' +
-      'Дотогава децата могат да играят свободно, а прогресът се пази на това устройство.</p>' +
+      '<p>Сметко е в пилотен период. Профилите за родители и учители с отчети и учителски панел идват скоро. ' +
+      'Дотогава децата играят свободно, без регистрация, а прогресът се пази на това устройство.</p>' +
       '<div class="modal-actions"><a class="btn btn-green" href="game.html">Играй сега</a>' +
       '<a class="btn btn-ghost" href="achievements.html">Моите постижения</a></div>'
     );
@@ -121,6 +121,16 @@
       var open = mn.classList.toggle('open');
       mb.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
+    // хедър върху небето: става плътен при скрол
+    var hdr = document.querySelector('.site-header.over');
+    if (hdr) { var onS = function () { hdr.classList.toggle('scrolled', window.scrollY > 30 || document.querySelector('.mobile-nav.open')); }; window.addEventListener('scroll', onS, { passive: true }); onS(); if (mb) mb.addEventListener('click', onS); }
+    // падащи менюта (клик/тъч; на десктоп и при задържане)
+    document.querySelectorAll('.dd').forEach(function (dd) {
+      var btn = dd.querySelector('.dd-btn');
+      btn.addEventListener('click', function (e) { e.stopPropagation(); var open = !dd.classList.contains('open'); document.querySelectorAll('.dd.open').forEach(function (o) { o.classList.remove('open'); o.querySelector('.dd-btn').setAttribute('aria-expanded', 'false'); }); dd.classList.toggle('open', open); btn.setAttribute('aria-expanded', open ? 'true' : 'false'); });
+    });
+    document.addEventListener('click', function () { document.querySelectorAll('.dd.open').forEach(function (o) { o.classList.remove('open'); o.querySelector('.dd-btn').setAttribute('aria-expanded', 'false'); }); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') document.querySelectorAll('.dd.open').forEach(function (o) { o.classList.remove('open'); }); });
     document.querySelectorAll('[data-login]').forEach(function (b) { b.addEventListener('click', function (e) { e.preventDefault(); S.loginModal(); }); });
     document.querySelectorAll('[data-subscribe]').forEach(function (b) { b.addEventListener('click', function (e) { e.preventDefault(); S.subscribeModal(b.getAttribute('data-subscribe')); }); });
     document.querySelectorAll('[data-year]').forEach(function (el) { el.textContent = new Date().getFullYear(); });

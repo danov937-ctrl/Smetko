@@ -24,13 +24,17 @@
 
     var html = '';
     [1, 2, 3, 4].forEach(function (g) {
-      var stars = G.stars(g), n = E.ADVENTURE[g].length, tot = 0, done = 0;
-      for (var i = 0; i < n; i++) { tot += stars[i] || 0; if (stars[i]) done++; }
-      var best = st.best['quick-' + g + '-mix'] || 0, bestAny = 0;
+      var tot = 0, done = 0;
+      Object.keys(st.adventure).forEach(function (k) {
+        if (k === String(g) || k.indexOf(g + '-') === 0) { var m = st.adventure[k]; for (var i in m) { tot += m[i]; if (m[i]) done++; } }
+      });
+      var bestAny = 0;
       for (var k in st.best) if (k.indexOf('quick-' + g + '-') === 0) bestAny = Math.max(bestAny, st.best[k]);
-      html += '<div class="card class-card g' + g + '"><h3>' + g + '. клас</h3><ul>' +
-        '<li>Мисии: ' + done + ' от ' + n + '</li><li>Звезди: ' + tot + ' от ' + (n * 3) + '</li><li>Рекорд „Бързо сметни“: ' + (bestAny || '—') + '</li></ul>' +
-        '<a class="btn btn-sm" href="game.html?grade=' + g + '&amp;mode=adventure">Продължи</a></div>';
+      var bid = (st.books || {})[g] || 'mon', book = S.Books ? S.Books.get(g, bid) : null;
+      html += '<div class="card class-card g' + g + '"><div class="cc-num">' + g + '</div><h3>' + g + '. клас</h3><ul>' +
+        '<li>Изпълнени мисии: ' + done + '</li><li>Звезди: ' + tot + '</li><li>Рекорд „Бързо сметни“: ' + (bestAny || '—') + '</li>' +
+        (book ? '<li>Учебник: ' + (book.id === 'mon' ? 'по програмата' : book.publisher) + '</li>' : '') + '</ul>' +
+        '<div class="cc-actions"><a class="btn btn-sm" href="game.html?grade=' + g + '&amp;mode=adventure">Продължи</a></div></div>';
     });
     $('#grades').innerHTML = html;
   }

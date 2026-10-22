@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>За родители и учители — Сметко</title>
-<meta name="description" content="Как Сметко помага на децата да обикнат математиката. Информация за родители и начални учители: безопасност, употреба в клас и домашна работа.">
+<title>За родители и учители – Сметко</title>
+<meta name="description" content="Как Сметко помага на децата да обикнат математиката. Информация за родители и начални учители: безопасност, употреба в час и за домашна работа.">
 <link rel="canonical" href="https://smetko.com/about.html">
-<meta name="theme-color" content="#4FB8FA">
+<meta name="theme-color" content="#3299FF">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Сметко">
-<meta property="og:title" content="За родители и учители — Сметко">
-<meta property="og:description" content="Как Сметко помага на децата да обикнат математиката. Информация за родители и начални учители: безопасност, употреба в клас и домашна работа.">
+<meta property="og:title" content="За родители и учители – Сметко">
+<meta property="og:description" content="Как Сметко помага на децата да обикнат математиката. Информация за родители и начални учители: безопасност, употреба в час и за домашна работа.">
 <meta property="og:url" content="https://smetko.com/about.html">
 <meta property="og:image" content="https://smetko.com/assets/images/og-image.png">
 <meta property="og:locale" content="bg_BG">
@@ -21,85 +21,110 @@
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap&amp;subset=cyrillic" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=1">
-<link rel="stylesheet" href="css/animations.css?v=1">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=2">
+<link rel="stylesheet" href="css/animations.css?v=2">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Начало", "item": "https://smetko.com/"}, {"@type": "ListItem", "position": 2, "name": "За Сметко", "item": "https://smetko.com/about.html"}]}</script>
 </head>
 <body>
 <a class="skip" href="#main">Към съдържанието</a>
 <header class="site-header">
   <div class="wrap">
-    <a class="logo" href="index.html" aria-label="Сметко — начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
-    <nav class="nav" aria-label="Основно меню"><a href="game.html">Мисии</a><a href="index.html#klasove">Класове</a><a href="achievements.html">Постижения</a><a href="about.html#roditeli" aria-current="page">За родители</a><a href="about.html#uchiteli">За учители</a><a href="pricing.html">Цени</a></nav>
+    <a class="logo" href="index.html" aria-label="Сметко – начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
+    <nav class="nav" aria-label="Основно меню">
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">Мисии <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="game.html"><b>Всички игри</b><small>Приключение, Бързо сметни, Тренировка</small></a>
+          <a href="class-1.html"><b>1. клас</b><small>Числата до 20 и кръглите десетици</small></a>
+          <a href="class-2.html"><b>2. клас</b><small>До 100 и таблицата за умножение</small></a>
+          <a href="class-3.html"><b>3. клас</b><small>До 1000, умножение и деление</small></a>
+          <a href="class-4.html"><b>4. клас</b><small>Многоцифрени числа, лице, тела</small></a>
+        </div></div>
+      <a href="achievements.html" data-nav="ach">Класации</a>
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">За учители <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="uchilishta.html"><b>Сметко в училище</b><small>Пилотна програма и документи</small></a>
+          <a href="rabotni-listove.html"><b>Работни листове</b><small>Задачи за печат с отговори</small></a>
+          <a href="uchilishta.html#domashna"><b>Линк за домашна</b><small>Конкретна тема с един линк</small></a>
+          <a href="about.html#uchiteli"><b>Как работи в клас</b><small>Идеи за часа по математика</small></a>
+        </div></div>
+      <a href="about.html#roditeli" aria-current="page">За родители</a>
+      <a href="pricing.html" data-nav="pricing">Цени</a>
+    </nav>
     <div class="header-actions">
       <a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
-      <button class="btn btn-teal btn-sm btn-login" data-login>Вход</button>
+      <a class="link-login" href="#" data-login>Вход</a>
+      <a class="btn btn-teal btn-sm btn-register" href="#" data-login>Регистрация</a>
       <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
     </div>
   </div>
-  <nav class="mobile-nav" aria-label="Мобилно меню"><a href="game.html">Мисии</a><a href="index.html#klasove">Класове</a><a href="achievements.html">Постижения</a><a href="about.html#roditeli" aria-current="page">За родители</a><a href="about.html#uchiteli">За учители</a><a href="pricing.html">Цени</a><a href="#" data-login>Вход за родители и учители</a></nav>
+  <nav class="mobile-nav" aria-label="Мобилно меню">
+    <a href="game.html">🎮 Мисии и игри</a>
+    <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
+    <a href="achievements.html">🏆 Класации и постижения</a>
+    <a href="uchilishta.html">🏫 За учители и училища</a>
+    <a href="rabotni-listove.html">🖨️ Работни листове</a>
+    <a href="about.html#roditeli">👨‍👩‍👧 За родители</a>
+    <a href="pricing.html">💶 Цени</a>
+    <div class="m-auth"><a class="btn btn-ghost" href="#" data-login>Вход</a><a class="btn btn-teal" href="#" data-login>Регистрация</a></div>
+  </nav>
 </header>
-
-<main id="main">
 <section class="page-hero">
+  <span class="cloud c1"></span><span class="cloud c2"></span>
   <div class="wrap">
     <div>
       <div class="breadcrumbs"><a href="index.html">Начало</a> › За Сметко</div>
       <h1>За Сметко</h1>
       <p class="lead">Сметко е бухал с очила и голямо сърце за числата. Мисията му е всяко дете в начален етап да смята уверено и с удоволствие.</p>
+      
     </div>
     <div class="owl" data-owl="hello"></div>
   </div>
 </section>
 
+<main id="main">
 <section class="section">
   <div class="wrap prose">
     <h2>Защо Сметко?</h2>
-    <p>Математиката в 1.–4. клас се гради като кула: ако таблицата за умножение или преминаването през десетицата не са затвърдени, всичко след тях става по-трудно. А затвърждаването става с упражнение — много и редовно упражнение.</p>
-    <p>Сметко превръща това упражнение в игра. Децата решават мисии, печелят точки и значки, побиват рекордите си и неусетно правят стотици задачи. Задачите се генерират по учебната програма, затова никога не свършват и рядко се повтарят.</p>
+    <p>Математиката в 1.–4. клас се гради като кула: ако таблицата за умножение или преминаването през десетицата не са затвърдени, всичко след тях става по-трудно. А затвърждаването става с упражнение – много и редовно упражнение.</p>
+    <p>Сметко превръща упражнението в игра. Задачите се генерират по темите на учебната програма на МОН, а мисиите следват уроците в учебника, по който учи детето. Затова то упражнява точно това, което учат в клас в момента.</p>
   </div>
 </section>
-
 <section class="section soft" id="roditeli">
   <div class="wrap prose">
     <span class="eyebrow">За родители</span>
     <h2>Как да използвате Сметко у дома</h2>
     <ul>
-      <li><b>По малко, но всеки ден.</b> 10–15 минути дневно дават повече от един дълъг час седмично. Огънчето 🔥 показва поредните дни игра.</li>
-      <li><b>Започнете от „Приключение“.</b> Мисиите вървят от лесно към трудно и детето само вижда напредъка си по картата.</li>
-      <li><b>Насочете „Тренировка“ към трудната тема.</b> Ако в училище учат таблицата за умножение, изберете точно нея. Без часовник и без стрес.</li>
-      <li><b>Похвалете усилието, не само резултата.</b> Сметко окуражава при грешка и показва правилния отговор, за да се учи детето от нея.</li>
+      <li><b>Изберете учебника на детето.</b> В „Приключение“ мисиите носят заглавията на уроците от неговия учебник.</li>
+      <li><b>По малко, но всеки ден.</b> 10–15 минути дневно дават повече от един дълъг час седмично.</li>
+      <li><b>Насочете „Тренировка“ към трудната тема.</b> Без часовник и без стрес.</li>
+      <li><b>Похвалете усилието, не само резултата.</b> Сметко окуражава при грешка и показва правилния отговор.</li>
     </ul>
     <h3>Безопасност и поверителност</h3>
     <ul>
       <li>Няма реклами и няма проследяващи скриптове.</li>
-      <li>Не събираме лични данни на децата. Прогресът (точки, значки, звезди) се пази само в браузъра на устройството.</li>
-      <li>Когато въведем профили, те ще са на родителя или учителя, а не на детето.</li>
+      <li>Не събираме лични данни на децата. Прогресът се пази само в браузъра на устройството.</li>
+      <li>Когато въведем профили, те ще са на родителя или учителя, а не на детето. Подробно: <a href="privacy-policy.html">Политика за поверителност</a>.</li>
     </ul>
-    <div class="callout">Предстои: семеен абонамент за до 4 деца, родителски профил и седмичен отчет за напредъка по имейл.</div>
   </div>
 </section>
-
 <section class="section" id="uchiteli">
   <div class="wrap prose">
     <span class="eyebrow">За учители</span>
     <h2>Сметко в класната стая</h2>
     <ul>
-      <li><b>Загрявка в началото на часа.</b> Пуснете „Бързо сметни“ на проектора или интерактивната дъска: класът решава заедно 60 секунди.</li>
-      <li><b>Домашна работа с един линк.</b> Всяка тема има собствен адрес, например таблицата за умножение в 3. клас:<br><code>smetko.com/game.html?grade=3&amp;mode=practice&amp;topic=multable</code></li>
-      <li><b>Индивидуален темп.</b> Трудността в „Тренировка“ се нагажда към детето, затова и по-бързите, и по-бавните работят на своето ниво.</li>
-      <li><b>Работи на всичко.</b> Телефон, таблет, компютър, интерактивна дъска. Без инсталиране.</li>
+      <li><b>Загрявка в началото на часа.</b> „Бързо сметни“ на интерактивната дъска – целият клас решава заедно 60 секунди.</li>
+      <li><b>Домашна работа с един линк.</b> Генерирайте линк към тема или мисия от <a href="uchilishta.html#domashna">страницата за училища</a>.</li>
+      <li><b>Работни листове.</b> <a href="rabotni-listove.html">Генерирайте задачи за печат</a> по тема, с отговори за учителя.</li>
+      <li><b>По вашия учебник.</b> Мисиите следват уроците в учебника, по който работи класът.</li>
     </ul>
-    <div class="callout">Предстои: учителски панел със статистика за всеки ученик, класации на класа, грамоти и абонамент „Цял клас“ (75 € за учебна година, до 30 ученици).</div>
-    <p><a class="btn btn-blue" href="mailto:info@smetko.com?subject=Сметко%20за%20моя%20клас">Пишете ни, ако искате да тествате с класа си</a></p>
+    <p><a class="btn btn-blue" href="uchilishta.html">Пилотна програма за училища</a></p>
   </div>
 </section>
-
 <section class="section soft" id="kontakt">
   <div class="wrap prose" style="text-align:center">
     <h2>Контакт</h2>
-    <p>Въпроси, идеи, открита грешка в задача? Пишете ни — четем всяко писмо.</p>
+    <p>Въпроси, идеи, открита грешка в задача? Пишете ни – четем всяко писмо.</p>
     <p><a class="btn" href="mailto:info@smetko.com">info@smetko.com</a></p>
   </div>
 </section>
@@ -108,8 +133,8 @@
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <a class="logo" href="index.html" aria-label="Сметко — начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
-        <p style="margin-top:14px">Сметко превръща математиката в игра за децата от 1. до 4. клас: задачи по учебната програма, точки, значки и мисии.</p>
+        <a class="logo" href="index.html" aria-label="Сметко – начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
+        <p style="margin-top:14px">Математика като игра за 1.–4. клас – по учебната програма на МОН и по заглавията на уроците в учебника на детето.</p>
       </div>
       <div><h4>Игри</h4><ul>
         <li><a href="game.html">Мисии</a></li>
@@ -120,23 +145,24 @@
       </ul></div>
       <div><h4>За възрастните</h4><ul>
         <li><a href="about.html#roditeli">За родители</a></li>
-        <li><a href="about.html#uchiteli">За учители</a></li>
-        <li><a href="pricing.html">Цени и абонаменти</a></li>
-        <li><a href="achievements.html">Постижения</a></li>
+        <li><a href="uchilishta.html">За учители и училища</a></li>
+        <li><a href="rabotni-listove.html">Работни листове</a></li>
+        <li><a href="pricing.html">Цени</a></li>
       </ul></div>
-      <div><h4>Информация</h4><ul>
-        <li><a href="about.html">За Сметко</a></li>
-        <li><a href="privacy-policy.html">Поверителност</a></li>
+      <div><h4>Правна информация</h4><ul>
         <li><a href="terms.html">Общи условия</a></li>
+        <li><a href="privacy-policy.html">Поверителност</a></li>
+        <li><a href="cookies.html">Бисквитки и хранилище</a></li>
+        <li><a href="pravna-informacia.html">Всички документи</a></li>
         <li><a href="mailto:info@smetko.com">info@smetko.com</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=1" defer></script>
-<script src="js/gamification.js?v=1" defer></script>
-<script src="js/audio.js?v=1" defer></script>
-<script src="js/app.js?v=1" defer></script>
+<script src="js/owl.js?v=2" defer></script>
+<script src="js/gamification.js?v=2" defer></script>
+<script src="js/audio.js?v=2" defer></script>
+<script src="js/app.js?v=2" defer></script>
 </body>
 </html>

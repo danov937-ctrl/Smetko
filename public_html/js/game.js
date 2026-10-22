@@ -15,6 +15,11 @@
   function say(k) { var a = SAY[k]; return a[Math.floor(Math.random() * a.length)]; }
 
   var st = { grade: 1, mode: 'adventure', topic: 'mix' };
+  var B = S.Books;
+  function bookId(g) { var b = G.state.books || {}; return b[g || st.grade] || 'mon'; }
+  function curBook() { return B.get(st.grade, bookId()); }
+  function advKey(g, id) { id = id || bookId(g); return String(g || st.grade) + (id === 'mon' ? '' : '-' + id); }
+  function shortLabel(t) { return t.length > 34 ? t.slice(0, 32).replace(/[\s,.:–-]+$/, '') + '…' : t; }
   var play = null;          // текуща игра
   var timers = [];
   function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
@@ -45,7 +50,7 @@
     wrap.hidden = st.mode === 'adventure';
     var topics = E.GRADES[st.grade].topics, valid = st.topic === 'mix';
     var html = '<button class="chip" data-topic="mix">🎲 Всички теми</button>';
-    topics.forEach(function (t) { if (t.id === st.topic) valid = true; html += '<button class="chip" data-topic="' + t.id + '">' + t.name + '</button>'; });
+    topics.forEach(function (t, i) { if (t.id === st.topic) valid = true; html += '<button class="chip" data-topic="' + t.id + '" title="' + t.name + '"><b>' + (i + 1) + '.</b> ' + t.short + '</button>'; });
     if (!valid) st.topic = 'mix';
     chips.innerHTML = html;
     $$('.chip', chips).forEach(function (c) {
@@ -53,13 +58,16 @@
       c.addEventListener('click', function () { A.click(); st.topic = c.dataset.topic; renderSetup(); });
     });
     $('#start-btn').textContent = st.mode === 'adventure' ? 'Към картата →' : 'Започни!';
+    var sel = $('#book-select'), books = B.list(st.grade), cur = bookId();
+    sel.innerHTML = books.map(function (b) { return '<option value="' + b.id + '"' + (b.id === cur ? ' selected' : '') + '>' + (b.id === 'mon' ? 'По учебната програма (всички учебници)' : b.publisher + ' – ' + b.title) + '</option>'; }).join('');
+    $('#book-wrap').hidden = st.mode !== 'adventure';
     renderToday();
   }
 
   // ---------- КАРТА ----------
   var MAP_W = 400, MAP_H = 1180;
   function nodePos(i, n) {
-    var y = 1100 - i * (1100 - 170) / (n - 1);
+    var y = (MAP_H - 80) - i * (MAP_H - 80 - 170) / (n - 1);
     var x = 200 + 105 * Math.sin(i * 1.05 + 0.4);
     return { x: x, y: y };
   }
@@ -80,23 +88,26 @@
     s += '<path d="M-20 400 C 80 330 160 360 240 340 C 320 320 380 350 430 340 L430 420 L-20 420 Z" fill="#9BDB72"/>';
     // флаг на върха
     s += '<g transform="translate(206 60)"><rect x="0" y="0" width="4" height="46" fill="#7B4A22"/><path d="M4 2 L36 12 L4 22 Z" fill="#FF5A5F"/></g>';
-    // река
-    s += '<path d="M-20 700 C 80 680 140 760 230 740 C 320 720 360 690 430 700 L430 730 C 360 720 320 752 230 772 C 140 792 80 712 -20 732 Z" fill="#7FD0FF" opacity=".9"/>';
-    // дървета
-    var trees = [[40, 470], [360, 520], [30, 620], [370, 820], [50, 900], [355, 1000], [30, 1080], [380, 1130], [330, 420], [70, 1010]];
+    // реки
+    for (var ry = 700; ry < MAP_H - 300; ry += 900) s += '<path d="M-20 ' + ry + ' C 80 ' + (ry - 20) + ' 140 ' + (ry + 60) + ' 230 ' + (ry + 40) + ' C 320 ' + (ry + 20) + ' 360 ' + (ry - 10) + ' 430 ' + ry + ' L430 ' + (ry + 30) + ' C 360 ' + (ry + 20) + ' 320 ' + (ry + 52) + ' 230 ' + (ry + 72) + ' C 140 ' + (ry + 92) + ' 80 ' + (ry + 12) + ' -20 ' + (ry + 32) + ' Z" fill="#7FD0FF" opacity=".9"/>';
+    // дървета по цялата височина
+    var trees = [];
+    for (var ty = 430, k = 0; ty < MAP_H - 30; ty += 95, k++) trees.push([k % 2 ? 360 + (k % 3) * 8 : 34 + (k % 4) * 6, ty]);
     trees.forEach(function (t) {
       s += '<rect x="' + (t[0] - 3) + '" y="' + (t[1] + 10) + '" width="6" height="16" fill="#7B4A22"/><circle cx="' + t[0] + '" cy="' + t[1] + '" r="20" fill="#3E9A36"/><circle cx="' + (t[0] + 12) + '" cy="' + (t[1] + 6) + '" r="13" fill="#4FAE3C"/>';
     });
     // цветя
-    for (var i = 0; i < 26; i++) {
-      var fx = (i * 137) % 400, fy = 430 + (i * 211) % 740;
+    for (var i = 0, nf = Math.round(MAP_H / 45); i < nf; i++) {
+      var fx = (i * 137) % 400, fy = 430 + (i * 211) % (MAP_H - 460);
       s += '<circle cx="' + fx + '" cy="' + fy + '" r="4" fill="' + ['#FFC531', '#FF5A5F', '#fff'][i % 3] + '" opacity=".9"/>';
     }
     return s;
   }
 
   function renderMap() {
-    var levels = E.ADVENTURE[st.grade], n = levels.length, stars = G.stars(st.grade);
+    var book = curBook(), key = advKey(), levels = book.missions, n = levels.length, stars = G.stars(key);
+    MAP_H = Math.max(1180, 250 + n * 82);
+    $('#map').style.aspectRatio = MAP_W + ' / ' + MAP_H;
     var pts = levels.map(function (_, i) { return nodePos(i, n); });
     var d = pathThrough(pts);
     var svg = '<svg viewBox="0 0 ' + MAP_W + ' ' + MAP_H + '" preserveAspectRatio="none" aria-hidden="true">' + mapDecor() +
@@ -104,31 +115,31 @@
       '<path d="' + d + '" stroke="#F6DFAE" stroke-width="24" fill="none" stroke-linecap="round"/>' +
       '<path d="' + d + '" stroke="#fff" stroke-width="4" stroke-dasharray="2 14" fill="none" stroke-linecap="round" opacity=".9"/></svg>';
     var current = 0;
-    for (var i = 0; i < n; i++) { if (G.isUnlocked(st.grade, i)) current = i; }
+    for (var i = 0; i < n; i++) { if (G.isUnlocked(key, i)) current = i; }
     var html = svg, total = 0;
     levels.forEach(function (lv, i) {
       var p = pts[i], s = stars[i] || 0; total += s;
-      var unlocked = G.isUnlocked(st.grade, i);
+      var unlocked = G.isUnlocked(key, i);
       var paid = S.config.paywall && !S.hasAccess() && i >= S.config.freeAdventureLevels;
       var cls = 'map-node ' + (p.x > 200 ? 'left-label' : 'right-label');
       if (!unlocked || paid) cls += ' locked'; else if (s > 0) cls += ' done';
       if (i === current && !paid) cls += ' current';
       var starStr = s ? '<span class="n-stars">' + '★★★'.slice(0, s) + '<span style="opacity:.35">' + '★★★'.slice(0, 3 - s) + '</span></span>' : '';
-      html += '<button class="' + cls + '" data-i="' + i + '" style="left:' + (p.x / MAP_W * 100) + '%;top:' + (p.y / MAP_H * 100) + '%;" aria-label="Мисия ' + (i + 1) + ': ' + lv[2] + (unlocked ? '' : ' (заключена)') + '">' +
-        ((!unlocked || paid) ? '<span class="lock">🔒</span>' : (i + 1)) + starStr + '<span class="n-label">' + lv[2] + '</span></button>';
+      html += '<button class="' + cls + '" data-i="' + i + '" style="left:' + (p.x / MAP_W * 100) + '%;top:' + (p.y / MAP_H * 100) + '%;" aria-label="Мисия ' + (i + 1) + ': ' + lv[0] + (unlocked ? '' : ' (заключена)') + '" title="' + lv[0] + '">' +
+        ((!unlocked || paid) ? '<span class="lock">🔒</span>' : (i + 1)) + starStr + '<span class="n-label">' + shortLabel(lv[0]) + '</span></button>';
     });
     var cp = pts[current];
     html += '<div class="map-owl" data-owl="hello" style="left:' + (cp.x / MAP_W * 100 + 9) + '%;top:' + (cp.y / MAP_H * 100 - 2) + '%"></div>';
     var map = $('#map');
     map.innerHTML = html;
     S.renderOwls(map);
-    $('#map-title').textContent = E.GRADES[st.grade].name + ' — Приключение';
+    $('#map-title').textContent = E.GRADES[st.grade].name + ' · ' + (book.id === 'mon' ? 'по програмата' : book.publisher);
     $('#map-stars').textContent = '★ ' + total + ' / ' + (n * 3);
     $$('.map-node', map).forEach(function (b) {
       b.addEventListener('click', function () {
         var i = +b.dataset.i;
         if (S.config.paywall && !S.hasAccess() && i >= S.config.freeAdventureLevels) { S.subscribeModal('пълен достъп'); return; }
-        if (!G.isUnlocked(st.grade, i)) { A.wrong(); S.toast('🔒 Първо мини мисия ' + i + '!'); return; }
+        if (!G.isUnlocked(key, i)) { A.wrong(); S.toast('🔒 Първо мини мисия ' + i + '!'); return; }
         A.click(); startAdventure(i);
       });
     });
@@ -142,8 +153,8 @@
 
   // ---------- ИГРА ----------
   function startAdventure(i) {
-    var lv = E.ADVENTURE[st.grade][i];
-    startPlay({ mode: 'adventure', topic: lv[0], level: lv[1], missionIdx: i, title: lv[2] });
+    var book = curBook(), m = book.missions[i];
+    startPlay({ mode: 'adventure', book: book, mission: m, topic: book.id === 'mon' ? (m[4] || 'mix') : 'book', level: m[2], missionIdx: i, title: m[0] });
   }
 
   function startPlay(opts) {
@@ -152,7 +163,7 @@
     var mode = opts.mode || st.mode;
     play = {
       mode: mode, grade: st.grade, topic: opts.topic || st.topic || 'mix', level: opts.level || 1,
-      missionIdx: opts.missionIdx, title: opts.title, total: mode === 'adventure' ? S.config.questionsPerMission : 0,
+      missionIdx: opts.missionIdx, title: opts.title, book: opts.book, mission: opts.mission, key: advKey(), total: mode === 'adventure' ? S.config.questionsPerMission : 0,
       idx: 0, correct: 0, wrong: 0, streak: 0, wrongStreak: 0, input: '', busy: false, waitNext: false,
       timeLeft: S.config.quickSeconds, task: null, lastQ: ''
     };
@@ -196,20 +207,38 @@
   function nextQuestion() {
     if (!play) return;
     var t, tries = 0;
-    do { t = E.generate(play.grade, play.topic, play.level); tries++; } while (t.q === play.lastQ && tries < 6);
-    play.task = t; play.lastQ = t.q; play.input = ''; play.busy = false; play.waitNext = false; play.qStart = Date.now();
+    do { t = st.skill ? E.generateSkill(play.grade, st.skill, play.level) : (play.mission && play.book && play.book.id !== 'mon') ? E.generateFrom(play.grade, play.mission[1], play.level) : E.generate(play.grade, play.topic, play.level); tries++; } while (t.q === play.lastQ && tries < 6);
+    play.task = t; S._task = t; play.lastQ = t.q; play.input = ''; play.busy = false; play.waitNext = false; play.qStart = Date.now();
     var qc = $('#qcard'); qc.classList.remove('ok', 'bad');
     var html = '';
     if (t.dots) html += dotsHTML(t.dots);
     if (t.figure) html += t.figure;
-    var long = !!(t.word || t.figure || /Кое число/.test(t.q));
-    html += '<div class="q-text' + (long ? ' long' : '') + '">' + t.q.replace('{?}', '<span class="slot empty" id="slot"></span>') + '</div>';
+    var plainLen = t.q.replace(/<[^>]+>/g, '').length;
+    var cls = t.word ? ' long' : (plainLen > 26 ? ' mid' : '');
+    html += '<div class="q-text' + cls + '">' + t.q.replace('{?}', '<span class="slot empty" id="slot"></span>') + '</div>';
     html += '<div class="explain" id="explain" aria-live="polite"></div>';
     $('#qbody').innerHTML = html;
     $('#keypad').hidden = t.kind !== 'number';
-    $('#choices').hidden = t.kind !== 'choice';
+    renderChoices(t);
     $('#next-row').hidden = true;
     if (play.mode === 'practice' && Math.random() < .15 && play.idx > 0) bubble(say('think'));
+  }
+
+  // бутони за избор: символи (<, =, >) или варианти (текст/картинки)
+  function renderChoices(t) {
+    var box = $('#choices');
+    if (t.kind !== 'choice') { box.hidden = true; box.innerHTML = ''; return; }
+    var symbols = typeof t.choices[0] === 'string';
+    box.className = 'choices' + (symbols ? '' : ' opts') + (t.optFigs ? ' figs' : '') + (t.romanOpts ? ' rom' : '');
+    box.style.setProperty('--n', t.choices.length);
+    box.innerHTML = t.choices.map(function (c, i) {
+      var v = symbols ? c : c.v, html = symbols ? c : c.html;
+      var label = symbols ? ({ '<': 'по-малко', '=': 'равно', '>': 'по-голямо' }[c]) : (t.optFigs ? v : '');
+      return '<button class="key opt" data-k="' + v + '" data-i="' + (i + 1) + '"' + (label ? ' aria-label="' + label + '"' : '') + '>' +
+        (!symbols ? '<span class="opt-n">' + (i + 1) + '</span>' : '') + html + '</button>';
+    }).join('');
+    box.hidden = false;
+    $$('.key', box).forEach(function (k) { k.addEventListener('click', function () { A.unlock(); press(k.getAttribute('data-k')); }); });
   }
 
   function dotsHTML(d) {
@@ -219,6 +248,7 @@
       for (i = 0; i < d.b; i++) b += '<i></i>';
       return '<div class="dots" aria-hidden="true"><span class="grp">' + a + '</span><span class="op">+</span><span class="grp b">' + b + '</span></div>';
     }
+    if (d.op === 'count') { for (i = 0; i < d.a; i++) a += '<i></i>'; return '<div class="dots big" aria-hidden="true"><span class="grp">' + a + '</span></div>'; }
     for (i = 0; i < d.a; i++) a += '<i' + (i >= d.a - d.b ? ' class="x"' : '') + '></i>';
     return '<div class="dots" aria-hidden="true"><span class="grp">' + a + '</span></div>';
   }
@@ -231,7 +261,15 @@
 
   function press(k) {
     if (!play || play.busy) { if (play && play.waitNext && (k === 'ok')) goNext(); return; }
-    if (play.task.kind === 'choice') { if (['<', '=', '>'].indexOf(k) >= 0) { play.input = k; var s = $('#slot'); s.textContent = k; s.classList.remove('empty'); submit(); } return; }
+    if (play.task.kind === 'choice') {
+      var t = play.task, vals = t.choices.map(function (c) { return typeof c === 'string' ? c : c.v; });
+      if (typeof t.choices[0] !== 'string' && /^\d$/.test(k)) k = vals[+k - 1];
+      if (vals.indexOf(k) < 0) return;
+      play.input = k;
+      var s = $('#slot'); if (s) { s.textContent = k; s.classList.remove('empty'); }
+      $$('#choices .key').forEach(function (b) { b.classList.toggle('picked', b.getAttribute('data-k') === k); });
+      submit(); return;
+    }
     if (k === 'del') { play.input = play.input.slice(0, -1); A.key(); }
     else if (k === 'ok') { submit(); return; }
     else if (/^\d$/.test(k)) { if (play.input.length >= 6) return; if (play.input === '0') play.input = ''; play.input += k; A.key(); }
@@ -243,8 +281,9 @@
     if (play.input === '') { var s = $('#slot'); if (s) { s.classList.remove('owl-jump'); void s.offsetWidth; s.classList.add('owl-jump'); } return; }
     play.busy = true;
     var ok = E.check(t, play.input), ms = Date.now() - play.qStart;
-    var res = G.answer({ correct: ok, topic: t.topic, mode: play.mode, grade: play.grade, ms: ms });
+    var res = G.answer({ correct: ok, topic: t.topic, table: t.table, mode: play.mode, grade: play.grade, ms: ms });
     var qc = $('#qcard'), ex = $('#explain');
+    if (t.kind === 'choice') $$('#choices .key').forEach(function (b) { var v = b.getAttribute('data-k'); if (v === String(t.answer)) b.classList.add('right'); else if (v === play.input) b.classList.add('wrong'); });
     if (ok) {
       play.correct++; play.streak++; play.wrongStreak = 0;
       qc.classList.add('ok');
@@ -317,7 +356,7 @@
       stars = p.correct >= p.total ? 3 : p.correct >= p.total - 1 ? 2 : p.correct >= Math.ceil(p.total * 0.625) ? 1 : 0;
       if (stars > 0) {
         G.addBonus(stars * 20);
-        extraBadges = G.setStars(p.grade, p.missionIdx, stars, E.ADVENTURE[p.grade].length);
+        extraBadges = G.setStars(p.key, p.missionIdx, stars, p.book.missions.length);
       }
       owlPose = stars >= 2 ? 'cheer' : stars === 1 ? 'happy' : 'encourage';
       celebrate = stars >= 2;
@@ -348,7 +387,7 @@
 
     html += '<div class="result-actions">';
     if (p.mode === 'adventure') {
-      var nextIdx = p.missionIdx + 1, hasNext = nextIdx < E.ADVENTURE[p.grade].length;
+      var nextIdx = p.missionIdx + 1, hasNext = nextIdx < p.book.missions.length;
       if (stars > 0 && hasNext) html += '<button class="btn btn-green btn-lg" data-act="next">Следваща мисия →</button>';
       html += '<button class="btn ' + (stars > 0 ? 'btn-white' : 'btn-lg') + '" data-act="retry">Опитай пак</button>';
       html += '<button class="btn btn-ghost" data-act="map">Към картата</button>';
@@ -404,6 +443,7 @@
   function bind() {
     $$('.grade-tab').forEach(function (b) { b.addEventListener('click', function () { A.click(); st.grade = +b.dataset.g; renderSetup(); }); });
     $$('.mode-btn').forEach(function (b) { b.addEventListener('click', function () { A.click(); st.mode = b.dataset.mode; renderSetup(); }); });
+    $('#book-select').addEventListener('change', function (e) { var s2 = G.state; s2.books = s2.books || {}; s2.books[st.grade] = e.target.value; G.save(); A.click(); });
     $('#start-btn').addEventListener('click', function () {
       A.unlock(); A.click(); setURL();
       if (st.mode === 'adventure') renderMap(); else startPlay();
@@ -412,7 +452,7 @@
     $('#exit-btn').addEventListener('click', exitPlay);
     $('#end-btn').addEventListener('click', function () { if (play) finish(); });
     $('#next-btn').addEventListener('click', function () { goNext(); });
-    $$('#keypad .key, #choices .key').forEach(function (k) {
+    $$('#keypad .key').forEach(function (k) {
       k.addEventListener('click', function () { A.unlock(); press(k.dataset.k); });
     });
     document.addEventListener('keydown', function (e) {
@@ -421,10 +461,11 @@
       var v = /^\d$/.test(k) ? k : map[k];
       if (!v) return;
       if (play.task && play.task.kind === 'number' && ['<', '>', '='].indexOf(v) >= 0) return;
+      if (play.task && play.task.kind === 'choice' && typeof play.task.choices[0] === 'string' && /^\d$/.test(v)) return;
       e.preventDefault();
       if (play.waitNext && v === 'ok') { goNext(); return; }
       press(v);
-      var btn = document.querySelector('.key[data-k="' + v + '"]:not([hidden])');
+      var btn = document.querySelector('#keypad:not([hidden]) .key[data-k="' + v + '"]');
       if (btn) { btn.classList.add('pressed'); setTimeout(function () { btn.classList.remove('pressed'); }, 110); }
     });
     var snd = $('#sound-btn');
@@ -439,6 +480,8 @@
     st.grade = (g >= 1 && g <= 4) ? g : (G.state.lastGrade || 1);
     st.mode = MODE_NAMES[m] ? m : 'adventure';
     st.topic = t || 'mix';
+    st.skill = q.get('skill') || null;
+    var qb = q.get('book'); if (qb && st.grade) { G.state.books = G.state.books || {}; G.state.books[st.grade] = qb; G.save(); }
     bind();
     renderSetup();
     if (g && m === 'adventure') renderMap();

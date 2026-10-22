@@ -34,7 +34,6 @@
     { id: 'daily', icon: '🎯', name: 'Дневна цел', desc: 'Изпълнена дневна цел' },
     { id: 'practice50', icon: '💪', name: 'Упоритко', desc: '50 верни задачи в Тренировка' }
   ];
-  var TABLE_TOPICS = { mul2: 1, div2: 1, multable: 1, divtable: 1 };
 
   function today() {
     var d = new Date();
@@ -47,7 +46,7 @@
       v: 1, createdAt: today(), points: 0, correct: 0, answered: 0,
       streak: { count: 0, last: null }, daily: { date: today(), count: 0 }, dailyGoal: 20,
       badges: {}, best: {}, adventure: {}, modes: {}, practiceCorrect: 0, tableStreak: 0, maxCombo: 0,
-      lastGrade: null, settings: { sound: true }
+      lastGrade: null, books: {}, settings: { sound: true }
     };
   }
 
@@ -105,7 +104,7 @@
       gained = 10 * mult;
       if (session.mode === 'quick' && opts.ms !== undefined && opts.ms < 3000) gained += 5;
       if (session.mode === 'practice') state.practiceCorrect += 1;
-      if (TABLE_TOPICS[opts.topic]) state.tableStreak += 1;
+      if (opts.table) state.tableStreak += 1;
       state.maxCombo = Math.max(state.maxCombo, session.combo);
       state.daily.count += 1;
       touchStreak();
@@ -121,7 +120,7 @@
       if (session.mode === 'quick' && session.correct >= 10 && (session.correctTimes[9] - session.start) <= 30000) award('speedy', nb);
     } else {
       session.combo = 0; session.wrong += 1;
-      if (TABLE_TOPICS[opts.topic]) state.tableStreak = 0;
+      if (opts.table) state.tableStreak = 0;
     }
     state.points += gained; session.points += gained;
     if (state.points >= 1000) award('p1000', nb);

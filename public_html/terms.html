@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Общи условия — Сметко</title>
-<meta name="description" content="Общи условия за ползване на smetko.com.">
+<title>Общи условия – Сметко</title>
+<meta name="description" content="Общи условия за ползване на образователната платформа Сметко (smetko.com).">
 <link rel="canonical" href="https://smetko.com/terms.html">
-<meta name="theme-color" content="#4FB8FA">
+<meta name="theme-color" content="#3299FF">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Сметко">
-<meta property="og:title" content="Общи условия — Сметко">
-<meta property="og:description" content="Общи условия за ползване на smetko.com.">
+<meta property="og:title" content="Общи условия – Сметко">
+<meta property="og:description" content="Общи условия за ползване на образователната платформа Сметко (smetko.com).">
 <meta property="og:url" content="https://smetko.com/terms.html">
 <meta property="og:image" content="https://smetko.com/assets/images/og-image.png">
 <meta property="og:locale" content="bg_BG">
@@ -21,52 +21,108 @@
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap&amp;subset=cyrillic" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=1">
-<link rel="stylesheet" href="css/animations.css?v=1">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=2">
+<link rel="stylesheet" href="css/animations.css?v=2">
 </head>
 <body>
 <a class="skip" href="#main">Към съдържанието</a>
 <header class="site-header">
   <div class="wrap">
-    <a class="logo" href="index.html" aria-label="Сметко — начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
-    <nav class="nav" aria-label="Основно меню"><a href="game.html">Мисии</a><a href="index.html#klasove">Класове</a><a href="achievements.html">Постижения</a><a href="about.html#roditeli">За родители</a><a href="about.html#uchiteli">За учители</a><a href="pricing.html">Цени</a></nav>
+    <a class="logo" href="index.html" aria-label="Сметко – начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
+    <nav class="nav" aria-label="Основно меню">
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">Мисии <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="game.html"><b>Всички игри</b><small>Приключение, Бързо сметни, Тренировка</small></a>
+          <a href="class-1.html"><b>1. клас</b><small>Числата до 20 и кръглите десетици</small></a>
+          <a href="class-2.html"><b>2. клас</b><small>До 100 и таблицата за умножение</small></a>
+          <a href="class-3.html"><b>3. клас</b><small>До 1000, умножение и деление</small></a>
+          <a href="class-4.html"><b>4. клас</b><small>Многоцифрени числа, лице, тела</small></a>
+        </div></div>
+      <a href="achievements.html" data-nav="ach">Класации</a>
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">За учители <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="uchilishta.html"><b>Сметко в училище</b><small>Пилотна програма и документи</small></a>
+          <a href="rabotni-listove.html"><b>Работни листове</b><small>Задачи за печат с отговори</small></a>
+          <a href="uchilishta.html#domashna"><b>Линк за домашна</b><small>Конкретна тема с един линк</small></a>
+          <a href="about.html#uchiteli"><b>Как работи в клас</b><small>Идеи за часа по математика</small></a>
+        </div></div>
+      <a href="about.html#roditeli" data-nav="parents">За родители</a>
+      <a href="pricing.html" data-nav="pricing">Цени</a>
+    </nav>
     <div class="header-actions">
       <a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
-      <button class="btn btn-teal btn-sm btn-login" data-login>Вход</button>
+      <a class="link-login" href="#" data-login>Вход</a>
+      <a class="btn btn-teal btn-sm btn-register" href="#" data-login>Регистрация</a>
       <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
     </div>
   </div>
-  <nav class="mobile-nav" aria-label="Мобилно меню"><a href="game.html">Мисии</a><a href="index.html#klasove">Класове</a><a href="achievements.html">Постижения</a><a href="about.html#roditeli">За родители</a><a href="about.html#uchiteli">За учители</a><a href="pricing.html">Цени</a><a href="#" data-login>Вход за родители и учители</a></nav>
+  <nav class="mobile-nav" aria-label="Мобилно меню">
+    <a href="game.html">🎮 Мисии и игри</a>
+    <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
+    <a href="achievements.html">🏆 Класации и постижения</a>
+    <a href="uchilishta.html">🏫 За учители и училища</a>
+    <a href="rabotni-listove.html">🖨️ Работни листове</a>
+    <a href="about.html#roditeli">👨‍👩‍👧 За родители</a>
+    <a href="pricing.html">💶 Цени</a>
+    <div class="m-auth"><a class="btn btn-ghost" href="#" data-login>Вход</a><a class="btn btn-teal" href="#" data-login>Регистрация</a></div>
+  </nav>
 </header>
 
 <main id="main">
-<section class="section"><div class="wrap prose">
-<div class="breadcrumbs"><a href="index.html">Начало</a> › Общи условия</div>
-<h1>Общи условия за ползване</h1>
-<p><i>Последна актуализация: <mark>[ПОПЪЛНЕТЕ]</mark> 2026 г.</i></p>
-<h2>1. Общи положения</h2>
-<p>Тези условия уреждат ползването на уебсайта smetko.com („Сметко“), управляван от <mark>[ПОПЪЛНЕТЕ]</mark>, ЕИК <mark>[ПОПЪЛНЕТЕ]</mark>, адрес <mark>[ПОПЪЛНЕТЕ]</mark>, имейл info@smetko.com.</p>
-<h2>2. Услугата</h2>
-<p>Сметко е образователна онлайн игра с математически задачи за ученици от 1. до 4. клас. Задачите се генерират автоматично по теми от учебната програма. Полагаме грижа задачите да са верни. Ако откриете грешка, моля, пишете ни.</p>
+<section class="section doc"><div class="wrap prose">
+<div class="breadcrumbs"><a href="index.html">Начало</a> › <a href="pravna-informacia.html">Правна информация</a> › Общи условия</div>
+
+<h1>Общи условия за ползване на Сметко</h1>
+<p class="meta">В сила от: <mark class="fill">[ПОПЪЛНЕТЕ: дата]</mark></p>
+<div class="callout warn">⚖️ <b>Образец.</b> Текстът е изготвен по българското и европейското законодателство, но не е правен съвет. Преди използване го прегледайте с юрист и попълнете маркираните полета.</div><div class="callout">Сметко е в <b>пилотен (тестов) период</b>: услугата се предоставя безплатно, без регистрация и без продажби. Документът ще бъде актуализиран преди въвеждането на платени абонаменти.</div>
+<h2>1. Предмет и страни</h2>
+<p>1.1. Тези Общи условия уреждат отношенията между <mark class="fill">[ПОПЪЛНЕТЕ: наименование на дружеството]</mark>, ЕИК <mark class="fill">[ПОПЪЛНЕТЕ: ЕИК]</mark>, със седалище и адрес на управление <mark class="fill">[ПОПЪЛНЕТЕ: седалище и адрес на управление]</mark>, имейл info@smetko.com („Доставчикът“), и всяко лице, което използва уебсайта smetko.com и свързаните с него услуги („Потребителят“).</p>
+<p>1.2. С използването на сайта Потребителят приема тези Общи условия. Ако не е съгласен, той следва да не използва услугата.</p>
+<p>1.3. Информацията по чл. 4 от Закона за електронната търговия е посочена на страница <a href="pravna-informacia.html">Правна информация</a>.</p>
+<h2>2. Описание на услугата</h2>
+<p>2.1. Сметко е образователна онлайн игра с математически задачи за ученици от 1. до 4. клас. Задачите се генерират автоматично по темите на учебните програми на Министерството на образованието и науката, а мисиите могат да се подреждат по заглавията на уроците в избран учебник.</p>
+<p>2.2. Сметко е помощно средство за упражнение. То не замества обучението в училище и не е официален учебен ресурс на МОН или на издателствата.</p>
+<p>2.3. Доставчикът полага грижа задачите да са верни и съобразени с учебните програми. При открита грешка Потребителят може да я съобщи на info@smetko.com.</p>
 <h2>3. Ползване от деца</h2>
-<p>Услугата е предназначена за деца под надзора на родител, настойник или учител. Регистрацията и абонаментите (когато бъдат въведени) се правят само от пълнолетни лица.</p>
+<p>3.1. Услугата е предназначена за деца под надзора на родител, настойник или учител. Регистрация на профил, сключване на абонамент и плащания се извършват само от пълнолетни лица.</p>
+<p>3.2. Децата използват услугата без регистрация и без въвеждане на лични данни. Повече информация има в <a href="privacy-policy.html">Политиката за поверителност</a>.</p>
 <h2>4. Безплатен достъп и абонаменти</h2>
-<p>Към момента всички игри са безплатни. При въвеждане на абонаментите цените, условията за плащане, подновяване, пробен период и право на отказ ще бъдат описани тук преди началото на продажбите, в съответствие със Закона за защита на потребителите.</p>
-<h2>5. Интелектуална собственост</h2>
-<p>Дизайнът, героят Сметко, текстовете и програмният код са собственост на <mark>[ПОПЪЛНЕТЕ]</mark> и не могат да се копират без писмено разрешение.</p>
-<h2>6. Отговорност</h2>
-<p>Сметко е помощно средство за упражнение и не замества обучението в училище. Не носим отговорност за прекъсвания на услугата поради технически причини извън нашия контрол.</p>
-<h2>7. Приложимо право</h2>
-<p>За неуредените въпроси се прилага българското законодателство.</p>
+<p>4.1. През пилотния период цялата услуга се предоставя безплатно.</p>
+<p>4.2. След въвеждане на платени абонаменти ще са налични: безплатен план с ограничено съдържание; абонамент за 1 месец (с автоматично подновяване, което може да се спре по всяко време); абонамент за учебна година и за 1 година (без автоматично подновяване); семеен абонамент; абонамент за клас и за училище. Актуалните цени са публикувани на страница <a href="pricing.html">Цени</a> и са в евро.</p>
+<p>4.3. Преди сключване на абонамент Потребителят получава ясна информация за цената, срока, подновяването и начина на прекратяване. Договорът се сключва на български език, а потвърждение се изпраща на имейла на Потребителя.</p>
+<p>4.4. Плащанията се обработват от лицензиран платежен оператор. Доставчикът не съхранява данни за банкови карти.</p>
+<p>4.5. За училища и класове може да се издава фактура и да се плаща по банков път.</p>
+<h2>5. Право на отказ</h2>
+<p>5.1. Потребителят – физическо лице има право да се откаже от договора от разстояние в срок от 14 дни от сключването му, без да посочва причина, съгласно чл. 50 от Закона за защита на потребителите (ЗЗП). Може да използва <a href="otkaz.html">стандартния формуляр за отказ</a> или друго недвусмислено изявление, изпратено на info@smetko.com.</p>
+<p>5.2. Съгласно чл. 57, т. 13 от ЗЗП правото на отказ не се прилага за цифрово съдържание, ако изпълнението е започнало с изричното предварително съгласие на Потребителя и с потвърждение, че той знае, че губи правото си на отказ. Такова съгласие се иска изрично при поръчката. Ако Потребителят не го даде, достъпът се предоставя след изтичането на 14-дневния срок или Потребителят запазва правото на отказ.</p>
+<p>5.3. При упражнено право на отказ Доставчикът възстановява получените плащания до 14 дни, по начина, по който е платено.</p>
+<h2>6. Прекратяване</h2>
+<p>6.1. Месечният абонамент може да бъде спрян по всяко време от профила или с имейл. Спирането действа от следващия период на плащане.</p>
+<p>6.2. Доставчикът може да спре достъпа при злоупотреба, опит за пробив в сигурността или нарушение на тези условия.</p>
+<h2>7. Интелектуална собственост</h2>
+<p>7.1. Дизайнът, героят „Сметко“, илюстрациите, текстовете и програмният код са собственост на Доставчика и са защитени от Закона за авторското право и сродните му права. Не могат да се копират или разпространяват без писмено разрешение.</p>
+<p>7.2. Учителите могат свободно да печатат и раздават в клас генерираните работни листове.</p>
+<p>7.3. Имената на издателства и заглавията на уроци от учебници се използват само за ориентиране. Сметко не е свързан с издателствата.</p>
+<h2>8. Отговорност</h2>
+<p>8.1. Доставчикът полага разумни усилия услугата да е достъпна непрекъснато, но не гарантира това при технически причини извън неговия контрол (хостинг, интернет връзка, браузър на Потребителя).</p>
+<p>8.2. Прогресът в играта, пазен само на устройството на Потребителя, може да бъде загубен при изчистване на данните на браузъра. Доставчикът не носи отговорност за такава загуба.</p>
+<h2>9. Жалби и спорове</h2>
+<p>9.1. Жалби и рекламации се подават на info@smetko.com. Доставчикът отговаря в срок до 14 дни.</p>
+<p>9.2. Потребителят може да се обърне към Комисията за защита на потребителите (<a href="https://kzp.bg" rel="noopener">kzp.bg</a>) или към секторните помирителни комисии за алтернативно решаване на спорове.</p>
+<p>9.3. Спорове, които не са решени по взаимно съгласие, се решават от компетентния български съд. Приложимо е българското право.</p>
+<h2>10. Промени</h2>
+<p>10.1. Доставчикът може да променя тези условия. За съществени промени регистрираните потребители се уведомяват по имейл поне 14 дни предварително.</p>
+
+<p class="doc-actions"><button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Печат / PDF</button> <a class="btn btn-ghost btn-sm" href="pravna-informacia.html">Всички документи</a></p>
 </div></section>
 </main>
 <footer class="site-footer">
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <a class="logo" href="index.html" aria-label="Сметко — начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
-        <p style="margin-top:14px">Сметко превръща математиката в игра за децата от 1. до 4. клас: задачи по учебната програма, точки, значки и мисии.</p>
+        <a class="logo" href="index.html" aria-label="Сметко – начало"><span class="owl-mini" data-owl="idle"></span><span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>
+        <p style="margin-top:14px">Математика като игра за 1.–4. клас – по учебната програма на МОН и по заглавията на уроците в учебника на детето.</p>
       </div>
       <div><h4>Игри</h4><ul>
         <li><a href="game.html">Мисии</a></li>
@@ -77,23 +133,24 @@
       </ul></div>
       <div><h4>За възрастните</h4><ul>
         <li><a href="about.html#roditeli">За родители</a></li>
-        <li><a href="about.html#uchiteli">За учители</a></li>
-        <li><a href="pricing.html">Цени и абонаменти</a></li>
-        <li><a href="achievements.html">Постижения</a></li>
+        <li><a href="uchilishta.html">За учители и училища</a></li>
+        <li><a href="rabotni-listove.html">Работни листове</a></li>
+        <li><a href="pricing.html">Цени</a></li>
       </ul></div>
-      <div><h4>Информация</h4><ul>
-        <li><a href="about.html">За Сметко</a></li>
-        <li><a href="privacy-policy.html">Поверителност</a></li>
+      <div><h4>Правна информация</h4><ul>
         <li><a href="terms.html">Общи условия</a></li>
+        <li><a href="privacy-policy.html">Поверителност</a></li>
+        <li><a href="cookies.html">Бисквитки и хранилище</a></li>
+        <li><a href="pravna-informacia.html">Всички документи</a></li>
         <li><a href="mailto:info@smetko.com">info@smetko.com</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=1" defer></script>
-<script src="js/gamification.js?v=1" defer></script>
-<script src="js/audio.js?v=1" defer></script>
-<script src="js/app.js?v=1" defer></script>
+<script src="js/owl.js?v=2" defer></script>
+<script src="js/gamification.js?v=2" defer></script>
+<script src="js/audio.js?v=2" defer></script>
+<script src="js/app.js?v=2" defer></script>
 </body>
 </html>
