@@ -4,8 +4,38 @@
   var S = window.Smetko, G = S.Game, E = S.MathEngine;
   function $(s) { return document.querySelector(s); }
 
+  function renderGrades(st) {
+    var html = '';
+    [1, 2, 3, 4].forEach(function (g) {
+      var tot = 0, done = 0;
+      Object.keys(st.adventure).forEach(function (k) {
+        if (k === String(g) || k.indexOf(g + '-') === 0) { var m = st.adventure[k]; for (var i in m) { tot += m[i]; if (m[i]) done++; } }
+      });
+      var bestAny = 0;
+      for (var k in st.best) if (k.indexOf('quick-' + g + '-') === 0) bestAny = Math.max(bestAny, st.best[k]);
+      var bid = (st.books || {})[g] || 'mon', book = S.Books ? S.Books.get(g, bid) : null;
+      html += '<div class="card class-card g' + g + '"><div class="cc-num">' + g + '</div><h3>' + g + '. клас</h3><ul>' +
+        '<li>Изпълнени мисии: ' + done + '</li><li>Звезди: ' + tot + '</li><li>Рекорд „Бързо сметни“: ' + (bestAny || '—') + '</li>' +
+        (book ? '<li>Учебник: ' + (book.id === 'mon' ? 'по програмата' : book.publisher) + '</li>' : '') + '</ul>' +
+        '<div class="cc-actions"><a class="btn btn-sm" href="game.html?grade=' + g + '&amp;mode=adventure">Продължи</a></div></div>';
+    });
+    $('#grades').innerHTML = html;
+  }
+
   function render() {
     var st = G.state, r = G.rank();
+    if (!G.earns()) { // без абонамент: без точки, нива и значки
+      $('#rank-line').textContent = '🔒 Точки, нива и значки – с абонамент';
+      $('#rank-bar').style.width = '0';
+      $('#rank-next').innerHTML = 'Въведи кода си или избери абонамент, за да печелиш точки, да вдигаш ниво и да влезеш в класациите. <a href="kod.html" style="color:#fff;text-decoration:underline">Имам код</a> · <a href="pricing.html" style="color:#fff;text-decoration:underline">Абонаменти</a>';
+      var acc0 = st.answered ? Math.round(st.correct / st.answered * 100) : 0;
+      $('#stats').innerHTML = [[st.correct, 'верни задачи'], [acc0 + '%', 'точност'], ['🔒', 'точки – с абонамент'], ['🔒', 'серия от дни – с абонамент']]
+        .map(function (x) { return '<div class="stat"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('');
+      $('#badges').innerHTML = G.BADGES.map(function (b) { return '<div class="badge locked"><div class="b-ico">' + b.icon + '</div><b>' + b.name + '</b><small>' + b.desc + '</small></div>'; }).join('');
+      $('#badge-count').innerHTML = 'Значките се събират с абонамент. <a href="pricing.html">Виж абонаментите</a>';
+      renderGrades(st);
+      return;
+    }
     $('#rank-line').textContent = 'Ниво ' + r.level + ': ' + r.name;
     $('#rank-bar').style.width = Math.round(r.progress * 100) + '%';
     $('#rank-next').textContent = r.next ? 'Още ' + (r.next.min - st.points) + ' точки до „' + r.next.name + '“' : 'Най-високото ниво! 🎓';
@@ -22,21 +52,7 @@
     }).join('');
     $('#badge-count').textContent = 'Събрани ' + have + ' от ' + G.BADGES.length + ' значки.';
 
-    var html = '';
-    [1, 2, 3, 4].forEach(function (g) {
-      var tot = 0, done = 0;
-      Object.keys(st.adventure).forEach(function (k) {
-        if (k === String(g) || k.indexOf(g + '-') === 0) { var m = st.adventure[k]; for (var i in m) { tot += m[i]; if (m[i]) done++; } }
-      });
-      var bestAny = 0;
-      for (var k in st.best) if (k.indexOf('quick-' + g + '-') === 0) bestAny = Math.max(bestAny, st.best[k]);
-      var bid = (st.books || {})[g] || 'mon', book = S.Books ? S.Books.get(g, bid) : null;
-      html += '<div class="card class-card g' + g + '"><div class="cc-num">' + g + '</div><h3>' + g + '. клас</h3><ul>' +
-        '<li>Изпълнени мисии: ' + done + '</li><li>Звезди: ' + tot + '</li><li>Рекорд „Бързо сметни“: ' + (bestAny || '—') + '</li>' +
-        (book ? '<li>Учебник: ' + (book.id === 'mon' ? 'по програмата' : book.publisher) + '</li>' : '') + '</ul>' +
-        '<div class="cc-actions"><a class="btn btn-sm" href="game.html?grade=' + g + '&amp;mode=adventure">Продължи</a></div></div>';
-    });
-    $('#grades').innerHTML = html;
+    renderGrades(st);
   }
 
   function myClass() {

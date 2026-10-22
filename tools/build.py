@@ -265,7 +265,7 @@ game = head('Игра – Сметко', 'Играй математически 
       <span class="timer-num" id="timer-num" hidden>60</span>
       <button class="btn btn-sm btn-purple" id="end-btn" hidden style="margin-left:auto">Край</button>
     </div>
-    <div class="score"><span class="pill" id="play-mode">Игра</span><span class="pill combo" id="combo"></span><span class="pill" id="level-pill">Ниво 1</span><span class="pill" id="pts">★ 0</span></div>
+    <div class="score"><span class="pill" id="play-mode">Игра</span><span class="pill combo" id="combo"></span><span class="pill" id="level-pill">Трудност 1</span><span class="pill" id="pts">★ 0</span></div>
     <div class="stage"><div class="owl" id="play-owl" data-owl="hello"></div><div class="bubble" id="bubble" aria-live="polite">Да започваме!</div></div>
     <div class="qcard" id="qcard"><div id="qbody"></div></div>
     <div class="keypad" id="keypad">
@@ -337,12 +337,12 @@ for g, d in GRADES.items():
 FAQ_PRICE = [
     ('Как се плаща?', 'Абонаментът се поръчва по имейл на <a href="mailto:info@smetko.com">info@smetko.com</a> и се активира с код за достъп, който получавате до 1 работен ден. Плащането е по банков път, а училищата получават фактура. Плащане с карта направо от сайта предстои.'),
     ('Как работи кодът за клас?', 'Всеки ученик получава картичка с личен код и го въвежда веднъж на <a href="kod.html">smetko.com/kod</a>. Кодовете са еднократни – всеки се активира на едно устройство. Учителят получава своя картичка с код и ПИН и вижда класацията на целия клас на <a href="klasaciya.html">smetko.com/klasaciya</a>.'),
-    ('Има ли безплатен план?', 'Да. Безплатно са „Бързо сметни“ за всички класове, първите <span data-cfg="freeMissions">3</span> мисии от всеки клас, <span data-cfg="freePractice">20</span> задачи на ден в „Тренировка“ и работните листове.'),
+    ('Има ли безплатен план?', 'Да. Безплатно са „Бързо сметни“ за всички класове, първите <span data-cfg="freeMissions">3</span> мисии от всеки клас, <span data-cfg="freePractice">20</span> задачи на ден в „Тренировка“ и работните листове. Точките, нивата, значките и класациите са с абонамент.'),
     ('Подновява ли се абонаментът автоматично?', 'Не. Абонаментът е за 6 месеца или 1 година и спира сам. Седмица преди края Сметко напомня в играта, за да поръчате нов код навреме.'),
     ('Как плащат училищата?', 'С фактура и банков превод. За 3 или повече класа има <span data-price="disc3">15</span>% отстъпка, а за 8 или повече класа – <span data-price="disc8">25</span>%.'),
     ('Мога ли да се откажа?', 'Да. Правата ви при отказ са описани в <a href="terms.html">Общите условия</a>, а формулярът за отказ е <a href="otkaz.html">тук</a>.'),
 ]
-paid = '<li>Мисии по учебника за всички класове</li><li>Неограничена тренировка</li><li>Всички значки и нива</li>'
+paid = '<li>Мисии по учебника за всички класове</li><li>Неограничена тренировка</li><li>Точки, нива и значки</li><li>Всички класации</li>'
 pricing = head('Цени и абонаменти – Сметко', 'Абонаменти за Сметко за 6 месеца и 1 година: индивидуален, семеен (4 деца) и за цял клас. Безплатен план и отстъпки за училища.',
                'pricing.html', [crumbs([('Начало', ''), ('Цени', 'pricing.html')]), faq_ld(FAQ_PRICE)]) + header('pricing') + page_hero(
     'Цени и абонаменти', 'По-малко от цената на една тетрадка на месец. Без реклами. Пълният достъп се активира с код.', 'Цени', 'happy',
@@ -354,7 +354,7 @@ pricing = head('Цени и абонаменти – Сметко', 'Абона�
     <div class="period-toggle" role="group" aria-label="Срок на абонамента"><button data-period="12" aria-pressed="true">1 година</button><button data-period="6" aria-pressed="false">6 месеца</button></div>
     <div class="plans">
       <div class="plan"><h3><span class="plan-ico">🐣</span> <span data-plan="free">Пухче</span><small class="plan-kind">Безплатно</small></h3><div class="who">Да опознаете Сметко</div><div class="price">0 €</div><div class="per">завинаги</div>
-        <ul><li>„Бързо сметни“ за всички класове</li><li>Първите <span data-cfg="freeMissions">3</span> мисии от всеки клас</li><li>Тренировка до <span data-cfg="freePractice">20</span> задачи на ден</li><li class="no">Всички мисии по учебника</li></ul>
+        <ul><li>„Бързо сметни“ за всички класове</li><li>Първите <span data-cfg="freeMissions">3</span> мисии от всеки клас</li><li>Тренировка до <span data-cfg="freePractice">20</span> задачи на ден</li><li class="no">Всички мисии по учебника</li><li class="no">Точки, нива и значки</li><li class="no">Класации</li></ul>
         <a class="btn btn-white" href="game.html">Играй сега</a></div>
       <div class="plan"><h3><span class="plan-ico">🦉</span> <span data-plan="single">Бухалче</span><small class="plan-kind">Индивидуален</small></h3>
         <div class="pp" data-p="12"><div class="price"><span data-price="single12">18</span> € <small>/ 1 година</small></div><div class="per"><span data-per="single12">1.50 € на месец</span></div></div>

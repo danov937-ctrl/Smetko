@@ -41,7 +41,7 @@
     var streak = (s.streak.last === G.today() || isYesterday(s.streak.last)) ? s.streak.count : 0;
     $('#streak-num').textContent = streak;
     var r = G.rank();
-    $('#rank-name').textContent = 'Ниво ' + r.level + ': ' + r.name;
+    $('#rank-name').innerHTML = G.earns() ? 'Ниво ' + r.level + ': ' + r.name : '🔒 Точки и нива – <a href="pricing.html">с абонамент</a>';
   }
   function isYesterday(d) { if (!d) return false; var y = new Date(); y.setDate(y.getDate() - 1); return d === y.toISOString().slice(0, 10) || Math.round((new Date(G.today()) - new Date(d)) / 864e5) === 1; }
 
@@ -207,7 +207,7 @@
     $('#end-btn').hidden = mode !== 'practice';
     $('#progress').hidden = mode === 'practice';
     $('#level-pill').hidden = mode === 'adventure';
-    $('#pts').textContent = '★ 0';
+    $('#pts').textContent = '★ 0'; $('#pts').hidden = !G.earns();
     setCombo(0);
     S.setOwl($('#play-owl'), 'hello');
     bubble(mode === 'challenge' ? 'Предизвикателство: ' + play.title + '! 60 секунди ⚡' : mode === 'quick' ? '60 секунди! Готов ли си? 🚀' : mode === 'adventure' ? 'Мисия ' + (play.missionIdx + 1) + ': ' + play.title + '!' : 'Спокойно, без бързане. Ти можеш!');
@@ -234,7 +234,7 @@
     if (timed(play.mode)) w = play.timeLeft / S.config.quickSeconds * 100;
     else if (play.mode === 'adventure') w = play.idx / play.total * 100;
     $('#progress i').style.width = Math.max(0, w) + '%';
-    $('#level-pill').textContent = 'Ниво ' + play.level;
+    $('#level-pill').textContent = 'Трудност ' + play.level;
   }
 
   function nextQuestion() {
@@ -322,7 +322,7 @@
       qc.classList.add('ok');
       if (res.mult > 1 && (play.streak === 5 || play.streak === 10)) { A.combo(); bubble(say('combo')); } else { A.correct(); bubble(say('ok')); }
       S.setOwl($('#play-owl'), play.streak >= 5 ? 'cheer' : 'happy');
-      var fp = document.createElement('div'); fp.className = 'float-pts'; fp.textContent = '+' + res.gained; qc.appendChild(fp);
+      if (res.gained > 0) { var fp = document.createElement('div'); fp.className = 'float-pts'; fp.textContent = '+' + res.gained; qc.appendChild(fp); }
       setCombo(res.combo, res.mult);
       adapt(true);
       later(goNext, timed(play.mode) ? 380 : 650);
@@ -337,7 +337,7 @@
       if (play.mode === 'practice') { play.waitNext = true; $('#next-row').hidden = false; $('#next-btn').focus({ preventScroll: true }); }
       else later(goNext, timed(play.mode) ? 1300 : 1700);
     }
-    $('#pts').textContent = '★ ' + (G.session ? G.session.points : 0);
+    $('#pts').textContent = '★ ' + (G.session ? G.session.points : 0); $('#pts').hidden = !G.earns();
     S.updateChip();
     res.newBadges.forEach(function (b, i) { later(function () { A.badge(); S.toast('<span style="font-size:1.6rem">' + b.icon + '</span> Нова значка: <b>' + b.name + '</b>', 3000); }, 300 + i * 900); });
     if (res.rankUp) later(function () { A.levelUp(); S.toast('🎉 Ново ниво: <b>' + res.rankUp.name + '</b>!', 3000); S.confetti(80); }, 200);
@@ -475,6 +475,10 @@
       .catch(function (e) { S.toast(e.message); });
   }
   function stats(a, al, b, bl, c, cl) {
+    if (cl === 'точки' && !G.earns()) { // без абонамент няма точки
+      return '<div class="result-stats"><div><b>' + a + '</b><span>' + al + '</span></div><div><b>' + b + '</b><span>' + bl + '</span></div><div><b>🔒</b><span>точки</span></div></div>' +
+        '<p class="lock-note free-note">⭐ С абонамент печелиш <b>точки, нива и значки</b> и влизаш в класациите. <a href="pricing.html">Абонаменти</a> · <a href="kod.html">Имам код</a></p>';
+    }
     return '<div class="result-stats"><div><b>' + a + '</b><span>' + al + '</span></div><div><b>' + b + '</b><span>' + bl + '</span></div><div><b>' + c + '</b><span>' + cl + '</span></div></div>';
   }
 

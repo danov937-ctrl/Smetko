@@ -204,7 +204,18 @@
   /* ---------- Хедър ---------- */
   function updateChip() {
     var chip = document.querySelector('[data-points]');
-    if (chip && S.Game) chip.innerHTML = '<span class="star">★</span> ' + S.Game.state.points;
+    if (!chip || !S.Game) return;
+    var on = S.Game.earns();
+    chip.hidden = !on; // без абонамент няма точки
+    if (on) chip.innerHTML = '<span class="star">★</span> ' + S.Game.state.points;
+  }
+  /* Точки, натрупани без абонамент (напр. при пробване), се изчистват веднъж. Звездите в мисиите остават. */
+  function cleanFreeProgress() {
+    var G = S.Game; if (!G || G.earns()) return;
+    var st = G.state;
+    if (st.access || st.accessLost || st.freeCleaned) return; // абонат (и с изтекъл код) пази всичко
+    st.points = 0; st.badges = {}; st.maxCombo = 0; st.streak = { count: 0, last: null }; st.freeCleaned = true;
+    G.save();
   }
   S.updateChip = updateChip;
 
@@ -212,6 +223,7 @@
     S.loadConfig();
     S.loadNews();
     S.renderOwls();
+    cleanFreeProgress();
     updateChip();
     var mb = document.querySelector('.menu-btn'), mn = document.querySelector('.mobile-nav');
     if (mb && mn) mb.addEventListener('click', function () {

@@ -72,7 +72,10 @@
       progress: next ? (points - RANKS[i].min) / (next.min - RANKS[i].min) : 1 };
   }
 
+  /* Точки, нива и значки се печелят само с абонамент (активен код). Без код – игрите са безплатни, но без точки. */
+  function earns() { var S = window.Smetko || {}; return !(S.config && S.config.paywall) || !!(S.hasAccess && S.hasAccess()); }
   function award(id, out) {
+    if (!earns()) return;
     if (state.badges[id]) return;
     state.badges[id] = today();
     for (var i = 0; i < BADGES.length; i++) if (BADGES[i].id === id) out.push(BADGES[i]);
@@ -129,6 +132,7 @@
       session.combo = 0; session.wrong += 1;
       if (opts.table) state.tableStreak = 0;
     }
+    if (!earns()) gained = 0;
     state.points += gained; session.points += gained;
     if (state.points >= 1000) award('p1000', nb);
     if (state.modes.quick && state.modes.adventure && state.modes.practice) award('explorer', nb);
@@ -137,7 +141,7 @@
     return { gained: gained, combo: session.combo, mult: mult, newBadges: nb, rankUp: rank().idx > rankBefore ? rank() : null };
   }
 
-  function addBonus(points) { state.points += points; if (session) session.points += points; save(); }
+  function addBonus(points) { if (!earns()) return; state.points += points; if (session) session.points += points; save(); }
 
   function endSession() {
     if (!session) return null;
@@ -184,7 +188,7 @@
     get state() { return state; }, load: load, save: save, rank: rank, RANKS: RANKS, BADGES: BADGES,
     startSession: startSession, answer: answer, addBonus: addBonus, endSession: endSession,
     awardBadge: function (id) { var nb = []; award(id, nb); save(); return nb; },
-    stars: stars, setStars: setStars, totalStars: totalStars, isUnlocked: isUnlocked,
+    earns: earns, stars: stars, setStars: setStars, totalStars: totalStars, isUnlocked: isUnlocked,
     reset: reset, setSound: setSound, today: today,
     get session() { return session; }
   };

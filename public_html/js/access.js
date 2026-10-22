@@ -39,6 +39,7 @@
       save();
       sync(true);
       markLinks();
+      if (S.updateChip) S.updateChip();
       return j;
     });
   }
