@@ -15,9 +15,9 @@ if (too_many('league', 240, 600)) json_out(['ok' => false, 'error' => 'Твър�
 note_attempt('league');
 $in = json_in();
 $grade = max(1, min(4, (int)($in['grade'] ?? 1)));
-$t = read_token((string)($in['token'] ?? ''));
-$c = $t ? get_code($t['c']) : null;
-if (!$c || (int)$c['revoked'] || $c['expires_at'] < today()) json_out(['ok' => true, 'locked' => true, 'list' => []]);
+$acc = league_access($in);
+if (!$acc) json_out(['ok' => true, 'locked' => true, 'list' => []]);
+$t = $acc['t'] ?: ['c' => '', 'd' => ''];
 $st = db()->prepare("SELECT cs.best, cs.at, r.id, r.device, r.code, r.nickname, b.class_name, s.name AS sname, s.town
     FROM challenge_scores cs JOIN redemptions r ON r.id = cs.rid JOIN codes c ON c.code = r.code JOIN batches b ON b.id = c.batch_id LEFT JOIN schools s ON s.id = b.school_id
     WHERE cs.week = ? AND cs.grade = ? AND r.hidden = 0 AND (b.type <> 'class' OR COALESCE(b.public, 1) = 1) AND c.revoked = 0 ORDER BY cs.best DESC, cs.at ASC");

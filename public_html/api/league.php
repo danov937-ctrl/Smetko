@@ -1,8 +1,8 @@
 <?php
 /* Общи класации между училищата.
    POST {scope: schools|classes|teachers|students, period: week|all, grade: 0-4, token?}
-   - Училища, класове и учители: видими за всички (без данни за деца).
-   - Ученици: само за потребители с код (token) – прякор, клас, училище.
+   Всички класации се виждат само с платен абонамент: активен код (token) или учител с код + ПИН.
+   Учениците се показват с прякор, клас и училище.
    Брои се само точките, спечелено след активирането на кода; класирането е по „точки на ученик“
    (всички точки ÷ броя ученици с код), за да е честно между малки и големи класове и училища. */
 declare(strict_types=1);
@@ -14,13 +14,9 @@ $in = json_in();
 $scope = in_array($in['scope'] ?? '', ['schools', 'classes', 'teachers', 'students'], true) ? $in['scope'] : 'schools';
 $period = ($in['period'] ?? '') === 'week' ? 'week' : 'all';
 $grade = max(0, min(4, (int)($in['grade'] ?? 0)));
-$me = null;
-if (!empty($in['token'])) {
-    $t = read_token((string)$in['token']);
-    $c = $t ? get_code($t['c']) : null;
-    if ($c && !(int)$c['revoked'] && $c['expires_at'] >= today()) $me = $t;
-}
-if ($scope === 'students' && !$me) json_out(['ok' => true, 'scope' => $scope, 'locked' => true, 'list' => []]);
+$acc = league_access($in);
+if (!$acc) json_out(['ok' => true, 'scope' => $scope, 'locked' => true, 'list' => []]);
+$me = $acc['t'];
 
 const MIN_SCHOOL = 5;  // ученици с код, за да влезе училище в класацията
 const MIN_CLASS = 3;
@@ -53,6 +49,7 @@ foreach ($q as $x) {
 }
 $mine = null;
 if ($me) foreach ($rows as $r) if ($r['code'] === $me['c'] && hash_equals($r['device'], $me['d'])) $mine = $r;
+if (!$me && ($tb = batch_of($acc['code']['code']))) $mine = ['id' => 0, 'sid' => $tb['school_id'], 'bid' => $tb['id'], 'teacher_name' => $tb['teacher_name'] ?? '']; // учител: неговият клас и училище
 
 function rank_groups(array $groups, int $min): array {
     $out = [];

@@ -74,6 +74,26 @@ function challenge_for(string $week, int $grade): array { // ръчно зада
     return ['title' => $t, 'skills' => $s, 'custom' => false];
 }
 
+/* ---------- достъп до класациите: само с платен абонамент ----------
+   Активен код (token) от който и да е план или учител с код + ПИН на класа. Връща ['t' => token|null, 'code' => ред на кода] или null. */
+function league_access(array $in): ?array {
+    if (!empty($in['token'])) {
+        $t = read_token((string)$in['token']);
+        $c = $t ? get_code($t['c']) : null;
+        if ($c && !(int)$c['revoked'] && $c['expires_at'] >= today()) return ['t' => $t, 'code' => $c];
+    }
+    if (!empty($in['code']) && isset($in['pin'])) {
+        if (too_many('pin_fail', 10, 900)) return null;
+        $code = normalize_code((string)$in['code']);
+        $c = $code ? get_code($code) : null;
+        $b = $c ? batch_of($code) : null;
+        $pin = (string)($b['pin'] ?? '') ?: (string)($c['pin'] ?? '');
+        if ($c && $c['type'] === 'class' && $pin !== '' && hash_equals($pin, trim((string)$in['pin'])) && !(int)$c['revoked'] && $c['expires_at'] >= today()) return ['t' => null, 'code' => $c];
+        note_attempt('pin_fail');
+    }
+    return null;
+}
+
 /* ---------- блог ---------- */
 const BLOG_CATS = ['Съвети за родители', 'За учители', 'Математика у дома', 'Новини от Сметко', 'Игри и идеи'];
 function slugify(string $t): string {

@@ -34,7 +34,7 @@
   function render(j) {
     var out = $('#liga-out');
     if (j.locked) {
-      out.innerHTML = '<div class="panel liga-locked"><div data-owl="think"></div><h3>Класацията на учениците е само за играчи с код</h3><p>Така прякорите на децата не се виждат от всеки в интернет. Въведи кода от картичката и влез в битката!</p><p><a class="btn btn-green" href="kod.html">🔑 Въведи код</a></p></div>';
+      out.innerHTML = '<div class="panel liga-locked"><div data-owl="think"></div><h3>Класациите са за абонати</h3><p>Училища, класове, учители и ученици от цялата страна – с всеки абонамент (индивидуален, семеен или за клас). Въведи кода си и влез в битката!</p><p><a class="btn btn-green" href="kod.html">🔑 Въведи код</a> <a class="btn btn-white" href="pricing.html">Абонаменти</a></p><p class="hint">Учител? Отворете първо <a href="klasaciya.html">класацията на класа</a> с код и ПИН и отметнете „Запомни на това устройство“.</p></div>';
       if (S.renderOwls) S.renderOwls(out);
       return;
     }
@@ -86,7 +86,7 @@
       return S.Challenge.board(g).then(function (j) {
         if (my !== seq) return;
         $('#liga-mine').innerHTML = '';
-        if (j.locked) { out.innerHTML = head + '<div class="panel liga-locked"><h3>Класацията на седмицата е за играчи с код</h3><p>Играй предизвикателството и сравни резултата си с ученици от цялата страна.</p><p><a class="btn btn-green" href="kod.html">🔑 Въведи код</a></p></div>'; return; }
+        if (j.locked) { out.innerHTML = head + '<div class="panel liga-locked"><div data-owl="think"></div><h3>Класациите са за абонати</h3><p>Училища, класове, учители и ученици от цялата страна – с всеки абонамент (индивидуален, семеен или за клас). Въведи кода си и влез в битката!</p><p><a class="btn btn-green" href="kod.html">🔑 Въведи код</a> <a class="btn btn-white" href="pricing.html">Абонаменти</a></p><p class="hint">Учител? Отворете първо <a href="klasaciya.html">класацията на класа</a> с код и ПИН и отметнете „Запомни на това устройство“.</p></div>'; if (S.renderOwls) S.renderOwls(out); return; }
         if (!j.list.length) { out.innerHTML = head + '<div class="panel" style="text-align:center"><p class="lead-dark">Още никой не е играл тази седмица. Бъди първият!</p></div>'; return; }
         out.innerHTML = head + '<div class="table-wrap"><table class="compare board liga-table"><tbody>' + j.list.map(function (r) {
           return '<tr class="' + (r.mine ? 'me' : '') + '"><td class="pl">' + r.place + '</td><td><b>' + esc(r.name) + '</b>' + (r.mine ? ' <span class="tag">ти</span>' : '') + '<small class="liga-sub">' + [r['class'], r.school, r.town].filter(Boolean).map(esc).join(' · ') + '</small></td><td class="sc">' + r.best + '<small>верни за 60 с</small></td></tr>';

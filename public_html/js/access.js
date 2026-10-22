@@ -67,12 +67,15 @@
 
   function classBoard() { var a = access(); return a ? post('class.php', { token: a.token }) : Promise.reject(new Error('Няма код за клас.')); }
   function teacherBoard(code, pin, hide, unhide, release) { var d = { code: code, pin: pin }; if (hide) { d.hide = hide; if (unhide) d.unhide = 1; } if (release) d.release = release; return post('class.php', d); }
-  function league(q) { var a = access(); q = q || {}; if (a) q.token = a.token; return post('league.php', q); }
+  function teacherCreds() { try { var b = JSON.parse(localStorage.getItem('smetko.board') || 'null'); return b && b.c && b.p ? b : null; } catch (e) { return null; } }
+  function withAccess(q) { var a = access(), t; q = q || {}; if (a) q.token = a.token; else if ((t = teacherCreds())) { q.code = t.c; q.pin = t.p; } return q; } // учител: кодът и ПИН-ът от класацията на класа
+  function league(q) { return post('league.php', withAccess(q)); }
+  function canSeeLeague() { return !!(access() || teacherCreds()); }
   function teacherSettings(code, pin, settings) { return post('class.php', { code: code, pin: pin, settings: settings }); }
   function setNickname(n) { st().nickname = n; save(); sync(true); }
   function forget() { var s = st(); delete s.access; save(); }
 
-  S.Access = { deviceId: deviceId, get: access, isClass: isClass, redeem: redeem, verify: verify, sync: sync, classBoard: classBoard, teacherBoard: teacherBoard, league: league, teacherSettings: teacherSettings, setNickname: setNickname, forget: forget, online: online };
+  S.Access = { deviceId: deviceId, get: access, isClass: isClass, redeem: redeem, verify: verify, sync: sync, classBoard: classBoard, teacherBoard: teacherBoard, league: league, withAccess: withAccess, canSeeLeague: canSeeLeague, teacherSettings: teacherSettings, setNickname: setNickname, forget: forget, online: online };
   S.hasAccess = function () { return !!access(); };
 
   function fmtDate(d) { var p = String(d).split('-'); return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0] : d; }

@@ -30,9 +30,8 @@
     return { best: Math.max(prev, score), isRecord: isRecord && prev > 0, first: first, newBadges: nb };
   }
   function board(grade) {
-    var a = S.Access && S.Access.get();
-    if (!a || !online()) return Promise.resolve({ locked: true, list: [] });
-    return fetch('/api/challenge.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: a.token, grade: grade }) }).then(function (r) { return r.json(); });
+    if (!S.Access || !S.Access.canSeeLeague() || !online()) return Promise.resolve({ locked: true, list: [] });
+    return fetch('/api/challenge.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(S.Access.withAccess({ grade: grade })) }).then(function (r) { return r.json(); });
   }
   function daysLeft() { if (!info) return 0; var e = new Date(info.ends + 'T23:59:59'); return Math.max(0, Math.ceil((e - new Date()) / 864e5)); }
   S.Challenge = { load: load, my: my, record: record, board: board, daysLeft: daysLeft, get info() { return info; } };
