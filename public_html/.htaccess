@@ -13,6 +13,14 @@ AddDefaultCharset UTF-8
   RewriteCond %{HTTPS} off [OR]
   RewriteCond %{HTTP_HOST} ^www\. [NC]
   RewriteRule ^ https://smetko.com%{REQUEST_URI} [L,R=301]
+
+  # Кратки адреси (печатат се на картичките)
+  RewriteRule ^kod/?$ /kod.html [L]
+  RewriteRule ^klasaciya/?$ /klasaciya.html [L]
+  RewriteRule ^admin$ /admin/ [L,R=301]
+
+  # Базата данни никога не се отдава
+  RewriteRule ^api/data/ - [F,L]
 </IfModule>
 
 # ---------- Типове файлове ----------

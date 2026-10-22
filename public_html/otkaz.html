@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=2">
-<link rel="stylesheet" href="css/animations.css?v=2">
+<link rel="stylesheet" href="css/style.css?v=3">
+<link rel="stylesheet" href="css/animations.css?v=3">
 </head>
 <body>
 <a class="skip" href="#main">Към съдържанието</a>
@@ -42,7 +42,8 @@
       <a href="achievements.html" data-nav="ach">Класации</a>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">За учители <span class="chev">▾</span></button>
         <div class="dd-panel">
-          <a href="uchilishta.html"><b>Сметко в училище</b><small>Пилотна програма и документи</small></a>
+          <a href="uchilishta.html"><b>Сметко в училище</b><small>Кодове за класа и документи</small></a>
+          <a href="klasaciya.html"><b>Класация на класа</b><small>С кода и ПИН-а от картичката</small></a>
           <a href="rabotni-listove.html"><b>Работни листове</b><small>Задачи за печат с отговори</small></a>
           <a href="uchilishta.html#domashna"><b>Линк за домашна</b><small>Конкретна тема с един линк</small></a>
           <a href="about.html#uchiteli"><b>Как работи в клас</b><small>Идеи за часа по математика</small></a>
@@ -52,8 +53,8 @@
     </nav>
     <div class="header-actions">
       <a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
-      <a class="link-login" href="#" data-login>Вход</a>
-      <a class="btn btn-teal btn-sm btn-register" href="#" data-login>Регистрация</a>
+      <a class="link-login" href="kod.html" data-code-link>Имам код</a>
+      <a class="btn btn-teal btn-sm btn-register" href="pricing.html">Абонамент</a>
       <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
     </div>
   </div>
@@ -61,11 +62,12 @@
     <a href="game.html">🎮 Мисии и игри</a>
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
     <a href="achievements.html">🏆 Класации и постижения</a>
+    <a href="kod.html">🔑 Въведи код за достъп</a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
     <a href="about.html#roditeli">👨‍👩‍👧 За родители</a>
     <a href="pricing.html">💶 Цени</a>
-    <div class="m-auth"><a class="btn btn-ghost" href="#" data-login>Вход</a><a class="btn btn-teal" href="#" data-login>Регистрация</a></div>
+    <div class="m-auth"><a class="btn btn-ghost" href="kod.html" data-code-link>Имам код</a><a class="btn btn-teal" href="pricing.html">Абонамент</a></div>
   </nav>
 </header>
 
@@ -111,6 +113,7 @@
         <li><a href="uchilishta.html">За учители и училища</a></li>
         <li><a href="rabotni-listove.html">Работни листове</a></li>
         <li><a href="pricing.html">Цени</a></li>
+        <li><a href="kod.html">Въведи код</a></li>
       </ul></div>
       <div><h4>Правна информация</h4><ul>
         <li><a href="terms.html">Общи условия</a></li>
@@ -123,9 +126,10 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=2" defer></script>
-<script src="js/gamification.js?v=2" defer></script>
-<script src="js/audio.js?v=2" defer></script>
-<script src="js/app.js?v=2" defer></script>
+<script src="js/owl.js?v=3" defer></script>
+<script src="js/gamification.js?v=3" defer></script>
+<script src="js/audio.js?v=3" defer></script>
+<script src="js/access.js?v=3" defer></script>
+<script src="js/app.js?v=3" defer></script>
 </body>
 </html>

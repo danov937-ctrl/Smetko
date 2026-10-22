@@ -4,6 +4,7 @@
   var S = window.Smetko, E = S.MathEngine, B = S.Books;
   function $(id) { return document.getElementById(id); }
   function topicOptions(g, withMix) {
+    if (!E) return '';
     var h = withMix ? '<option value="mix">Всички теми (смесено)</option>' : '';
     E.GRADES[g].topics.forEach(function (t, i) { h += '<option value="' + t.id + '">' + (i + 1) + '. ' + t.name + '</option>'; });
     return h;
@@ -68,7 +69,79 @@
     fillTopics();
   }
 
+
+  // ---------- Код за достъп ----------
+  function fmtCode(v) {
+    var c = v.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (c.indexOf('SMET') === 0) c = c.slice(4);
+    c = c.slice(0, 8);
+    return 'SMET-' + c.slice(0, 4) + (c.length > 4 ? '-' + c.slice(4) : '');
+  }
+  function bindCodeInput(inp) {
+    inp.addEventListener('input', function () { var v = inp.value; if (!v.replace(/[^A-Za-z0-9]/g, '') || v.replace(/[^A-Za-z0-9]/g, '').toUpperCase() === 'SMET') { inp.value = v.toUpperCase(); return; } inp.value = fmtCode(v); });
+  }
+  function initCode() {
+    var form = $('code-form'), inp = $('code-input'), nick = $('nick-input'), err = $('code-err'), ok = $('code-ok'), btn = $('code-btn');
+    bindCodeInput(inp);
+    var q = new URLSearchParams(location.search).get('c'); if (q) inp.value = fmtCode(q);
+    if (S.Game && S.Game.state.nickname) nick.value = S.Game.state.nickname;
+    function showOk(a, fresh) {
+      form.hidden = true; ok.hidden = false;
+      ok.innerHTML = '<div class="owl" data-owl="cheer" style="width:140px;margin:0 auto"></div><h2>' + (fresh ? 'Готово! 🎉' : 'Имаш пълен достъп') + '</h2>' +
+        '<p class="lead-dark">Код <b>' + esc(a.code) + '</b> · ' + esc(a.typeName || '') + ' · валиден до <b>' + S.fmtDate(a.expires) + '</b></p>' +
+        (a.type === 'class' ? '<p class="hint">Резултатите ти влизат в класацията на класа. Виж я в „Постижения“.</p>' : '') +
+        '<div class="hero-cta" style="justify-content:center"><a class="btn btn-lg" href="game.html">Играй</a><a class="btn btn-ghost" href="achievements.html">Постижения</a></div>' +
+        '<p class="hint" style="margin-top:18px"><button class="btn btn-sm btn-ghost" id="code-other">Въведи друг код</button></p>';
+      S.renderOwls(ok);
+      $('code-other').addEventListener('click', function () { ok.hidden = true; form.hidden = false; inp.value = ''; inp.focus(); });
+      if (fresh) { S.confetti(); if (S.Audio) S.Audio.win(); }
+    }
+    var cur = S.Access && S.Access.get(); if (cur && !q) showOk(cur, false);
+    form.addEventListener('submit', function (e) {
+      e.preventDefault(); err.textContent = '';
+      var code = fmtCode(inp.value);
+      if (code.replace(/[^A-Z0-9]/g, '').length !== 12) { err.textContent = 'Кодът има 8 знака след SMET, напр. SMET-AB2C-D3EF.'; inp.focus(); return; }
+      btn.disabled = true; btn.textContent = 'Проверявам…';
+      S.Access.redeem(code, nick.value.trim(), S.Game ? S.Game.state.lastGrade : 0).then(function (j) {
+        showOk(S.Access.get() || j, true);
+      }).catch(function (ex) { err.textContent = ex.message; }).then(function () { btn.disabled = false; btn.textContent = 'Активирай'; });
+    });
+  }
+
+  // ---------- Класация ----------
+  function boardTable(j, teacher) {
+    if (!j.list.length) return '<div class="panel" style="text-align:center"><p class="lead-dark">Още никой не е въвел кода. Когато учениците започнат да играят, ще ги видите тук.</p></div>';
+    var top = j.list.filter(function (r) { return !r.hidden; }).slice(0, 3);
+    var pod = '<div class="podium">' + [1, 0, 2].map(function (i) { var r = top[i]; if (!r) return '<div class="pod empty"></div>'; return '<div class="pod p' + (i + 1) + (r.me ? ' me' : '') + '"><span class="medal">' + ['🥇', '🥈', '🥉'][i] + '</span><b>' + esc(r.name) + '</b><small>★ ' + r.points + '</small></div>'; }).join('') + '</div>';
+    var rows = j.list.map(function (r) {
+      var acc = r.answered ? Math.round(r.correct / r.answered * 100) + '%' : '–';
+      return '<tr class="' + (r.me ? 'me' : '') + (r.hidden ? ' hid' : '') + '"><td>' + r.place + '</td><td><b>' + esc(r.name) + '</b>' + (r.me ? ' <span class="tag">ти</span>' : '') + '</td><td>★ ' + r.points + '</td><td>' + r.missions + '</td><td>' + r.stars + '</td>' +
+        (teacher ? '<td>' + (r.correct || 0) + '</td><td>' + acc + '</td><td>' + (r.last ? S.fmtDate(r.last.slice(0, 10)) : '–') + '</td><td><button class="btn btn-sm btn-ghost" data-hide="' + r.id + '" data-un="' + (r.hidden ? 1 : 0) + '">' + (r.hidden ? 'Покажи' : 'Скрий') + '</button></td>' : '') + '</tr>';
+    }).join('');
+    return pod + '<div class="table-wrap"><table class="compare board"><thead><tr><th>#</th><th>Ученик</th><th>Точки</th><th>Мисии</th><th>Звезди</th>' + (teacher ? '<th>Верни</th><th>Точност</th><th>Последно</th><th></th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+  }
+  S.boardTable = boardTable;
+  function initBoard() {
+    var form = $('board-form'), code = $('b-code'), pin = $('b-pin'), err = $('b-err'), out = $('board-out'), rem = $('b-remember');
+    bindCodeInput(code);
+    try { var saved = JSON.parse(localStorage.getItem('smetko.board') || 'null'); if (saved) { code.value = saved.c; pin.value = saved.p; rem.checked = true; } } catch (e) {}
+    function load(hide, un) {
+      err.textContent = '';
+      S.Access.teacherBoard(fmtCode(code.value), pin.value.trim(), hide, un).then(function (j) {
+        try { if (rem.checked) localStorage.setItem('smetko.board', JSON.stringify({ c: fmtCode(code.value), p: pin.value.trim() })); else localStorage.removeItem('smetko.board'); } catch (e) {}
+        out.innerHTML = '<div class="section-head" style="margin-top:30px"><h2 class="lined">' + esc(j.label || 'Класация') + '</h2><p>' + j.uses + ' от ' + j.max + ' устройства · кодът е валиден до ' + S.fmtDate(j.expires) + ' · <button class="btn btn-sm btn-ghost" id="b-refresh">🔄 Обнови</button> <button class="btn btn-sm btn-ghost" onclick="window.print()">🖨️ Печат</button></p></div>' + boardTable(j, true) +
+          '<p class="hint" style="margin-top:14px">Скритите ученици не се виждат от съучениците. Прякорите се избират от децата – ако някой е неподходящ, скрийте го.</p>';
+        $('b-refresh').addEventListener('click', function () { load(); });
+        out.querySelectorAll('[data-hide]').forEach(function (b) { b.addEventListener('click', function () { load(+b.getAttribute('data-hide'), b.getAttribute('data-un') === '1'); }); });
+      }).catch(function (ex) { err.textContent = ex.message; });
+    }
+    form.addEventListener('submit', function (e) { e.preventDefault(); load(); });
+    if (code.value && pin.value) load();
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
+    if ($('code-form')) initCode();
+    if ($('board-form')) initBoard();
     if ($('hw-grade')) initHomework();
     if ($('ws-grade')) initWorksheet();
   });

@@ -60,11 +60,12 @@ BOOKS = {1: ['Бит и Техника', 'Архимед'], 2: ['Бит и Те�
 
 FAQ_INDEX = [
     ('По кой учебник са задачите?', 'Детето избира своя учебник и мисиите се подреждат по заглавията на уроците в него. Ако учебникът още го няма в списъка, мисиите следват учебната програма на МОН – общият ред, по който работят всички одобрени учебници.'),
-    ('Безплатен ли е Сметко?', 'По време на пилотния период всички игри са безплатни. После ще има безплатен план и абонаменти с 14 дни пробен период. Вижте <a href="pricing.html">цените</a>.'),
-    ('Трябва ли регистрация?', 'Не. Децата играят веднага, а прогресът се пази на устройството. Профилите за родители и учители с отчети предстоят.'),
+    ('Безплатен ли е Сметко?', 'Има безплатен план: „Бързо сметни“, първите 3 мисии от всеки клас и 20 задачи на ден в „Тренировка“. Пълният достъп се отключва с код от учителя или с абонамент. Вижте <a href="pricing.html">цените</a>.'),
+    ('Как се използва код за достъп?', 'Отворете <a href="kod.html">smetko.com/kod</a> и въведете кода от картичката. Пълният достъп се включва веднага на това устройство.'),
+    ('Трябва ли регистрация?', 'Не. Децата играят веднага, без имейл и без парола. Прогресът се пази на устройството, а с код за клас резултатите влизат и в класацията на класа – само с прякор.'),
     ('Има ли реклами?', 'Не. Сметко е чиста детска среда, без рекламни банери и без проследяване.'),
     ('На какво устройство работи?', 'На телефон, таблет, компютър и интерактивна дъска, направо в браузъра. Може да се добави на началния екран като приложение и работи и без интернет.'),
-    ('Как може училището ни да се включи?', 'Вижте <a href="uchilishta.html">пилотната програма за училища</a>. Там са и образците на документите.'),
+    ('Как може училището ни да се включи?', 'Вижте <a href="uchilishta.html">Сметко за училища</a>: всеки клас получава картичка с код за учениците и ПИН за учителя. Там са и образците на документите.'),
 ]
 
 
@@ -165,20 +166,20 @@ index = head('Сметко – математика като игра за 1.–
         <li>„Бързо сметни“ на интерактивната дъска</li>
         <li>Линк за домашна по конкретна тема</li>
         <li>Работни листове за печат с отговори</li>
-        <li>Учителски панел и класации на класа <span class="soon">скоро</span></li>
+        <li>Класация на класа с ПИН от картичката</li>
       </ul>
-      <a class="btn btn-blue" href="uchilishta.html">Сметко в училище</a>
+      <a class="btn btn-blue" href="uchilishta.html">Сметко за училища</a>
     </article>
   </div>
 </section>
 
 <section class="section soft">
   <div class="wrap">
-    <div class="section-head"><h2 class="lined">Честни цени</h2><p>По време на пилотния период всичко е безплатно. После: безплатен план и абонаменти с 14 дни пробен период.</p></div>
+    <div class="section-head"><h2 class="lined">Честни цени</h2><p>Безплатен план за всички. Пълен достъп с код от учителя или с абонамент.</p></div>
     <div class="plans three">
       <div class="plan"><h3>1 месец</h3><div class="who">Без обвързване</div><div class="price">2.99 € <small>/ месец</small></div><div class="per">&nbsp;</div><ul><li>Всички мисии по учебника</li><li>Неограничена тренировка</li><li>Всички значки и нива</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
       <div class="plan featured"><span class="ribbon">Препоръчан</span><h3>Учебна година</h3><div class="who">15 септември – 30 юни</div><div class="price">15 € <small>/ година</small></div><div class="per">≈ 1.58 € на месец</div><ul><li>Всичко от месечния план</li><li>Без плащане през лятото</li><li>Подходящ за подарък</li></ul><a class="btn" href="pricing.html">Детайли</a></div>
-      <div class="plan"><h3>Цял клас</h3><div class="who">До 30 ученици + учители</div><div class="price">75 € <small>/ уч. година</small></div><div class="per">2.50 € на ученик</div><ul><li>Всичко за всяко дете</li><li>Учителски панел <span class="soon">скоро</span></li><li>Фактура</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
+      <div class="plan"><h3>Цял клас</h3><div class="who">До 35 устройства + ПИН за учителя</div><div class="price">75 € <small>/ уч. година</small></div><div class="per">≈ 2.50 € на ученик</div><ul><li>Всичко за всяко дете</li><li>Класация на класа</li><li>Фактура</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
     </div>
   </div>
 </section>
@@ -330,8 +331,9 @@ for g, d in GRADES.items():
 
 # ================= pricing.html =================
 FAQ_PRICE = [
-    ('Кога започват абонаментите?', 'След пилотния период в училищата и след регистрацията на търговеца. Дотогава всички игри са безплатни. Пишете ни на <a href="mailto:info@smetko.com">info@smetko.com</a> и ще ви уведомим първи.'),
-    ('Има ли безплатен пробен период?', 'Да, 14 дни пълен достъп без плащане след регистрация на родителски или учителски профил.'),
+    ('Как се плаща?', 'Абонаментът се поръчва по имейл на <a href="mailto:info@smetko.com">info@smetko.com</a> и се активира с код за достъп, който получавате до 1 работен ден. Плащането е по банков път, а училищата получават фактура. Плащане с карта направо от сайта предстои.'),
+    ('Как работи кодът за клас?', 'Учителят получава картичка с код и ПИН. Учениците въвеждат кода на <a href="kod.html">smetko.com/kod</a> (до 35 устройства), а учителят вижда класацията на класа с ПИН-а.'),
+    ('Има ли безплатен план?', 'Да. Безплатно са „Бързо сметни“ за всички класове, първите 3 мисии от всеки клас, 20 задачи на ден в „Тренировка“ и работните листове.'),
     ('Подновява ли се абонаментът автоматично?', 'Месечният абонамент се подновява всеки месец и може да се спре по всяко време. Годишният и този за учебна година не се подновяват автоматично. Ще ви напомним преди изтичането им.'),
     ('Как плащат училищата?', 'С фактура и банков превод. За 3 или повече класа има 15% отстъпка, а за 8 или повече класа – 25%.'),
     ('Мога ли да се откажа?', 'Да. Правата ви при отказ са описани в <a href="terms.html">Общите условия</a>, а формулярът за отказ е <a href="otkaz.html">тук</a>.'),
@@ -339,8 +341,8 @@ FAQ_PRICE = [
 paid = '<li>Мисии по учебника за всички класове</li><li>Неограничена тренировка</li><li>Всички значки и нива</li>'
 pricing = head('Цени и абонаменти – Сметко', 'Абонаменти за Сметко: 1 месец 2.99 €, учебна година 15 €, година 18 €, семеен 29 €, клас 75 €. Отстъпки за училища.',
                'pricing.html', [crumbs([('Начало', ''), ('Цени', 'pricing.html')]), faq_ld(FAQ_PRICE)]) + header('pricing') + page_hero(
-    'Цени и абонаменти', 'По-малко от цената на една тетрадка на месец. Без реклами, с 14 дни безплатен пробен период.', 'Цени', 'happy',
-    '<div class="callout" style="max-width:640px">🎉 По време на пилотния период <b>всички игри са безплатни</b>.</div>') + f'''
+    'Цени и абонаменти', 'По-малко от цената на една тетрадка на месец. Без реклами. Пълният достъп се активира с код.', 'Цени', 'happy',
+    '<div class="hero-cta"><a class="btn btn-lg btn-green" href="kod.html">🔑 Имам код</a><a class="btn btn-white" href="mailto:info@smetko.com?subject=Код%20за%20достъп%20до%20Сметко">Поръчай код</a></div>') + f'''
 <main id="main">
 <section class="section">
   <div class="wrap">
@@ -363,11 +365,11 @@ pricing = head('Цени и абонаменти – Сметко', 'Абона�
     <div class="section-head"><h2 class="lined">За семейства, класове и училища</h2></div>
     <div class="plans three">
       <div class="plan"><h3>Семеен</h3><div class="who">До 4 деца + 1 родителски профил</div><div class="price">29 € <small>/ година</small></div><div class="per">≈ 7.25 € на дете</div>
-        <ul>{paid}<li>Отделен профил за всяко дете</li><li>Седмичен отчет <span class="soon">скоро</span></li></ul><button class="btn btn-white" data-subscribe="Семеен">Избирам</button></div>
-      <div class="plan featured"><span class="ribbon">За учители</span><h3>Цял клас</h3><div class="who">До 30 ученици, 1 основен + 2 гост учители</div><div class="price">75 € <small>/ учебна година</small></div><div class="per">2.50 € на ученик</div>
-        <ul>{paid}<li>Учителски панел и статистика <span class="soon">скоро</span></li><li>Класации и грамоти <span class="soon">скоро</span></li><li>Фактура</li></ul><button class="btn" data-subscribe="Цял клас">Избирам</button></div>
+        <ul>{paid}<li>Един код за до 6 устройства</li><li>Валиден 12 месеца</li></ul><button class="btn btn-white" data-subscribe="Семеен">Избирам</button></div>
+      <div class="plan featured"><span class="ribbon">За учители</span><h3>Цял клас</h3><div class="who">Код за до 35 устройства + ПИН за учителя</div><div class="price">75 € <small>/ учебна година</small></div><div class="per">2.50 € на ученик</div>
+        <ul>{paid}<li>Класация и резултати на класа</li><li>Картичка с код и ПИН</li><li>Фактура</li></ul><button class="btn" data-subscribe="Цял клас">Избирам</button></div>
       <div class="plan"><h3>Училище</h3><div class="who">Няколко класа или цялото училище</div><div class="price" style="font-size:2rem">по запитване</div><div class="per">до −25% отстъпка</div>
-        <ul><li>−15% за 3 или повече класа</li><li>−25% за 8 или повече класа</li><li>Фактура и банков превод</li><li>Безплатен пилотен период</li></ul><a class="btn btn-blue" href="uchilishta.html">Пилотна програма</a></div>
+        <ul><li>−15% за 3 или повече класа</li><li>−25% за 8 или повече класа</li><li>Фактура и банков превод</li><li>Картички за всеки клас</li></ul><a class="btn btn-blue" href="uchilishta.html">Сметко за училища</a></div>
     </div>
     <p class="price-note">Всички цени са в евро. Информацията за ДДС ще бъде посочена след регистрацията на търговеца.</p>
   </div>
@@ -384,7 +386,7 @@ pricing = head('Цени и абонаменти – Сметко', 'Абона�
         <tr><td>Работни листове за печат</td><td class="c">✓</td><td class="c">✓</td></tr>
         <tr><td>Точки, нива и значки</td><td class="c">✓</td><td class="c">✓</td></tr>
         <tr><td>Без реклами</td><td class="c">✓</td><td class="c">✓</td></tr>
-        <tr><td>Отчет за родителя / учителски панел</td><td class="c">–</td><td class="c">скоро</td></tr>
+        <tr><td>Класация на класа (с код за клас)</td><td class="c">–</td><td class="c">✓</td></tr>
       </tbody>
     </table></div>
   </div>
@@ -420,7 +422,7 @@ about = head('За родители и учители – Сметко', 'Как
     <ul>
       <li>Няма реклами и няма проследяващи скриптове.</li>
       <li>Не събираме лични данни на децата. Прогресът се пази само в браузъра на устройството.</li>
-      <li>Когато въведем профили, те ще са на родителя или учителя, а не на детето. Подробно: <a href="privacy-policy.html">Политика за поверителност</a>.</li>
+      <li>С код за клас детето може да влезе в класацията с прякор – не пишете фамилия. Подробно: <a href="privacy-policy.html">Политика за поверителност</a>.</li>
     </ul>
   </div>
 </section>
@@ -433,8 +435,9 @@ about = head('За родители и учители – Сметко', 'Как
       <li><b>Домашна работа с един линк.</b> Генерирайте линк към тема или мисия от <a href="uchilishta.html#domashna">страницата за училища</a>.</li>
       <li><b>Работни листове.</b> <a href="rabotni-listove.html">Генерирайте задачи за печат</a> по тема, с отговори за учителя.</li>
       <li><b>По вашия учебник.</b> Мисиите следват уроците в учебника, по който работи класът.</li>
+      <li><b>Класация на класа.</b> С кода и ПИН-а от картичката виждате резултатите на учениците на <a href="klasaciya.html">smetko.com/klasaciya</a>.</li>
     </ul>
-    <p><a class="btn btn-blue" href="uchilishta.html">Пилотна програма за училища</a></p>
+    <p><a class="btn btn-blue" href="uchilishta.html">Сметко за училища</a></p>
   </div>
 </section>
 <section class="section soft" id="kontakt">
@@ -455,35 +458,37 @@ ach = head('Постижения и класации – Сметко', 'Точ�
 <main id="main">
 <section class="section"><div class="wrap"><div class="stat-row" id="stats"></div></div></section>
 <section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Значки</h2><p id="badge-count"></p></div><div class="badges" id="badges"></div></div></section>
+<section class="section" id="myclass-sec" hidden><div class="wrap"><div class="section-head"><h2 class="lined">Моят клас</h2><p id="myclass-sub"></p></div><div id="myclass"></div></div></section>
 <section class="section"><div class="wrap"><div class="section-head"><h2 class="lined">Звезди и рекорди</h2><p>Звезди от „Приключение“ и най-добри резултати в „Бързо сметни“.</p></div><div class="grid grid-4" id="grades"></div></div></section>
 <section class="section soft">
   <div class="wrap prose" style="text-align:center">
     <h2>Класации</h2>
-    <p>Класациите на класа и училището ще се появят с учителските профили. Дотогава се състезавай със себе си – побий рекорда си в „Бързо сметни“!</p>
+    <p>С код за клас резултатите ти влизат в класацията на класа. Без код – състезавай се със себе си и побий рекорда си в „Бързо сметни“!</p>
     <p><a class="btn btn-lg" href="game.html?mode=quick&amp;start=0">⚡ Побий рекорда</a></p>
-    <p class="small-note">Прогресът се пази само на това устройство. <button class="btn btn-sm btn-ghost" id="reset-btn">Изтрий прогреса</button></p>
+    <p class="small-note">Прогресът се пази на това устройство. <button class="btn btn-sm btn-ghost" id="reset-btn">Изтрий прогреса</button></p>
+    <p class="small-note"><a href="klasaciya.html">Вход за учител (код + ПИН)</a></p>
   </div>
 </section>
 </main>
-''' + FOOTER + scripts(['js/math-engine.js', 'js/textbooks.js', 'js/achievements.js'])
+''' + FOOTER + scripts(['js/math-engine.js', 'js/textbooks.js', 'js/tools.js', 'js/achievements.js'])
 write('achievements.html', ach)
 
 # ================= uchilishta.html (училища) =================
-school = head('Сметко в училище – пилотна програма', 'Безплатна пилотна програма за начални учители и училища: Сметко в час, домашни с линк, работни листове и образци на документи.',
+school = head('Сметко за училища – кодове за класа, класации, работни листове', 'Сметко за начални учители: код за целия клас, класация с ПИН, домашни с линк, работни листове и документи за училището.',
               'uchilishta.html', [crumbs([('Начало', ''), ('За училища', 'uchilishta.html')])]) + header() + page_hero(
-    'Сметко в училище', 'Безплатна пилотна програма за начални учители. Тествайте Сметко с класа си и ни помогнете да го направим най-добрия помощник по математика.', 'За училища', 'hero',
-    '<div class="hero-cta"><a class="btn btn-lg" href="mailto:info@smetko.com?subject=Пилотна%20програма%20Сметко">Включете се</a><a class="btn btn-white" href="#dokumenti">Документи</a></div>') + '''
+    'Сметко за училища', 'Един код за целия клас, класация за учителя, домашни с линк и работни листове – по учебника, по който работите.', 'За училища', 'hero',
+    '<div class="hero-cta"><a class="btn btn-lg" href="mailto:info@smetko.com?subject=Кодове%20за%20класа%20–%20Сметко">Поръчай кодове</a><a class="btn btn-white" href="klasaciya.html">Класация на класа</a></div>') + """
 <main id="main">
 <section class="section">
   <div class="wrap">
-    <div class="section-head"><h2 class="lined">Как протича пилотът</h2></div>
+    <div class="section-head"><h2 class="lined">Как работи</h2></div>
     <div class="grid grid-4 steps-num">
-      <div class="card"><b class="n">1</b><h3>Запитване</h3><p>Пишете ни с името на училището, класа и учебника, по който работите.</p></div>
-      <div class="card"><b class="n">2</b><h3>Споразумение</h3><p>Подписваме кратко <a href="dogovor-pilot.html">споразумение за пилотно ползване</a>. Безплатно е.</p></div>
-      <div class="card"><b class="n">3</b><h3>В час и у дома</h3><p>4–8 седмици използвате Сметко в час и за домашна работа.</p></div>
-      <div class="card"><b class="n">4</b><h3>Обратна връзка</h3><p>Кратка анкета за вас и за децата. Подобряваме Сметко по вашите идеи.</p></div>
+      <div class="card"><b class="n">1</b><h3>Картичка за класа</h3><p>Всеки клас получава картичка с <b>код за учениците</b> и <b>ПИН за учителя</b>.</p></div>
+      <div class="card"><b class="n">2</b><h3>Учениците въвеждат кода</h3><p>На <a href="kod.html">smetko.com/kod</a> – веднъж на всяко устройство. До 35 устройства на клас.</p></div>
+      <div class="card"><b class="n">3</b><h3>Играят по учебника</h3><p>Избират учебника и решават мисиите по уроците – в час и у дома.</p></div>
+      <div class="card"><b class="n">4</b><h3>Класация за учителя</h3><p>С кода и ПИН-а на <a href="klasaciya.html">smetko.com/klasaciya</a> виждате точките, мисиите и точността на всеки.</p></div>
     </div>
-    <div class="callout" style="margin-top:24px">В пилотния период децата <b>не създават профили</b> и <b>не въвеждат лични данни</b>. Прогресът се пази само на устройството, на което играят.</div>
+    <div class="callout" style="margin-top:24px">Учениците <b>не се регистрират</b> и <b>не въвеждат имейл или фамилия</b>. В класацията се показва само прякор, който детето избира. Подробно: <a href="privacy-policy.html">Политика за поверителност</a>.</div>
   </div>
 </section>
 <section class="section soft" id="domashna">
@@ -508,20 +513,66 @@ school = head('Сметко в училище – пилотна програм�
 </section>
 <section class="section soft" id="dokumenti">
   <div class="wrap">
-    <div class="section-head"><h2 class="lined">Документи за училището</h2><p>Образци, готови за печат. Преди подписване ги прегледайте с юрист или с длъжностното лице по защита на данните на училището.</p></div>
+    <div class="section-head"><h2 class="lined">Документи за училището</h2><p>Образци, готови за печат. Преди подписване ги прегледайте с длъжностното лице по защита на данните на училището.</p></div>
     <div class="grid grid-3 docs-list">
-      <a class="card doc-card" href="dogovor-pilot.html"><b>📄 Споразумение за пилотно ползване</b><small>Между училището и Сметко – безплатен тестов период</small></a>
+      <a class="card doc-card" href="dogovor-uchilishte.html"><b>📄 Договор за достъп за училище</b><small>Кодове за класовете, срок, цена, данни</small></a>
       <a class="card doc-card" href="pismo-roditeli.html"><b>✉️ Информационно писмо до родителите</b><small>С декларация за информираност</small></a>
-      <a class="card doc-card" href="dogovor-danni.html"><b>🔒 Договор за обработване на лични данни</b><small>По чл. 28 от GDPR – при учителски профили</small></a>
-      <a class="card doc-card" href="privacy-policy.html"><b>🛡️ Политика за поверителност</b><small>Какви данни (не) събираме</small></a>
-      <a class="card doc-card" href="terms.html"><b>📘 Общи условия</b><small>Правила за ползване и абонаменти</small></a>
+      <a class="card doc-card" href="dogovor-danni.html"><b>🔒 Договор за обработване на лични данни</b><small>По чл. 28 от GDPR</small></a>
+      <a class="card doc-card" href="privacy-policy.html"><b>🛡️ Политика за поверителност</b><small>Какви данни обработваме</small></a>
+      <a class="card doc-card" href="terms.html"><b>📘 Общи условия</b><small>Правила, абонаменти, кодове</small></a>
       <a class="card doc-card" href="pravna-informacia.html"><b>📚 Всички документи</b><small>Правна информация на едно място</small></a>
     </div>
   </div>
 </section>
 </main>
-''' + FOOTER + scripts(['js/math-engine.js', 'js/textbooks.js', 'js/tools.js'])
+""" + FOOTER + scripts(['js/math-engine.js', 'js/textbooks.js', 'js/tools.js'])
 write('uchilishta.html', school)
+
+# ================= kod.html (въвеждане на код) =================
+kod = head('Въведи код за достъп – Сметко', 'Въведете кода от картичката и отключете пълния достъп до Сметко.', 'kod.html', [], 'code-page') + header() + page_hero(
+    'Въведи код', 'Кодът е на картичката от учителя или в имейла с абонамента. Пълният достъп се включва веднага на това устройство.', 'Код за достъп', 'hero') + """
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="panel code-panel" id="code-box">
+      <form id="code-form" autocomplete="off">
+        <label class="step-label" for="code-input">Код за достъп</label>
+        <input id="code-input" class="input code-input" placeholder="SMET-XXXX-XXXX" maxlength="16" inputmode="text" autocapitalize="characters" spellcheck="false" required>
+        <label class="step-label" for="nick-input" style="margin-top:16px">Как да те показваме в класацията? <small>(по желание)</small></label>
+        <input id="nick-input" class="input" placeholder="Само име или прякор, напр. Ники С." maxlength="20">
+        <p class="hint">Не пиши фамилия. Прякорът се вижда само от учителя и съучениците ти, ако кодът е за клас.</p>
+        <button class="btn btn-lg btn-green" id="code-btn" type="submit">Активирай</button>
+        <p class="code-err" id="code-err" role="alert"></p>
+      </form>
+      <div id="code-ok" hidden></div>
+    </div>
+    <p class="hint" style="text-align:center;margin-top:20px">Нямаш код? <a href="pricing.html">Виж цените</a> или <a href="mailto:info@smetko.com?subject=Код%20за%20достъп%20до%20Сметко">поръчай код</a>.</p>
+  </div>
+</section>
+</main>
+""" + FOOTER + scripts(['js/tools.js'])
+write('kod.html', kod)
+
+# ================= klasaciya.html (класация на класа) =================
+board = head('Класация на класа – Сметко', 'Класация и резултати на класа за учителя – с кода и ПИН-а от картичката.', 'klasaciya.html', [], 'board-page') + header('ach') + page_hero(
+    'Класация на класа', 'За учителя: въведете кода на класа и ПИН-а от картичката. Учениците виждат класацията в „Постижения“.', 'Класация на класа', 'cheer') + """
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <form class="panel tool-panel" id="board-form" autocomplete="off">
+      <div class="tool-grid">
+        <label>Код на класа<input id="b-code" class="input code-input" placeholder="SMET-XXXX-XXXX" maxlength="16" autocapitalize="characters" spellcheck="false" required></label>
+        <label>ПИН за учителя<input id="b-pin" class="input" placeholder="4 цифри" maxlength="4" inputmode="numeric" required></label>
+      </div>
+      <div class="ws-actions"><label class="check"><input type="checkbox" id="b-remember"> Запомни на това устройство</label><button class="btn" type="submit">Покажи класацията</button></div>
+      <p class="code-err" id="b-err" role="alert"></p>
+    </form>
+    <div id="board-out"></div>
+  </div>
+</section>
+</main>
+""" + FOOTER + scripts(['js/tools.js'])
+write('klasaciya.html', board)
 
 # ================= rabotni-listove.html =================
 ws = head('Работни листове по математика 1.–4. клас – Сметко', 'Генератор на работни листове по математика за 1.–4. клас по темите на учебната програма, с отговори за учителя. Безплатно, за печат.',

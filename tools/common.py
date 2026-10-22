@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '2'
+VER = '3'
 EMAIL = 'info@smetko.com'
 
 # Данни за търговеца — попълват се след регистрация на фирмата (търсете „[ПОПЪЛНЕТЕ“ във всички файлове)
@@ -66,7 +66,8 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
       <a href="achievements.html" data-nav="ach">Класации</a>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">За учители <span class="chev">▾</span></button>
         <div class="dd-panel">
-          <a href="uchilishta.html"><b>Сметко в училище</b><small>Пилотна програма и документи</small></a>
+          <a href="uchilishta.html"><b>Сметко в училище</b><small>Кодове за класа и документи</small></a>
+          <a href="klasaciya.html"><b>Класация на класа</b><small>С кода и ПИН-а от картичката</small></a>
           <a href="rabotni-listove.html"><b>Работни листове</b><small>Задачи за печат с отговори</small></a>
           <a href="uchilishta.html#domashna"><b>Линк за домашна</b><small>Конкретна тема с един линк</small></a>
           <a href="about.html#uchiteli"><b>Как работи в клас</b><small>Идеи за часа по математика</small></a>
@@ -79,11 +80,12 @@ MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
     <a href="game.html">🎮 Мисии и игри</a>
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
     <a href="achievements.html">🏆 Класации и постижения</a>
+    <a href="kod.html">🔑 Въведи код за достъп</a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
     <a href="about.html#roditeli">👨‍👩‍👧 За родители</a>
     <a href="pricing.html">💶 Цени</a>
-    <div class="m-auth"><a class="btn btn-ghost" href="#" data-login>Вход</a><a class="btn btn-teal" href="#" data-login>Регистрация</a></div>
+    <div class="m-auth"><a class="btn btn-ghost" href="kod.html" data-code-link>Имам код</a><a class="btn btn-teal" href="pricing.html">Абонамент</a></div>
   </nav>'''
 
 
@@ -98,8 +100,8 @@ def header(active='', over=False, game=False):
     {nav}
     <div class="header-actions">
       {snd}<a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
-      <a class="link-login" href="#" data-login>Вход</a>
-      <a class="btn btn-teal btn-sm btn-register" href="#" data-login>Регистрация</a>
+      <a class="link-login" href="kod.html" data-code-link>Имам код</a>
+      <a class="btn btn-teal btn-sm btn-register" href="pricing.html">Абонамент</a>
       <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
     </div>
   </div>
@@ -127,6 +129,7 @@ FOOTER = '''<footer class="site-footer">
         <li><a href="uchilishta.html">За учители и училища</a></li>
         <li><a href="rabotni-listove.html">Работни листове</a></li>
         <li><a href="pricing.html">Цени</a></li>
+        <li><a href="kod.html">Въведи код</a></li>
       </ul></div>
       <div><h4>Правна информация</h4><ul>
         <li><a href="terms.html">Общи условия</a></li>
@@ -143,8 +146,8 @@ FOOTER = '''<footer class="site-footer">
 
 
 def scripts(extra=()):
-    base = ['js/owl.js', 'js/gamification.js', 'js/audio.js', 'js/app.js']
-    order = base[:3] + [e for e in extra if e not in ('js/game.js', 'js/achievements.js', 'js/tools.js')] + ['js/app.js'] + \
+    base = ['js/owl.js', 'js/gamification.js', 'js/audio.js', 'js/access.js', 'js/app.js']
+    order = base[:4] + [e for e in extra if e not in ('js/game.js', 'js/achievements.js', 'js/tools.js')] + ['js/app.js'] + \
         [e for e in extra if e in ('js/game.js', 'js/achievements.js', 'js/tools.js')]
     return ''.join(f'<script src="{s}?v={VER}" defer></script>\n' for s in order) + '</body>\n</html>\n'
 

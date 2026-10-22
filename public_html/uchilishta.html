@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Сметко в училище – пилотна програма</title>
-<meta name="description" content="Безплатна пилотна програма за начални учители и училища: Сметко в час, домашни с линк, работни листове и образци на документи.">
+<title>Сметко за училища – кодове за класа, класации, работни листове</title>
+<meta name="description" content="Сметко за начални учители: код за целия клас, класация с ПИН, домашни с линк, работни листове и документи за училището.">
 <link rel="canonical" href="https://smetko.com/uchilishta.html">
 <meta name="theme-color" content="#3299FF">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Сметко">
-<meta property="og:title" content="Сметко в училище – пилотна програма">
-<meta property="og:description" content="Безплатна пилотна програма за начални учители и училища: Сметко в час, домашни с линк, работни листове и образци на документи.">
+<meta property="og:title" content="Сметко за училища – кодове за класа, класации, работни листове">
+<meta property="og:description" content="Сметко за начални учители: код за целия клас, класация с ПИН, домашни с линк, работни листове и документи за училището.">
 <meta property="og:url" content="https://smetko.com/uchilishta.html">
 <meta property="og:image" content="https://smetko.com/assets/images/og-image.png">
 <meta property="og:locale" content="bg_BG">
@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=2">
-<link rel="stylesheet" href="css/animations.css?v=2">
+<link rel="stylesheet" href="css/style.css?v=3">
+<link rel="stylesheet" href="css/animations.css?v=3">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Начало", "item": "https://smetko.com/"}, {"@type": "ListItem", "position": 2, "name": "За училища", "item": "https://smetko.com/uchilishta.html"}]}</script>
 </head>
 <body>
@@ -43,7 +43,8 @@
       <a href="achievements.html" data-nav="ach">Класации</a>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">За учители <span class="chev">▾</span></button>
         <div class="dd-panel">
-          <a href="uchilishta.html"><b>Сметко в училище</b><small>Пилотна програма и документи</small></a>
+          <a href="uchilishta.html"><b>Сметко в училище</b><small>Кодове за класа и документи</small></a>
+          <a href="klasaciya.html"><b>Класация на класа</b><small>С кода и ПИН-а от картичката</small></a>
           <a href="rabotni-listove.html"><b>Работни листове</b><small>Задачи за печат с отговори</small></a>
           <a href="uchilishta.html#domashna"><b>Линк за домашна</b><small>Конкретна тема с един линк</small></a>
           <a href="about.html#uchiteli"><b>Как работи в клас</b><small>Идеи за часа по математика</small></a>
@@ -53,8 +54,8 @@
     </nav>
     <div class="header-actions">
       <a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
-      <a class="link-login" href="#" data-login>Вход</a>
-      <a class="btn btn-teal btn-sm btn-register" href="#" data-login>Регистрация</a>
+      <a class="link-login" href="kod.html" data-code-link>Имам код</a>
+      <a class="btn btn-teal btn-sm btn-register" href="pricing.html">Абонамент</a>
       <button class="menu-btn" aria-label="Меню" aria-expanded="false"><span></span></button>
     </div>
   </div>
@@ -62,11 +63,12 @@
     <a href="game.html">🎮 Мисии и игри</a>
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
     <a href="achievements.html">🏆 Класации и постижения</a>
+    <a href="kod.html">🔑 Въведи код за достъп</a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
     <a href="about.html#roditeli">👨‍👩‍👧 За родители</a>
     <a href="pricing.html">💶 Цени</a>
-    <div class="m-auth"><a class="btn btn-ghost" href="#" data-login>Вход</a><a class="btn btn-teal" href="#" data-login>Регистрация</a></div>
+    <div class="m-auth"><a class="btn btn-ghost" href="kod.html" data-code-link>Имам код</a><a class="btn btn-teal" href="pricing.html">Абонамент</a></div>
   </nav>
 </header>
 <section class="page-hero">
@@ -74,9 +76,9 @@
   <div class="wrap">
     <div>
       <div class="breadcrumbs"><a href="index.html">Начало</a> › За училища</div>
-      <h1>Сметко в училище</h1>
-      <p class="lead">Безплатна пилотна програма за начални учители. Тествайте Сметко с класа си и ни помогнете да го направим най-добрия помощник по математика.</p>
-      <div class="hero-cta"><a class="btn btn-lg" href="mailto:info@smetko.com?subject=Пилотна%20програма%20Сметко">Включете се</a><a class="btn btn-white" href="#dokumenti">Документи</a></div>
+      <h1>Сметко за училища</h1>
+      <p class="lead">Един код за целия клас, класация за учителя, домашни с линк и работни листове – по учебника, по който работите.</p>
+      <div class="hero-cta"><a class="btn btn-lg" href="mailto:info@smetko.com?subject=Кодове%20за%20класа%20–%20Сметко">Поръчай кодове</a><a class="btn btn-white" href="klasaciya.html">Класация на класа</a></div>
     </div>
     <div class="owl" data-owl="hero"></div>
   </div>
@@ -85,14 +87,14 @@
 <main id="main">
 <section class="section">
   <div class="wrap">
-    <div class="section-head"><h2 class="lined">Как протича пилотът</h2></div>
+    <div class="section-head"><h2 class="lined">Как работи</h2></div>
     <div class="grid grid-4 steps-num">
-      <div class="card"><b class="n">1</b><h3>Запитване</h3><p>Пишете ни с името на училището, класа и учебника, по който работите.</p></div>
-      <div class="card"><b class="n">2</b><h3>Споразумение</h3><p>Подписваме кратко <a href="dogovor-pilot.html">споразумение за пилотно ползване</a>. Безплатно е.</p></div>
-      <div class="card"><b class="n">3</b><h3>В час и у дома</h3><p>4–8 седмици използвате Сметко в час и за домашна работа.</p></div>
-      <div class="card"><b class="n">4</b><h3>Обратна връзка</h3><p>Кратка анкета за вас и за децата. Подобряваме Сметко по вашите идеи.</p></div>
+      <div class="card"><b class="n">1</b><h3>Картичка за класа</h3><p>Всеки клас получава картичка с <b>код за учениците</b> и <b>ПИН за учителя</b>.</p></div>
+      <div class="card"><b class="n">2</b><h3>Учениците въвеждат кода</h3><p>На <a href="kod.html">smetko.com/kod</a> – веднъж на всяко устройство. До 35 устройства на клас.</p></div>
+      <div class="card"><b class="n">3</b><h3>Играят по учебника</h3><p>Избират учебника и решават мисиите по уроците – в час и у дома.</p></div>
+      <div class="card"><b class="n">4</b><h3>Класация за учителя</h3><p>С кода и ПИН-а на <a href="klasaciya.html">smetko.com/klasaciya</a> виждате точките, мисиите и точността на всеки.</p></div>
     </div>
-    <div class="callout" style="margin-top:24px">В пилотния период децата <b>не създават профили</b> и <b>не въвеждат лични данни</b>. Прогресът се пази само на устройството, на което играят.</div>
+    <div class="callout" style="margin-top:24px">Учениците <b>не се регистрират</b> и <b>не въвеждат имейл или фамилия</b>. В класацията се показва само прякор, който детето избира. Подробно: <a href="privacy-policy.html">Политика за поверителност</a>.</div>
   </div>
 </section>
 <section class="section soft" id="domashna">
@@ -117,13 +119,13 @@
 </section>
 <section class="section soft" id="dokumenti">
   <div class="wrap">
-    <div class="section-head"><h2 class="lined">Документи за училището</h2><p>Образци, готови за печат. Преди подписване ги прегледайте с юрист или с длъжностното лице по защита на данните на училището.</p></div>
+    <div class="section-head"><h2 class="lined">Документи за училището</h2><p>Образци, готови за печат. Преди подписване ги прегледайте с длъжностното лице по защита на данните на училището.</p></div>
     <div class="grid grid-3 docs-list">
-      <a class="card doc-card" href="dogovor-pilot.html"><b>📄 Споразумение за пилотно ползване</b><small>Между училището и Сметко – безплатен тестов период</small></a>
+      <a class="card doc-card" href="dogovor-uchilishte.html"><b>📄 Договор за достъп за училище</b><small>Кодове за класовете, срок, цена, данни</small></a>
       <a class="card doc-card" href="pismo-roditeli.html"><b>✉️ Информационно писмо до родителите</b><small>С декларация за информираност</small></a>
-      <a class="card doc-card" href="dogovor-danni.html"><b>🔒 Договор за обработване на лични данни</b><small>По чл. 28 от GDPR – при учителски профили</small></a>
-      <a class="card doc-card" href="privacy-policy.html"><b>🛡️ Политика за поверителност</b><small>Какви данни (не) събираме</small></a>
-      <a class="card doc-card" href="terms.html"><b>📘 Общи условия</b><small>Правила за ползване и абонаменти</small></a>
+      <a class="card doc-card" href="dogovor-danni.html"><b>🔒 Договор за обработване на лични данни</b><small>По чл. 28 от GDPR</small></a>
+      <a class="card doc-card" href="privacy-policy.html"><b>🛡️ Политика за поверителност</b><small>Какви данни обработваме</small></a>
+      <a class="card doc-card" href="terms.html"><b>📘 Общи условия</b><small>Правила, абонаменти, кодове</small></a>
       <a class="card doc-card" href="pravna-informacia.html"><b>📚 Всички документи</b><small>Правна информация на едно място</small></a>
     </div>
   </div>
@@ -148,6 +150,7 @@
         <li><a href="uchilishta.html">За учители и училища</a></li>
         <li><a href="rabotni-listove.html">Работни листове</a></li>
         <li><a href="pricing.html">Цени</a></li>
+        <li><a href="kod.html">Въведи код</a></li>
       </ul></div>
       <div><h4>Правна информация</h4><ul>
         <li><a href="terms.html">Общи условия</a></li>
@@ -160,12 +163,13 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=2" defer></script>
-<script src="js/gamification.js?v=2" defer></script>
-<script src="js/audio.js?v=2" defer></script>
-<script src="js/math-engine.js?v=2" defer></script>
-<script src="js/textbooks.js?v=2" defer></script>
-<script src="js/app.js?v=2" defer></script>
-<script src="js/tools.js?v=2" defer></script>
+<script src="js/owl.js?v=3" defer></script>
+<script src="js/gamification.js?v=3" defer></script>
+<script src="js/audio.js?v=3" defer></script>
+<script src="js/access.js?v=3" defer></script>
+<script src="js/math-engine.js?v=3" defer></script>
+<script src="js/textbooks.js?v=3" defer></script>
+<script src="js/app.js?v=3" defer></script>
+<script src="js/tools.js?v=3" defer></script>
 </body>
 </html>

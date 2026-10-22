@@ -5,11 +5,11 @@
   var S = window.Smetko = window.Smetko || {};
 
   /* ---------- НАСТРОЙКИ ----------
-     paywall: false → всичко е отключено (докато няма плащания и профили).
-     Когато пуснем абонаментите, сменете на true: мисиите след freeAdventureLevels
-     ще искат абонамент. */
+     paywall: true → безплатен план (Бързо сметни, първите мисии, 20 задачи/ден в Тренировка);
+     пълният достъп се отключва с код за достъп (js/access.js, админ: /admin/).
+     paywall: false → всичко е отключено за всички. */
   S.config = {
-    paywall: false,
+    paywall: true,
     freeAdventureLevels: 3,
     freePracticePerDay: 20,
     trialDays: 14,
@@ -18,7 +18,7 @@
     quickSeconds: 60
   };
 
-  S.hasAccess = function () { return !S.config.paywall; /* TODO: проверка на абонамент от сървъра */ };
+  if (!S.hasAccess) S.hasAccess = function () { return !S.config.paywall; }; // истинската проверка е в access.js
 
   /* ---------- Сметко ---------- */
   S.renderOwls = function (root) {
@@ -60,24 +60,22 @@
 
   S.subscribeModal = function (planName) {
     S.modal(
-      '<div data-owl="happy"></div><h3>Абонаментите стартират скоро!</h3>' +
-      '<p>' + (planName ? 'Избрахте <b>' + planName + '</b>. ' : '') +
-      'В момента всички игри са <b>безплатни</b>, докато подготвяме профилите за родители и учители. ' +
-      'Пишете ни и ще ви уведомим първи, с отстъпка за ранни абонати.</p>' +
-      '<div class="modal-actions"><a class="btn" href="mailto:' + S.config.contactEmail + '?subject=' + encodeURIComponent('Абонамент Сметко' + (planName ? ': ' + planName : '')) + '">Пишете ни</a>' +
-      '<a class="btn btn-green" href="game.html">Играй сега</a></div>'
+      '<div data-owl="happy"></div><h3>' + (planName ? 'Абонамент „' + planName + '“' : 'Отключи пълния достъп') + '</h3>' +
+      '<p>Пълният достъп до всички мисии по учебника и неограничената тренировка се активира с <b>код за достъп</b>. ' +
+      'Поръчайте код по имейл и ще го получите до 1 работен ден. Учителите получават кодове за целия клас.</p>' +
+      '<div class="modal-actions"><a class="btn btn-green" href="kod.html">Имам код</a>' +
+      '<a class="btn" href="mailto:' + S.config.contactEmail + '?subject=' + encodeURIComponent('Код за достъп до Сметко' + (planName ? ': ' + planName : '')) + '">Поръчай код</a></div>'
     );
   };
-
-  S.loginModal = function () {
+  S.accessModal = function () {
     S.modal(
-      '<div data-owl="encourage"></div><h3>Вход за родители и учители</h3>' +
-      '<p>Сметко е в пилотен период. Профилите за родители и учители с отчети и учителски панел идват скоро. ' +
-      'Дотогава децата играят свободно, без регистрация, а прогресът се пази на това устройство.</p>' +
-      '<div class="modal-actions"><a class="btn btn-green" href="game.html">Играй сега</a>' +
-      '<a class="btn btn-ghost" href="achievements.html">Моите постижения</a></div>'
+      '<div data-owl="encourage"></div><h3>Тази мисия е с пълен достъп</h3>' +
+      '<p>В безплатния план са първите ' + S.config.freeAdventureLevels + ' мисии от всеки клас, „Бързо сметни“ и ' + S.config.freePracticePerDay + ' задачи на ден в „Тренировка“. ' +
+      'Всичко останало се отключва с код от учителя или с абонамент.</p>' +
+      '<div class="modal-actions"><a class="btn btn-green" href="kod.html">Въведи код</a><a class="btn btn-ghost" href="pricing.html">Цени</a></div>'
     );
   };
+  S.loginModal = function () { location.href = 'kod.html'; };
 
   /* ---------- Конфети ---------- */
   S.confetti = function (count) {

@@ -138,7 +138,7 @@
     $$('.map-node', map).forEach(function (b) {
       b.addEventListener('click', function () {
         var i = +b.dataset.i;
-        if (S.config.paywall && !S.hasAccess() && i >= S.config.freeAdventureLevels) { S.subscribeModal('пълен достъп'); return; }
+        if (S.config.paywall && !S.hasAccess() && i >= S.config.freeAdventureLevels) { S.accessModal(); return; }
         if (!G.isUnlocked(key, i)) { A.wrong(); S.toast('🔒 Първо мини мисия ' + i + '!'); return; }
         A.click(); startAdventure(i);
       });
@@ -322,7 +322,7 @@
     updateProgress();
     if (play.mode === 'adventure' && play.idx >= play.total) { finish(); return; }
     if (play.mode === 'quick' && play.timeLeft <= 0) return;
-    if (play.mode === 'practice' && practiceLimitReached()) { finish(); S.subscribeModal('пълен достъп'); return; }
+    if (play.mode === 'practice' && practiceLimitReached()) { finish(); S.accessModal(); return; }
     if (play.idx % 3 === 0) S.setOwl($('#play-owl'), 'idle');
     nextQuestion();
   }
@@ -349,6 +349,7 @@
     clearTimers();
     var p = play; play = null;
     var s = G.endSession() || { correct: p.correct, wrong: p.wrong, points: 0, newBadges: [] };
+    if (S.Access) setTimeout(function () { S.Access.sync(); }, 300);
     var answered = p.correct + p.wrong, acc = answered ? Math.round(p.correct / answered * 100) : 0;
     var html = '', owlPose = 'happy', extraBadges = [], stars = 0, celebrate = false;
 

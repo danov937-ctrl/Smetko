@@ -1,0 +1,5 @@
+# API: без листинг, JSON само през PHP
+Options -Indexes
+<FilesMatch "^lib\.php$">
+  Require all denied
+</FilesMatch>

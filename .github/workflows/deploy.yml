@@ -31,3 +31,9 @@ jobs:
           protocol: ftps
           local-dir: ./public_html/
           server-dir: ./
+          # базата с кодовете живее само на сървъра – не се пипа при качване
+          exclude: |
+            **/.git*
+            **/.git*/**
+            api/data/*.sqlite
+            api/data/*.sqlite-*
