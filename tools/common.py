@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '15'
+VER = '16'
 EMAIL = 'info@smetko.com'
 
 # Данни за търговеца — попълват се след регистрация на фирмата (търсете „[ПОПЪЛНЕТЕ“ във всички файлове)
@@ -67,12 +67,12 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
         <div class="dd-panel">
           <a href="liga.html"><b>Обща класация</b><small>Училища, класове, учители, ученици</small></a>
           <a href="achievements.html"><b>Моите постижения</b><small>Точки, значки и моят клас</small></a>
-          <a href="klasaciya.html"><b>Класация на класа</b><small>За учителя – с код и ПИН</small></a>
+          <a href="tablo.html"><b>Класация на класа</b><small>За учителя – в „Табло“</small></a>
         </div></div>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">Учители <span class="chev">▾</span></button>
         <div class="dd-panel">
-          <a href="uchilishta.html"><b>Сметко в училище</b><small>Кодове за класа и документи</small></a>
-          <a href="klasaciya.html"><b>Класация на класа</b><small>С кода и ПИН-а от картичката</small></a>
+          <a href="uchilishta.html"><b>Сметко в училище</b><small>Абонамент за класа и документи</small></a>
+          <a href="tablo.html"><b>📋 Табло</b><small>Ученици, домашни, отчети, класация</small></a>
           <a href="rabotni-listove.html"><b>Работни листове</b><small>Задачи за печат с отговори</small></a>
           <a href="uchilishta.html#domashna"><b>Линк за домашна</b><small>Конкретна тема с един линк</small></a>
           <a href="about.html#uchiteli"><b>Как работи в клас</b><small>Идеи за часа по математика</small></a>
@@ -80,12 +80,12 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="parents">Родители <span class="chev">▾</span></button>
         <div class="dd-panel">
           <a href="about.html#roditeli"><b>За родители</b><small>Как Сметко помага на детето</small></a>
-          <a href="otchet.html"><b>Отчет за родителя</b><small>Напредък, силни и слаби теми</small></a>
+          <a href="profil.html"><b>Отчет за родителя</b><small>В профила ви – за всяко дете</small></a>
           <a href="za-nas.html"><b>За нас</b><small>Кои сме и защо направихме Сметко</small></a>
           <a href="novini.html"><b>Новини</b><small>Какво ново има</small></a>
         </div></div>
       <a href="blog/" data-nav="blog">Блог</a>
-      <a href="pricing.html" data-nav="pricing">Цени</a>
+      <a href="pricing.html" data-nav="pricing">Абонаменти</a>
     </nav>'''
 
 MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
@@ -94,15 +94,15 @@ MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
     <a href="liga.html">🏆 Обща класация</a>
     <a href="achievements.html">⭐ Моите постижения</a>
-    <a href="kod.html" data-code-link>🔑 Въведи код за достъп</a>
     <a href="novini.html">📰 Новини <b class="m-news" data-news-count hidden></b></a>
+    <a href="tablo.html">📋 Табло за учители</a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
     <a href="about.html#roditeli">👨‍👩‍👧 За родители</a>
     <a href="otchet.html">📊 Отчет за родителя</a>
     <a href="blog/">✍️ Блог</a>
     <a href="za-nas.html">🦉 За нас</a>
-    <a href="pricing.html">💶 Цени</a>
+    <a href="pricing.html">💶 Абонаменти</a>
   </nav>'''
 
 
@@ -148,9 +148,9 @@ FOOTER = '''<footer class="site-footer">
         <li><a href="za-nas.html">За нас</a></li>
         <li><a href="uchilishta.html">За учители и училища</a></li>
         <li><a href="rabotni-listove.html">Работни листове</a></li>
-        <li><a href="pricing.html">Цени</a></li>
+        <li><a href="pricing.html">Абонаменти</a></li>
         <li><a href="vhod.html">Вход</a> · <a href="registracia.html">Регистрация</a></li>
-        <li><a href="kod.html">Въведи код</a></li>
+        <li><a href="tablo.html">Табло за учители</a></li>
         <li><a href="novini.html">Новини</a></li>
       </ul></div>
       <div><h4>Правна информация</h4><ul>

@@ -71,34 +71,12 @@
   document.addEventListener('DOMContentLoaded', function () {
     if (!$('rp-local')) return;
     var G = S.Game, st = G ? G.state : {};
-    function tab(t) {
-      document.querySelectorAll('[data-rt]').forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-rt') === t)); });
-      $('rp-local').hidden = t !== 'local'; $('rp-form').hidden = t !== 'remote'; $('rp-remote').hidden = t !== 'remote';
-    }
-    document.querySelectorAll('[data-rt]').forEach(function (b) { b.addEventListener('click', function () { tab(b.getAttribute('data-rt')); }); });
     if (st.answered) {
       var stars = 0, missions = 0; for (var k in st.adventure || {}) for (var i in st.adventure[k]) { stars += st.adventure[k][i]; if (st.adventure[k][i]) missions++; }
       S.Report.render($('rp-local'), { nickname: st.nickname || '', grade: st.lastGrade, answered: st.answered, correct: st.correct, stars: stars, missions: missions, skills: st.skills, days: st.days });
     } else {
-      $('rp-local').innerHTML = '<div class="panel" style="text-align:center"><p class="lead-dark">На това устройство още няма решени задачи.</p><p>Отворете отчета на устройството, на което играе детето, или вижте го с <b>код и ПИН</b>.</p><p><a class="btn" href="game.html">🎮 Към играта</a></p></div>';
-      tab('remote');
+      $('rp-local').innerHTML = '<div class="panel" style="text-align:center"><p class="lead-dark">На това устройство още няма решени задачи.</p><p>Влезте в акаунта си – там е отчетът за всяко дете.</p><p><a class="btn" href="profil.html">Моят профил</a> <a class="btn btn-ghost" href="game.html">🎮 Към играта</a></p></div>';
     }
-    var code = $('rp-code'), pin = $('rp-pin');
-    try { var sv = JSON.parse(localStorage.getItem('smetko.parent') || 'null'); if (sv) { code.value = sv.c; pin.value = sv.p; $('rp-remember').checked = true; } } catch (e) {}
-    $('rp-form').addEventListener('submit', function (e) {
-      e.preventDefault(); $('rp-err').textContent = '';
-      if (!S.Access || !S.Access.online) { $('rp-err').textContent = 'Нужна е интернет връзка.'; return; }
-      fetch('/api/parent.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: code.value, pin: pin.value.trim() }) })
-        .then(function (r) { return r.json(); }).then(function (j) {
-          if (!j.ok) { $('rp-err').textContent = j.error || 'Грешка.'; return; }
-          try { if ($('rp-remember').checked) localStorage.setItem('smetko.parent', JSON.stringify({ c: code.value, p: pin.value.trim() })); else localStorage.removeItem('smetko.parent'); } catch (x) {}
-          var el = $('rp-remote');
-          if (!j.activated) { el.innerHTML = '<div class="panel" style="text-align:center"><p class="lead-dark">Кодът още не е въведен на устройството на детето.</p><p>Отворете <b>smetko.com/kod</b> на телефона или таблета, на който ще играе.</p></div>'; return; }
-          S.Report.render(el, j); if (S.hookDipl) S.hookDipl(el, j);
-          el.insertAdjacentHTML('afterbegin', '<p class="hint" style="text-align:center">Код ' + j.code + ' · ' + j.typeName + ' · валиден до ' + S.fmtDate(j.expires) + (j.last ? ' · последна игра ' + S.fmtDate(String(j.last).slice(0, 10)) : '') + '</p>');
-        }).catch(function () { $('rp-err').textContent = 'Сървърът не отговаря. Опитайте пак.'; });
-    });
-    if (code.value && pin.value && !st.answered) $('rp-form').dispatchEvent(new Event('submit'));
     // грамота за детето (в края на учебната година)
     S.reportDiploma = function (r) {
       if (!S.diplomasOpen || !S.diplomasOpen() || !r || !r.answered) return '';

@@ -1,7 +1,7 @@
 <?php
 /* Общи класации между училищата.
    POST {scope: schools|classes|teachers|students, period: week|all, grade: 0-4, token?}
-   Всички класации се виждат само с платен абонамент: активен код (token) или учител с код + ПИН.
+   Всички класации се виждат само с платен абонамент: ученик/дете с активен абонамент (token) или влязъл акаунт с абонамент.
    Учениците се показват с прякор, клас и училище.
    Брои се само точките, спечелено след активирането на кода; класирането е по „точки на ученик“
    (всички точки ÷ броя ученици с код), за да е честно между малки и големи класове и училища. */
@@ -37,10 +37,10 @@ foreach ($st as $r) {
     $r['g'] = $g;
     $rows[] = $r;
 }
-// брой издадени кодове за ученици (знаменател за „точки на ученик“)
+// брой ученици в класа (знаменател за „точки на ученик“)
 $issued = ['b' => [], 's' => []];
-$q = $pdo->prepare("SELECT b.id, b.school_id, COUNT(*) AS n, b.grade FROM codes c JOIN batches b ON b.id = c.batch_id
-    WHERE c.revoked = 0 AND c.expires_at >= ? AND COALESCE(c.role, 'student') <> 'teacher' AND b.type = 'class' GROUP BY b.id");
+$q = $pdo->prepare("SELECT b.id, b.school_id, COUNT(*) AS n, b.grade FROM redemptions r JOIN codes c ON c.code = r.code JOIN batches b ON b.id = c.batch_id
+    WHERE c.revoked = 0 AND c.expires_at >= ? AND b.type = 'class' GROUP BY b.id");
 $q->execute([today()]);
 foreach ($q as $x) {
     if ($grade && (int)$x['grade'] && (int)$x['grade'] !== $grade) continue;
@@ -49,7 +49,10 @@ foreach ($q as $x) {
 }
 $mine = null;
 if ($me) foreach ($rows as $r) if ($r['code'] === $me['c'] && hash_equals($r['device'], $me['d'])) $mine = $r;
-if (!$me && ($tb = batch_of($acc['code']['code']))) $mine = ['id' => 0, 'sid' => $tb['school_id'], 'bid' => $tb['id'], 'teacher_name' => $tb['teacher_name'] ?? '']; // учител: неговият клас и училище
+if (!$me && $acc['account']) { // влязъл учител: първият му клас и училище
+    $q = $pdo->prepare("SELECT b.* FROM batches b JOIN codes c ON c.batch_id = b.id WHERE c.account_id = ? AND c.type = 'class' ORDER BY c.expires_at DESC LIMIT 1"); $q->execute([(int)$acc['account']['id']]);
+    if ($tb = $q->fetch()) $mine = ['id' => 0, 'sid' => $tb['school_id'], 'bid' => $tb['id'], 'teacher_name' => $tb['teacher_name'] ?? ''];
+}
 
 function rank_groups(array $groups, int $min): array {
     $out = [];

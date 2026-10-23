@@ -412,6 +412,7 @@
       html += '<div id="ch-board" class="ch-board"></div>';
     } else if (p.mode === 'homework') {
       var hwOk = p.correct >= Math.ceil(p.total * 0.8);
+      extraBadges = G.event('hw').concat(p.correct === p.total ? G.event('hwPerfect') : []);
       owlPose = hwOk ? 'cheer' : 'happy'; celebrate = hwOk;
       html += '<h2>' + (p.correct === p.total ? 'Домашната е перфектна! 🌟' : hwOk ? 'Браво, домашната е готова! 📚' : 'Домашната е готова!') + '</h2>';
       html += '<p class="sub">' + p.hw.title + ' · ' + E.GRADES[p.grade].name + '</p>';
@@ -440,7 +441,7 @@
     html += '<div class="result-actions">';
     if (p.mode === 'adventure') {
       var nextIdx = p.missionIdx + 1, hasNext = nextIdx < p.book.missions.length;
-      if (stars > 0 && hasNext && missionLocked(nextIdx)) html += '<button class="btn btn-green btn-lg" data-act="next">🔒 Следваща мисия</button><p class="lock-note" style="width:100%">Безплатни са първите ' + S.config.freeAdventureLevels + ' мисии. Следващите се отключват с код от учителя или с абонамент.</p>';
+      if (stars > 0 && hasNext && missionLocked(nextIdx)) html += '<button class="btn btn-green btn-lg" data-act="next">🔒 Следваща мисия</button><p class="lock-note" style="width:100%">Безплатни са първите ' + S.config.freeAdventureLevels + ' мисии. Следващите се отключват с абонамент.</p>';
       else if (stars > 0 && hasNext) html += '<button class="btn btn-green btn-lg" data-act="next">Следваща мисия →</button>';
       html += '<button class="btn ' + (stars > 0 ? 'btn-white' : 'btn-lg') + '" data-act="retry">Опитай пак</button>';
       html += '<button class="btn btn-ghost" data-act="map">Към картата</button>';
@@ -475,7 +476,7 @@
     if (p.mode === 'challenge' && S.Challenge) setTimeout(function () { // мястото в класацията на седмицата (след синхронизацията)
       S.Challenge.board(p.grade).then(function (j) {
         var el = $('#ch-board'); if (!el) return;
-        if (j.locked) { el.innerHTML = '<p class="hint">С код от учителя ще видиш на кое място си сред всички ученици. <a href="kod.html">Въведи код</a></p>'; return; }
+        if (j.locked) { el.innerHTML = '<p class="hint">С абонамент ще видиш на кое място си сред всички ученици. <a href="pricing.html">Абонаменти</a></p>'; return; }
         if (j.mine) el.innerHTML = '<p class="ch-place">Ти си <b>' + j.mine.place + '-' + (j.mine.place % 10 === 1 && j.mine.place % 100 !== 11 ? 'ви' : j.mine.place % 10 === 2 && j.mine.place % 100 !== 12 ? 'ри' : (j.mine.place % 10 === 7 || j.mine.place % 10 === 8) && Math.floor(j.mine.place / 10) % 10 !== 1 ? 'ми' : 'ти') + '</b> от ' + j.list.length + ' в ' + p.grade + '. клас тази седмица!</p>';
       }).catch(function () {});
     }, 1500);
@@ -493,7 +494,7 @@
   function stats(a, al, b, bl, c, cl) {
     if (cl === 'точки' && !G.earns()) { // без абонамент няма точки
       return '<div class="result-stats"><div><b>' + a + '</b><span>' + al + '</span></div><div><b>' + b + '</b><span>' + bl + '</span></div><div><b>🔒</b><span>точки</span></div></div>' +
-        '<p class="lock-note free-note">⭐ С абонамент печелиш <b>точки, нива и значки</b> и влизаш в класациите. <a href="pricing.html">Абонаменти</a> · <a href="kod.html">Имам код</a></p>';
+        '<p class="lock-note free-note">⭐ С абонамент печелиш <b>точки, нива и значки</b> и влизаш в класациите. <a href="pricing.html">Абонаменти</a></p>';
     }
     return '<div class="result-stats"><div><b>' + a + '</b><span>' + al + '</span></div><div><b>' + b + '</b><span>' + bl + '</span></div><div><b>' + c + '</b><span>' + cl + '</span></div></div>';
   }
@@ -565,7 +566,7 @@
     var hw = +q.get('hw');
     if (hw && S.Homework) {
       show('screen-setup');
-      S.Homework.find(hw).then(function (h) { if (h) startHomework(h); else S.toast(S.Access && S.Access.isClass() ? 'Тази домашна вече не е активна.' : 'Домашните са за ученици с код за клас.'); });
+      S.Homework.find(hw).then(function (h) { if (h) startHomework(h); else S.toast(S.Access && S.Access.isClass() ? 'Тази домашна вече не е активна.' : 'Домашните са за ученици от клас – влез с името и паролата от учителя.'); });
       return;
     }
     if (m === 'homework') m = null;

@@ -22,16 +22,25 @@
     $('#grades').innerHTML = html;
   }
 
+  function badgeGroups(st, lockedAll) { // значките по групи
+    return G.GROUPS.map(function (g) {
+      var list = G.BADGES.filter(function (b) { return b.g === g[0]; }), got = list.filter(function (b) { return !lockedAll && st.badges[b.id]; }).length;
+      return '<div class="badge-group"><h3>' + g[1] + ' <small>' + got + '/' + list.length + '</small></h3><div class="badges">' + list.map(function (b) {
+        var on = !lockedAll && !!st.badges[b.id];
+        return '<div class="badge' + (on ? '' : ' locked') + '" title="' + b.desc + (on ? ' · спечелена на ' + S.fmtDate(st.badges[b.id]) : '') + '"><div class="b-ico">' + b.icon + '</div><b>' + b.name + '</b><small>' + b.desc + '</small></div>';
+      }).join('') + '</div></div>';
+    }).join('');
+  }
   function render() {
     var st = G.state, r = G.rank();
     if (!G.earns()) { // без абонамент: без точки, нива и значки
       $('#rank-line').textContent = '🔒 Точки, нива и значки – с абонамент';
       $('#rank-bar').style.width = '0';
-      $('#rank-next').innerHTML = 'Въведи кода си или избери абонамент, за да печелиш точки, да вдигаш ниво и да влезеш в класациите. <a href="kod.html" style="color:#fff;text-decoration:underline">Имам код</a> · <a href="pricing.html" style="color:#fff;text-decoration:underline">Абонаменти</a>';
+      $('#rank-next').innerHTML = 'С абонамент печелиш точки, вдигаш ниво, събираш значки и влизаш в класациите. <a href="pricing.html" style="color:#fff;text-decoration:underline">Абонаменти</a>';
       var acc0 = st.answered ? Math.round(st.correct / st.answered * 100) : 0;
       $('#stats').innerHTML = [[st.correct, 'верни задачи'], [acc0 + '%', 'точност'], ['🔒', 'точки – с абонамент'], ['🔒', 'серия от дни – с абонамент']]
         .map(function (x) { return '<div class="stat"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('');
-      $('#badges').innerHTML = G.BADGES.map(function (b) { return '<div class="badge locked"><div class="b-ico">' + b.icon + '</div><b>' + b.name + '</b><small>' + b.desc + '</small></div>'; }).join('');
+      $('#badges').innerHTML = badgeGroups(st, true);
       $('#badge-count').innerHTML = 'Значките се събират с абонамент. <a href="pricing.html">Виж абонаментите</a>';
       renderGrades(st);
       return;
@@ -45,28 +54,28 @@
       ['★ ' + st.points, 'точки'], [st.correct, 'верни задачи'], [acc + '%', 'точност'], ['🔥 ' + (st.streak.count || 0), 'поредни дни (рекорд в серия: ' + st.maxCombo + ')']
     ].map(function (x) { return '<div class="stat"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('');
 
-    var have = 0;
-    $('#badges').innerHTML = G.BADGES.map(function (b) {
-      var got = !!st.badges[b.id]; if (got) have++;
-      return '<div class="badge' + (got ? '' : ' locked') + '"><div class="b-ico">' + b.icon + '</div><b>' + b.name + '</b><small>' + b.desc + '</small></div>';
-    }).join('');
-    $('#badge-count').textContent = 'Събрани ' + have + ' от ' + G.BADGES.length + ' значки.';
+    G.check();
+    $('#badges').innerHTML = badgeGroups(st, false);
+    var have = G.BADGES.filter(function (b) { return st.badges[b.id]; }).length;
+    $('#badge-count').innerHTML = 'Събрани <b>' + have + ' от ' + G.BADGES.length + '</b> значки.';
 
     renderGrades(st);
   }
 
+  function esc2(x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function myClass() {
     if (!S.Access || !S.Access.isClass()) return;
     var sec = $('#myclass-sec'), box = $('#myclass'), acc = S.Access.get();
     sec.hidden = false;
-    $('#myclass-sub').innerHTML = (acc.role === 'teacher' ? 'Вие сте учител · <a href="klasaciya.html">пълна таблица с ПИН</a> · ' : '') + 'Код ' + acc.code + (acc.label ? ' · ' + acc.label : '') + ' · <a href="#" id="nick-edit">' + (G.state.nickname ? 'Прякор: ' + G.state.nickname + ' (смени)' : 'Избери прякор') + '</a>';
+    var stu = S.Account && S.Account.student;
+    $('#myclass-sub').innerHTML = stu ? esc2(stu.avatar + ' ' + stu.name) + (stu.cls && stu.cls.name ? ' · ' + esc2(stu.cls.name) : '') + (stu.cls && stu.cls.school ? ' · ' + esc2(stu.cls.school) : '') : (acc.label ? esc2(acc.label) + ' · ' : '') + '<a href="#" id="nick-edit">' + (G.state.nickname ? 'Прякор: ' + esc2(G.state.nickname) + ' (смени)' : 'Избери прякор') + '</a>';
     box.innerHTML = '<p class="lead-dark" style="text-align:center">Зареждам класацията…</p>';
     S.Access.sync(true);
     setTimeout(function () {
       S.Access.classBoard().then(function (j) { box.innerHTML = S.boardTable ? S.boardTable(j, false) : ''; })
         .catch(function (e) { box.innerHTML = '<p class="lead-dark" style="text-align:center">' + e.message + '</p>'; });
     }, 600);
-    $('#nick-edit').addEventListener('click', function (e) {
+    if ($('#nick-edit')) $('#nick-edit').addEventListener('click', function (e) {
       e.preventDefault();
       var d = S.modal('<div data-owl="happy"></div><h3>Твоят прякор</h3><p>Само име или прякор – без фамилия.</p><input class="input" id="nick-new" maxlength="20" value="' + (G.state.nickname || '').replace(/"/g, '') + '"><div class="modal-actions"><button class="btn btn-green" id="nick-save">Запази</button></div>');
       d.querySelector('#nick-save').addEventListener('click', function () { S.Access.setNickname(d.querySelector('#nick-new').value.trim().slice(0, 20)); d.close(); myClass(); });

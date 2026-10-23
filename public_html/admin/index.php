@@ -12,11 +12,11 @@ $syStart = ((int)date('n') >= 9 ? date('Y') : (int)date('Y') - 1) . '-09-01';
 
 $k = [
     'codes' => (int)$one("SELECT COUNT(*) FROM codes c WHERE $stud"),
-    'act' => (int)$one("SELECT COUNT(DISTINCT r.code) FROM redemptions r JOIN codes c ON c.code = r.code WHERE $stud"),
+    'act' => (int)$one("SELECT COUNT(*) FROM codes c WHERE c.account_id IS NOT NULL AND $stud"),
     'd1' => (int)$one('SELECT COUNT(*) FROM redemptions WHERE last_seen >= ?', [$ago(1)]),
     'd7' => (int)$one('SELECT COUNT(*) FROM redemptions WHERE last_seen >= ?', [$ago(7)]),
     'd30' => (int)$one('SELECT COUNT(*) FROM redemptions WHERE last_seen >= ?', [$ago(30)]),
-    'new7' => (int)$one('SELECT COUNT(*) FROM redemptions WHERE created_at >= ?', [$ago(7)]),
+    'new7' => (int)$one('SELECT COUNT(*) FROM codes WHERE activated_at >= ?', [$ago(7)]),
     'schools' => (int)$one('SELECT COUNT(*) FROM schools'),
     'accounts' => (int)$one('SELECT COUNT(*) FROM accounts'), 'acc7' => (int)$one("SELECT COUNT(*) FROM accounts WHERE created_at >= datetime('now', '-7 days')"),
     'classes' => (int)$one("SELECT COUNT(*) FROM batches WHERE type = 'class'"),
@@ -74,7 +74,7 @@ $body .= '<div class="grid g2"><div class="card"><h3>⏳ Кодове, коит�
 
 // последни активирания
 $last = '';
-foreach ($pdo->query('SELECT r.created_at, r.nickname, c.code, c.role, b.id, b.label FROM redemptions r JOIN codes c ON c.code = r.code JOIN batches b ON b.id = c.batch_id ORDER BY r.id DESC LIMIT 10') as $r)
-    $last .= '<tr><td>' . h(date('d.m H:i', strtotime($r['created_at'] . ' UTC'))) . '</td><td class="mono">' . h($r['code']) . '</td><td>' . h($r['role'] === 'teacher' ? 'учител' : ($r['nickname'] ?: '–')) . '</td><td><a href="kodove.php?batch=' . (int)$r['id'] . '">' . h($r['label'] ?: '#' . $r['id']) . '</a></td></tr>';
-$body .= '<div class="card"><h3>🕑 Последни активирания</h3>' . ($last ? '<div class="tw"><table><thead><tr><th>Кога</th><th>Код</th><th>Прякор</th><th>Партида</th></tr></thead><tbody>' . $last . '</tbody></table></div>' : '<p class="muted">Още никой не е въвел код.</p>') . '</div>';
+foreach ($pdo->query('SELECT c.activated_at, c.code, c.type, c.label, a.email, a.id AS aid FROM codes c LEFT JOIN accounts a ON a.id = c.account_id WHERE c.activated_at IS NOT NULL ORDER BY c.activated_at DESC LIMIT 10') as $r)
+    $last .= '<tr><td>' . h(date('d.m H:i', strtotime($r['activated_at'] . ' UTC'))) . '</td><td class="mono"><a href="kodove.php?code=' . urlencode($r['code']) . '">' . h($r['code']) . '</a></td><td>' . h(TYPE_NAMES[$r['type']] ?? $r['type']) . '</td><td>' . ($r['aid'] ? '<a href="akaunti.php?id=' . (int)$r['aid'] . '">' . h($r['email']) . '</a>' : '–') . '</td></tr>';
+$body .= '<div class="card"><h3>🕑 Последни активирания</h3>' . ($last ? '<div class="tw"><table><thead><tr><th>Кога</th><th>Код</th><th>Абонамент</th><th>Акаунт</th></tr></thead><tbody>' . $last . '</tbody></table></div>' : '<p class="muted">Още никой не е въвел код.</p>') . '</div>';
 page('Табло', $body, '<a class="btn" href="kodove.php">🔑 Нови кодове</a><a class="btn ghost" href="porachki.php?new=1">🧾 Нова поръчка</a>');

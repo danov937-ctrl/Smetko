@@ -1,6 +1,6 @@
 /* Сметко — домашни от учителя (/api/homework.php).
-   Ученикът с код за клас вижда домашните на класа ([data-hw-cards]) и ги решава в играта (game.html?hw=ID).
-   Учителят ги задава от „Класация на класа“ (js/tools.js). */
+   Ученикът от клас вижда домашните на класа ([data-hw-cards]) и ги решава в играта (game.html?hw=ID).
+   Учителят ги задава от „Табло“ (js/tablo.js), където пише и съобщение до класа. */
 (function () {
   'use strict';
   var S = window.Smetko = window.Smetko || {};
@@ -19,13 +19,13 @@
     if (!online()) return Promise.resolve(cache ? cache.list : []);
     if (pending && !force) return pending;
     pending = post({ token: t, action: 'mine' }).then(function (j) {
-      cache = { list: j.list || [], t: Date.now() }; try { localStorage.setItem(KEY, JSON.stringify(cache)); } catch (e) {}
+      cache = { list: j.list || [], message: j.message || '', messageAt: j.messageAt || '', t: Date.now() }; try { localStorage.setItem(KEY, JSON.stringify(cache)); } catch (e) {}
       return cache.list;
     }).catch(function () { return cache ? cache.list : []; });
     return pending;
   }
   function submit(id, correct, answered) {
-    var t = token(); if (!t) return Promise.reject(new Error('Няма код за клас.'));
+    var t = token(); if (!t) return Promise.reject(new Error('Влез като ученик от клас.'));
     return post({ token: t, action: 'submit', id: id, correct: correct, answered: answered }).then(function (j) { pending = null; return j; });
   }
   function find(id) { return mine().then(function (l) { for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i]; return null; }); }
@@ -43,7 +43,8 @@
     var boxes = document.querySelectorAll('[data-hw-cards]'); if (!boxes.length || !token()) return;
     mine().then(function (l) {
       var open = l.filter(function (h) { return !h.done; }), list = open.concat(l.filter(function (h) { return h.done && h.due >= today(); }));
-      boxes.forEach(function (b) { b.innerHTML = list.slice(0, 4).map(card).join(''); b.hidden = !list.length; });
+      var msg = cache && cache.message ? '<div class="hw-card msg"><span class="hw-ico">📣</span><div class="hw-txt"><small>Съобщение от учителя' + (cache.messageAt ? ' · ' + S.fmtDate(cache.messageAt) : '') + '</small><b>' + esc(cache.message) + '</b></div></div>' : '';
+      boxes.forEach(function (b) { b.innerHTML = msg + list.slice(0, 4).map(card).join(''); b.hidden = !list.length && !msg; });
     });
   }
   S.Homework = { mine: mine, submit: submit, find: find, render: render, dueText: dueText };

@@ -6,7 +6,7 @@
 
   /* ---------- НАСТРОЙКИ ----------
      paywall: true → безплатен план (Бързо сметни, първите мисии, 20 задачи/ден в Тренировка);
-     пълният достъп се отключва с код за достъп (js/access.js, админ: /admin/).
+     пълният достъп се отключва с абонамент към акаунта (js/account.js, js/access.js, админ: /admin/).
      paywall: false → всичко е отключено за всички. */
   S.config = {
     paywall: true,
@@ -170,7 +170,7 @@
       '<div class="ord-class" hidden><div class="ord-row"><label>Брой класове<input class="input" id="o-qty" type="number" min="1" max="60" value="' + (qty0 || 1) + '"></label><label>Кои класове<input class="input" id="o-classes" maxlength="200" placeholder="напр. 2а, 2б"></label></div>' +
       '<label>Училище<input class="input" id="o-school" maxlength="160" placeholder="ОУ „Иван Вазов“"></label><label>Населено място<input class="input" id="o-town" maxlength="60" placeholder="Пловдив"></label></div>' +
       '<label>Име и фамилия<input class="input" id="o-name" maxlength="120" autocomplete="name" placeholder="напр. Мария Иванова" value="' + escH(A ? A.name : '') + '"></label>' +
-      '<div class="ord-row"><label>Имейл – тук ще получите кода<input class="input" id="o-email" type="email" maxlength="160" autocomplete="email" inputmode="email" placeholder="ime@primer.bg" value="' + escH(A ? A.email : '') + '"></label><label>Телефон <small class="o-opt" id="o-phone-opt">(по желание)</small><input class="input" id="o-phone" type="tel" maxlength="40" autocomplete="tel" placeholder="08XX XXX XXX"></label></div>' +
+      '<div class="ord-row"><label>Имейл – тук ще получите кода за активиране<input class="input" id="o-email" type="email" maxlength="160" autocomplete="email" inputmode="email" placeholder="ime@primer.bg" value="' + escH(A ? A.email : '') + '"></label><label>Телефон <small class="o-opt" id="o-phone-opt">(по желание)</small><input class="input" id="o-phone" type="tel" maxlength="40" autocomplete="tel" placeholder="08XX XXX XXX"></label></div>' +
       '<label class="check"><input type="checkbox" id="o-inv"><span>Искам фактура</span></label>' +
       '<div class="ord-inv" hidden><div class="ord-row"><label>Фирма / училище<input class="input" id="o-company" maxlength="160"></label><label>ЕИК<input class="input" id="o-eik" maxlength="13" inputmode="numeric"></label></div><div class="ord-row"><label>МОЛ<input class="input" id="o-mol" maxlength="80"></label><label>Адрес<input class="input" id="o-addr" maxlength="200"></label></div></div>' +
       '<label>Бележка <small class="o-opt">(по желание)</small><textarea class="input" id="o-notes" maxlength="1000" rows="2"></textarea></label>' +
@@ -220,8 +220,8 @@
     S.modal(
       '<div data-owl="encourage"></div><h3>Тази мисия е с пълен достъп</h3>' +
       '<p>В безплатния план са първите ' + S.config.freeAdventureLevels + ' мисии от всеки клас, „Бързо сметни“ и ' + S.config.freePracticePerDay + ' задачи на ден в „Тренировка“. ' +
-      'Всичко останало се отключва с код от учителя или с абонамент.</p>' +
-      '<div class="modal-actions"><a class="btn btn-green" href="kod.html">Въведи код</a><a class="btn btn-ghost" href="pricing.html">Цени</a></div>'
+      'Всичко останало се отключва с абонамент. Ученик от клас? Влез с името и паролата от учителя.</p>' +
+      '<div class="modal-actions"><a class="btn btn-green" href="pricing.html">Абонаменти</a><a class="btn btn-ghost" href="vhod.html">Вход</a></div>'
     );
   };
   S.loginModal = function () { location.href = 'vhod.html'; };

@@ -41,24 +41,24 @@ if ($action === 'link' && $id) {
     $pdo->prepare('UPDATE orders SET batch_id = ? WHERE id = ?')->execute([(int)post('batch') ?: null, $id]);
     audit('Партида към поръчка', "#$id → #" . (int)post('batch')); flash('Партидата е свързана.'); go('porachki.php?id=' . $id);
 }
-/* един клик: кодове за индивидуален/семеен абонамент */
+/* един клик: кодове за поръчката (по един код за всеки абонамент; за клас – по един за всеки клас) */
 if ($action === 'auto_codes' && $id) {
     $o = $pdo->prepare('SELECT * FROM orders WHERE id = ?'); $o->execute([$id]); $o = $o->fetch();
-    $type = $o ? (str_starts_with((string)$o['plan'], 'Индивидуален') ? 'single' : (str_starts_with((string)$o['plan'], 'Семеен') ? 'family' : '')) : '';
-    if (!$o || !$type || $o['batch_id']) { flash('Само за индивидуален или семеен абонамент без създадени кодове.', 'err'); go('porachki.php?id=' . $id); }
-    $months = str_contains((string)$o['plan'], '6 месеца') ? 6 : 12;
-    $exp = date('Y-m-d', strtotime('+' . $months . ' months'));
-    $count = $type === 'family' ? 4 * max(1, (int)$o['qty']) : max(1, (int)$o['qty']);
-    $label = mb_substr((string)($o['contact'] ?: $o['client']), 0, 120);
+    $plan = (string)($o['plan'] ?? '');
+    $type = str_starts_with($plan, 'Индивидуален') ? 'single' : (str_starts_with($plan, 'Семеен') ? 'family' : (str_starts_with($plan, 'Цял клас') ? 'class' : ''));
+    $has = $pdo->prepare('SELECT COUNT(*) FROM codes WHERE order_id = ?'); $has->execute([$id]);
+    if (!$o || !$type || (int)$has->fetchColumn()) { flash('Кодовете вече са създадени или планът е „Друго“ (създайте ги ръчно).', 'err'); go('porachki.php?id=' . $id); }
+    $exp = date('Y-m-d', strtotime(str_contains($plan, '6 месеца') ? '+6 months' : '+1 year'));
+    $count = max(1, (int)$o['qty']); $label = mb_substr((string)($o['client'] ?: $o['contact']), 0, 120); $seats = PLAN_SEATS[$type];
     $pdo->beginTransaction();
-    $pdo->prepare('INSERT INTO batches(label, type, max_uses, expires_at, created_at, public) VALUES(?, ?, 1, ?, ?, 1)')->execute([$label, $type, $exp, now()]);
-    $bid = (int)$pdo->lastInsertId();
-    $ins = $pdo->prepare('INSERT OR IGNORE INTO codes(code, batch_id, type, max_uses, expires_at, pin, label, created_at, role) VALUES(?, ?, ?, 1, ?, ?, ?, ?, ?)');
-    for ($made = 0; $made < $count;) { $ins->execute([random_code(), $bid, $type, $exp, random_pin(), $label, now(), 'student']); $made += $ins->rowCount(); }
-    $pdo->prepare("UPDATE orders SET batch_id = ?, status = CASE WHEN status IN ('new', 'codes') THEN 'codes' ELSE status END WHERE id = ?")->execute([$bid, $id]);
+    $ins = $pdo->prepare('INSERT OR IGNORE INTO codes(code, batch_id, type, max_uses, expires_at, pin, label, created_at, role, order_id) VALUES(?, ?, ?, ?, ?, NULL, ?, ?, ?, ?)');
+    $mk = function () use ($pdo, $label, $type, $seats, $exp, $o) { $pdo->prepare('INSERT INTO batches(label, type, max_uses, expires_at, created_at, school_id, public) VALUES(?, ?, ?, ?, ?, ?, 1)')->execute([$label, $type, $seats, $exp, now(), $type === 'class' ? ($o['school_id'] ?: null) : null]); return (int)$pdo->lastInsertId(); };
+    $bid = $type === 'class' ? 0 : $mk(); $first = 0;
+    for ($made = 0; $made < $count;) { $b = $type === 'class' ? $mk() : $bid; $ins->execute([random_code(), $b, $type, $seats, $exp, $label, now(), 'student', $id]); if ($ins->rowCount()) { $made++; $first = $first ?: $b; } }
+    $pdo->prepare("UPDATE orders SET batch_id = ?, status = CASE WHEN status = 'new' THEN 'codes' ELSE status END WHERE id = ?")->execute([$first, $id]);
     $pdo->commit();
     audit('Кодове за поръчка', "#$id · " . TYPE_NAMES[$type] . " × $count до $exp");
-    flash("Създадени са $count кода (валидни до " . fdate($exp) . '). Проверете имейла по-долу и натиснете „Изпрати имейла“.');
+    flash("Създаден" . ($count > 1 ? "и са $count кода" : ' е кодът') . ' (валидност до ' . fdate($exp) . '). Проверете имейла по-долу и натиснете „Изпрати имейла“.');
     go('porachki.php?id=' . $id);
 }
 if ($action === 'send_mail' && $id) {
@@ -124,35 +124,29 @@ if ($id || isset($_GET['new'])) {
         'function calc(){var p=parseFloat(opt().dataset.price||0),n=+q.value||1,ds=+d.value||0;document.getElementById("qlbl").textContent="Брой ("+opt().dataset.unit+")";if(!p){c.textContent="Въведете сумата ръчно.";return;}var s=Math.round(p*n*(100-ds))/100;c.textContent=n+" × "+p+" €"+(ds?" − "+ds+"%":"")+" = "+s.toFixed(2)+" €";if(!touched)a.value=s.toFixed(2);}' .
         'pl.addEventListener("change",function(){touched=false;auto();calc();});q.addEventListener("input",function(){touched=false;auto();calc();});d.addEventListener("input",function(){touched=false;calc();});a.addEventListener("input",function(){touched=true;});auto();calc();})();</script>';
     if ($id) {
-        $batch = null;
-        if ($o['batch_id']) { $b = $pdo->prepare('SELECT * FROM batches WHERE id = ?'); $b->execute([(int)$o['batch_id']]); $batch = $b->fetch() ?: null; }
+        $oc = $pdo->prepare('SELECT * FROM codes WHERE order_id = ? ORDER BY created_at, code'); $oc->execute([$id]); $ocodes = $oc->fetchAll();
+        if (!$ocodes && $o['batch_id']) { $oc = $pdo->prepare('SELECT * FROM codes WHERE batch_id = ? ORDER BY created_at, code'); $oc->execute([(int)$o['batch_id']]); $ocodes = $oc->fetchAll(); }
         $f = '<form method="post" class="inline">' . csrf_field() . '<input type="hidden" name="id" value="' . $id . '">';
-        $auto = str_starts_with((string)$o['plan'], 'Индивидуален') || str_starts_with((string)$o['plan'], 'Семеен');
-        $act = '<div class="card"><h2>Действия</h2><div class="row">' .
-            ($batch ? '<a class="btn" href="kodove.php?batch=' . (int)$batch['id'] . '">🔑 Кодовете: ' . h($batch['label'] ?: '#' . $batch['id']) . '</a><a class="btn ghost" target="_blank" href="cards.php?batch=' . (int)$batch['id'] . '">🖨️ Картички</a>'
-                : ($auto ? $f . '<button name="action" value="auto_codes">⚡ Създай ' . (str_starts_with((string)$o['plan'], 'Семеен') ? 'кодовете (4 на семейство)' : 'кода') . '</button></form>' : '') .
-                  '<a class="btn' . ($auto ? ' ghost' : '') . '" href="kodove.php?order=' . $id . '">🔑 Създай кодовете ' . ($auto ? 'ръчно' : 'за поръчката') . '</a>') .
+        $auto = (bool)preg_match('/^(Индивидуален|Семеен|Цял клас)/u', (string)$o['plan']);
+        $act = '<div class="card"><h2>Действия</h2>' . ($ocodes ? '<p>Кодове: ' . implode(' ', array_map(fn($c) => '<a class="mono" href="kodove.php?code=' . urlencode($c['code']) . '">' . h($c['code']) . '</a>' . ($c['account_id'] ? ' <span class="tag tg">активиран</span>' : ''), $ocodes)) . '</p>' : '') . '<div class="row">' .
+            ($ocodes ? '<a class="btn ghost" target="_blank" href="cards.php?order=' . $id . '">🖨️ Картички</a>'
+                : ($auto ? $f . '<button name="action" value="auto_codes">⚡ Създай кода' . ((int)$o['qty'] > 1 ? 'вете (' . (int)$o['qty'] . ')' : '') . '</button></form>' : '') .
+                  '<a class="btn' . ($auto ? ' ghost' : '') . '" href="kodove.php?order=' . $id . '">🔑 Създай ръчно</a>') .
             '<a class="btn ghost" target="_blank" href="porachki.php?action=proforma&amp;id=' . $id . '">📄 Проформа</a>' .
             $f . '<input type="hidden" name="status" value="sent"><button name="action" value="status" class="ghost">📨 Изпратена</button></form>' .
             $f . '<input type="hidden" name="status" value="paid"><button name="action" value="status" class="green">💶 Платена</button></form>' .
             $f . '<button name="action" value="delete" class="red" data-confirm="Да изтрием ли поръчката?">🗑</button></form></div>';
-        $bopts = '<option value="0">– няма –</option>';
-        foreach ($pdo->query('SELECT id, label FROM batches ORDER BY id DESC LIMIT 200') as $b) $bopts .= '<option value="' . (int)$b['id'] . '"' . ((int)$o['batch_id'] === (int)$b['id'] ? ' selected' : '') . '>#' . (int)$b['id'] . ' ' . h($b['label']) . '</option>';
-        $act .= '<form method="post" class="row" style="margin-top:12px">' . csrf_field() . '<input type="hidden" name="id" value="' . $id . '"><input type="hidden" name="action" value="link"><label style="margin:0">Свържи с партида <select name="batch" style="width:auto">' . $bopts . '</select></label><button class="sm ghost">Свържи</button></form></div>';
+        $act .= '</div>';
         // текст на имейл
-        $codes = '';
-        if ($batch) {
-            $st = $pdo->prepare("SELECT code, role, pin FROM codes WHERE batch_id = ? AND revoked = 0 ORDER BY CASE WHEN role = 'teacher' THEN 0 ELSE 1 END, created_at, code"); $st->execute([(int)$batch['id']]);
-            $list = $st->fetchAll();
-            if ($batch['type'] === 'class') {
-                $t = array_values(array_filter($list, fn($r) => $r['role'] === 'teacher'));
-                $codes = "Код на учителя: " . ($t[0]['code'] ?? '') . "\nПИН за класацията: " . ($t[0]['pin'] ?? '') . "\n\nКодове за учениците (по един на дете):\n" . implode("\n", array_map(fn($r) => $r['code'], array_filter($list, fn($r) => $r['role'] !== 'teacher')));
-            } else $codes = (count($list) > 1 ? "Кодове за достъп (по един за всяко дете):\n" : "Код за достъп:\n") . implode("\n", array_map(fn($r) => $r['code'] . ($r['pin'] ? '   (ПИН за отчета на родителя: ' . $r['pin'] . ')' : ''), $list));
-        }
+        $isClass = str_starts_with((string)$o['plan'], 'Цял клас'); $isFam = str_starts_with((string)$o['plan'], 'Семеен');
+        $codes = $ocodes ? (count($ocodes) > 1 ? "Вашите кодове за абонамент:\n" : "Вашият код за абонамент:\n") . implode("\n", array_map(fn($c) => $c['code'], $ocodes)) . "\n(валиден до " . fdate($ocodes[0]['expires_at']) . ")" : '';
+        $how = $isClass
+            ? "Как се включва класът:\n1. Влезте или си направете безплатен акаунт на smetko.com/registracia (като учител).\n2. Отворете „Абонаменти“ → „Имате код?“ и въведете кода – само веднъж." . (count($ocodes) > 1 ? ' Всеки код е за един клас.' : '') . "\n3. В „Табло“ (smetko.com/tablo) напишете имената на учениците – всеки получава потребител и парола. Отпечатайте картите и ги раздайте.\n4. Децата влизат от smetko.com → Вход → Ученик."
+            : "Как се активира:\n1. Влезте или си направете безплатен акаунт на smetko.com/registracia.\n2. Отворете „Абонаменти“ → „Имате код?“ и въведете кода – само веднъж.\n3. В „Моят профил“ добавете " . ($isFam ? 'профил за всяко дете (до 4)' : 'профил за детето') . ". Абонаментът важи на всяко устройство, на което влезете.";
         $mail = "Здравейте" . ($o['contact'] ? ', ' . $o['contact'] : '') . ",\n\nБлагодарим Ви, че избрахте Сметко – математика като игра за 1.–4. клас!\n\n" .
-            ($codes ?: "[Кодовете ще бъдат тук, след като създадете партидата.]") . ($batch && $batch['type'] !== 'class' ? "\n\nКак се използва (препоръчваме):\n1. Направете си безплатен акаунт на smetko.com/registracia\n2. Добавете профил за детето и въведете кода в него – той важи на всички устройства на детето (телефон, таблет, компютър).\n\nИли без акаунт: отворете smetko.com/kod на устройството на детето и въведете кода. Тогава кодът важи само за това устройство." : "\n\nКак се използва:\n1. Отворете smetko.com/kod\n2. Въведете кода – пълният достъп се включва веднага.\nВсеки код е еднократен и се активира на едно устройство.") .
-            ($batch && $batch['type'] === 'class' ? "\n\nКласацията на класа е на smetko.com/klasaciya – с кода на учителя и ПИН-а." : '') .
+            ($codes ?: "[Кодът ще бъде тук, след като го създадете с „⚡ Създай кода“.]") . "\n\n" . $how .
             "\n\nСума за плащане: " . money($o['amount']) . ($co['iban'] ? "\nIBAN: " . $co['iban'] . ($co['bank'] ? ' (' . $co['bank'] . ')' : '') : '') . "\n\nПоздрави,\nЕкипът на Сметко\n" . $cfg['contactEmail'];
+        $batch = $ocodes ? ['id' => 0] : null;
         $act .= '<form method="post" class="card">' . csrf_field() . '<input type="hidden" name="id" value="' . $id . '"><h2>Имейл до клиента</h2><textarea id="mailtxt" name="text" style="min-height:260px">' . h($mail) . '</textarea><div class="row" style="margin-top:8px">' .
             ($o['email'] && $batch ? '<button name="action" value="send_mail" data-confirm="Да изпратим ли имейла на ' . h($o['email']) . '?">✉️ Изпрати имейла</button>' : '') . '<button type="button" class="ghost" data-copy="mailtxt">📋 Копирай текста</button>' .
             ($o['email'] ? '<a class="btn ghost" href="mailto:' . h($o['email']) . '?subject=' . rawurlencode('Сметко – кодове за достъп') . '">✉️ Отвори пощата</a>' : '') . '</div><p class="hint">Текстът може да се поправи преди изпращане. Картичките за печат (PDF) може да прикачите от „🖨️ Картички“ → Печат → Запази като PDF и да ги изпратите от пощата си.</p></form>';

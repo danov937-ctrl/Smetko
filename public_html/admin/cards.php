@@ -1,36 +1,20 @@
 <?php
-/* Картички с кодове за печат: A4, 4 картички (A6) на страница. */
+/* Картички с кодове за абонамент (A4, 4 на страница) – напр. за подарък или за предаване на ръка.
+   cards.php?code=SMET-… (един код) или ?order=ID (всички кодове към поръчка). */
 declare(strict_types=1);
 require __DIR__ . '/_lib.php';
 require_admin();
-
-$bid = (int)($_GET['batch'] ?? 0);
-$st = db()->prepare("SELECT * FROM codes WHERE batch_id = ? AND revoked = 0 ORDER BY CASE WHEN role = 'teacher' THEN 0 ELSE 1 END, created_at, code"); $st->execute([$bid]);
+$oid = (int)($_GET['order'] ?? 0); $one = normalize_code((string)($_GET['code'] ?? ''));
+$st = $oid ? db()->prepare('SELECT * FROM codes WHERE order_id = ? AND revoked = 0 ORDER BY created_at, code') : db()->prepare('SELECT * FROM codes WHERE code = ?');
+$st->execute([$oid ?: $one]);
 $codes = $st->fetchAll();
 $site = 'smetko.com';
 $cards = '';
-$tn = 0;
 foreach ($codes as $i => $c) {
     $exp = date('d.m.Y', strtotime($c['expires_at']));
-    $isT = ($c['role'] ?? '') === 'teacher';
-    if ($isT) $tn++;
-    $qr = '<div class="qr" data-qr="https://' . $site . '/kod.html?c=' . h(urlencode($c['code'])) . '"></div>';
-    if ($isT) { // картичка за учителя: личен код + ПИН за класацията
-        $cards .= '<div class="card t-teach">
-      <div class="sky"><div class="cl c1"></div><div class="cl c2"></div><div class="owl" data-owl="think"></div>
-        <div class="brand"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></div><div class="slogan">' . ($tn === 1 ? 'Картичка за учителя' : 'Картичка за помощен учител') . '</div></div>
-      <div class="body">
-        <div class="ttl">Класация на класа</div>
-        <div class="tk"><div><small>Код на учителя</small><b>' . h($c['code']) . '</b></div><div><small>ПИН</small><b>' . h($c['pin']) . '</b></div></div>
-        <div class="row"><ol><li>Отвори <b>' . $site . '/klasaciya</b></li><li>Въведи кода и ПИН-а</li><li>Виж точките и мисиите на всички ученици</li></ol>' . $qr . '</div>
-        <div class="pin">Кодът важи и като <b>твой пълен достъп</b> на едно устройство (сканирай QR кода).<small>Не показвайте ПИН-а на учениците · валидно до ' . $exp . '</small></div>' .
-        ($c['label'] ? '<div class="lbl">' . h($c['label']) . '</div>' : '') . '
-      </div></div>';
-        continue;
-    }
-    $isClass = $c['type'] === 'class';
-    $title = ['class' => 'Код за ученик', 'teacher' => 'Код за учител', 'single' => 'Подаръчен код', 'family' => 'Семеен код'][$c['type']] ?? 'Код за достъп';
-    $what = 'Еднократен код: активира се само на едно устройство. Пази картичката!';
+    $qr = '<div class="qr" data-qr="https://' . $site . '/pricing.html#activate"></div>';
+    $title = ['class' => 'Абонамент за цял клас', 'single' => 'Абонамент за едно дете', 'family' => 'Семеен абонамент'][$c['type']] ?? 'Абонамент';
+    $what = $c['type'] === 'class' ? 'До 30 ученици – всеки с име и парола от учителя.' : ($c['type'] === 'family' ? 'До 4 деца – всяко със свой профил, на всяко устройство.' : 'За едно дете – на всяко устройство.');
     $cards .= '<div class="card t-' . h($c['type']) . '">
       <div class="sky"><div class="cl c1"></div><div class="cl c2"></div><div class="owl" data-owl="' . ($i % 3 === 0 ? 'hero' : ($i % 3 === 1 ? 'cheer' : 'hello')) . '"></div>
         <div class="brand"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></div><div class="slogan">Математика като игра · 1.–4. клас</div></div>
@@ -38,9 +22,7 @@ foreach ($codes as $i => $c) {
         <div class="ttl">' . h($title) . '</div>
         <div class="code">' . h($c['code']) . '</div>
         <div class="what">' . h($what) . '</div>
-        <div class="row"><ol><li>Отвори <b>' . $site . '/kod</b></li><li>Въведи кода' . ($isClass ? ' и прякор' : '') . '</li><li>Играй до <b>' . $exp . '</b></li></ol>' . $qr . '</div>' .
-        ($isClass ? '<div class="pin">🏆 Точките ти влизат в класацията на класа.<small>Прякор без фамилия · пълен достъп до всички мисии и игри</small></div>' : '') .
-        (!$isClass && $c['pin'] ? '<div class="pin">👨‍👩‍👧 ПИН за родителя: <b>' . h($c['pin']) . '</b><small>Отчет за напредъка от всеки телефон: ' . $site . '/otchet</small></div>' : '') .
+        <div class="row"><ol><li>Влез или се регистрирай на <b>' . $site . '</b></li><li>Отвори <b>Абонаменти</b> → „Имате код?“</li><li>Въведи кода – веднъж. Важи до <b>' . $exp . '</b></li></ol>' . $qr . '</div>' .
         ($c['label'] ? '<div class="lbl">' . h($c['label']) . '</div>' : '') . '
       </div></div>';
 }
@@ -82,11 +64,11 @@ body { margin: 0; font-family: Nunito, Arial, sans-serif; background: #ccd; colo
 .tk div:last-child b { font-size: 19pt; color: #E06A00; }
 @media print { body { background: #fff; } .bar { display: none; } .sheet { margin: 0; } }
 </style></head><body>
-<div class="bar"><span><?= count($codes) ?> картички<?= ($codes && $codes[0]['type'] === 'class') ? ' (първата е за учителя)' : '' ?> · печат на A4, без полета (Margins: None), с фонови цветове</span><button onclick="window.print()">🖨️ Печат</button></div>
+<div class="bar"><span><?= count($codes) ?> картички · печат на A4, без полета (Margins: None), с фонови цветове</span><button onclick="window.print()">🖨️ Печат</button></div>
 <?php
 $all = array_values(array_filter(explode('<!--CARD-->', str_replace('<div class="card ', '<!--CARD--><div class="card ', $cards))));
 foreach (array_chunk($all, 4) as $page) echo '<div class="sheet">' . implode('', $page) . '</div>';
-if (!$all) echo '<p style="padding:40px">Няма активни кодове в тази партида.</p>';
+if (!$all) echo '<p style="padding:40px">Няма активни кодове.</p>';
 ?>
 <script src="../js/owl.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>

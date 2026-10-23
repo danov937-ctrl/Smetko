@@ -3,8 +3,8 @@
    GET                         → {account|null, profiles, classes}
    POST {action: ...}          → register, login, logout, forgot, reset, password, delete,
                                  profile_add, profile_update, profile_delete, profile_get, save_state,
-                                 link_code, link_class, class_remove
-   Вход с бисквитка (HttpOnly). Децата от клас продължават да влизат само с личния си код. */
+                                 activate (код за абонамент – веднъж, от страница „Абонаменти“), profile_plan
+   Вход с бисквитка (HttpOnly). Учениците от клас влизат с потребител и парола от учителя (api/student.php). */
 declare(strict_types=1);
 const MAX_PROFILES = 4;
 const MAX_STATE = 300000;
@@ -30,21 +30,31 @@ function acc_profiles(int $aid): array {
     }
     return $out;
 }
+function class_name_of(array $b): string { return trim(($b['class_name'] ? $b['class_name'] . ' клас' : ($b['label'] ?: 'Клас')) . (!empty($b['school']) ? ' · ' . $b['school'] . (!empty($b['town']) ? ', ' . $b['town'] : '') : '')); }
 function acc_classes(int $aid): array {
-    $st = db()->prepare('SELECT ac.code, ac.batch_id, b.pin, b.class_name, b.grade, b.label, b.expires_at, s.name AS school, s.town FROM account_classes ac JOIN batches b ON b.id = ac.batch_id LEFT JOIN schools s ON s.id = b.school_id WHERE ac.account_id = ? ORDER BY ac.created_at');
+    $st = db()->prepare("SELECT b.*, c.code, c.expires_at AS cexp, c.max_uses, s.name AS school, s.town, (SELECT COUNT(*) FROM redemptions r WHERE r.code = c.code) AS students
+        FROM codes c JOIN batches b ON b.id = c.batch_id LEFT JOIN schools s ON s.id = b.school_id WHERE c.account_id = ? AND c.type = 'class' AND c.revoked = 0 ORDER BY b.class_name, b.id");
     $st->execute([$aid]);
-    return array_map(fn($r) => ['batch' => (int)$r['batch_id'], 'code' => $r['code'], 'pin' => (string)$r['pin'], 'name' => trim(($r['class_name'] ?: $r['label'] ?: 'Клас') . ($r['school'] ? ' · ' . $r['school'] . ($r['town'] ? ', ' . $r['town'] : '') : '')),
-        'grade' => (int)$r['grade'], 'expires' => $r['expires_at']], $st->fetchAll());
+    return array_map(fn($r) => ['id' => (int)$r['id'], 'name' => class_name_of($r), 'className' => (string)$r['class_name'], 'grade' => (int)$r['grade'], 'expires' => $r['cexp'], 'valid' => $r['cexp'] >= today(),
+        'students' => (int)$r['students'], 'seats' => (int)($r['max_uses'] ?: 30)], $st->fetchAll());
+}
+function acc_subs(int $aid): array { // абонаментите на акаунта (и изтеклите – за напомняне)
+    $st = db()->prepare('SELECT c.*, (SELECT COUNT(*) FROM profiles p WHERE p.code = c.code) AS used_p, (SELECT COUNT(*) FROM redemptions r WHERE r.code = c.code) AS used_r FROM codes c WHERE c.account_id = ? AND c.revoked = 0 ORDER BY c.expires_at DESC');
+    $st->execute([$aid]);
+    $pn = site_config()['planNames'] ?? [];
+    return array_map(fn($c) => ['code' => $c['code'], 'type' => $c['type'], 'typeName' => TYPE_NAMES[$c['type']] ?? $c['type'], 'planName' => $pn[$c['type']] ?? '', 'expires' => $c['expires_at'], 'valid' => code_valid($c),
+        'seats' => code_seats($c), 'used' => $c['type'] === 'class' ? (int)$c['used_r'] : (int)$c['used_p'], 'activated' => substr((string)$c['activated_at'], 0, 10)], $st->fetchAll());
 }
 function acc_me(?array $a): array {
     if (!$a) return ['ok' => true, 'account' => null];
+    $profiles = acc_profiles((int)$a['id']); // първо профилите – там се разпределят свободните места
     return ['ok' => true, 'account' => ['email' => $a['email'], 'name' => $a['name'], 'role' => $a['role'], 'since' => substr((string)$a['created_at'], 0, 10)],
-        'profiles' => acc_profiles((int)$a['id']), 'classes' => acc_classes((int)$a['id'])];
+        'profiles' => $profiles, 'classes' => acc_classes((int)$a['id']), 'subs' => acc_subs((int)$a['id'])];
 }
 function need(): array { $a = auth_account(); if (!$a) json_out(['ok' => false, 'error' => 'Влезте в акаунта си.', 'auth' => false], 401); return $a; }
 function my_profile(array $a, $id): array {
     $st = db()->prepare('SELECT * FROM profiles WHERE id = ? AND account_id = ?'); $st->execute([(int)$id, (int)$a['id']]);
-    $p = $st->fetch(); if (!$p) json_out(['ok' => false, 'error' => 'Няма такъв профил.'], 404); return $p;
+    $p = $st->fetch(); $st->closeCursor(); if (!$p) json_out(['ok' => false, 'error' => 'Няма такъв профил.'], 404); return $p;
 }
 function clean_name(string $n, int $max = 30): string { $n = trim(preg_replace('/\s+/u', ' ', $n) ?? ''); return mb_substr(preg_replace('/[^\p{L}\p{N} .\-\']/u', '', $n) ?? '', 0, $max); }
 function clean_avatar(string $a): string { return in_array($a, AVATARS, true) ? $a : '🦉'; }
@@ -94,7 +104,7 @@ case 'register':
 case 'login':
     if (too_many('login_fail', 10, 900)) json_out(['ok' => false, 'error' => 'Твърде много грешни опити. Опитайте след 15 минути или възстановете паролата си.'], 429);
     $st = $pdo->prepare('SELECT * FROM accounts WHERE email = ?'); $st->execute([$email]);
-    $a = $st->fetch();
+    $a = $st->fetch(); $st->closeCursor();
     if (!$a || !password_verify((string)($in['password'] ?? ''), (string)$a['pass'])) { note_attempt('login_fail'); json_out(['ok' => false, 'error' => 'Грешен имейл или парола.'], 403); }
     if ((int)$a['disabled']) json_out(['ok' => false, 'error' => 'Акаунтът е спрян. Пишете ни на ' . site_config()['contactEmail'] . '.'], 403);
     if (password_needs_rehash((string)$a['pass'], PASSWORD_DEFAULT)) $pdo->prepare('UPDATE accounts SET pass = ? WHERE id = ?')->execute([password_hash((string)$in['password'], PASSWORD_DEFAULT), (int)$a['id']]);
@@ -109,7 +119,8 @@ case 'forgot': // винаги един и същ отговор – не изд
     if (too_many('forgot', 5, 3600)) json_out(['ok' => false, 'error' => 'Твърде много заявки. Опитайте след час.'], 429);
     note_attempt('forgot');
     $st = $pdo->prepare('SELECT * FROM accounts WHERE email = ? AND disabled = 0'); $st->execute([$email]);
-    if ($a = $st->fetch()) {
+    $a = $st->fetch(); $st->closeCursor();
+    if ($a) {
         $tok = bin2hex(random_bytes(24));
         $pdo->prepare('UPDATE accounts SET reset_hash = ?, reset_until = ? WHERE id = ?')->execute([hash('sha256', $tok), time() + 3600, (int)$a['id']]);
         mail_reset($email, (string)$a['name'], SITE_URL . "/zabravena-parola.html?t=$tok");
@@ -120,7 +131,7 @@ case 'reset':
     if (too_many('reset_fail', 10, 900)) json_out(['ok' => false, 'error' => 'Твърде много опити. Опитайте след 15 минути.'], 429);
     $tok = (string)($in['token'] ?? '');
     $st = $pdo->prepare('SELECT * FROM accounts WHERE reset_hash = ? AND reset_until > ?'); $st->execute([hash('sha256', $tok), time()]);
-    $a = preg_match('/^[a-f0-9]{48}$/', $tok) ? $st->fetch() : null;
+    $a = preg_match('/^[a-f0-9]{48}$/', $tok) ? $st->fetch() : null; $st->closeCursor();
     if (!$a) { note_attempt('reset_fail'); json_out(['ok' => false, 'error' => 'Връзката е изтекла или вече е използвана. Поискайте нова.'], 400); }
     if ($e = check_pass((string)($in['password'] ?? ''))) json_out(['ok' => false, 'error' => $e, 'field' => 'password'], 400);
     $pdo->prepare('UPDATE accounts SET pass = ?, reset_hash = NULL, reset_until = 0 WHERE id = ?')->execute([password_hash((string)$in['password'], PASSWORD_DEFAULT), (int)$a['id']]);
@@ -148,7 +159,7 @@ case 'delete': // самостоятелно изтриване на акаун�
     $a = need();
     if (!password_verify((string)($in['password'] ?? ''), (string)$a['pass'])) json_out(['ok' => false, 'error' => 'Грешна парола.', 'field' => 'password'], 403);
     $aid = (int)$a['id'];
-    foreach (['profiles', 'account_classes', 'auth_sessions'] as $t) $pdo->prepare("DELETE FROM $t WHERE account_id = ?")->execute([$aid]);
+    foreach (['profiles', 'auth_sessions'] as $t) $pdo->prepare("DELETE FROM $t WHERE account_id = ?")->execute([$aid]);
     $pdo->prepare('DELETE FROM accounts WHERE id = ?')->execute([$aid]);
     auth_set_cookie('', time() - 3600);
     json_out(['ok' => true, 'account' => null]);
@@ -193,48 +204,38 @@ case 'save_state': // {id, state, rev} – ако междувременно д�
     if (!$st->rowCount()) json_out(['ok' => true, 'conflict' => true, 'state' => null, 'rev' => -1]);
     json_out(['ok' => true, 'rev' => (int)$p['rev'] + 1]);
 
-case 'link_code': // код за абонамент към детски профил – важи на всяко устройство, на което детето влезе
-    $a = need(); $p = my_profile($a, $in['id'] ?? 0);
-    if (too_many('redeem_fail', 30, 900)) json_out(['ok' => false, 'error' => 'Твърде много грешни опити. Опитайте след 15 минути.'], 429);
+case 'activate': // код за абонамент – въвежда се веднъж, на страница „Абонаменти“, от влязъл акаунт
+    $a = need();
+    if (too_many('redeem_fail', 20, 900)) json_out(['ok' => false, 'error' => 'Твърде много грешни опити. Опитайте след 15 минути.'], 429);
     $code = normalize_code((string)($in['code'] ?? ''));
     $row = $code ? get_code($code) : null;
-    if (!$row) { note_attempt('redeem_fail'); json_out(['ok' => false, 'error' => 'Няма такъв код. Проверете буквите и цифрите.'], 404); }
-    if ((int)$row['revoked'] === 1) json_out(['ok' => false, 'error' => 'Този код е спрян. Свържете се с нас.'], 403);
+    if (!$row) { note_attempt('redeem_fail'); json_out(['ok' => false, 'error' => 'Няма такъв код. Проверете буквите и цифрите.', 'field' => 'code'], 404); }
+    if ((int)$row['revoked'] === 1) json_out(['ok' => false, 'error' => 'Този код е спрян. Пишете ни на ' . site_config()['contactEmail'] . '.'], 403);
     if ($row['expires_at'] < today()) json_out(['ok' => false, 'error' => 'Кодът е изтекъл на ' . date('d.m.Y', strtotime($row['expires_at'])) . '.'], 410);
-    if (($row['role'] ?? 'student') === 'teacher') json_out(['ok' => false, 'error' => 'Това е код на учител – добавете го в „Моите класове“ заедно с ПИН-а.'], 400);
-    $dev = (string)$p['device'];
-    $old = clean_device((string)($in['device'] ?? '')); // устройството, на което кодът вече е активиран (ако е това)
+    if ((int)$row['account_id'] === (int)$a['id']) json_out(['ok' => false, 'error' => 'Този абонамент вече е активен във вашия акаунт.'], 409);
     $pdo->exec('BEGIN IMMEDIATE');
-    $st = $pdo->prepare('SELECT id, device FROM redemptions WHERE code = ?'); $st->execute([$code]);
-    $red = $st->fetchAll();
-    $mine = array_filter($red, fn($r) => $r['device'] === $dev);
-    if (!$mine) {
-        $move = $old !== '' ? array_values(array_filter($red, fn($r) => $r['device'] === $old)) : [];
-        if ($move) $pdo->prepare('UPDATE redemptions SET device = ?, last_seen = ? WHERE id = ?')->execute([$dev, now(), (int)$move[0]['id']]); // точките и класациите се запазват
-        elseif (count($red) >= CODE_DEVICES) { $pdo->exec('ROLLBACK'); note_attempt('redeem_fail'); json_out(['ok' => false, 'error' => 'Този код вече е активиран на друго устройство. Ако е вашият, въведете го от устройството, на което детето играе, или ни пишете.'], 409); }
-        else $pdo->prepare('INSERT INTO redemptions(code, device, created_at, last_seen, nickname, grade) VALUES(?, ?, ?, ?, ?, ?)')->execute([$code, $dev, now(), now(), clean_nick((string)$p['name']) ?: null, (int)$p['grade'] ?: null]);
+    $st = $pdo->prepare('SELECT account_id FROM codes WHERE code = ?'); $st->execute([$code]);
+    $used = (int)$st->fetchColumn();
+    if (!$used) { $st = $pdo->prepare('SELECT COUNT(*) FROM redemptions WHERE code = ?'); $st->execute([$code]); $used = (int)$st->fetchColumn(); }
+    if ($used) { $pdo->exec('ROLLBACK'); note_attempt('redeem_fail'); json_out(['ok' => false, 'error' => 'Този код вече е използван. Всеки код се активира само веднъж.'], 409); }
+    $pdo->prepare('UPDATE codes SET account_id = ?, activated_at = ?, max_uses = COALESCE(NULLIF(max_uses, 0), ?) WHERE code = ?')->execute([(int)$a['id'], now(), PLAN_SEATS[$row['type']] ?? 1, $code]);
+    if ($row['type'] === 'class') {
+        $pdo->prepare('UPDATE batches SET account_id = ? WHERE id = ?')->execute([(int)$a['id'], (int)$row['batch_id']]);
+        if ($a['role'] !== 'teacher') $pdo->prepare("UPDATE accounts SET role = 'teacher' WHERE id = ?")->execute([(int)$a['id']]);
     }
-    $pdo->prepare('UPDATE profiles SET code = ? WHERE id = ?')->execute([$code, (int)$p['id']]);
     $pdo->exec('COMMIT');
-    $p['code'] = $code;
-    $res = acc_me(auth_account()); $res['access'] = profile_access($p); $res['device'] = $dev;
+    $res = acc_me(auth_account(true)); $res['activated'] = ['type' => $row['type'], 'typeName' => TYPE_NAMES[$row['type']] ?? '', 'expires' => $row['expires_at'], 'classId' => $row['type'] === 'class' ? (int)$row['batch_id'] : 0];
     json_out($res);
 
-case 'link_class': // учител: клас с кода (на учителя или който и да е от класа) и ПИН-а
-    $a = need();
-    if (too_many('pin_fail', 10, 900)) json_out(['ok' => false, 'error' => 'Твърде много грешни опити. Опитайте след 15 минути.'], 429);
-    $code = normalize_code((string)($in['code'] ?? ''));
-    $row = $code ? get_code($code) : null; $b = $row ? batch_of($code) : null;
-    $pin = (string)($b['pin'] ?? '') ?: (string)($row['pin'] ?? '');
-    if (!$row || !$b || $row['type'] !== 'class' || $pin === '' || !hash_equals($pin, trim((string)($in['pin'] ?? '')))) { note_attempt('pin_fail'); json_out(['ok' => false, 'error' => 'Грешен код или ПИН. Използвайте кода и ПИН-а за учителя от картичката.'], 403); }
-    $st = $pdo->prepare('SELECT COUNT(*) FROM account_classes WHERE account_id = ?'); $st->execute([(int)$a['id']]);
-    if ((int)$st->fetchColumn() >= 30) json_out(['ok' => false, 'error' => 'Достигнат е максимумът от 30 класа.'], 400);
-    $pdo->prepare('INSERT INTO account_classes(account_id, batch_id, code, created_at) VALUES(?, ?, ?, ?) ON CONFLICT(account_id, batch_id) DO UPDATE SET code = excluded.code')->execute([(int)$a['id'], (int)$b['id'], $code, now()]);
-    json_out(acc_me(auth_account()));
-
-case 'class_remove':
-    $a = need();
-    $pdo->prepare('DELETE FROM account_classes WHERE account_id = ? AND batch_id = ?')->execute([(int)$a['id'], (int)($in['batch'] ?? 0)]);
+case 'profile_plan': // индивидуален абонамент: за кое дете е (може да се премести)
+    $a = need(); $p = my_profile($a, $in['id'] ?? 0);
+    $subs = array_merge(account_subs((int)$a['id'], 'single'), account_subs((int)$a['id'], 'family'));
+    if (!$subs) json_out(['ok' => false, 'error' => 'Нямате активен абонамент.'], 400);
+    $s0 = $subs[0];
+    $st = $pdo->prepare('SELECT id FROM profiles WHERE code = ? AND id <> ? ORDER BY updated_at'); $st->execute([$s0['code'], (int)$p['id']]);
+    $others = array_column($st->fetchAll(), 'id');
+    if (count($others) >= code_seats($s0)) $pdo->prepare('UPDATE profiles SET code = NULL WHERE id = ?')->execute([(int)$others[0]]);
+    $pdo->prepare('UPDATE profiles SET code = ? WHERE id = ?')->execute([$s0['code'], (int)$p['id']]);
     json_out(acc_me(auth_account()));
 }
 json_out(['ok' => false, 'error' => 'Непознато действие.'], 400);

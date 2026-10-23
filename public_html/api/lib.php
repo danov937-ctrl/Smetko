@@ -16,7 +16,8 @@ function db(): PDO {
     if (!is_dir($dir)) { @mkdir($dir, 0750, true); }
     if (!file_exists($dir . '/.htaccess')) { @file_put_contents($dir . '/.htaccess', "Require all denied\nDeny from all\n"); }
     $pdo = new PDO('sqlite:' . $dir . '/smetko.sqlite', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
-    $pdo->exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=4000;');
+    $pdo->setAttribute(PDO::ATTR_TIMEOUT, 8);
+    $pdo->exec('PRAGMA journal_mode=WAL'); $pdo->exec('PRAGMA foreign_keys=ON'); $pdo->exec('PRAGMA busy_timeout=8000');
     $pdo->exec("CREATE TABLE IF NOT EXISTS settings (k TEXT PRIMARY KEY, v TEXT);
       CREATE TABLE IF NOT EXISTS batches (id INTEGER PRIMARY KEY AUTOINCREMENT, label TEXT, type TEXT, max_uses INTEGER, expires_at TEXT, created_at TEXT);
       CREATE TABLE IF NOT EXISTS codes (code TEXT PRIMARY KEY, batch_id INTEGER, type TEXT, max_uses INTEGER, expires_at TEXT, pin TEXT, label TEXT, revoked INTEGER DEFAULT 0, created_at TEXT);
@@ -39,8 +40,11 @@ function db(): PDO {
     foreach (['week TEXT', 'week_base INTEGER DEFAULT 0', 'synced_at INTEGER DEFAULT 0', 'flags INTEGER DEFAULT 0', 'join_base INTEGER DEFAULT 0', 'nick_block INTEGER DEFAULT 0', 'day TEXT', 'day_correct INTEGER DEFAULT 0', 'stats TEXT'] as $col) {
         if (!$has('redemptions', strtok($col, ' '))) $pdo->exec('ALTER TABLE redemptions ADD COLUMN ' . $col);
     }
-    // ПИН за родителя на индивидуалните и семейните кодове (за отчета на smetko.com/otchet.html)
-    $pdo->exec("UPDATE codes SET pin = CAST(1000 + ABS(RANDOM()) % 9000 AS TEXT) WHERE type IN ('single','family') AND (pin IS NULL OR pin = '')");
+    // абонаментите се активират от акаунт; ученикът от клас влиза с потребител и парола (ред в redemptions)
+    foreach (['account_id INTEGER', 'activated_at TEXT', 'order_id INTEGER'] as $col) if (!$has('codes', strtok($col, ' '))) $pdo->exec('ALTER TABLE codes ADD COLUMN ' . $col);
+    foreach (['account_id INTEGER', 'book TEXT', 'message TEXT', 'message_at TEXT'] as $col) if (!$has('batches', strtok($col, ' '))) $pdo->exec('ALTER TABLE batches ADD COLUMN ' . $col);
+    foreach (['username TEXT', 'pass_hash TEXT', 'pass_enc TEXT', 'avatar TEXT', 'state TEXT', 'rev INTEGER DEFAULT 0'] as $col) if (!$has('redemptions', strtok($col, ' '))) $pdo->exec('ALTER TABLE redemptions ADD COLUMN ' . $col);
+    $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_red_user ON redemptions(username); CREATE INDEX IF NOT EXISTS idx_codes_acc ON codes(account_id); CREATE INDEX IF NOT EXISTS idx_batch_acc ON batches(account_id)');
     $pdo->exec("CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, client TEXT, contact TEXT, email TEXT, phone TEXT, school_id INTEGER,
         plan TEXT, qty INTEGER DEFAULT 1, amount REAL DEFAULT 0, status TEXT DEFAULT 'new', invoice TEXT, paid_at TEXT, batch_id INTEGER, notes TEXT);
       CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, ip TEXT, action TEXT, details TEXT);
@@ -50,7 +54,6 @@ function db(): PDO {
       CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, pass TEXT, name TEXT, role TEXT DEFAULT 'parent', created_at TEXT, last_login TEXT, reset_hash TEXT, reset_until INTEGER DEFAULT 0, disabled INTEGER DEFAULT 0);
       CREATE TABLE IF NOT EXISTS auth_sessions (hash TEXT PRIMARY KEY, account_id INTEGER, created_at TEXT, last_seen TEXT, expires INTEGER, ua TEXT);
       CREATE TABLE IF NOT EXISTS profiles (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, name TEXT, grade INTEGER, avatar TEXT, device TEXT UNIQUE, code TEXT, state TEXT, rev INTEGER DEFAULT 0, updated_at TEXT, created_at TEXT);
-      CREATE TABLE IF NOT EXISTS account_classes (account_id INTEGER, batch_id INTEGER, code TEXT, created_at TEXT, PRIMARY KEY(account_id, batch_id));
       CREATE INDEX IF NOT EXISTS idx_prof_acc ON profiles(account_id);
       CREATE TABLE IF NOT EXISTS news (id INTEGER PRIMARY KEY AUTOINCREMENT, emoji TEXT, title TEXT, body TEXT, link TEXT, link_text TEXT, starts TEXT, ends TEXT, active INTEGER DEFAULT 1, popup INTEGER DEFAULT 1, created_at TEXT);
       CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY AUTOINCREMENT, slug TEXT UNIQUE, title TEXT, excerpt TEXT, body TEXT, emoji TEXT, image TEXT, category TEXT, published INTEGER DEFAULT 0, published_at TEXT, created_at TEXT, updated_at TEXT, views INTEGER DEFAULT 0);
@@ -84,21 +87,15 @@ function challenge_for(string $week, int $grade): array { // ръчно зада
 
 /* ---------- достъп до класациите: само с платен абонамент ----------
    Активен код (token) от който и да е план или учител с код + ПИН на класа. Връща ['t' => token|null, 'code' => ред на кода] или null. */
+/* достъп до класациите: ученик/профил с активен абонамент (token) или влязъл акаунт с активен абонамент */
 function league_access(array $in): ?array {
     if (!empty($in['token'])) {
         $t = read_token((string)$in['token']);
         $c = $t ? get_code($t['c']) : null;
-        if ($c && !(int)$c['revoked'] && $c['expires_at'] >= today()) return ['t' => $t, 'code' => $c];
+        if ($c && code_valid($c)) return ['t' => $t, 'code' => $c, 'account' => null];
     }
-    if (!empty($in['code']) && isset($in['pin'])) {
-        if (too_many('pin_fail', 10, 900)) return null;
-        $code = normalize_code((string)$in['code']);
-        $c = $code ? get_code($code) : null;
-        $b = $c ? batch_of($code) : null;
-        $pin = (string)($b['pin'] ?? '') ?: (string)($c['pin'] ?? '');
-        if ($c && $c['type'] === 'class' && $pin !== '' && hash_equals($pin, trim((string)$in['pin'])) && !(int)$c['revoked'] && $c['expires_at'] >= today()) return ['t' => null, 'code' => $c];
-        note_attempt('pin_fail');
-    }
+    $a = auth_account();
+    if ($a && ($subs = account_subs((int)$a['id']))) return ['t' => null, 'code' => $subs[0], 'account' => $a];
     return null;
 }
 
@@ -117,16 +114,16 @@ function auth_login(int $aid): void {
     auth_set_cookie($tok, $exp);
     $_COOKIE[AUTH_COOKIE] = $tok; // важи веднага в същата заявка
 }
-function auth_account(): ?array {
+function auth_account(bool $reload = false): ?array {
     static $cache = [];
     $tok = (string)($_COOKIE[AUTH_COOKIE] ?? '');
-    if (array_key_exists($tok, $cache)) return $cache[$tok];
+    if (!$reload && array_key_exists($tok, $cache)) return $cache[$tok];
     $acc = &$cache[$tok]; $acc = null;
     if (!preg_match('/^[a-f0-9]{64}$/', $tok)) return null;
-    $st = db()->prepare('SELECT a.* FROM auth_sessions s JOIN accounts a ON a.id = s.account_id WHERE s.hash = ? AND s.expires > ? AND a.disabled = 0');
+    $st = db()->prepare('SELECT a.*, s.last_seen AS s_seen FROM auth_sessions s JOIN accounts a ON a.id = s.account_id WHERE s.hash = ? AND s.expires > ? AND a.disabled = 0');
     $st->execute([hash('sha256', $tok), time()]);
-    $acc = $st->fetch() ?: null;
-    if ($acc) db()->prepare('UPDATE auth_sessions SET last_seen = ? WHERE hash = ?')->execute([now(), hash('sha256', $tok)]);
+    $acc = $st->fetch() ?: null; $st->closeCursor(); // без отворен курсор преди запис (иначе SQLite връща „database is locked“)
+    if ($acc && (string)$acc['s_seen'] < gmdate('Y-m-d H:i:s', time() - 300)) db()->prepare('UPDATE auth_sessions SET last_seen = ? WHERE hash = ?')->execute([now(), hash('sha256', $tok)]);
     return $acc;
 }
 function auth_logout(): void {
@@ -134,15 +131,59 @@ function auth_logout(): void {
     if ($tok !== '') db()->prepare('DELETE FROM auth_sessions WHERE hash = ?')->execute([hash('sha256', $tok)]);
     auth_set_cookie('', time() - 3600);
 }
-/* достъп на детски профил: кодът е активиран на „устройството“ на профила (единно за всички устройства на детето) */
+/* ---------- абонаменти ----------
+   Един код = един абонамент. Активира се веднъж от акаунт (страница „Абонаменти“).
+   Индивидуален → 1 детски профил, семеен → до 4, клас → до 30 ученици с потребител и парола (създава ги учителят в „Табло“). */
+const PLAN_SEATS = ['single' => 1, 'family' => 4, 'class' => 30];
+function code_valid(array $c): bool { return !(int)$c['revoked'] && $c['expires_at'] >= today(); }
+function code_seats(array $c): int { return max(1, (int)($c['max_uses'] ?: (PLAN_SEATS[$c['type']] ?? 1))); }
+function account_subs(int $aid, ?string $type = null): array { // активните абонаменти на акаунта, първо най-дългите
+    $st = db()->prepare('SELECT * FROM codes WHERE account_id = ? AND revoked = 0 AND expires_at >= ?' . ($type ? ' AND type = ?' : '') . ' ORDER BY expires_at DESC');
+    $st->execute($type ? [$aid, today(), $type] : [$aid, today()]);
+    return $st->fetchAll();
+}
+function access_obj(array $c, string $device, string $role = 'student'): array { // какво пази устройството за пълния достъп
+    return ['code' => $c['code'], 'type' => $c['type'], 'typeName' => TYPE_NAMES[$c['type']] ?? $c['type'], 'role' => $role, 'expires' => $c['expires_at'],
+        'label' => $c['label'] ?? '', 'token' => make_token($c['code'], $device, $c['expires_at']), 'valid' => code_valid($c)];
+}
+function ensure_player(string $code, string $device, string $nick, int $grade): int { // ред за класациите и синхронизацията
+    $st = db()->prepare('SELECT id FROM redemptions WHERE code = ? AND device = ?'); $st->execute([$code, $device]);
+    $id = (int)$st->fetchColumn(); $st->closeCursor();
+    if ($id) return $id;
+    db()->prepare('INSERT INTO redemptions(code, device, created_at, last_seen, nickname, grade) VALUES(?, ?, ?, ?, ?, ?)')->execute([$code, $device, now(), now(), clean_nick($nick) ?: null, $grade ?: null]);
+    return (int)db()->lastInsertId();
+}
+/* детски профил: покрит ли е от семейния/индивидуалния абонамент на акаунта (свободните места се дават автоматично) */
 function profile_access(array $p): ?array {
-    if (empty($p['code'])) return null;
-    $c = get_code((string)$p['code']);
-    if (!$c) return null;
-    $r = db()->prepare('SELECT id FROM redemptions WHERE code = ? AND device = ?'); $r->execute([$p['code'], $p['device']]);
-    if (!$r->fetchColumn()) return null;
-    return ['code' => $c['code'], 'type' => $c['type'], 'typeName' => TYPE_NAMES[$c['type']] ?? $c['type'], 'role' => $c['role'] ?? 'student', 'expires' => $c['expires_at'],
-        'label' => $c['label'] ?? '', 'token' => make_token($c['code'], (string)$p['device'], $c['expires_at']), 'valid' => !(int)$c['revoked'] && $c['expires_at'] >= today()];
+    $pdo = db(); $c = null;
+    if (!empty($p['code'])) { $c = get_code((string)$p['code']); if ($c && ((int)$c['account_id'] !== (int)$p['account_id'] || !code_valid($c))) $c = null; }
+    if (!$c) {
+        foreach (array_merge(account_subs((int)$p['account_id'], 'family'), account_subs((int)$p['account_id'], 'single')) as $s) {
+            $n = $pdo->prepare('SELECT COUNT(*) FROM profiles WHERE code = ? AND id <> ?'); $n->execute([$s['code'], (int)$p['id']]);
+            $used = (int)$n->fetchColumn(); $n->closeCursor();
+            if ($used < code_seats($s)) { $c = $s; break; }
+        }
+        $pdo->prepare('UPDATE profiles SET code = ? WHERE id = ?')->execute([$c['code'] ?? null, (int)$p['id']]);
+        if (!$c) return null;
+    }
+    ensure_player($c['code'], (string)$p['device'], (string)$p['name'], (int)$p['grade']);
+    return access_obj($c, (string)$p['device']);
+}
+/* пароли на учениците: учителят може да ги види и отпечата, затова се пазят и шифровани (освен хеша за проверка) */
+function kid_key(): string { return hash('sha256', secret() . '|kidpass', true); }
+function kid_enc(string $p): string { $iv = random_bytes(12); $tag = ''; $c = openssl_encrypt($p, 'aes-256-gcm', kid_key(), OPENSSL_RAW_DATA, $iv, $tag); return base64_encode($iv . $tag . $c); }
+function kid_dec(?string $e): string { if (!$e) return ''; $r = base64_decode($e); if (strlen($r) < 29) return ''; $p = openssl_decrypt(substr($r, 28), 'aes-256-gcm', kid_key(), OPENSSL_RAW_DATA, substr($r, 0, 12), substr($r, 12, 16)); return $p === false ? '' : $p; }
+const KID_WORDS = ['slon', 'lisa', 'zaek', 'mecho', 'tigar', 'zebra', 'sova', 'kit', 'lav', 'panda', 'delfin', 'kote', 'kuche', 'papagal', 'pingvin', 'kenguru', 'zhiraf', 'katerica', 'pchela', 'raketa', 'oblak', 'slance', 'zvezda', 'yabalka', 'cheresha', 'topka', 'kubche', 'molivche'];
+function kid_password(): string { return KID_WORDS[random_int(0, count(KID_WORDS) - 1)] . random_int(10, 99); }
+function translit(string $s): string {
+    $m = ['а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e', 'ж' => 'zh', 'з' => 'z', 'и' => 'i', 'й' => 'y', 'к' => 'k', 'л' => 'l', 'м' => 'm', 'н' => 'n', 'о' => 'o', 'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't', 'у' => 'u', 'ф' => 'f', 'х' => 'h', 'ц' => 'ts', 'ч' => 'ch', 'ш' => 'sh', 'щ' => 'sht', 'ъ' => 'a', 'ь' => 'y', 'ю' => 'yu', 'я' => 'ya'];
+    return preg_replace('/[^a-z0-9]/', '', strtr(mb_strtolower($s), $m)) ?? '';
+}
+function kid_username(string $name): string { // напр. „Ани Петрова“ → ani47 (уникално)
+    $base = substr(translit(explode(' ', trim($name))[0] ?? '') ?: 'uchenik', 0, 10);
+    $st = db()->prepare('SELECT 1 FROM redemptions WHERE username = ?');
+    for ($i = 0; $i < 200; $i++) { $u = $base . random_int($i < 50 ? 10 : 100, $i < 50 ? 99 : 9999); $st->execute([$u]); if (!$st->fetchColumn()) return $u; }
+    return $base . bin2hex(random_bytes(3));
 }
 
 /* ---------- блог ---------- */
@@ -232,17 +273,11 @@ function random_pin(): string { return (string)random_int(1000, 9999); }
 
 function get_code(string $code): ?array {
     $st = db()->prepare('SELECT * FROM codes WHERE code = ?'); $st->execute([$code]);
-    $r = $st->fetch(); return $r ?: null;
+    $r = $st->fetch(); $st->closeCursor(); return $r ?: null;
 }
-/* Всеки код е еднократен: активира се на едно устройство. */
-const CODE_DEVICES = 1;
 function batch_of(string $code): ?array {
     $st = db()->prepare('SELECT b.* FROM batches b JOIN codes c ON c.batch_id = b.id WHERE c.code = ?'); $st->execute([$code]);
     $r = $st->fetch(); return $r ?: null;
-}
-function code_uses(string $code): int {
-    $st = db()->prepare('SELECT COUNT(*) FROM redemptions WHERE code = ?'); $st->execute([$code]);
-    return (int)$st->fetchColumn();
 }
 
 /* ---------- токен за устройство ---------- */
@@ -264,10 +299,11 @@ function read_token(string $t): ?array {
 /* ---------- защита от налучкване ---------- */
 function too_many(string $kind, int $max, int $window): bool {
     $pdo = db(); $t = time();
-    $pdo->prepare('DELETE FROM attempts WHERE ts < ?')->execute([$t - 86400]);
+    if (random_int(1, 40) === 1) $pdo->prepare('DELETE FROM attempts WHERE ts < ?')->execute([$t - 86400]); // почистване от време на време
     $st = $pdo->prepare('SELECT COUNT(*) FROM attempts WHERE ip = ? AND kind = ? AND ts > ?');
     $st->execute([client_ip(), $kind, $t - $window]);
-    return (int)$st->fetchColumn() >= $max;
+    $n = (int)$st->fetchColumn(); $st->closeCursor();
+    return $n >= $max;
 }
 function note_attempt(string $kind): void {
     db()->prepare('INSERT INTO attempts(ip, kind, ts) VALUES(?, ?, ?)')->execute([client_ip(), $kind, time()]);

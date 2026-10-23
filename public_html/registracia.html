@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=15">
-<link rel="stylesheet" href="css/animations.css?v=15">
+<link rel="stylesheet" href="css/style.css?v=16">
+<link rel="stylesheet" href="css/animations.css?v=16">
 </head>
 <body class="acct-page-body">
 <a class="skip" href="#main">Към съдържанието</a>
@@ -43,12 +43,12 @@
         <div class="dd-panel">
           <a href="liga.html"><b>Обща класация</b><small>Училища, класове, учители, ученици</small></a>
           <a href="achievements.html"><b>Моите постижения</b><small>Точки, значки и моят клас</small></a>
-          <a href="klasaciya.html"><b>Класация на класа</b><small>За учителя – с код и ПИН</small></a>
+          <a href="tablo.html"><b>Класация на класа</b><small>За учителя – в „Табло“</small></a>
         </div></div>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">Учители <span class="chev">▾</span></button>
         <div class="dd-panel">
-          <a href="uchilishta.html"><b>Сметко в училище</b><small>Кодове за класа и документи</small></a>
-          <a href="klasaciya.html"><b>Класация на класа</b><small>С кода и ПИН-а от картичката</small></a>
+          <a href="uchilishta.html"><b>Сметко в училище</b><small>Абонамент за класа и документи</small></a>
+          <a href="tablo.html"><b>📋 Табло</b><small>Ученици, домашни, отчети, класация</small></a>
           <a href="rabotni-listove.html"><b>Работни листове</b><small>Задачи за печат с отговори</small></a>
           <a href="uchilishta.html#domashna"><b>Линк за домашна</b><small>Конкретна тема с един линк</small></a>
           <a href="about.html#uchiteli"><b>Как работи в клас</b><small>Идеи за часа по математика</small></a>
@@ -56,12 +56,12 @@
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="parents">Родители <span class="chev">▾</span></button>
         <div class="dd-panel">
           <a href="about.html#roditeli"><b>За родители</b><small>Как Сметко помага на детето</small></a>
-          <a href="otchet.html"><b>Отчет за родителя</b><small>Напредък, силни и слаби теми</small></a>
+          <a href="profil.html"><b>Отчет за родителя</b><small>В профила ви – за всяко дете</small></a>
           <a href="za-nas.html"><b>За нас</b><small>Кои сме и защо направихме Сметко</small></a>
           <a href="novini.html"><b>Новини</b><small>Какво ново има</small></a>
         </div></div>
       <a href="blog/" data-nav="blog">Блог</a>
-      <a href="pricing.html" data-nav="pricing">Цени</a>
+      <a href="pricing.html" data-nav="pricing">Абонаменти</a>
     </nav>
     <div class="header-actions">
       <a class="news-bell" href="novini.html" title="Новини" aria-label="Новини">🔔<b data-news-count hidden></b></a><a class="points-chip" href="achievements.html" data-points title="Моите точки"><span class="star">★</span> 0</a>
@@ -76,15 +76,15 @@
     <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
     <a href="liga.html">🏆 Обща класация</a>
     <a href="achievements.html">⭐ Моите постижения</a>
-    <a href="kod.html" data-code-link>🔑 Въведи код за достъп</a>
     <a href="novini.html">📰 Новини <b class="m-news" data-news-count hidden></b></a>
+    <a href="tablo.html">📋 Табло за учители</a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
     <a href="about.html#roditeli">👨‍👩‍👧 За родители</a>
     <a href="otchet.html">📊 Отчет за родителя</a>
     <a href="blog/">✍️ Блог</a>
     <a href="za-nas.html">🦉 За нас</a>
-    <a href="pricing.html">💶 Цени</a>
+    <a href="pricing.html">💶 Абонаменти</a>
   </nav>
 </header>
 <section class="page-hero">
@@ -93,7 +93,7 @@
     <div>
       <div class="breadcrumbs"><a href="index.html">Начало</a> › Регистрация</div>
       <h1>Регистрация</h1>
-      <p class="lead">Безплатна е и отнема 30 секунди. Пълният достъп до мисиите се включва с код за абонамент.</p>
+      <p class="lead">Безплатна е и отнема 30 секунди. Абонаментът се активира с код в „Абонаменти“.</p>
       
     </div>
     <div class="owl" data-owl="happy"></div>
@@ -104,9 +104,10 @@
 <section class="section"><div class="wrap acct-wrap">
   <form class="panel acct-form" id="reg-form" novalidate>
     <h2>Създайте акаунт</h2>
+    <p class="act-pending" id="reg-pending" hidden>🔑 След регистрацията ще активираме кода <b></b>.</p>
     <div class="role-pick" role="radiogroup" aria-label="Аз съм">
       <label><input type="radio" name="role" value="parent" checked><span><i>👨‍👩‍👧</i><b>Родител</b><small>Профили за децата и отчети</small></span></label>
-      <label><input type="radio" name="role" value="teacher"><span><i>👩‍🏫</i><b>Учител</b><small>Моите класове и класации</small></span></label>
+      <label><input type="radio" name="role" value="teacher"><span><i>👩‍🏫</i><b>Учител</b><small>Табло: ученици, домашни</small></span></label>
     </div>
     <label class="step-label" for="r-name">Вашето име</label>
     <input id="r-name" class="input" autocomplete="name" maxlength="60" placeholder="напр. Мария Иванова" required>
@@ -124,11 +125,11 @@
     <ul class="acct-benefits">
       <li><b>📱 Всяко устройство</b> Детето продължава от телефона, таблета или компютъра – звездите и точките не се губят.</li>
       <li><b>👧👦 До 4 деца</b> Отделен профил с име и картинка за всяко дете.</li>
-      <li><b>🔑 Един код – навсякъде</b> Кодът за абонамент се въвежда веднъж в профила на детето.</li>
+      <li><b>🔑 Един код – веднъж</b> Кодът за абонамент се въвежда само веднъж, в „Абонаменти“.</li>
       <li><b>📊 Отчети</b> Силни теми и теми за упражнение по уроците.</li>
-      <li><b>👩‍🏫 За учители</b> Всички ваши класове на едно място – класация и отчети без повторно въвеждане на ПИН.</li>
+      <li><b>👩‍🏫 За учители</b> „Табло“: ученици с име и парола, домашни със срок, отчет по теми и класация.</li>
     </ul>
-    <p class="hint">Децата не се регистрират и не въвеждат лични данни. Учениците с код от учителя играят само с кода.</p>
+    <p class="hint">Децата не въвеждат имейл. Учениците от клас влизат с име и парола от учителя.</p>
   </aside>
 </div></section>
 </main>
@@ -153,9 +154,9 @@
         <li><a href="za-nas.html">За нас</a></li>
         <li><a href="uchilishta.html">За учители и училища</a></li>
         <li><a href="rabotni-listove.html">Работни листове</a></li>
-        <li><a href="pricing.html">Цени</a></li>
+        <li><a href="pricing.html">Абонаменти</a></li>
         <li><a href="vhod.html">Вход</a> · <a href="registracia.html">Регистрация</a></li>
-        <li><a href="kod.html">Въведи код</a></li>
+        <li><a href="tablo.html">Табло за учители</a></li>
         <li><a href="novini.html">Новини</a></li>
       </ul></div>
       <div><h4>Правна информация</h4><ul>
@@ -169,12 +170,12 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=15" defer></script>
-<script src="js/gamification.js?v=15" defer></script>
-<script src="js/audio.js?v=15" defer></script>
-<script src="js/access.js?v=15" defer></script>
-<script src="js/account.js?v=15" defer></script>
-<script src="js/app.js?v=15" defer></script>
-<script src="js/tools.js?v=15" defer></script>
+<script src="js/owl.js?v=16" defer></script>
+<script src="js/gamification.js?v=16" defer></script>
+<script src="js/audio.js?v=16" defer></script>
+<script src="js/access.js?v=16" defer></script>
+<script src="js/account.js?v=16" defer></script>
+<script src="js/app.js?v=16" defer></script>
+<script src="js/tools.js?v=16" defer></script>
 </body>
 </html>

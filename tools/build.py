@@ -61,11 +61,11 @@ BOOKS = {1: ['Просвета', 'Просвета Плюс', 'Бит и Тех�
 FAQ_INDEX = [
     ('По кой учебник са задачите?', 'Детето избира своя учебник и получава <b>по една мисия за всеки урок</b> от годишното разпределение – между 110 и 136 мисии за година, с уроците в същия ред. Ако учебникът още го няма в списъка, мисиите следват учебната програма на МОН – общият ред, по който работят всички одобрени учебници.'),
     ('Безплатен ли е Сметко?', 'Има безплатен план: „Бързо сметни“, първите <span data-cfg="freeMissions">3</span> мисии от всеки клас и <span data-cfg="freePractice">20</span> задачи на ден в „Тренировка“. Пълният достъп се отключва с код от учителя или с абонамент. Вижте <a href="pricing.html">цените</a>.'),
-    ('Как се използва код за достъп?', 'Отворете <a href="kod.html">smetko.com/kod</a> и въведете кода от картичката. Пълният достъп се включва веднага на това устройство. Всеки код е еднократен – за едно устройство или, ако родителят го въведе в профила на детето в акаунта си, за всички устройства на това дете.'),
-    ('Трябва ли регистрация?', 'За децата – не. Те играят веднага, без имейл и без парола. Родителите и учителите могат да си направят <a href="registracia.html">безплатен акаунт</a>: детето продължава от телефона, таблета или компютъра, кодът важи на всичките му устройства, а учителят има класовете си на едно място.'),
+    ('Как се активира абонамент?', 'След поръчката получавате един код по имейл. Влезте в акаунта си (или си направете безплатен), отворете <a href="pricing.html#activate">„Абонаменти“</a> и въведете кода – веднъж. Семейният и индивидуалният абонамент важат за децата в профила ви на всяко устройство, а абонаментът за клас – за до 30 ученици.'),
+    ('Трябва ли регистрация?', 'За да опитате – не: безплатният план работи веднага. За абонамент родителят или учителят прави безплатен акаунт. Децата не въвеждат имейл: родителят им прави профили, а учениците от клас влизат с име и парола от учителя.'),
     ('Има ли реклами?', 'Не. Сметко е чиста детска среда, без рекламни банери и без проследяване.'),
     ('На какво устройство работи?', 'На телефон, таблет, компютър и интерактивна дъска, направо в браузъра. Може да се добави на началния екран като приложение и работи и без интернет.'),
-    ('Как може училището ни да се включи?', 'Вижте <a href="uchilishta.html">Сметко за училища</a>: всеки ученик получава картичка с личен еднократен код, а учителят – картичка с ПИН за класацията на класа. Там са и образците на документите.'),
+    ('Как може училището ни да се включи?', 'Учителят поръчва абонамент за клас, активира кода в акаунта си и в <a href="tablo.html">„Табло“</a> пише имената на учениците. Всеки ученик получава потребител и парола – отпечатвате картите и ги раздавате. Вижте <a href="uchilishta.html">Сметко за училища</a>.'),
 ]
 
 
@@ -177,7 +177,7 @@ index = head('Сметко – математика като игра за 1.–
 
 <section class="section soft">
   <div class="wrap">
-    <div class="section-head"><h2 class="lined">Честни цени</h2><p>Безплатен план за всички. Пълен достъп с код от учителя или с абонамент.</p></div>
+    <div class="section-head"><h2 class="lined">Честни цени</h2><p>Безплатен план за всички. Пълен достъп с абонамент – за детето или за целия клас.</p></div>
     <div class="plans three">
       <div class="plan"><h3><span class="plan-ico">🦉</span> <span data-plan="single">Бухалче</span><small class="plan-kind">Индивидуален</small></h3><div class="who">1 дете + отчет за родителя</div><div class="price"><span data-price="single12">18</span> € <small>/ 1 година</small></div><div class="per">или <span data-price="single6">10</span> € за 6 месеца</div><ul><li>Всички мисии по учебника</li><li>Неограничена тренировка</li><li>Отчет за родителя</li></ul><a class="btn btn-white" href="pricing.html">Детайли</a></div>
       <div class="plan featured"><span class="ribbon">Най-изгоден</span><h3><span class="plan-ico">🏡</span> <span data-plan="family">Гнездо</span><small class="plan-kind">Семеен</small></h3><div class="who">До 4 деца + родител</div><div class="price"><span data-price="family12">30</span> € <small>/ 1 година</small></div><div class="per">или <span data-price="family6">18</span> € за 6 месеца</div><ul><li>Отделен код за всяко дете</li><li>Отчет за всяко дете</li><li>Подходящ за подарък</li></ul><a class="btn" href="pricing.html">Детайли</a></div>
@@ -337,21 +337,21 @@ for g, d in GRADES.items():
 # ================= pricing.html =================
 FAQ_PRICE = [
     ('Как се плаща?', 'Натиснете „Поръчай“ под плана, попълнете формата и платете по банков път – данните за плащане излизат веднага и идват и на имейла ви. След плащането получавате кода на имейла, обикновено до 1 работен ден. При нужда издаваме фактура. Плащане с карта направо от сайта предстои.'),
-    ('Как работи кодът за клас?', 'Всеки ученик получава картичка с личен код и го въвежда веднъж на <a href="kod.html">smetko.com/kod</a>. Кодовете са еднократни – всеки се активира на едно устройство. Учителят получава своя картичка с код и ПИН и вижда класацията на целия клас на <a href="klasaciya.html">smetko.com/klasaciya</a>.'),
+    ('Как работи абонаментът за клас?', 'Получавате един код. Активирате го в „Абонаменти“, а в <a href="tablo.html">„Табло“</a> пишете имената на учениците (до 30). Всеки получава потребител и парола за вход – картите се отпечатват с един бутон. Там са и домашните, отчетът по теми и класацията на класа.'),
     ('Има ли безплатен план?', 'Да. Безплатно са „Бързо сметни“ за всички класове, първите <span data-cfg="freeMissions">3</span> мисии от всеки клас, <span data-cfg="freePractice">20</span> задачи на ден в „Тренировка“ и работните листове. Точките, нивата, значките и класациите са с абонамент.'),
-    ('Подновява ли се абонаментът автоматично?', 'Не. Абонаментът е за 6 месеца или 1 година и спира сам. Седмица преди края Сметко напомня в играта, за да поръчате нов код навреме.'),
+    ('Подновява ли се абонаментът автоматично?', 'Не. Абонаментът е за 6 месеца или 1 година и спира сам. Преди края ви напомняме, за да подновите навреме.'),
     ('Как плащат училищата?', 'С фактура и банков превод. За 3 или повече класа има <span data-price="disc3">15</span>% отстъпка, а за 8 или повече класа – <span data-price="disc8">25</span>%.'),
     ('Мога ли да се откажа?', 'Да. Правата ви при отказ са описани в <a href="terms.html">Общите условия</a>, а формулярът за отказ е <a href="otkaz.html">тук</a>.'),
 ]
 paid = '<li>Мисии по учебника за всички класове</li><li>Неограничена тренировка</li><li>Точки, нива и значки</li><li>Всички класации</li>'
-pricing = head('Цени и абонаменти – Сметко', 'Абонаменти за Сметко за 6 месеца и 1 година: индивидуален, семеен (4 деца) и за цял клас. Безплатен план и отстъпки за училища.',
-               'pricing.html', [crumbs([('Начало', ''), ('Цени', 'pricing.html')]), faq_ld(FAQ_PRICE)]) + header('pricing') + page_hero(
-    'Цени и абонаменти', 'По-малко от цената на една тетрадка на месец. Без реклами. Пълният достъп се активира с код.', 'Цени', 'happy',
-    '<div class="hero-cta"><a class="btn btn-lg btn-green" href="kod.html">🔑 Имам код</a></div>') + f'''
+pricing = head('Абонаменти – Сметко', 'Абонаменти за Сметко за 6 месеца и 1 година: индивидуален, семеен (4 деца) и за цял клас. Безплатен план и отстъпки за училища.',
+               'pricing.html', [crumbs([('Начало', ''), ('Абонаменти', 'pricing.html')]), faq_ld(FAQ_PRICE)]) + header('pricing') + page_hero(
+    'Абонаменти', 'По-малко от цената на една тетрадка на месец. Без реклами. Един код – активира се веднъж в акаунта ви.', 'Абонаменти', 'happy',
+    '<div class="hero-cta"><a class="btn btn-lg btn-green" href="#activate">🔑 Имам код</a><a class="btn btn-white" href="#plans">Виж абонаментите</a></div>') + f'''
 <main id="main">
 <section class="section">
   <div class="wrap">
-    <div class="section-head"><h2 class="lined">Абонаменти</h2><p>Изберете срок – цените се сменят веднага.</p></div>
+    <div class="section-head" id="plans"><h2 class="lined">Изберете абонамент</h2><p>Изберете срок – цените се сменят веднага.</p></div>
     <div class="period-toggle" role="group" aria-label="Срок на абонамента"><button data-period="12" aria-pressed="true">1 година</button><button data-period="6" aria-pressed="false">6 месеца</button></div>
     <div class="plans">
       <div class="plan"><h3><span class="plan-ico">🐣</span> <span data-plan="free">Пухче</span><small class="plan-kind">Безплатно</small></h3><div class="who">Да опознаете Сметко</div><div class="price">0 €</div><div class="per">завинаги</div>
@@ -361,28 +361,42 @@ pricing = head('Цени и абонаменти – Сметко', 'Абона�
         <div class="pp" data-p="12"><div class="price"><span data-price="single12">18</span> € <small>/ 1 година</small></div><div class="per"><span data-per="single12">1.50 € на месец</span></div></div>
         <div class="pp" data-p="6" hidden><div class="price"><span data-price="single6">10</span> € <small>/ 6 месеца</small></div><div class="per"><span data-per="single6">≈ 1.67 € на месец</span></div></div>
         <dl class="profiles"><div><dt>Детски профили</dt><dd>1</dd></div><div><dt>Отчет за родителя</dt><dd>✓</dd></div></dl>
-        <ul>{paid}<li>ПИН за родителя – отчет от всеки телефон</li></ul><button class="btn btn-white" data-subscribe="Индивидуален">Поръчай</button></div>
+        <ul>{paid}<li>1 детски профил – на всяко устройство</li><li>Отчет за родителя в профила</li></ul><button class="btn btn-white" data-subscribe="Индивидуален">Поръчай</button></div>
       <div class="plan featured"><span class="ribbon">Най-изгоден</span><h3><span class="plan-ico">🏡</span> <span data-plan="family">Гнездо</span><small class="plan-kind">Семеен</small></h3>
         <div class="pp" data-p="12"><div class="price"><span data-price="family12">30</span> € <small>/ 1 година</small></div><div class="per"><span data-per="family12">7.50 € на дете</span></div></div>
         <div class="pp" data-p="6" hidden><div class="price"><span data-price="family6">18</span> € <small>/ 6 месеца</small></div><div class="per"><span data-per="family6">4.50 € на дете</span></div></div>
         <dl class="profiles"><div><dt>Детски профили</dt><dd>4</dd></div><div><dt>Родителски профили</dt><dd>1</dd></div></dl>
-        <ul>{paid}<li>Отделен код и отчет за всяко дете</li></ul><button class="btn" data-subscribe="Семеен">Поръчай</button></div>
+        <ul>{paid}<li>До 4 деца – всяко със свой профил</li><li>Отчет за всяко дете</li></ul><button class="btn" data-subscribe="Семеен">Поръчай</button></div>
       <div class="plan"><h3><span class="plan-ico">🐦</span> <span data-plan="class">Ято</span><small class="plan-kind">Цял клас</small></h3>
         <div class="pp" data-p="12"><div class="price"><span data-price="class12">80</span> € <small>/ 1 година</small></div><div class="per"><span data-per="class12">≈ 2.67 € на ученик</span></div></div>
         <div class="pp" data-p="6" hidden><div class="price"><span data-price="class6">45</span> € <small>/ 6 месеца</small></div><div class="per"><span data-per="class6">1.50 € на ученик</span></div></div>
         <dl class="profiles"><div><dt>Детски профили в клас</dt><dd>30</dd></div><div><dt>Учителски профили</dt><dd>1 + 2</dd></div></dl>
-        <ul>{paid}<li>Класация и отчет по теми за учителя</li><li>Картички с кодове за печат</li></ul><button class="btn btn-white" data-subscribe="Цял клас">Поръчай</button></div>
+        <ul>{paid}<li>„Табло“: ученици, домашни, отчет по теми</li><li>Карти с име и парола за всеки ученик</li></ul><button class="btn btn-white" data-subscribe="Цял клас">Поръчай</button></div>
     </div>
   </div>
 </section>
-<section class="section soft">
+<section class="section soft" id="activate">
+  <div class="wrap">
+    <div class="panel act-panel">
+      <form id="act-form" autocomplete="off">
+        <div class="act-ico">🔑</div><h2>Имате код за абонамент?</h2>
+        <p class="hint" id="act-who">Влезте в акаунта си, за да активирате кода.</p>
+        <div class="act-row"><input id="act-code" class="input code-input" placeholder="SMET-XXXX-XXXX" maxlength="16" autocapitalize="characters" spellcheck="false" aria-label="Код за абонамент"><button class="btn btn-green btn-lg" type="submit">Активирай</button></div>
+        <p class="code-err" id="act-err" role="alert"></p>
+        <div id="act-subs"></div>
+        <p class="hint act-note">Кодът идва по имейл след поръчката и се въвежда <b>само веднъж</b>. Семейният и индивидуалният абонамент важат за децата в профила ви на всяко устройство. С абонамент за клас в „Табло“ създавате учениците – всеки с име и парола.</p>
+      </form>
+      <div id="act-ok" hidden></div>
+    </div>
+  </div>
+</section>
+<section class="section">
   <div class="wrap">
     <div class="section-head"><h2 class="lined">За училища</h2></div>
     <div class="plans three" style="max-width:420px;margin:0 auto;grid-template-columns:1fr">
       <div class="plan"><h3><span class="plan-ico">🌳</span> <span data-plan="school">Гора</span><small class="plan-kind">Училище</small></h3><div class="who">Няколко класа или цялото училище</div><div class="price" style="font-size:2rem">по запитване</div><div class="per">до −<span data-price="disc8">25</span>% отстъпка</div>
         <ul><li>−<span data-price="disc3">15</span>% за 3 или повече класа</li><li>−<span data-price="disc8">25</span>% за 8 или повече класа</li><li>Фактура и банков превод</li><li>Картички и класация за всеки клас</li><li>Място в общата класация на училищата</li></ul><button class="btn btn-blue" data-subscribe="Цял клас" data-qty="3">Поръчай за няколко класа</button> <a class="btn btn-white" href="uchilishta.html" style="margin-top:8px">Сметко за училища</a></div>
     </div>
-    <p class="price-note">👤 С безплатен <a href="registracia.html">акаунт за родител</a> кодът се въвежда в профила на детето и важи на всичките му устройства – телефон, таблет и компютър.</p>
     <p class="price-note">Всички цени са в евро. Информацията за ДДС ще бъде посочена след регистрацията на търговеца.</p>
   </div>
 </section>
@@ -437,8 +451,8 @@ about = head('За родители и учители – Сметко', 'Как
     <h3>Безопасност и поверителност</h3>
     <ul>
       <li>Няма реклами и няма проследяващи скриптове.</li>
-      <li>Не събираме лични данни на децата. Прогресът се пази само в браузъра на устройството.</li>
-      <li>С код за клас детето може да влезе в класацията с прякор – не пишете фамилия. Подробно: <a href="privacy-policy.html">Политика за поверителност</a>.</li>
+      <li>Децата не въвеждат имейл. Родителят прави профил с име или прякор, а учителят – потребител за всеки ученик (без фамилия).</li>
+      <li>В класациите се виждат само име, клас и училище, и то само от абонати. Подробно: <a href="privacy-policy.html">Политика за поверителност</a>.</li>
     </ul>
   </div>
 </section>
@@ -451,7 +465,7 @@ about = head('За родители и учители – Сметко', 'Как
       <li><b>Домашна работа с един линк.</b> Генерирайте линк към тема или мисия от <a href="uchilishta.html#domashna">страницата за училища</a>.</li>
       <li><b>Работни листове.</b> <a href="rabotni-listove.html">Генерирайте задачи за печат</a> по тема, с отговори за учителя.</li>
       <li><b>По вашия учебник.</b> Мисиите следват уроците в учебника, по който работи класът.</li>
-      <li><b>Класация на класа.</b> С кода и ПИН-а от картичката виждате резултатите на учениците на <a href="klasaciya.html">smetko.com/klasaciya</a>.</li>
+      <li><b>„Табло“ за учителя.</b> Ученици с име и парола, домашни със срок, отчет по теми и класация на класа – на <a href="tablo.html">smetko.com/tablo</a>.</li>
     </ul>
     <p><a class="btn btn-blue" href="uchilishta.html">Сметко за училища</a></p>
   </div>
@@ -473,16 +487,16 @@ ach = head('Постижения и класации – Сметко', 'Точ�
     '<div style="max-width:420px"><div class="rank-bar"><i id="rank-bar" style="width:0"></i></div><p class="rank-next" id="rank-next"></p></div>') + '''
 <main id="main">
 <section class="section"><div class="wrap"><div class="stat-row" id="stats"></div></div></section>
-<section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Значки</h2><p id="badge-count"></p></div><div class="badges" id="badges"></div></div></section>
+<section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Значки</h2><p id="badge-count"></p></div><div id="badges" class="badge-groups"></div></div></section>
 <section class="section" id="myclass-sec" hidden><div class="wrap"><div class="section-head"><h2 class="lined">Моят клас</h2><p id="myclass-sub"></p></div><div id="myclass"></div></div></section>
 <section class="section"><div class="wrap"><div class="section-head"><h2 class="lined">Звезди и рекорди</h2><p>Звезди от „Приключение“ и най-добри резултати в „Бързо сметни“.</p></div><div class="grid grid-4" id="grades"></div></div></section>
 <section class="section soft">
   <div class="wrap prose" style="text-align:center">
     <h2>Класации</h2>
-    <p>С код резултатите ти влизат в класацията на класа и в <a href="liga.html">общата класация</a> – срещу ученици, класове и училища от цялата страна. Всяка седмица започва нова битка!</p>
+    <p>С абонамент резултатите ти влизат в класацията на класа и в <a href="liga.html">общата класация</a> – срещу ученици, класове и училища от цялата страна. Всяка седмица започва нова битка!</p>
     <p><a class="btn btn-lg" href="liga.html">🏆 Обща класация</a> <a class="btn btn-lg btn-white" href="game.html?mode=quick&amp;start=0">⚡ Побий рекорда</a></p>
     <p class="small-note">Прогресът се пази на това устройство. <button class="btn btn-sm btn-ghost" id="reset-btn">Изтрий прогреса</button></p>
-    <p class="small-note"><a href="otchet.html">👨‍👩‍👧 Отчет за родителя</a> · <a href="klasaciya.html">Вход за учител (код + ПИН)</a></p>
+    <p class="small-note"><a href="profil.html">👨‍👩‍👧 Отчет за родителя</a> · <a href="tablo.html">📋 Табло за учителя</a></p>
   </div>
 </section>
 </main>
@@ -490,22 +504,22 @@ ach = head('Постижения и класации – Сметко', 'Точ�
 write('achievements.html', ach)
 
 # ================= uchilishta.html (училища) =================
-school = head('Сметко за училища – кодове за класа, класации, работни листове', 'Сметко за начални учители: код за целия клас, класация с ПИН, домашни с линк, работни листове и документи за училището.',
+school = head('Сметко за училища – Табло за учителя, домашни, класации', 'Сметко за начални учители: абонамент за целия клас, Табло с ученици, домашни със срок, отчет по теми, класации и работни листове.',
               'uchilishta.html', [crumbs([('Начало', ''), ('За училища', 'uchilishta.html')])]) + header() + page_hero(
-    'Сметко за училища', 'Един код за целия клас, класация за учителя, домашни с линк и работни листове – по учебника, по който работите.', 'За училища', 'hero',
-    '<div class="hero-cta"><a class="btn btn-lg" href="klasaciya.html">Класация на класа</a><a class="btn btn-white" href="rabotni-listove.html">Работни листове</a></div>') + """
+    'Сметко за училища', 'Абонамент за целия клас, „Табло“ за учителя, домашни със срок и работни листове – по учебника, по който работите.', 'За училища', 'hero',
+    '<div class="hero-cta"><a class="btn btn-lg" href="tablo.html">📋 Табло</a><a class="btn btn-white" href="pricing.html#plans">Абонамент за клас</a></div>') + """
 <main id="main">
 <section class="section">
   <div class="wrap">
     <div class="section-head"><h2 class="lined">Как работи</h2></div>
     <div class="grid grid-4 steps-num">
-      <div class="card"><b class="n">1</b><h3>Картички за класа</h3><p>Всеки ученик получава картичка с <b>личен еднократен код</b>, а учителят – картичка с <b>код и ПИН</b>.</p></div>
-      <div class="card"><b class="n">2</b><h3>Учениците въвеждат кода</h3><p>На <a href="kod.html">smetko.com/kod</a> – веднъж. Кодът се активира само на едно устройство и не може да се ползва от друг.</p></div>
-      <div class="card"><b class="n">3</b><h3>Играят по учебника</h3><p>Избират учебника и решават мисиите по уроците – в час и у дома.</p></div>
-      <div class="card"><b class="n">4</b><h3>Класация за учителя</h3><p>С кода и ПИН-а от вашата картичка на <a href="klasaciya.html">smetko.com/klasaciya</a> виждате точките, мисиите и точността на всеки. Сменено устройство? Освобождавате кода с един бутон.</p></div>
+      <div class="card"><b class="n">1</b><h3>Абонамент за клас</h3><p>Поръчвате от <a href="pricing.html#plans">„Абонаменти“</a> и получавате <b>един код</b> по имейл. Активирате го веднъж в акаунта си.</p></div>
+      <div class="card"><b class="n">2</b><h3>Пишете имената</h3><p>В <a href="tablo.html">„Табло“</a> поставяте списъка с ученици. Всеки получава <b>потребител и парола</b> – отпечатвате картите с един бутон.</p></div>
+      <div class="card"><b class="n">3</b><h3>Децата влизат и играят</h3><p>От smetko.com → „Вход“ → „Ученик“. Прогресът им се пази – продължават от училищния таблет и от телефона у дома.</p></div>
+      <div class="card"><b class="n">4</b><h3>Вие виждате всичко</h3><p>Кой е играл, точност, слаби теми, домашни със срок и класация на класа. Забравена парола? Нова с едно натискане.</p></div>
     </div>
     <div class="panel liga-promo"><div><h3>🏆 Обща класация между училищата</h3><p>Класовете и училищата се състезават всяка седмица и през цялата година – честно, по <b>точки на ученик</b>. Учителите имат своя класация, а децата виждат на кое място са сред всички ученици. <a href="liga.html">Виж класацията →</a></p></div></div>
-    <div class="callout" style="margin-top:24px">Учениците <b>не се регистрират</b> и <b>не въвеждат имейл или фамилия</b>. В класацията се показва само прякор, който детето избира. Подробно: <a href="privacy-policy.html">Политика за поверителност</a>.</div>
+    <div class="callout" style="margin-top:24px">Учениците <b>не въвеждат имейл или фамилия</b> – учителят пише само име и първа буква на фамилията. В класациите се виждат само от абонати. Подробно: <a href="privacy-policy.html">Политика за поверителност</a>.</div>
   </div>
 </section>
 <section class="section soft" id="domashna">
@@ -536,7 +550,7 @@ school = head('Сметко за училища – кодове за класа
       <a class="card doc-card" href="pismo-roditeli.html"><b>✉️ Информационно писмо до родителите</b><small>С декларация за информираност</small></a>
       <a class="card doc-card" href="dogovor-danni.html"><b>🔒 Договор за обработване на лични данни</b><small>По чл. 28 от GDPR</small></a>
       <a class="card doc-card" href="privacy-policy.html"><b>🛡️ Политика за поверителност</b><small>Какви данни обработваме</small></a>
-      <a class="card doc-card" href="terms.html"><b>📘 Общи условия</b><small>Правила, абонаменти, кодове</small></a>
+      <a class="card doc-card" href="terms.html"><b>📘 Общи условия</b><small>Правила, абонаменти, акаунти</small></a>
       <a class="card doc-card" href="pravna-informacia.html"><b>📚 Всички документи</b><small>Правна информация на едно място</small></a>
     </div>
   </div>
@@ -545,63 +559,21 @@ school = head('Сметко за училища – кодове за класа
 """ + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/tools.js'])
 write('uchilishta.html', school)
 
-# ================= kod.html (въвеждане на код) =================
-kod = head('Въведи код за достъп – Сметко', 'Въведете кода от картичката и отключете пълния достъп до Сметко.', 'kod.html', [], 'code-page') + header() + page_hero(
-    'Въведи код', 'Кодът е на картичката от учителя или в имейла с абонамента. Всеки код е еднократен: пълният достъп се включва веднага на това устройство и кодът вече не може да се използва другаде.', 'Код за достъп', 'hero') + """
-<main id="main">
-<section class="section">
-  <div class="wrap">
-    <div class="panel code-panel" id="code-box">
-      <form id="code-form" autocomplete="off">
-        <label class="step-label" for="code-input">Код за достъп</label>
-        <input id="code-input" class="input code-input" placeholder="SMET-XXXX-XXXX" maxlength="16" inputmode="text" autocapitalize="characters" spellcheck="false" required>
-        <div id="code-profile-wrap" hidden><label class="step-label" for="code-profile" style="margin-top:16px">За кое дете е кодът?</label><select id="code-profile" class="input"></select>
-        <p class="hint">Кодът се записва в профила на детето и важи на всяко устройство, на което то влезе.</p></div>
-        <div class="nick-wrap"><label class="step-label" for="nick-input" style="margin-top:16px">Как да те показваме в класацията? <small>(по желание)</small></label>
-        <input id="nick-input" class="input" placeholder="Само име или прякор, напр. Ники С." maxlength="20">
-        <p class="hint">Не пиши фамилия. Прякорът се вижда само от учителя и съучениците ти, ако кодът е за клас.</p></div>
-        <p class="hint" id="code-profile-hint" hidden>💡 Добавете профил за детето в <a href="profil.html">„Моят профил“</a> – тогава кодът важи на всички устройства.</p>
-        <button class="btn btn-lg btn-green" id="code-btn" type="submit">Активирай</button>
-        <p class="code-err" id="code-err" role="alert"></p>
-      </form>
-      <div id="code-ok" hidden></div>
-    </div>
-    <p class="hint" style="text-align:center;margin-top:20px">Родител ли сте? <a href="registracia.html">Създайте акаунт</a> – кодът ще важи на телефона, таблета и компютъра на детето.<br>Нямаш код? <a href="pricing.html">Виж цените</a>.</p>
-  </div>
-</section>
-</main>
-""" + FOOTER + scripts(['js/tools.js'])
-write('kod.html', kod)
-
-# ================= klasaciya.html (класация на класа) =================
-board = head('Класация на класа – Сметко', 'Класация и резултати на класа за учителя – с кода и ПИН-а от картичката.', 'klasaciya.html', [], 'board-page') + header('ach') + page_hero(
-    'Класация на класа', 'За учителя: въведете кода и ПИН-а от картичката за учителя. Учениците виждат класацията в „Постижения“.', 'Класация на класа', 'cheer') + """
-<main id="main">
-<section class="section">
-  <div class="wrap">
-    <form class="panel tool-panel" id="board-form" autocomplete="off">
-      <div class="tool-grid">
-        <label>Код на учителя<input id="b-code" class="input code-input" placeholder="SMET-XXXX-XXXX" maxlength="16" autocapitalize="characters" spellcheck="false" required></label>
-        <label>ПИН за учителя<input id="b-pin" class="input" placeholder="4 цифри" maxlength="4" inputmode="numeric" required></label>
-      </div>
-      <div class="ws-actions"><label class="check"><input type="checkbox" id="b-remember"> Запомни на това устройство</label><button class="btn" type="submit">Покажи класацията</button></div>
-      <p class="code-err" id="b-err" role="alert"></p>
-    </form>
-    <div id="board-out"></div>
-  </div>
-</section>
-</main>
-""" + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/report.js', 'js/diploma.js', 'js/tools.js'])
-write('klasaciya.html', board)
-
+# ================= kod.html, klasaciya.html, otchet.html → пренасочване (стари връзки) =================
+def redirect_page(name, to, title):
+    html = head(title + ' – Сметко', title, name, noindex=True).replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta http-equiv="refresh" content="0; url=' + to + '">') + header() + \
+        '<main id="main"><section class="section"><div class="wrap" style="text-align:center"><p class="lead-dark">Страницата е преместена. <a href="' + to + '">Продължете тук →</a></p></div></section></main><script>location.replace("' + to + '")</script>' + FOOTER + scripts()
+    write(name, html)
+redirect_page('kod.html', 'pricing.html#activate', 'Активиране на абонамент')
+redirect_page('klasaciya.html', 'tablo.html', 'Табло за учителя')
 
 # ================= liga.html (общи класации) =================
 LIGA_FAQ = [
-    ('Как се класират училищата и класовете?', 'По <b>точки на ученик</b>: всички точки на учениците се делят на броя ученици с код. Така малък клас, в който играят всички, може да изпревари голям клас. Училище влиза в класацията с поне 5 ученици с код, а клас – с поне 3.'),
-    ('Кои точки се броят?', 'Само спечелените след въвеждането на кода. „Тази седмица“ започва отначало всеки понеделник, а „Цялата година“ брои точките от 15 септември до 30 юни.'),
+    ('Как се класират училищата и класовете?', 'По <b>точки на ученик</b>: всички точки на учениците се делят на броя ученици в класа. Така малък клас, в който играят всички, може да изпревари голям клас. Училище влиза в класацията с поне 5 ученици с код, а клас – с поне 3.'),
+    ('Кои точки се броят?', 'Само спечелените, откакто ученикът е в класа или детето – в абонамента. „Тази седмица“ започва отначало всеки понеделник, а „Цялата година“ брои точките от 15 септември до 30 юни.'),
     ('Може ли някой да си „напише“ точки?', 'Сървърът проверява дали точките растат правдоподобно: до 35 точки за верен отговор и не повече от един верен отговор в секунда. Необичайни резултати не влизат в класацията.'),
-    ('Кой вижда прякора на детето?', 'Всички класации се виждат само от абонати – деца, родители и учители с активен код (индивидуален, семеен или за клас). Показват се прякор (без фамилия), клас и училище. Учителят може да скрие ученик или да изключи целия клас от общата класация.'),
-    ('Как да включа класа си?', 'Поръчайте кодове за класа – училището и класът се вписват при създаването им. Вижте <a href="uchilishta.html">Сметко за училища</a>.'),
+    ('Кой вижда прякора на детето?', 'Всички класации се виждат само от абонати – деца, родители и учители с активен абонамент (индивидуален, семеен или за клас). Показват се прякор (без фамилия), клас и училище. Учителят може да скрие ученик или да изключи целия клас от общата класация.'),
+    ('Как да включа класа си?', 'С абонамент за клас: в <a href="tablo.html">„Табло“ → „Настройки“</a> впишете класа и училището и оставете отметката „участва в общата класация“.'),
 ]
 liga_pg = head('Обща класация – училища, класове и ученици | Сметко', 'Седмична и годишна класация на училищата, класовете, учителите и учениците, които играят Сметко.', 'liga.html',
                [crumbs([('Начало', ''), ('Обща класация', 'liga.html')]), faq_ld(LIGA_FAQ)], 'liga-page') + header('ach') + page_hero(
@@ -649,16 +621,9 @@ rep_pg = head('Отчет за родителя – Сметко', 'Отчет �
     'Отчет за родителя', 'Колко играе детето, колко точно смята, в кои теми е силно и какво да упражните заедно.', 'Отчет за родителя', 'think') + """
 <main id="main">
 <section class="section"><div class="wrap">
-  <div class="rp-tabs" role="tablist"><button data-rt="local" aria-selected="true">📱 На това устройство</button><button data-rt="remote" aria-selected="false">🔑 С код и ПИН</button></div>
+  <div class="panel rp-acct"><div><b>👨‍👩‍👧 Отчетите на всички деца – в профила ви</b><p class="hint">Влезте в акаунта си – там е отчетът за всяко дете, от всяко устройство.</p></div><a class="btn" href="profil.html">Моят профил</a></div>
+  <h2 class="lined" style="margin-top:26px">📱 На това устройство</h2>
   <div id="rp-local"></div>
-  <form class="panel tool-panel" id="rp-form" hidden autocomplete="off">
-    <p style="margin-top:0">Вижте отчета от вашия телефон. Кодът и <b>ПИН-ът за родителя</b> са на картичката или в имейла с абонамента (индивидуален и семеен план).</p>
-    <div class="tool-grid"><label>Код на детето<input id="rp-code" class="input code-input" placeholder="SMET-XXXX-XXXX" maxlength="16" autocapitalize="characters" spellcheck="false" required></label>
-    <label>ПИН за родителя<input id="rp-pin" class="input" placeholder="4 цифри" maxlength="4" inputmode="numeric" required></label></div>
-    <div class="ws-actions"><label class="check"><input type="checkbox" id="rp-remember"> Запомни на това устройство</label><button class="btn" type="submit">Покажи отчета</button></div>
-    <p class="code-err" id="rp-err" role="alert"></p>
-  </form>
-  <div id="rp-remote"></div>
   <p class="doc-actions" style="text-align:center"><button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Печат / PDF</button></p>
 </div></section>
 </main>
@@ -670,44 +635,56 @@ write('otchet.html', rep_pg)
 def pw_field(id_, ph, ac):
     return f'<div class="pw-wrap"><input id="{id_}" class="input" type="password" placeholder="{ph}" autocomplete="{ac}" required minlength="{8 if ac == "new-password" else 1}"><button type="button" class="pw-eye" data-pw="{id_}" aria-label="Покажи паролата">👁️</button></div>'
 
-login_pg = head('Вход – Сметко', 'Вход в Сметко за родители и учители. Учениците с код от учителя влизат с личния си код.', 'vhod.html', [], 'acct-page-body') + header() + page_hero(
-    'Вход', 'За родители и учители. Детето продължава от всяко устройство, а отчетите и класациите са на едно място.', 'Вход', 'hello') + f"""
+login_pg = head('Вход – Сметко', 'Вход в Сметко: родители и учители с имейл и парола, ученици – с потребител и парола от учителя.', 'vhod.html', [], 'acct-page-body') + header() + page_hero(
+    'Вход', 'Родители и учители – с имейл. Ученици – с името и паролата от картата от учителя.', 'Вход', 'hello') + f"""
 <main id="main">
 <section class="section"><div class="wrap acct-wrap">
-  <form class="panel acct-form" id="login-form">
-    <h2>👤 Родител или учител</h2>
-    <label class="step-label" for="l-email">Имейл</label>
-    <input id="l-email" class="input" type="email" autocomplete="email" inputmode="email" placeholder="ime@primer.bg" required>
-    <label class="step-label" for="l-pass">Парола</label>
-    {pw_field('l-pass', 'Вашата парола', 'current-password')}
-    <p class="acct-forgot"><a href="zabravena-parola.html">Забравена парола?</a></p>
-    <button class="btn btn-lg btn-green" type="submit">Влез</button>
-    <p class="code-err" id="login-err" role="alert"></p>
-    <p class="hint acct-alt">Нямате акаунт? <a href="registracia.html"><b>Регистрирайте се безплатно</b></a></p>
-  </form>
+  <div class="panel acct-form-wrap">
+    <div class="login-tabs" role="tablist"><button data-lt="adult" aria-selected="true">👤 Родител / учител</button><button data-lt="kid" aria-selected="false">🎒 Ученик</button></div>
+    <form class="acct-form" id="login-form">
+      <label class="step-label" for="l-email">Имейл</label>
+      <input id="l-email" class="input" type="email" autocomplete="email" inputmode="email" placeholder="ime@primer.bg" required>
+      <label class="step-label" for="l-pass">Парола</label>
+      {pw_field('l-pass', 'Вашата парола', 'current-password')}
+      <p class="acct-forgot"><a href="zabravena-parola.html">Забравена парола?</a></p>
+      <button class="btn btn-lg btn-green" type="submit">Влез</button>
+      <p class="code-err" id="login-err" role="alert"></p>
+      <p class="hint acct-alt">Нямате акаунт? <a href="registracia.html"><b>Регистрирайте се безплатно</b></a></p>
+    </form>
+    <form class="acct-form" id="kid-form" hidden autocomplete="off">
+      <label class="step-label" for="k-user">Потребител</label>
+      <input id="k-user" class="input kid-input" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="напр. ani47" required>
+      <label class="step-label" for="k-pass">Парола</label>
+      {pw_field('k-pass', 'напр. zaek42', 'current-password').replace('class="input"', 'class="input kid-input" autocapitalize="none" spellcheck="false"')}
+      <button class="btn btn-lg btn-green" type="submit">Влез и играй</button>
+      <p class="code-err" id="kid-err" role="alert"></p>
+      <p class="hint acct-alt">Потребителят и паролата са на картата от учителя. Забравил си ги? Попитай учителя.</p>
+    </form>
+  </div>
   <aside class="panel acct-side">
     <div class="owl" data-owl="cheer" style="width:110px"></div>
-    <h2>🎒 Ученик с код?</h2>
-    <p>Ако учителят ти е дал картичка с код, не ти трябва регистрация – въведи кода и играй.</p>
-    <a class="btn btn-teal" href="kod.html" data-code-link>🔑 Влез с код</a>
+    <h2>Как се влиза?</h2>
+    <p><b>👨‍👩‍👧 Родители</b> – с имейла и паролата си. Детето избира своя профил и продължава от всяко устройство.</p>
+    <p><b>👩‍🏫 Учители</b> – с имейла и паролата си. Класът ви е в <a href="tablo.html">„Табло“</a>.</p>
+    <p><b>🎒 Ученици от клас</b> – с потребителя и паролата от картата от учителя.</p>
     <hr>
-    <h3>👩‍🏫 Учител?</h3>
-    <p class="hint">Може да отворите класацията на класа и само с кода и ПИН-а от картичката: <a href="klasaciya.html">Класация на класа</a>. С акаунт класовете ви са запомнени на всяко устройство.</p>
+    <p class="hint">Само ще пробвате? Безплатният план работи и без вход: <a href="game.html">Играй</a>.</p>
   </aside>
 </div></section>
 </main>
-""" + FOOTER + scripts(['js/tools.js'])
+""" + FOOTER + scripts()
 write('vhod.html', login_pg)
 
 reg_pg = head('Регистрация – Сметко', 'Безплатна регистрация в Сметко за родители и учители: профили за децата, прогрес на всяко устройство, отчети и класове.', 'registracia.html', [], 'acct-page-body') + header() + page_hero(
-    'Регистрация', 'Безплатна е и отнема 30 секунди. Пълният достъп до мисиите се включва с код за абонамент.', 'Регистрация', 'happy') + f"""
+    'Регистрация', 'Безплатна е и отнема 30 секунди. Абонаментът се активира с код в „Абонаменти“.', 'Регистрация', 'happy') + f"""
 <main id="main">
 <section class="section"><div class="wrap acct-wrap">
   <form class="panel acct-form" id="reg-form" novalidate>
     <h2>Създайте акаунт</h2>
+    <p class="act-pending" id="reg-pending" hidden>🔑 След регистрацията ще активираме кода <b></b>.</p>
     <div class="role-pick" role="radiogroup" aria-label="Аз съм">
       <label><input type="radio" name="role" value="parent" checked><span><i>👨‍👩‍👧</i><b>Родител</b><small>Профили за децата и отчети</small></span></label>
-      <label><input type="radio" name="role" value="teacher"><span><i>👩‍🏫</i><b>Учител</b><small>Моите класове и класации</small></span></label>
+      <label><input type="radio" name="role" value="teacher"><span><i>👩‍🏫</i><b>Учител</b><small>Табло: ученици, домашни</small></span></label>
     </div>
     <label class="step-label" for="r-name">Вашето име</label>
     <input id="r-name" class="input" autocomplete="name" maxlength="60" placeholder="напр. Мария Иванова" required>
@@ -725,11 +702,11 @@ reg_pg = head('Регистрация – Сметко', 'Безплатна р�
     <ul class="acct-benefits">
       <li><b>📱 Всяко устройство</b> Детето продължава от телефона, таблета или компютъра – звездите и точките не се губят.</li>
       <li><b>👧👦 До 4 деца</b> Отделен профил с име и картинка за всяко дете.</li>
-      <li><b>🔑 Един код – навсякъде</b> Кодът за абонамент се въвежда веднъж в профила на детето.</li>
+      <li><b>🔑 Един код – веднъж</b> Кодът за абонамент се въвежда само веднъж, в „Абонаменти“.</li>
       <li><b>📊 Отчети</b> Силни теми и теми за упражнение по уроците.</li>
-      <li><b>👩‍🏫 За учители</b> Всички ваши класове на едно място – класация и отчети без повторно въвеждане на ПИН.</li>
+      <li><b>👩‍🏫 За учители</b> „Табло“: ученици с име и парола, домашни със срок, отчет по теми и класация.</li>
     </ul>
-    <p class="hint">Децата не се регистрират и не въвеждат лични данни. Учениците с код от учителя играят само с кода.</p>
+    <p class="hint">Децата не въвеждат имейл. Учениците от клас влизат с име и парола от учителя.</p>
   </aside>
 </div></section>
 </main>
@@ -760,12 +737,19 @@ fp_pg = head('Забравена парола – Сметко', 'Възстан
 """ + FOOTER + scripts()
 write('zabravena-parola.html', fp_pg)
 
-prof_pg = head('Моят профил – Сметко', 'Детски профили, кодове за абонамент, отчети и класове.', 'profil.html', [], 'acct-page-body', noindex=True) + header() + """
+prof_pg = head('Моят профил – Сметко', 'Детски профили, абонамент и отчети.', 'profil.html', [], 'acct-page-body', noindex=True) + header() + """
 <main id="main">
 <section class="section acct-main"><div class="wrap"><div id="acct-page"></div></div></section>
 </main>
 """ + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/report.js', 'js/tools.js'])
 write('profil.html', prof_pg)
+
+tablo_pg = head('Табло – Сметко', 'Табло за учителя: ученици с име и парола, домашни, отчет по теми, класация и грамоти.', 'tablo.html', [], 'tablo-page', noindex=True) + header() + """
+<main id="main">
+<section class="section tb-main"><div class="wrap"><div id="tablo"></div></div></section>
+</main>
+""" + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/report.js', 'js/diploma.js', 'js/tools.js', 'js/tablo.js'])
+write('tablo.html', tablo_pg)
 
 # ================= za-nas.html (за нас) =================
 about_us = head('За нас – Сметко', 'Кои сме и защо направихме Сметко – математика като игра за 1.–4. клас, по учебната програма на МОН и по учебника на детето.', 'za-nas.html',

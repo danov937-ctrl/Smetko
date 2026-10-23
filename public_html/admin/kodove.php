@@ -1,199 +1,142 @@
 <?php
-/* Кодове за достъп: партиди, създаване, търсене, спиране, освобождаване, валидност, CSV. */
+/* Кодове за абонамент: един код = един абонамент. Клиентът го активира веднъж в акаунта си (smetko.com → Абонаменти).
+   Индивидуален → 1 дете, семеен → до 4 деца, клас → до 30 ученици (учителят ги създава в „Табло“ с име и парола). */
 declare(strict_types=1);
 require __DIR__ . '/_lib.php';
 require_admin();
 $pdo = db();
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
-$back = fn(int $b = 0) => go('kodove.php' . ($b ? '?batch=' . $b : ''));
+$PLANS = ['single' => 'Индивидуален (1 дете)', 'family' => 'Семеен (до 4 деца)', 'class' => 'Цял клас (до 30 ученици)'];
+$code = normalize_code((string)($_POST['code'] ?? $_GET['code'] ?? ''));
+$back = fn(string $c = '') => go('kodove.php' . ($c ? '?code=' . urlencode($c) : ''));
 
-/* ---------- действия ---------- */
+/* ---------- създаване ---------- */
 if ($action === 'create') {
-    $type = array_key_exists($_POST['type'] ?? '', TYPE_NAMES) ? $_POST['type'] : 'class';
-    $count = max(1, min(500, (int)($_POST['count'] ?? 1)));
-    $exp = preg_match('/^\d{4}-\d{2}-\d{2}$/', post('expires')) ? post('expires') : school_year_end();
+    $type = array_key_exists($_POST['type'] ?? '', $PLANS) ? $_POST['type'] : 'single';
+    $count = max(1, min(200, (int)($_POST['count'] ?? 1)));
+    $exp = preg_match('/^\d{4}-\d{2}-\d{2}$/', post('expires')) ? post('expires') : date('Y-m-d', strtotime('+1 year'));
     $label = mb_substr(post('label'), 0, 120);
+    $oid = (int)($_POST['order_id'] ?? 0);
+    $seats = PLAN_SEATS[$type];
     $pdo->beginTransaction();
     $sid = $type === 'class' ? school_from_post($pdo) : null;
-    $cname = mb_substr(post('class_name'), 0, 20);
-    $cgrade = max(0, min(4, (int)($_POST['grade'] ?? 0)));
-    if (!$cgrade && preg_match('/^([1-4])/', $cname, $m)) $cgrade = (int)$m[1];
-    $tname = mb_substr(post('teacher_name'), 0, 40);
-    if ($label === '' && $type === 'class') {
-        $sn = $sid ? $pdo->query('SELECT name, town FROM schools WHERE id = ' . (int)$sid)->fetch() : null;
-        $label = trim(($cname ? $cname . ' клас' : '') . ($sn ? ' · ' . $sn['name'] . ($sn['town'] ? ', ' . $sn['town'] : '') : ''), ' ·');
+    $ins = $pdo->prepare('INSERT OR IGNORE INTO codes(code, batch_id, type, max_uses, expires_at, pin, label, created_at, role, order_id) VALUES(?, ?, ?, ?, ?, NULL, ?, ?, ?, ?)');
+    $newBatch = fn() => ($pdo->prepare('INSERT INTO batches(label, type, max_uses, expires_at, created_at, school_id, public) VALUES(?, ?, ?, ?, ?, ?, 1)')->execute([$label, $type, $seats, $exp, now(), $sid]) ? (int)$pdo->lastInsertId() : 0);
+    $made = []; $bid = $type === 'class' ? 0 : $newBatch(); $first = 0;
+    while (count($made) < $count) {
+        $b = $type === 'class' ? $newBatch() : $bid; // всеки клас е отделна група за класациите
+        $c = random_code(); $ins->execute([$c, $b, $type, $seats, $exp, $label, now(), 'student', $oid ?: null]);
+        if ($ins->rowCount()) { $made[] = $c; $first = $first ?: $b; } elseif ($type === 'class') $pdo->prepare('DELETE FROM batches WHERE id = ?')->execute([$b]);
     }
-    $pin = $type === 'class' ? random_pin() : null;
-    $pdo->prepare('INSERT INTO batches(label, type, max_uses, expires_at, created_at, pin, school_id, class_name, grade, teacher_name, public) VALUES(?, ?, 1, ?, ?, ?, ?, ?, ?, ?, 1)')
-        ->execute([$label, $type, $exp, now(), $pin, $sid, $cname, $cgrade ?: null, $tname]);
-    $bid = (int)$pdo->lastInsertId();
-    $ins = $pdo->prepare('INSERT OR IGNORE INTO codes(code, batch_id, type, max_uses, expires_at, pin, label, created_at, role) VALUES(?, ?, ?, 1, ?, ?, ?, ?, ?)');
-    $teachers = $type === 'class' ? 1 + max(0, min(5, (int)($_POST['helpers'] ?? 2))) : 0; // 1 учител + помощници (по подразбиране 2)
-    for ($k = 0; $k < $teachers; $k++) { do { $ins->execute([random_code(), $bid, $type, $exp, $pin, $label, now(), 'teacher']); } while ($ins->rowCount() === 0); }
-    $made = 0;
-    while ($made < $count) { $ins->execute([random_code(), $bid, $type, $exp, in_array($type, ['single', 'family'], true) ? random_pin() : null, $label, now(), 'student']); $made += $ins->rowCount(); }
-    $oid = (int)($_POST['order_id'] ?? 0);
-    if ($oid) $pdo->prepare("UPDATE orders SET batch_id = ?, status = CASE WHEN status = 'new' THEN 'codes' ELSE status END WHERE id = ?")->execute([$bid, $oid]);
+    if ($oid) $pdo->prepare("UPDATE orders SET batch_id = COALESCE(batch_id, ?), status = CASE WHEN status = 'new' THEN 'codes' ELSE status END WHERE id = ?")->execute([$first, $oid]);
     $pdo->commit();
-    audit('Нови кодове', TYPE_NAMES[$type] . " × $count · $label" . ($oid ? " · поръчка #$oid" : ''));
-    flash($type === 'class' ? "Създадени са $count кода за ученици + " . ($teachers === 1 ? '1 код за учителя' : $teachers . ' кода за учители (1 + ' . ($teachers - 1) . ')') . " (ПИН $pin)." : "Създадени са $count кода.");
-    $back($bid);
+    audit('Нови кодове', TYPE_NAMES[$type] . " × $count до $exp · $label" . ($oid ? " · поръчка #$oid" : ''));
+    flash("Създадени са $count кода ($PLANS[$type]). Изпратете ги на клиента – активират се в „Абонаменти“.");
+    go($oid ? 'porachki.php?id=' . $oid : 'kodove.php?made=' . urlencode(implode(',', $made)));
 }
-$code = post('code'); $bidp = (int)($_POST['batch'] ?? 0);
-if (in_array($action, ['revoke', 'restore'], true)) {
+$row = $code ? get_code($code) : null;
+if ($row && in_array($action, ['revoke', 'restore'], true)) {
     $pdo->prepare('UPDATE codes SET revoked = ? WHERE code = ?')->execute([$action === 'revoke' ? 1 : 0, $code]);
-    audit($action === 'revoke' ? 'Спрян код' : 'Възстановен код', $code);
-    flash($action === 'revoke' ? 'Кодът е спрян.' : 'Кодът е възстановен.'); $back($bidp);
+    audit($action === 'revoke' ? 'Спрян код' : 'Възстановен код', $code); flash($action === 'revoke' ? 'Кодът е спрян – абонаментът не работи.' : 'Кодът е възстановен.'); $back($code);
 }
-if ($action === 'release') {
-    $pdo->prepare('DELETE FROM redemptions WHERE code = ?')->execute([$code]);
-    audit('Освободен код', $code);
-    flash('Кодът е освободен и може да се въведе отново на едно устройство.'); $back($bidp);
+if ($row && $action === 'extend' && preg_match('/^\d{4}-\d{2}-\d{2}$/', post('expires'))) {
+    $pdo->prepare('UPDATE codes SET expires_at = ? WHERE code = ?')->execute([post('expires'), $code]);
+    if ($row['type'] === 'class') $pdo->prepare('UPDATE batches SET expires_at = ? WHERE id = ?')->execute([post('expires'), (int)$row['batch_id']]);
+    audit('Нова валидност', "$code → " . post('expires')); flash('Валидността е обновена.'); $back($code);
 }
-if ($action === 'revoke_batch' || $action === 'restore_batch') {
-    $pdo->prepare('UPDATE codes SET revoked = ? WHERE batch_id = ?')->execute([$action === 'revoke_batch' ? 1 : 0, $bidp]);
-    audit($action === 'revoke_batch' ? 'Спряна партида' : 'Възстановена партида', '#' . $bidp);
-    flash($action === 'revoke_batch' ? 'Всички кодове в партидата са спрени.' : 'Всички кодове в партидата са възстановени.'); $back($bidp);
+if ($row && $action === 'seats') {
+    $n = max(1, min(200, (int)post('seats')));
+    $pdo->prepare('UPDATE codes SET max_uses = ? WHERE code = ?')->execute([$n, $code]);
+    audit('Места в абонамента', "$code → $n"); flash('Броят места е обновен.'); $back($code);
 }
-if ($action === 'add_codes') { // още кодове в съществуваща партида (нов ученик в класа)
-    $b = $pdo->prepare('SELECT * FROM batches WHERE id = ?'); $b->execute([$bidp]); $b = $b->fetch();
-    $n = max(1, min(100, (int)($_POST['count'] ?? 1)));
-    if ($b) {
-        $ins = $pdo->prepare('INSERT OR IGNORE INTO codes(code, batch_id, type, max_uses, expires_at, pin, label, created_at, role) VALUES(?, ?, ?, 1, ?, NULL, ?, ?, ?)');
-        $made = 0; while ($made < $n) { $ins->execute([random_code(), $bidp, $b['type'], $b['expires_at'], $b['label'], now(), 'student']); $made += $ins->rowCount(); }
-        audit('Добавени кодове', "#$bidp × $n"); flash("Добавени са $n нови кода в партидата.");
+if ($row && $action === 'label') {
+    $pdo->prepare('UPDATE codes SET label = ? WHERE code = ?')->execute([mb_substr(post('label'), 0, 120), $code]);
+    audit('Бележка към код', $code); flash('Запазено.'); $back($code);
+}
+if ($row && $action === 'release') { // активиран по погрешка в чужд акаунт → може да се активира отново
+    $pdo->prepare('UPDATE codes SET account_id = NULL, activated_at = NULL WHERE code = ?')->execute([$code]);
+    $pdo->prepare('UPDATE profiles SET code = NULL WHERE code = ?')->execute([$code]);
+    if ($row['type'] === 'class') $pdo->prepare('UPDATE batches SET account_id = NULL WHERE id = ?')->execute([(int)$row['batch_id']]);
+    audit('Освободен код', $code); flash('Кодът е освободен – може да се активира отново (учениците на класа се запазват).'); $back($code);
+}
+if ($row && $action === 'delete') {
+    if ($row['account_id']) { flash('Кодът е активиран – спрете го вместо да го триете.', 'err'); $back($code); }
+    $pdo->prepare('DELETE FROM codes WHERE code = ?')->execute([$code]);
+    $n = $pdo->prepare('SELECT COUNT(*) FROM codes WHERE batch_id = ?'); $n->execute([(int)$row['batch_id']]);
+    if (!(int)$n->fetchColumn()) $pdo->prepare('DELETE FROM batches WHERE id = ?')->execute([(int)$row['batch_id']]);
+    audit('Изтрит код', $code); flash('Кодът е изтрит.'); go('kodove.php');
+}
+
+$status = function (array $c): string {
+    if ((int)$c['revoked']) return '<span class="tag tr">спрян</span>';
+    if ($c['expires_at'] < today()) return '<span class="tag">изтекъл</span>';
+    return $c['account_id'] ? '<span class="tag tg">активен</span>' : '<span class="tag">свободен</span>';
+};
+
+/* ---------- един код ---------- */
+if ($row && $action === '') {
+    $acc = null; if ($row['account_id']) { $a = $pdo->prepare('SELECT id, email, name FROM accounts WHERE id = ?'); $a->execute([(int)$row['account_id']]); $acc = $a->fetch() ?: null; }
+    $b = $pdo->prepare('SELECT b.*, s.name AS sname, s.town FROM batches b LEFT JOIN schools s ON s.id = b.school_id WHERE b.id = ?'); $b->execute([(int)$row['batch_id']]); $b = $b->fetch() ?: [];
+    $who = '';
+    if ($row['type'] === 'class') {
+        $st = $pdo->prepare('SELECT nickname, username, last_seen, ' . SCORE_ALL . ' AS pts FROM redemptions r WHERE code = ? ORDER BY pts DESC'); $st->execute([$code]);
+        $kids = $st->fetchAll();
+        $who = '<div class="card"><h2>Класът</h2><p>' . h(($b['class_name'] ?? '') ? $b['class_name'] . ' клас' : 'Класът още не е вписан') . ($b['sname'] ?? '' ? ' · ' . h($b['sname'] . ', ' . $b['town']) : '') . ($b['teacher_name'] ?? '' ? ' · ' . h($b['teacher_name']) : '') . '</p>' .
+            ($kids ? '<div class="tw"><table><thead><tr><th>Ученик</th><th>Потребител</th><th class="num">Точки</th><th>Последно</th></tr></thead><tbody>' . implode('', array_map(fn($k) => '<tr><td>' . h($k['nickname']) . '</td><td class="mono">' . h($k['username']) . '</td><td class="num">' . (int)$k['pts'] . '</td><td>' . fdate($k['last_seen']) . '</td></tr>', $kids)) . '</tbody></table></div>' : '<p class="muted">Учителят още не е добавил ученици.</p>') . '</div>';
+    } else {
+        $st = $pdo->prepare('SELECT name, grade FROM profiles WHERE code = ?'); $st->execute([$code]);
+        $kids = $st->fetchAll();
+        $who = '<div class="card"><h2>Включени деца</h2>' . ($kids ? '<p>' . implode(', ', array_map(fn($k) => h($k['name']) . ' (' . (int)$k['grade'] . '. клас)', $kids)) . '</p>' : '<p class="muted">Още няма детски профили.</p>') . '</div>';
     }
-    $back($bidp);
+    $f = '<form method="post" class="inline">' . csrf_field() . '<input type="hidden" name="code" value="' . h($code) . '">';
+    $body = '<div class="card"><p><a href="kodove.php">← Всички кодове</a></p><h2 class="mono">' . h($code) . ' ' . $status($row) . '</h2>' .
+        '<p>' . h($PLANS[$row['type']] ?? $row['type']) . ' · места: <b>' . code_seats($row) . '</b> · валиден до <b>' . fdate($row['expires_at']) . '</b>' . ($row['label'] ? ' · ' . h($row['label']) : '') . '</p>' .
+        '<p>' . ($acc ? 'Активиран на ' . fdate($row['activated_at']) . ' от <a href="akaunti.php?id=' . (int)$acc['id'] . '">' . h($acc['email']) . '</a> (' . h($acc['name']) . ')' : 'Още не е активиран. Клиентът го въвежда на <b>smetko.com → Абонаменти</b>.') .
+        ($row['order_id'] ? ' · <a href="porachki.php?id=' . (int)$row['order_id'] . '">поръчка #' . (int)$row['order_id'] . '</a>' : '') . '</p>' .
+        '<div class="row">' . $f . ((int)$row['revoked'] ? '<button name="action" value="restore" class="ghost">↩️ Възстанови</button>' : '<button name="action" value="revoke" class="ghost" data-confirm="Да спрем ли абонамента?">⛔ Спри</button>') . '</form>' .
+        ($acc ? $f . '<button name="action" value="release" class="ghost" data-confirm="Да освободим ли кода? Ще може да се активира в друг акаунт.">🔓 Освободи</button></form>' : $f . '<button name="action" value="delete" class="red" data-confirm="Да изтрием ли кода?">🗑 Изтрий</button></form>') .
+        '<a class="btn ghost" target="_blank" href="cards.php?code=' . urlencode($code) . '">🖨️ Картичка</a></div></div>' .
+        '<div class="card grid g3">' .
+        '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="extend"><input type="hidden" name="code" value="' . h($code) . '"><label>Валиден до<input type="date" name="expires" value="' . h($row['expires_at']) . '"></label><button class="sm">Запази</button></form>' .
+        '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="seats"><input type="hidden" name="code" value="' . h($code) . '"><label>Места (деца/ученици)<input type="number" name="seats" min="1" max="200" value="' . code_seats($row) . '"></label><button class="sm">Запази</button></form>' .
+        '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="label"><input type="hidden" name="code" value="' . h($code) . '"><label>Бележка (клиент)<input name="label" maxlength="120" value="' . h($row['label']) . '"></label><button class="sm">Запази</button></form></div>' . $who;
+    page('Код за абонамент', $body);
 }
-if ($action === 'newpin') {
-    $pin = random_pin();
-    $pdo->prepare('UPDATE batches SET pin = ? WHERE id = ?')->execute([$pin, $bidp]);
-    $pdo->prepare("UPDATE codes SET pin = ? WHERE batch_id = ? AND role = 'teacher'")->execute([$pin, $bidp]);
-    audit('Нов ПИН', "#$bidp"); flash("Новият ПИН на учителя е $pin. Старият вече не работи."); $back($bidp);
-}
-if ($action === 'info') {
-    $sid = school_from_post($pdo);
-    $cname = mb_substr(post('class_name'), 0, 20);
-    $cgrade = max(0, min(4, (int)($_POST['grade'] ?? 0)));
-    if (!$cgrade && preg_match('/^([1-4])/', $cname, $m)) $cgrade = (int)$m[1];
-    $pdo->prepare('UPDATE batches SET school_id = ?, class_name = ?, grade = ?, teacher_name = ?, public = ?, label = ? WHERE id = ?')
-        ->execute([$sid, $cname, $cgrade ?: null, mb_substr(post('teacher_name'), 0, 40), empty($_POST['public']) ? 0 : 1, mb_substr(post('label'), 0, 120), $bidp]);
-    $pdo->prepare('UPDATE codes SET label = ? WHERE batch_id = ?')->execute([mb_substr(post('label'), 0, 120), $bidp]);
-    audit('Данни за партида', "#$bidp"); flash('Данните са запазени.'); $back($bidp);
-}
-if ($action === 'extend') {
-    $exp = preg_match('/^\d{4}-\d{2}-\d{2}$/', post('expires')) ? post('expires') : null;
-    if ($exp) { $pdo->prepare('UPDATE codes SET expires_at = ? WHERE batch_id = ?')->execute([$exp, $bidp]); $pdo->prepare('UPDATE batches SET expires_at = ? WHERE id = ?')->execute([$exp, $bidp]); audit('Нова валидност', "#$bidp → $exp"); flash('Валидността е обновена.'); }
-    $back($bidp);
-}
-if ($action === 'delete_batch') {
-    $used = $pdo->prepare('SELECT COUNT(*) FROM redemptions r JOIN codes c ON c.code = r.code WHERE c.batch_id = ?'); $used->execute([$bidp]);
-    if ((int)$used->fetchColumn() > 0) { flash('Партидата има активирани кодове – спрете я вместо да я триете.', 'err'); $back($bidp); }
-    $pdo->prepare('DELETE FROM codes WHERE batch_id = ?')->execute([$bidp]); $pdo->prepare('DELETE FROM batches WHERE id = ?')->execute([$bidp]);
-    audit('Изтрита партида', "#$bidp"); flash('Партидата е изтрита.'); go('kodove.php');
-}
+
+/* ---------- списък ---------- */
+$q = trim((string)($_GET['q'] ?? '')); $type = array_key_exists($_GET['type'] ?? '', $PLANS) ? $_GET['type'] : ''; $st0 = in_array($_GET['st'] ?? '', ['free', 'active', 'expired', 'revoked'], true) ? $_GET['st'] : '';
+$where = ["c.type IN ('single','family','class')"]; $args = [];
+if ($type) { $where[] = 'c.type = ?'; $args[] = $type; }
+if ($st0 === 'free') $where[] = 'c.account_id IS NULL AND c.revoked = 0 AND c.expires_at >= date(\'now\')';
+if ($st0 === 'active') $where[] = 'c.account_id IS NOT NULL AND c.revoked = 0 AND c.expires_at >= date(\'now\')';
+if ($st0 === 'expired') $where[] = 'c.expires_at < date(\'now\')';
+if ($st0 === 'revoked') $where[] = 'c.revoked = 1';
+if ($q !== '') { $where[] = '(c.code LIKE ? OR c.label LIKE ? OR a.email LIKE ? OR b.class_name LIKE ? OR s.name LIKE ?)'; $l = '%' . $q . '%'; array_push($args, '%' . strtoupper($q) . '%', $l, $l, $l, $l); }
+$sql = "SELECT c.*, a.email, b.class_name, s.name AS sname, (SELECT COUNT(*) FROM profiles p WHERE p.code = c.code) AS up, (SELECT COUNT(*) FROM redemptions r WHERE r.code = c.code) AS ur
+    FROM codes c LEFT JOIN accounts a ON a.id = c.account_id LEFT JOIN batches b ON b.id = c.batch_id LEFT JOIN schools s ON s.id = b.school_id WHERE " . implode(' AND ', $where) . ' ORDER BY c.created_at DESC';
 if ($action === 'csv') {
-    $b = (int)($_GET['batch'] ?? 0);
-    $st = $pdo->prepare("SELECT c.code, c.role, c.pin, c.type, c.expires_at, c.label, c.revoked, (SELECT MIN(created_at) FROM redemptions r WHERE r.code = c.code) AS act, (SELECT nickname FROM redemptions r WHERE r.code = c.code LIMIT 1) AS nick
-        FROM codes c WHERE c.batch_id = ? ORDER BY CASE WHEN c.role = 'teacher' THEN 0 ELSE 1 END, c.created_at, c.code");
-    $st->execute([$b]);
-    csv_out('smetko-kodove-' . $b . '.csv', ['Код', 'За', 'ПИН', 'Вид', 'Активиран', 'Прякор', 'Валиден до', 'Бележка', 'Спрян'],
-        (function () use ($st) { foreach ($st as $r) yield [$r['code'], $r['role'] === 'teacher' ? 'учител' : 'ученик', $r['pin'], TYPE_NAMES[$r['type']] ?? $r['type'], $r['act'] ? substr($r['act'], 0, 10) : 'не', $r['nick'], $r['expires_at'], $r['label'], $r['revoked'] ? 'да' : '']; })());
+    $st = $pdo->prepare($sql); $st->execute($args);
+    csv_out('smetko-kodove-' . date('Y-m-d') . '.csv', ['Код', 'Вид', 'Места', 'Използвани', 'Валиден до', 'Активиран от', 'Активиран на', 'Бележка', 'Спрян'],
+        (function () use ($st) { foreach ($st as $r) yield [$r['code'], TYPE_NAMES[$r['type']] ?? $r['type'], code_seats($r), $r['type'] === 'class' ? $r['ur'] : $r['up'], $r['expires_at'], $r['email'], substr((string)$r['activated_at'], 0, 10), $r['label'], $r['revoked'] ? 'да' : '']; })());
 }
-
-/* ---------- изглед: една партида ---------- */
-$bid = (int)($_GET['batch'] ?? 0);
-if ($bid) {
-    $b = $pdo->prepare('SELECT b.*, s.name AS sname, s.town FROM batches b LEFT JOIN schools s ON s.id = b.school_id WHERE b.id = ?'); $b->execute([$bid]); $b = $b->fetch();
-    if (!$b) { flash('Няма такава партида.', 'err'); go('kodove.php'); }
-    $st = $pdo->prepare("SELECT c.*, r.created_at AS act, r.last_seen AS last, r.nickname AS nick, " . SCORE_ALL . " AS pts, r.flags FROM codes c LEFT JOIN redemptions r ON r.code = c.code
-        WHERE c.batch_id = ? ORDER BY CASE WHEN c.role = 'teacher' THEN 0 ELSE 1 END, c.created_at, c.code");
-    $st->execute([$bid]);
-    $rows = ''; $used = 0; $total = 0;
-    foreach ($st as $r) {
-        $isT = ($r['role'] ?? '') === 'teacher';
-        if (!$isT) { $total++; if ($r['act']) $used++; }
-        $state = $r['revoked'] ? '<span class="tag tr">спрян</span>' : ($r['expires_at'] < today() ? '<span class="tag">изтекъл</span>' : ($r['act'] ? '<span class="tag tg">активиран</span>' : '<span class="tag">свободен</span>'));
-        $f = '<form method="post" class="inline">' . csrf_field() . '<input type="hidden" name="batch" value="' . $bid . '"><input type="hidden" name="code" value="' . h($r['code']) . '">';
-        $btn = $f . ($r['revoked'] ? '<button name="action" value="restore" class="sm ghost">Възстанови</button>' : '<button name="action" value="revoke" class="sm ghost" data-confirm="Да спрем ли кода? Устройството губи достъпа.">Спри</button>') . '</form>' .
-            ($r['act'] && !$r['revoked'] ? ' ' . $f . '<button name="action" value="release" class="sm ghost" data-confirm="Да освободим ли кода? Старото устройство губи достъпа, а кодът може да се въведе на едно ново устройство.">Освободи</button></form>' : '');
-        $rows .= '<tr' . ($isT ? ' style="background:#FFF8E6"' : '') . '><td class="mono">' . h($r['code']) . '</td><td>' . ($isT ? '<b>учител</b> · ПИН <span class="mono">' . h($r['pin']) . '</span>' : ($r['type'] === 'class' ? 'ученик' : h(TYPE_NAMES[$r['type']] ?? '') . ($r['pin'] ? ' · ПИН за родителя <span class="mono">' . h($r['pin']) . '</span>' : ''))) . '</td><td>' . fdate($r['act']) . '</td><td>' . h($r['nick'] ?? '') . ((int)$r['flags'] ? ' <span class="tag tr" title="сигнали за неправдоподобни точки">⚠</span>' : '') . '</td><td class="num">' . ($r['act'] ? (int)$r['pts'] : '') . '</td><td>' . fdate($r['last']) . '</td><td>' . $state . '</td><td class="row">' . $btn . '</td></tr>';
-    }
-    $order = $pdo->prepare('SELECT id, client FROM orders WHERE batch_id = ?'); $order->execute([$bid]); $order = $order->fetch();
-    $f = '<form method="post" class="inline">' . csrf_field() . '<input type="hidden" name="batch" value="' . $bid . '">';
-    $body = '<div class="card"><p><a href="kodove.php">← Всички партиди</a></p><h2>' . h($b['label'] ?: 'Партида #' . $bid) . '</h2>' .
-        '<p>' . h(TYPE_NAMES[$b['type']] ?? $b['type']) . ' · еднократни кодове · активирани <b>' . $used . ' от ' . $total . '</b> · валидни до <b>' . fdate($b['expires_at']) . '</b>' .
-        ($b['sname'] ? ' · ' . h($b['sname'] . ', ' . $b['town']) : '') . ($b['type'] === 'class' && !empty($b['pin']) ? '<br>ПИН на учителя за класацията: <b class="mono">' . h($b['pin']) . '</b>' : '') .
-        ($order ? '<br>Поръчка: <a href="porachki.php?id=' . (int)$order['id'] . '">#' . (int)$order['id'] . ' ' . h($order['client']) . '</a>' : '') . '</p>' .
-        '<div class="row"><a class="btn" target="_blank" href="cards.php?batch=' . $bid . '">🖨️ Картички за печат</a><a class="btn ghost" href="?action=csv&amp;batch=' . $bid . '">⬇️ CSV (Excel)</a>' .
-        ($b['type'] === 'class' ? '<a class="btn ghost" href="../klasaciya.html" target="_blank">🏆 Класацията на сайта</a>' : '') . '</div></div>';
-    $body .= '<div class="card"><h2>Действия</h2><div class="grid g2">' .
-        '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="extend"><input type="hidden" name="batch" value="' . $bid . '"><label>Валидни до<input type="date" name="expires" value="' . h($b['expires_at']) . '"></label><button class="sm">Запази валидността</button></form>' .
-        '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="add_codes"><input type="hidden" name="batch" value="' . $bid . '"><label>Още кодове (нов ученик)<input type="number" name="count" value="1" min="1" max="100"></label><button class="sm">Добави кодове</button></form>' .
-        '</div><div class="row" style="margin-top:12px">' .
-        ($b['type'] === 'class' ? $f . '<button name="action" value="newpin" class="sm ghost" data-confirm="Да сменим ли ПИН-а на учителя? Старият спира да работи.">🔑 Нов ПИН</button></form>' : '') .
-        $f . '<button name="action" value="revoke_batch" class="sm ghost" data-confirm="Да спрем ли ВСИЧКИ кодове в партидата?">⛔ Спри всички</button></form>' .
-        $f . '<button name="action" value="restore_batch" class="sm ghost">↩️ Възстанови всички</button></form>' .
-        ($used === 0 ? $f . '<button name="action" value="delete_batch" class="sm red" data-confirm="Да изтрием ли партидата? Това не може да се върне.">🗑 Изтрий партидата</button></form>' : '') . '</div></div>';
-    $body .= '<div class="card"><details' . ($b['type'] === 'class' && empty($b['school_id']) ? ' open' : '') . '><summary>🏫 Училище, клас, учител и бележка' . ($b['type'] === 'class' && empty($b['school_id']) ? ' – <b style="color:#B4232A">попълнете за общата класация</b>' : '') . '</summary>' .
-        '<form method="post" style="margin-top:10px">' . csrf_field() . '<input type="hidden" name="action" value="info"><input type="hidden" name="batch" value="' . $bid . '"><div class="grid g3">' .
-        school_fields($pdo, $b['school_id'] ? (int)$b['school_id'] : null) .
-        '<label>Клас (напр. 2. б)<input name="class_name" maxlength="20" value="' . h($b['class_name'] ?? '') . '"></label>' .
-        '<label>Учител (по желание)<input name="teacher_name" maxlength="40" value="' . h($b['teacher_name'] ?? '') . '"></label>' .
-        '<label class="wide">Бележка на картичките<input name="label" maxlength="120" value="' . h($b['label'] ?? '') . '"></label>' .
-        '<label class="chk"><input type="checkbox" name="public" value="1"' . ((int)($b['public'] ?? 1) ? ' checked' : '') . '> Участва в общата класация</label></div><button class="sm">Запази</button></form></details></div>';
-    $body .= '<div class="card"><h2>Кодове</h2><p class="hint">„Освободи“ – ако дете смени или загуби устройство. Старото губи достъпа, а кодът може да се въведе отново веднъж.</p><div class="tw"><table><thead><tr><th>Код</th><th>За</th><th>Активиран</th><th>Прякор</th><th class="num">Точки</th><th>Последно</th><th>Статус</th><th></th></tr></thead><tbody>' . $rows . '</tbody></table></div></div>';
-    page('Партида', $body);
-}
-
-/* ---------- търсене ---------- */
-$q = trim((string)($_GET['q'] ?? ''));
-$search = '';
-if ($q !== '') {
-    $nc = normalize_code($q);
-    $st = $pdo->prepare("SELECT c.code, c.batch_id, c.role, c.revoked, c.expires_at, b.label, r.nickname, r.created_at AS act, r.last_seen FROM codes c JOIN batches b ON b.id = c.batch_id LEFT JOIN redemptions r ON r.code = c.code
-        WHERE c.code = ? OR c.code LIKE ? OR r.nickname LIKE ? OR b.label LIKE ? ORDER BY c.created_at DESC LIMIT 100");
-    $like = '%' . mb_strtoupper($q) . '%';
-    $st->execute([$nc ?: '-', $like, '%' . $q . '%', '%' . $q . '%']);
-    $rows = '';
-    foreach ($st as $r) $rows .= '<tr><td class="mono"><a href="?batch=' . (int)$r['batch_id'] . '">' . h($r['code']) . '</a></td><td>' . h($r['role'] === 'teacher' ? 'учител' : 'ученик') . '</td><td>' . h($r['label']) . '</td><td>' . h($r['nickname'] ?? '') . '</td><td>' . fdate($r['act']) . '</td><td>' . fdate($r['last_seen']) . '</td><td>' . ($r['revoked'] ? '<span class="tag tr">спрян</span>' : ($r['expires_at'] < today() ? '<span class="tag">изтекъл</span>' : '<span class="tag tg">валиден</span>')) . '</td></tr>';
-    $search = '<div class="card"><h2>Резултати за „' . h($q) . '“</h2>' . ($rows ? '<div class="tw"><table><thead><tr><th>Код</th><th>За</th><th>Партида</th><th>Прякор</th><th>Активиран</th><th>Последно</th><th>Статус</th></tr></thead><tbody>' . $rows . '</tbody></table></div>' : '<p>Няма намерени кодове.</p>') . '</div>';
-}
-
-/* ---------- изглед: всички партиди ---------- */
-$oid = (int)($_GET['order'] ?? 0);
-$ord = null;
-if ($oid) { $o = $pdo->prepare('SELECT * FROM orders WHERE id = ?'); $o->execute([$oid]); $ord = $o->fetch() ?: null; }
-$preType = $ord ? (str_contains((string)$ord['plan'], 'клас') ? 'class' : (str_contains((string)$ord['plan'], 'Семеен') ? 'family' : 'single')) : 'class';
-$preExp = school_year_end();
-$preCount = $ord ? max(1, (int)$ord['qty'] * ($preType === 'class' ? 30 : ($preType === 'family' ? 4 : 1))) : 25;
-$preExp = $ord && str_contains((string)$ord['plan'], '6 месеца') ? date('Y-m-d', strtotime('+6 months')) : ($ord && str_contains((string)$ord['plan'], '1 година') ? date('Y-m-d', strtotime('+1 year')) : school_year_end());
-$opt = fn($v, $t) => '<option value="' . $v . '"' . ($v === $preType ? ' selected' : '') . '>' . $t . '</option>';
-$body = '<form method="get" class="card filters noprint"><label>Търсене<input name="q" value="' . h($q) . '" placeholder="код, прякор или бележка"></label><button class="blue">🔍 Търси</button>' . ($q !== '' ? '<a class="btn ghost" href="kodove.php">Изчисти</a>' : '') . '</form>' . $search;
-$body .= '<form method="post" class="card"><h2>Нови кодове' . ($ord ? ' за поръчка #' . $oid . ' – ' . h($ord['client']) : '') . '</h2>' . csrf_field() . '<input type="hidden" name="action" value="create"><input type="hidden" name="order_id" value="' . $oid . '"><div class="grid g4">' .
-    '<label>Вид<select name="type" id="t">' . $opt('class', 'Клас – код за всеки ученик + учител') . $opt('teacher', 'Учител – личен достъп') . $opt('single', 'Индивидуален – за едно дете') . $opt('family', 'Семеен – по един код на дете') . '</select></label>' .
-    '<label><span id="cl">Брой ученици</span><input type="number" name="count" id="u" value="' . $preCount . '" min="1" max="500"></label>' .
-    '<span class="forclass" style="display:contents">' . school_fields($pdo, $ord && $ord['school_id'] ? (int)$ord['school_id'] : null) .
-    '<label>Клас (напр. 2. б)<input name="class_name" maxlength="20" placeholder="2. б"></label>' .
-    '<label>Учител (по желание)<input name="teacher_name" maxlength="40" placeholder="г-жа Петрова"></label>' .
-    '<label>Помощни учители (с картичка)<select name="helpers"><option value="2" selected>2 (1 + 2)</option><option value="1">1</option><option value="0">няма</option><option value="3">3</option></select></label></span>' .
-    '<label>Валидни до<input type="date" name="expires" value="' . $preExp . '"></label>' .
-    '<label class="wide">Бележка на картичките (празно = „2. б клас · училище, град“)<input name="label" maxlength="120" value="' . h($ord && $preType !== 'class' ? $ord['client'] : '') . '"></label></div>' .
-    '<p class="hint">Всеки код е <b>еднократен</b> – активира се на едно устройство. За клас се създава код за всеки ученик и картички за учителя и помощниците (код + общ ПИН за класацията). Индивидуалните и семейните кодове получават <b>ПИН за родителя</b> за отчета.</p><button>Създай кодове</button></form>' .
-    '<script>(function(){var t=document.getElementById("t");function f(){var v=t.value;document.getElementById("cl").textContent={class:"Брой ученици",teacher:"Брой учители",single:"Брой кодове",family:"Брой деца"}[v];document.querySelector(".forclass").style.display=v==="class"?"contents":"none";}t.addEventListener("change",function(){document.getElementById("u").value={class:25,teacher:1,single:1,family:4}[t.value];f();});f();})();</script>';
-$type = in_array($_GET['type'] ?? '', array_keys(TYPE_NAMES), true) ? $_GET['type'] : '';
-$where = $type ? "WHERE b.type = '" . $type . "'" : '';
+$st = $pdo->prepare($sql . ' LIMIT 500'); $st->execute($args);
 $rows = '';
-foreach ($pdo->query("SELECT b.*, s.name AS sname, s.town, (SELECT COUNT(*) FROM codes c WHERE c.batch_id = b.id AND COALESCE(c.role,'student') <> 'teacher') AS n,
-        (SELECT COUNT(DISTINCT r.code) FROM redemptions r JOIN codes c ON c.code = r.code WHERE c.batch_id = b.id AND COALESCE(c.role,'student') <> 'teacher') AS dev,
-        (SELECT COUNT(*) FROM codes c WHERE c.batch_id = b.id AND c.revoked = 1) AS rev
-        FROM batches b LEFT JOIN schools s ON s.id = b.school_id $where ORDER BY b.id DESC") as $b) {
-    $exp = $b['expires_at'] < today() ? '<span class="tag">изтекли</span>' : ($b['expires_at'] < date('Y-m-d', strtotime('+30 days')) ? '<span class="tag ty">изтичат скоро</span>' : '');
-    $pct = $b['n'] ? round($b['dev'] / $b['n'] * 100) : 0;
-    $rows .= '<tr><td><a href="?batch=' . (int)$b['id'] . '"><b>' . h($b['label'] ?: 'Партида #' . $b['id']) . '</b></a>' . ($b['sname'] ? '<br><small class="muted">' . h($b['sname'] . ', ' . $b['town']) . '</small>' : '') . '</td><td>' . h(TYPE_NAMES[$b['type']] ?? $b['type']) . '</td><td class="num">' . (int)$b['n'] . '</td><td class="num">' . (int)$b['dev'] . ' <small class="muted">(' . $pct . '%)</small></td><td>' . fdate($b['expires_at']) . ' ' . $exp . ((int)$b['rev'] ? ' <span class="tag tr">' . (int)$b['rev'] . ' спрени</span>' : '') . '</td><td class="row"><a class="btn sm ghost" href="cards.php?batch=' . (int)$b['id'] . '" target="_blank">🖨️</a><a class="btn sm ghost" href="?action=csv&amp;batch=' . (int)$b['id'] . '">CSV</a></td></tr>';
-}
-$tabs = '<div class="pill-nav">';
-foreach (['' => 'Всички'] + TYPE_NAMES as $k => $v) $tabs .= '<a class="btn sm ' . ($type === $k ? '' : 'ghost') . '" href="?type=' . $k . '">' . h($v) . '</a>';
-$tabs .= '</div>';
-$body .= '<div class="card"><h2>Партиди</h2>' . $tabs . ($rows ? '<div class="tw"><table><thead><tr><th>Партида</th><th>Вид</th><th class="num">Кодове</th><th class="num">Активирани</th><th>Валидни до</th><th></th></tr></thead><tbody>' . $rows . '</tbody></table></div>' : '<p>Още няма кодове. Създайте първите горе.</p>') . '</div>';
-page('Кодове за достъп', $body);
+$made = array_filter(explode(',', (string)($_GET['made'] ?? '')));
+foreach ($st as $r) $rows .= '<tr' . (in_array($r['code'], $made, true) ? ' style="background:#FFF8E6"' : '') . '><td class="mono"><a href="?code=' . urlencode($r['code']) . '">' . h($r['code']) . '</a></td><td>' . h(TYPE_NAMES[$r['type']] ?? $r['type']) . '</td><td class="num">' . ($r['type'] === 'class' ? (int)$r['ur'] : (int)$r['up']) . ' / ' . code_seats($r) . '</td><td>' . fdate($r['expires_at']) . '</td><td>' . $status($r) . '</td><td>' . h((string)$r['email']) . '</td><td>' . h(trim(($r['class_name'] ? $r['class_name'] . ' · ' : '') . ($r['sname'] ?? '') . ' ' . ($r['label'] ?? ''))) . '</td></tr>';
+$oid = (int)($_GET['order'] ?? 0); $ord = null;
+if ($oid) { $o = $pdo->prepare('SELECT * FROM orders WHERE id = ?'); $o->execute([$oid]); $ord = $o->fetch() ?: null; }
+$preType = $ord ? (str_contains((string)$ord['plan'], 'клас') ? 'class' : (str_contains((string)$ord['plan'], 'Семеен') ? 'family' : 'single')) : 'single';
+$preExp = date('Y-m-d', strtotime($ord && str_contains((string)$ord['plan'], '6 месеца') ? '+6 months' : '+1 year'));
+$opt = fn($v, $t) => '<option value="' . $v . '"' . ($v === $preType ? ' selected' : '') . '>' . h($t) . '</option>';
+$body = '<form method="post" class="card"><h2>➕ Нови кодове' . ($ord ? ' за поръчка #' . $oid . ' – ' . h($ord['client']) : '') . '</h2>' . csrf_field() . '<input type="hidden" name="action" value="create"><input type="hidden" name="order_id" value="' . $oid . '"><div class="grid g4">' .
+    '<label>Абонамент<select name="type" id="t">' . $opt('single', $PLANS['single']) . $opt('family', $PLANS['family']) . $opt('class', $PLANS['class']) . '</select></label>' .
+    '<label>Брой кодове (абонаменти)<input type="number" name="count" value="' . ($ord ? max(1, (int)$ord['qty']) : 1) . '" min="1" max="200"></label>' .
+    '<label>Валидни до<input type="date" name="expires" value="' . $preExp . '"></label>' .
+    '<label>Бележка (клиент)<input name="label" maxlength="120" value="' . h($ord['client'] ?? '') . '"></label>' .
+    '<span class="forclass" style="display:contents">' . school_fields($pdo, $ord && $ord['school_id'] ? (int)$ord['school_id'] : null) . '</span></div>' .
+    '<p class="hint">Един код = един абонамент. Клиентът го въвежда <b>веднъж</b> на smetko.com → <b>Абонаменти</b> (от акаунта си). За клас всеки код е отделен клас – учителят вписва класа и учениците в „Табло“.</p><button>Създай</button></form>' .
+    '<script>(function(){var t=document.getElementById("t");function f(){document.querySelector(".forclass").style.display=t.value==="class"?"contents":"none";}t.addEventListener("change",f);f();})();</script>';
+$tabs = '<form method="get" class="filters noprint"><label>Търсене<input name="q" value="' . h($q) . '" placeholder="код, имейл, клиент, училище"></label><label>Вид<select name="type"><option value="">всички</option>' . implode('', array_map(fn($k) => '<option value="' . $k . '"' . ($type === $k ? ' selected' : '') . '>' . h(TYPE_NAMES[$k]) . '</option>', array_keys($PLANS))) . '</select></label>' .
+    '<label>Статус<select name="st"><option value="">всички</option>' . implode('', array_map(fn($k, $v) => '<option value="' . $k . '"' . ($st0 === $k ? ' selected' : '') . '>' . $v . '</option>', ['free', 'active', 'expired', 'revoked'], ['свободни', 'активни', 'изтекли', 'спрени'])) . '</select></label><button class="blue">🔍 Покажи</button></form>';
+$body .= '<div class="card"><h2>Кодове</h2>' . $tabs . ($rows ? '<div class="tw"><table><thead><tr><th>Код</th><th>Вид</th><th class="num">Използвани места</th><th>Валиден до</th><th>Статус</th><th>Акаунт</th><th>Клиент / клас</th></tr></thead><tbody>' . $rows . '</tbody></table></div>' : '<p class="muted">Няма кодове.</p>') . '</div>';
+page('Кодове за абонамент', $body, '<a class="btn ghost" href="?action=csv&amp;q=' . urlencode($q) . '&amp;type=' . $type . '&amp;st=' . $st0 . '">⬇️ CSV</a>');

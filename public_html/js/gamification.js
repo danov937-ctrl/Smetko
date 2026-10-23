@@ -18,23 +18,70 @@
     { name: 'Професор Сметко', min: 13000 }
   ];
 
+  /* Значки: група, икона, име (казва какво е постигнато) и как се печели.
+     test(st) връща true, когато значката е заслужена – проверява се след всеки отговор, мисия и домашна. */
+  function sum(o, f) { var n = 0; for (var k in o || {}) for (var i in o[k]) if (f(o[k][i])) n++; return n; }
+  function stars(st) { var n = 0; for (var k in st.adventure || {}) for (var i in st.adventure[k]) n += st.adventure[k][i]; return n; }
+  function missions(st) { return sum(st.adventure, function (v) { return v >= 1; }); }
+  function perfects(st) { return sum(st.adventure, function (v) { return v >= 3; }); }
+  function chapter(st) { for (var k in st.adventure || {}) { var n = 0; for (var i = 0; i < 16; i++) if ((st.adventure[k][i] || 0) >= 1) n++; if (n >= 16) return true; } return false; }
+  function quickBest(st) { var m = 0; for (var k in st.best || {}) if (k.indexOf('quick-') === 0) m = Math.max(m, st.best[k]); return m; }
+  function topics(st, min) { var n = 0; for (var k in st.skills || {}) if (st.skills[k][1] >= min) n++; return n; }
+  function mastered(st) { var n = 0; for (var k in st.skills || {}) { var x = st.skills[k]; if (x[1] >= 30 && x[0] / x[1] >= 0.9) n++; } return n; }
+  function cnt(st, k) { return (st.counters || {})[k] || 0; }
+  var GROUPS = [['start', '🌱 Първи стъпки'], ['solve', '✏️ Решени задачи'], ['sharp', '🎯 Точност и скорост'], ['days', '📅 Постоянство'], ['adv', '🗺️ Приключение'], ['learn', '🧩 Знания по теми'], ['class', '🎒 Домашни и предизвикателства'], ['points', '💰 Точки']];
   var BADGES = [
-    { id: 'first', icon: '🌱', name: 'Първи стъпки', desc: 'Първата вярно решена задача' },
-    { id: 'speedy', icon: '⚡', name: 'Бързак', desc: '10 верни задачи за под 30 секунди' },
-    { id: 'table', icon: '🧠', name: 'Майстор на таблицата', desc: '20 верни поред на умножение и деление' },
-    { id: 'week', icon: '🏆', name: 'Седмичен шампион', desc: '7 поредни дни игра' },
-    { id: 'combo10', icon: '🔥', name: 'Комбо звезда', desc: '10 верни отговора поред' },
-    { id: 'c100', icon: '💯', name: 'Стотица', desc: '100 верни задачи общо' },
-    { id: 'c1000', icon: '🎖️', name: 'Хилядник', desc: '1000 верни задачи общо' },
-    { id: 'p1000', icon: '💰', name: 'Събирач на точки', desc: '1000 точки общо' },
-    { id: 'explorer', icon: '🧭', name: 'Изследовател', desc: 'Изиграни и трите режима' },
-    { id: 'perfect', icon: '⭐', name: 'Перфектна мисия', desc: '3 звезди в мисия' },
-    { id: 'stars15', icon: '🌟', name: 'Звездобрец', desc: '15 звезди в Приключение' },
-    { id: 'summit', icon: '🏔️', name: 'Покорител на върха', desc: 'Стигнат връх в Приключение' },
-    { id: 'daily', icon: '🎯', name: 'Дневна цел', desc: 'Изпълнена дневна цел' },
-    { id: 'practice50', icon: '💪', name: 'Упоритко', desc: '50 верни задачи в Тренировка' },
-    { id: 'challenge', icon: '🥇', name: 'Предизвикател', desc: 'Изпълнено седмично предизвикателство' },
-    { id: 'challenge5', icon: '👑', name: 'Шампион на седмиците', desc: '5 изпълнени седмични предизвикателства' }
+    { id: 'first', g: 'start', icon: '🌱', name: 'Първи стъпки', desc: 'Първата вярно решена задача', test: function (st) { return st.correct >= 1; } },
+    { id: 'c10', g: 'start', icon: '🐣', name: 'Добро начало', desc: '10 верни задачи', test: function (st) { return st.correct >= 10; } },
+    { id: 'explorer', g: 'start', icon: '🧭', name: 'Изследовател', desc: 'Изиграни и трите режима: Приключение, Бързо сметни и Тренировка', test: function (st) { return st.modes.quick && st.modes.adventure && st.modes.practice; } },
+    { id: 'grades4', g: 'start', icon: '🎒', name: 'Във всички класове', desc: 'Игра в 1., 2., 3. и 4. клас', test: function (st) { var g = (st.counters || {}).grades || {}; return g[1] && g[2] && g[3] && g[4]; } },
+    { id: 'c50', g: 'solve', icon: '✏️', name: 'Петдесет верни', desc: '50 верни задачи общо', test: function (st) { return st.correct >= 50; } },
+    { id: 'c100', g: 'solve', icon: '💯', name: 'Стотица', desc: '100 верни задачи общо', test: function (st) { return st.correct >= 100; } },
+    { id: 'c250', g: 'solve', icon: '📗', name: 'Пълна тетрадка', desc: '250 верни задачи общо', test: function (st) { return st.correct >= 250; } },
+    { id: 'c500', g: 'solve', icon: '📚', name: 'Цял учебник', desc: '500 верни задачи общо', test: function (st) { return st.correct >= 500; } },
+    { id: 'c1000', g: 'solve', icon: '🎖️', name: 'Хилядник', desc: '1000 верни задачи общо', test: function (st) { return st.correct >= 1000; } },
+    { id: 'c2500', g: 'solve', icon: '🏅', name: 'Неуморим математик', desc: '2500 верни задачи общо', test: function (st) { return st.correct >= 2500; } },
+    { id: 'c5000', g: 'solve', icon: '🏆', name: 'Легенда на сметките', desc: '5000 верни задачи общо', test: function (st) { return st.correct >= 5000; } },
+    { id: 'combo10', g: 'sharp', icon: '🔥', name: 'Десет поред', desc: '10 верни отговора един след друг', test: function (st) { return st.maxCombo >= 10; } },
+    { id: 'combo20', g: 'sharp', icon: '🎯', name: 'Снайперист', desc: '20 верни отговора един след друг', test: function (st) { return st.maxCombo >= 20; } },
+    { id: 'combo30', g: 'sharp', icon: '☄️', name: 'Без нито една грешка', desc: '30 верни отговора един след друг', test: function (st) { return st.maxCombo >= 30; } },
+    { id: 'precise', g: 'sharp', icon: '⏱️', name: 'Точен като часовник', desc: 'Поне 90% точност след 200 задачи', test: function (st) { return st.answered >= 200 && st.correct / st.answered >= 0.9; } },
+    { id: 'table', g: 'sharp', icon: '🧠', name: 'Майстор на таблицата', desc: '20 верни поред на умножение и деление', test: function (st) { return st.tableStreak >= 20; } },
+    { id: 'speedy', g: 'sharp', icon: '⚡', name: 'Бързак', desc: '10 верни за под 30 секунди в „Бързо сметни“', test: null },
+    { id: 'quick15', g: 'sharp', icon: '🚀', name: 'Ракета', desc: '15 верни за 60 секунди в „Бързо сметни“', test: function (st) { return quickBest(st) >= 15; } },
+    { id: 'quick25', g: 'sharp', icon: '🌠', name: 'Светкавица', desc: '25 верни за 60 секунди в „Бързо сметни“', test: function (st) { return quickBest(st) >= 25; } },
+    { id: 'streak3', g: 'days', icon: '🌤️', name: 'Три дни подред', desc: 'Игра 3 поредни дни', test: function (st) { return st.streak.count >= 3; } },
+    { id: 'week', g: 'days', icon: '🗓️', name: 'Цяла седмица', desc: 'Игра 7 поредни дни', test: function (st) { return st.streak.count >= 7; } },
+    { id: 'streak14', g: 'days', icon: '🔆', name: 'Две седмици без прекъсване', desc: 'Игра 14 поредни дни', test: function (st) { return st.streak.count >= 14; } },
+    { id: 'streak30', g: 'days', icon: '🌈', name: 'Месец с математика', desc: 'Игра 30 поредни дни', test: function (st) { return st.streak.count >= 30; } },
+    { id: 'days20', g: 'days', icon: '🤝', name: 'Верен приятел на Сметко', desc: 'Игра в 20 различни дни', test: function (st) { return Object.keys(st.days || {}).length >= 20; } },
+    { id: 'daily', g: 'days', icon: '✅', name: 'Дневна цел', desc: 'Изпълнена дневна цел', test: function (st) { return cnt(st, 'goals') >= 1 || st.daily.count >= st.dailyGoal; } },
+    { id: 'daily10', g: 'days', icon: '📈', name: 'Десет дневни цели', desc: 'Дневната цел е изпълнена в 10 различни дни', test: function (st) { return cnt(st, 'goals') >= 10; } },
+    { id: 'perfect', g: 'adv', icon: '⭐', name: 'Перфектна мисия', desc: '3 звезди в мисия', test: function (st) { return perfects(st) >= 1; } },
+    { id: 'perfect10', g: 'adv', icon: '🌟', name: 'Перфекционист', desc: '3 звезди в 10 мисии', test: function (st) { return perfects(st) >= 10; } },
+    { id: 'perfect25', g: 'adv', icon: '💎', name: 'Диамантен ученик', desc: '3 звезди в 25 мисии', test: function (st) { return perfects(st) >= 25; } },
+    { id: 'missions10', g: 'adv', icon: '🗺️', name: 'Пътешественик', desc: '10 минати мисии', test: function (st) { return missions(st) >= 10; } },
+    { id: 'chapter', g: 'adv', icon: '📖', name: 'Цяла глава', desc: 'Минати всички 16 мисии от една глава на картата', test: chapter },
+    { id: 'missions50', g: 'adv', icon: '🧗', name: 'Катерач', desc: '50 минати мисии', test: function (st) { return missions(st) >= 50; } },
+    { id: 'stars15', g: 'adv', icon: '✨', name: 'Звездобрец', desc: '15 звезди в Приключение', test: function (st) { return stars(st) >= 15; } },
+    { id: 'stars50', g: 'adv', icon: '🌙', name: 'Звездно небе', desc: '50 звезди в Приключение', test: function (st) { return stars(st) >= 50; } },
+    { id: 'stars150', g: 'adv', icon: '🌌', name: 'Млечен път', desc: '150 звезди в Приключение', test: function (st) { return stars(st) >= 150; } },
+    { id: 'summit', g: 'adv', icon: '🏔️', name: 'Покорител на върха', desc: 'Мината последната мисия от учебника', test: null },
+    { id: 'practice50', g: 'learn', icon: '💪', name: 'Упоритко', desc: '50 верни задачи в Тренировка', test: function (st) { return st.practiceCorrect >= 50; } },
+    { id: 'practice200', g: 'learn', icon: '🏋️', name: 'Желязна воля', desc: '200 верни задачи в Тренировка', test: function (st) { return st.practiceCorrect >= 200; } },
+    { id: 'topics5', g: 'learn', icon: '🧩', name: 'Многостранен', desc: 'Поне по 10 задачи от 5 различни вида', test: function (st) { return topics(st, 10) >= 5; } },
+    { id: 'topics15', g: 'learn', icon: '🎓', name: 'Всезнайко', desc: 'Поне по 10 задачи от 15 различни вида', test: function (st) { return topics(st, 10) >= 15; } },
+    { id: 'master1', g: 'learn', icon: '🥋', name: 'Майстор на тема', desc: '90% точност в един вид задачи (поне 30 задачи)', test: function (st) { return mastered(st) >= 1; } },
+    { id: 'master5', g: 'learn', icon: '🧙', name: 'Голям майстор', desc: '90% точност в 5 вида задачи (по поне 30 задачи)', test: function (st) { return mastered(st) >= 5; } },
+    { id: 'hw1', g: 'class', icon: '📝', name: 'Първа домашна', desc: 'Предадена домашна от учителя', test: function (st) { return cnt(st, 'hw') >= 1; } },
+    { id: 'hwPerfect', g: 'class', icon: '🌟', name: 'Домашна без грешка', desc: 'Всички задачи от домашната – верни', test: function (st) { return cnt(st, 'hwPerfect') >= 1; } },
+    { id: 'hw10', g: 'class', icon: '🎒', name: 'Отличник по домашни', desc: '10 предадени домашни', test: function (st) { return cnt(st, 'hw') >= 10; } },
+    { id: 'challenge', g: 'class', icon: '🥇', name: 'Предизвикател', desc: 'Изпълнено седмично предизвикателство', test: function (st) { return ((st.challenge || {}).total || 0) >= 1; } },
+    { id: 'challenge5', g: 'class', icon: '👑', name: 'Шампион на седмиците', desc: '5 изпълнени седмични предизвикателства', test: function (st) { return ((st.challenge || {}).total || 0) >= 5; } },
+    { id: 'challenge10', g: 'class', icon: '🦸', name: 'Легенда на предизвикателствата', desc: '10 изпълнени седмични предизвикателства', test: function (st) { return ((st.challenge || {}).total || 0) >= 10; } },
+    { id: 'p1000', g: 'points', icon: '💰', name: 'Събирач на точки', desc: '1000 точки общо', test: function (st) { return st.points >= 1000; } },
+    { id: 'p5000', g: 'points', icon: '🪙', name: 'Пълна касичка', desc: '5000 точки общо', test: function (st) { return st.points >= 5000; } },
+    { id: 'p20000', g: 'points', icon: '💎', name: 'Съкровищница', desc: '20 000 точки общо', test: function (st) { return st.points >= 20000; } }
   ];
 
   function today() {
@@ -49,7 +96,7 @@
       streak: { count: 0, last: null }, daily: { date: today(), count: 0 }, dailyGoal: 20,
       badges: {}, best: {}, adventure: {}, modes: {}, practiceCorrect: 0, tableStreak: 0, maxCombo: 0,
       lastGrade: null, books: {}, settings: { sound: true },
-      skills: {}, days: {}, challenge: {}
+      skills: {}, days: {}, challenge: {}, counters: {}
     };
   }
 
@@ -80,7 +127,7 @@
       progress: next ? (points - RANKS[i].min) / (next.min - RANKS[i].min) : 1 };
   }
 
-  /* Точки, нива и значки се печелят само с абонамент (активен код). Без код – игрите са безплатни, но без точки. */
+  /* Точки, нива и значки се печелят само с абонамент. Без абонамент игрите са безплатни, но без точки. */
   function earns() { var S = window.Smetko || {}; return !(S.config && S.config.paywall) || !!(S.hasAccess && S.hasAccess()); }
   function award(id, out) {
     if (!earns()) return;
@@ -88,6 +135,12 @@
     state.badges[id] = today();
     for (var i = 0; i < BADGES.length; i++) if (BADGES[i].id === id) out.push(BADGES[i]);
   }
+  function checkAll(out) { // всички значки, които вече са заслужени
+    if (!earns()) return out;
+    for (var i = 0; i < BADGES.length; i++) { var b = BADGES[i]; if (b.test && !state.badges[b.id] && b.test(state)) award(b.id, out); }
+    return out;
+  }
+  function counter(k, n) { state.counters = state.counters || {}; state.counters[k] = (state.counters[k] || 0) + (n || 1); }
 
   function touchStreak() {
     var t = today(), s = state.streak;
@@ -102,6 +155,7 @@
     load();
     session = { mode: mode, grade: grade, topic: topic, start: Date.now(), combo: 0, correct: 0, wrong: 0, points: 0, correctTimes: [], newBadges: [] };
     state.modes[mode] = true; state.lastGrade = grade;
+    state.counters = state.counters || {}; state.counters.grades = state.counters.grades || {}; state.counters.grades[grade] = 1;
     save();
     return session;
   }
@@ -127,14 +181,7 @@
       state.daily.count += 1;
       touchStreak();
 
-      award('first', nb);
-      if (session.combo >= 10) award('combo10', nb);
-      if (state.correct >= 100) award('c100', nb);
-      if (state.correct >= 1000) award('c1000', nb);
-      if (state.tableStreak >= 20) award('table', nb);
-      if (state.practiceCorrect >= 50) award('practice50', nb);
-      if (state.streak.count >= 7) award('week', nb);
-      if (state.daily.count >= state.dailyGoal) award('daily', nb);
+      if (state.daily.count === state.dailyGoal) counter('goals');
       if (session.mode === 'quick' && session.correct >= 10 && (session.correctTimes[9] - session.start) <= 30000) award('speedy', nb);
     } else {
       session.combo = 0; session.wrong += 1;
@@ -142,8 +189,7 @@
     }
     if (!earns()) gained = 0;
     state.points += gained; session.points += gained;
-    if (state.points >= 1000) award('p1000', nb);
-    if (state.modes.quick && state.modes.adventure && state.modes.practice) award('explorer', nb);
+    checkAll(nb);
     session.newBadges = session.newBadges.concat(nb);
     save();
     return { gained: gained, combo: session.combo, mult: mult, newBadges: nb, rankUp: rank().idx > rankBefore ? rank() : null };
@@ -161,7 +207,7 @@
       s.isRecord = s.correct > s.prevBest;
       if (s.isRecord) state.best[key] = s.correct;
     }
-    if (state.points >= 1000) award('p1000', nb);
+    checkAll(nb);
     s.newBadges = s.newBadges.concat(nb);
     save();
     session = null;
@@ -174,9 +220,8 @@
     var nb = [];
     var g = state.adventure[grade] = state.adventure[grade] || {};
     if (!g[idx] || st > g[idx]) g[idx] = st;
-    if (st === 3) award('perfect', nb);
-    if (totalStars() >= 15) award('stars15', nb);
     if (st >= 1 && idx === total - 1) award('summit', nb);
+    checkAll(nb);
     save();
     return nb;
   }
@@ -195,7 +240,8 @@
   window.Smetko.Game = {
     get state() { return state; }, load: load, save: save, rank: rank, RANKS: RANKS, BADGES: BADGES,
     startSession: startSession, answer: answer, addBonus: addBonus, endSession: endSession,
-    awardBadge: function (id) { var nb = []; award(id, nb); save(); return nb; },
+    awardBadge: function (id) { var nb = []; award(id, nb); checkAll(nb); save(); return nb; },
+    event: function (k, n) { var nb = []; counter(k, n); checkAll(nb); save(); return nb; }, check: function () { var nb = checkAll([]); if (nb.length) save(); return nb; }, GROUPS: GROUPS,
     earns: earns, stars: stars, setStars: setStars, totalStars: totalStars, isUnlocked: isUnlocked,
     reset: reset, replace: replace, fresh: fresh, setSound: setSound, today: today,
     get session() { return session; }

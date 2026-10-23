@@ -13,7 +13,7 @@ $t = read_token((string)($in['token'] ?? ''));
 if (!$t) json_out(['ok' => false, 'error' => 'Невалиден токен.'], 401);
 $pdo = db();
 $st = $pdo->prepare('SELECT * FROM redemptions WHERE code = ? AND device = ?'); $st->execute([$t['c'], $t['d']]);
-$r = $st->fetch();
+$r = $st->fetch(); $st->closeCursor();
 if (!$r) json_out(['ok' => true, 'saved' => false]);
 
 $n = fn($k, $max) => max(0, min($max, (int)($in[$k] ?? 0)));
@@ -26,7 +26,7 @@ if ((int)$r['synced_at'] === 0) {
     $points = min($points, $correct * 35 + $stars * 20);
     $pdo->prepare('UPDATE redemptions SET points = ?, correct = ?, stars = ?, join_base = ?, week_base = ?, week = ?, synced_at = ? WHERE id = ?')
         ->execute([$points, $correct, $stars, $points, $points, week_key(), time(), (int)$r['id']]);
-    $st->execute([$t['c'], $t['d']]); $r = $st->fetch();
+    $st->execute([$t['c'], $t['d']]); $r = $st->fetch(); $st->closeCursor();
 }
 // правдоподобност (при изтрит прогрес числата падат – това се приема)
 $elapsed = max(0, time() - (int)$r['synced_at']);
@@ -50,7 +50,7 @@ if ($r['week'] !== $week) $base = (int)$r['points'];
 if ($points < $base) $base = $points;
 $join = min((int)$r['join_base'], $points);
 
-$nick = (int)$r['nick_block'] ? '' : clean_nick((string)($in['nickname'] ?? '')); // изтрит от админ прякор не се връща
+$nick = ((int)$r['nick_block'] || !empty($r['username'])) ? '' : clean_nick((string)($in['nickname'] ?? '')); // изтрит от админ прякор не се връща; името на ученик от клас се сменя само от учителя
 $stats = isset($in['stats']) ? clean_stats($in['stats']) : null;
 $sql = 'UPDATE redemptions SET last_seen = ?, synced_at = ?, points = ?, correct = ?, answered = ?, stars = ?, missions = ?, week = ?, week_base = ?, join_base = ?, flags = ?, day = ?, day_correct = ?' . ($stats ? ', stats = ?' : '') . ($nick ? ', nickname = ?' : '') . (isset($in['grade']) ? ', grade = ?' : '') . ' WHERE id = ?';
 $args = [now(), time(), $points, $correct, $answered, $stars, $missions, $week, $base, $join, min($flags, 1000000), today(), $dayCorrect];

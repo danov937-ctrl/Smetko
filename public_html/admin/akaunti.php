@@ -36,7 +36,7 @@ if ($acc && $action === 'unlink') { // кодът се маха от профи�
 }
 if ($acc && $action === 'delete') {
     if (mb_strtolower(post('confirm')) !== mb_strtolower($acc['email'])) { flash('За потвърждение напишете имейла на акаунта.', 'err'); $back(); }
-    foreach (['profiles', 'account_classes', 'auth_sessions'] as $t) $pdo->prepare("DELETE FROM $t WHERE account_id = ?")->execute([$id]);
+    foreach (['profiles', 'auth_sessions'] as $t) $pdo->prepare("DELETE FROM $t WHERE account_id = ?")->execute([$id]);
     $pdo->prepare('DELETE FROM accounts WHERE id = ?')->execute([$id]);
     audit('Изтрит акаунт', $acc['email']); flash('Акаунтът и профилите са изтрити.'); go('akaunti.php');
 }
@@ -53,9 +53,9 @@ if ($acc) {
                 ' <form method="post" style="display:inline">' . csrf_field() . '<input type="hidden" name="action" value="unlink"><input type="hidden" name="pid" value="' . (int)$p['id'] . '"><button class="ghost sm" data-confirm="Да махнем ли кода от профила?">✕</button></form>' : '<span class="muted">без код</span>') . '</td>' .
             '<td class="num">' . (int)($s['points'] ?? 0) . '</td><td class="num">' . (int)($s['answered'] ?? 0) . '</td><td>' . fdate($p['updated_at']) . '</td></tr>';
     }
-    $cs = $pdo->prepare('SELECT ac.*, b.label, b.class_name FROM account_classes ac LEFT JOIN batches b ON b.id = ac.batch_id WHERE ac.account_id = ?'); $cs->execute([$id]);
+    $cs = $pdo->prepare('SELECT c.code, c.type, c.expires_at, c.revoked, b.class_name, (SELECT COUNT(*) FROM redemptions r WHERE r.code = c.code) AS n FROM codes c LEFT JOIN batches b ON b.id = c.batch_id WHERE c.account_id = ? ORDER BY c.expires_at DESC'); $cs->execute([$id]);
     $cls = '';
-    foreach ($cs as $k) $cls .= '<li><a href="kodove.php?batch=' . (int)$k['batch_id'] . '">' . h($k['label'] ?: $k['class_name'] ?: '#' . $k['batch_id']) . '</a> <small class="muted mono">' . h($k['code']) . '</small></li>';
+    foreach ($cs as $k) $cls .= '<li><a class="mono" href="kodove.php?code=' . urlencode($k['code']) . '">' . h($k['code']) . '</a> · ' . h(TYPE_NAMES[$k['type']] ?? $k['type']) . ($k['type'] === 'class' ? ' ' . h($k['class_name'] ?: '') . ' · ' . (int)$k['n'] . ' ученици' : '') . ' · до ' . fdate($k['expires_at']) . ((int)$k['revoked'] ? ' <span class="tag tr">спрян</span>' : ($k['expires_at'] < today() ? ' <span class="tag">изтекъл</span>' : '')) . '</li>';
     $ns = $pdo->prepare('SELECT COUNT(*) FROM auth_sessions WHERE account_id = ? AND expires > ?'); $ns->execute([$id, time()]);
     $link = $_SESSION['reset_link'] ?? ''; unset($_SESSION['reset_link']);
     $btn = fn($a, $t, $cls = 'ghost', $conf = '') => '<form method="post" style="display:inline">' . csrf_field() . '<input type="hidden" name="action" value="' . $a . '"><input type="hidden" name="id" value="' . $id . '"><button class="' . $cls . '"' . ($conf ? ' data-confirm="' . h($conf) . '"' : '') . '>' . $t . '</button></form> ';
@@ -64,7 +64,7 @@ if ($acc) {
         '<div class="row">' . $btn('reset_link', '✉️ Изпрати връзка за нова парола', '') . $btn('logout_all', '🚪 Изведи от всички устройства') . $btn('toggle', (int)$acc['disabled'] ? '✅ Пусни акаунта' : '⛔ Спри акаунта', 'ghost', (int)$acc['disabled'] ? '' : 'Акаунтът няма да може да влиза. Продължаваме ли?') . '</div>' .
         ($link ? '<p class="hint">Връзка (важи 24 часа):</p><div class="row"><input id="rl" readonly value="' . h($link) . '" style="flex:1"><button type="button" class="ghost" data-copy="rl">📋 Копирай</button></div>' : '') . '</div>' .
         '<div class="card"><h2>Детски профили</h2>' . ($rows ? '<div class="tw"><table><thead><tr><th>Профил</th><th>Клас</th><th>Код</th><th class="num">Точки</th><th class="num">Задачи</th><th>Записан</th></tr></thead><tbody>' . $rows . '</tbody></table></div>' : '<p class="muted">Няма профили.</p>') . '</div>' .
-        ($cls || $acc['role'] === 'teacher' ? '<div class="card"><h2>Класове</h2>' . ($cls ? '<ul>' . $cls . '</ul>' : '<p class="muted">Няма добавени класове.</p>') . '</div>' : '') .
+        '<div class="card"><h2>Абонаменти</h2>' . ($cls ? '<ul>' . $cls . '</ul>' : '<p class="muted">Няма активирани кодове.</p>') . '</div>' .
         '<form method="post" class="card">' . csrf_field() . '<input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="' . $id . '"><h2>Изтриване</h2><p class="hint">Изтриват се акаунтът, детските профили и записаният прогрес (напр. по искане на родителя по GDPR). Активираните кодове и точките в класациите остават.</p><div class="row"><input name="confirm" placeholder="Напишете имейла за потвърждение" style="flex:1"><button class="red">🗑️ Изтрий акаунта</button></div></form>';
     page('Акаунт: ' . $acc['email'], $body, '<a class="btn ghost" href="akaunti.php">← Всички акаунти</a>');
 }
@@ -74,7 +74,7 @@ $where = []; $args = [];
 if ($q !== '') { $where[] = '(a.email LIKE ? OR a.name LIKE ? OR a.id IN (SELECT account_id FROM profiles WHERE name LIKE ? OR code LIKE ?))'; $l = '%' . $q . '%'; array_push($args, $l, $l, $l, '%' . strtoupper($q) . '%'); }
 if (isset($ROLE[$role])) { $where[] = 'a.role = ?'; $args[] = $role; }
 $sql = 'SELECT a.*, (SELECT COUNT(*) FROM profiles p WHERE p.account_id = a.id) AS np, (SELECT COUNT(*) FROM profiles p WHERE p.account_id = a.id AND p.code IS NOT NULL) AS nc,
-    (SELECT COUNT(*) FROM account_classes k WHERE k.account_id = a.id) AS nk FROM accounts a' . ($where ? ' WHERE ' . implode(' AND ', $where) : '') . ' ORDER BY a.id DESC';
+    (SELECT COUNT(*) FROM codes k WHERE k.account_id = a.id AND k.type = \'class\') AS nk FROM accounts a' . ($where ? ' WHERE ' . implode(' AND ', $where) : '') . ' ORDER BY a.id DESC';
 if (($_GET['export'] ?? '') === 'csv') {
     $st = $pdo->prepare($sql); $st->execute($args);
     csv_out('smetko-akaunti-' . date('Y-m-d') . '.csv', ['Имейл', 'Име', 'Роля', 'Профили', 'С код', 'Класове', 'Регистриран', 'Последен вход', 'Спрян'],
