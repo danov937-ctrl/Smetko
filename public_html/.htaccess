@@ -25,6 +25,8 @@ AddDefaultCharset UTF-8
   RewriteRule ^vhod/?$ /vhod.html [L]
   RewriteRule ^registracia/?$ /registracia.html [L]
   RewriteRule ^profil/?$ /profil.html [L]
+  RewriteRule ^tablo/?$ /tablo.html [L]
+  RewriteRule ^abonamenti/?$ /pricing.html [L]
   RewriteRule ^blog/?$ /blog/index.php [L]
   RewriteRule ^blog/([a-z0-9-]+)/?$ /blog/index.php?s=$1 [L,QSA]
   RewriteRule ^admin/?$ /admin/index.php [L,R=302]
