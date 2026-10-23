@@ -57,7 +57,7 @@ GRADES = {
             about='В 4. клас темите са 7: числата над 1000, събиране и изваждане на многоцифрени числа без и с преминаване, умножение и деление с едноцифрено и с двуцифрено число. Децата пишат римски цифри, мерят ъгли в градуси, разпознават куб, паралелепипед, цилиндър, конус, пирамида и сфера, намират лице на правоъгълник и квадрат и работят с мерните единици за лице.',
             ex=['4 528 + 3 271 = ?', 'XIV = ?', '2 345 · 3 = ?', '576 : 24 = ?', 'Лице на 8 см × 5 см = ?']),
 }
-BOOKS = {1: ['Просвета', 'Просвета Плюс', 'Бит и Техника', 'Архимед'], 2: ['Бит и Техника'], 3: ['Просвета', 'Бит и Техника'], 4: ['Бит и Техника']}
+BOOKS = {1: ['Просвета', 'Просвета Плюс', 'Бит и Техника', 'Архимед'], 2: ['Просвета', 'Просвета Плюс', 'Бит и Техника'], 3: ['Просвета', 'Просвета Плюс', 'Бит и Техника'], 4: ['Просвета', 'Просвета Плюс', 'Бит и Техника']}
 
 FAQ_INDEX = [
     ('По кой учебник са задачите?', 'Детето избира своя учебник и получава <b>по една мисия за всеки урок</b> от годишното разпределение – между 110 и 136 мисии за година, с уроците в същия ред. Ако учебникът още го няма в списъка, мисиите следват учебната програма на МОН – общият ред, по който работят всички одобрени учебници.'),
@@ -123,10 +123,11 @@ index = head('Сметко – математика като игра за 1.–
     <div class="section-head"><h2 class="lined">По твоя учебник</h2><p>Избираш учебника, по който учиш, и получаваш по една мисия за всеки урок в него – над 100 мисии за година.</p></div>
     <div class="book-strip">
       <div class="book-card"><b>Учебна програма на МОН</b><small>общ ред за всички учебници</small></div>
+      <div class="book-card"><b>Просвета</b><small>1., 2., 3. и 4. клас</small></div>
+      <div class="book-card"><b>Просвета Плюс</b><small>1., 2., 3. и 4. клас</small></div>
       <div class="book-card"><b>Бит и Техника</b><small>1., 2., 3. и 4. клас</small></div>
       <div class="book-card"><b>Архимед</b><small>1. клас</small></div>
-      <div class="book-card"><b>Просвета</b><small>3. клас</small></div>
-      <div class="book-card more"><b>Скоро още</b><small>Просвета Плюс, Клет, Анубис, Булвест</small></div>
+      <div class="book-card more"><b>Скоро още</b><small>Клет, Анубис, Булвест</small></div>
     </div>
   </div>
 </section>
@@ -283,8 +284,10 @@ game = head('Математически игри онлайн за 1.–4. кл�
       <button class="btn btn-sm btn-purple" id="end-btn" hidden style="margin-left:auto">Край</button>
     </div>
     <div class="score"><span class="pill" id="play-mode">Игра</span><span class="pill combo" id="combo"></span><span class="pill" id="level-pill">Трудност 1</span><span class="pill" id="pts">★ 0</span></div>
+    <div class="play-grid"><div class="play-main">
     <div class="stage"><div class="owl" id="play-owl" data-owl="hello"></div><div class="bubble" id="bubble" aria-live="polite">Да започваме!</div></div>
     <div class="qcard" id="qcard"><div id="qbody"></div></div>
+    </div><div class="play-side">
     <div class="keypad" id="keypad">
       <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
       <button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
@@ -293,6 +296,8 @@ game = head('Математически игри онлайн за 1.–4. кл�
     </div>
     <div class="choices" id="choices" hidden></div>
     <div class="next-row" id="next-row" hidden><button class="btn btn-green btn-lg" id="next-btn">Напред →</button></div>
+    <p class="kbd-hint">⌨️ Можеш да пишеш с клавиатурата: цифри, <kbd>Enter</kbd> – провери, <kbd>⌫</kbd> – изтрий</p>
+    </div></div>
   </div>
 </section>
 

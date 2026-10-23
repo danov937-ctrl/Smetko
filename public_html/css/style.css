@@ -1451,3 +1451,52 @@ body { overflow-x: clip; }
 .nav > a, .dd-btn { white-space: nowrap; }
 @media (min-width: 1100px) and (max-width: 1199px) { .nav > a, .dd-btn { font-size: .93rem; padding: 8px 7px; } .logo-word { font-size: .92em; } }
 @media (min-width: 1100px) and (max-width: 1259px) { .game-header .header-actions { gap: 5px; } .game-header .wrap { gap: 4px; } .game-header .logo-word { font-size: .85em; } }
+
+/* ---------- Играта на компютър: широко оформление вместо „телефон в средата“ ---------- */
+.kbd-hint { display: none; }
+.map.wide .map-node { width: 76px; font-size: 1.6rem; }
+.map.wide .map-node .n-label { top: calc(100% + 10px); left: 50%; right: auto; transform: translateX(-50%); max-width: 150px; font-size: .8rem; }
+.map.wide .map-node .n-stars { bottom: auto; top: -22px; font-size: .95rem; }
+.map.wide .map-owl { width: 70px; }
+@media (min-width: 1000px) and (min-height: 560px) {
+  .game-page main { padding-top: 6px; }
+  .game-wrap { max-width: 1100px; padding: 14px 24px 48px; }
+  #screen-map .map { max-width: 1060px; border-radius: 34px; }
+  #screen-map .map-head h2 { font-size: 1.7rem; }
+  /* избор на игра */
+  #screen-setup .game-wrap { max-width: 1060px; }
+  .today { padding: 14px 22px; }
+  .today .owl { width: 76px; }
+  .mode-btn { padding: 20px 14px; }
+  .mode-btn b { font-size: 1.25rem; hyphens: none; word-break: normal; }
+  .grade-tab { padding: 16px 4px; font-size: 1.15rem; }
+  .grade-tab b { font-size: 2.2rem; }
+  /* игрален екран: задачата вляво, клавиатурата вдясно */
+  .play-grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 28px; align-items: start; }
+  .play-main .stage { grid-template-columns: 130px 1fr; margin-bottom: 16px; }
+  .play-main .stage .owl { width: 130px; }
+  .play-main .stage .bubble { font-size: 1.15rem; padding: 14px 18px; }
+  .qcard { min-height: 300px; padding: 36px 28px; border-radius: 34px; }
+  .q-text { font-size: 4.2rem; }
+  .q-text.long { font-size: 1.6rem; }
+  .q-text.long .slot { font-size: 2rem; }
+  .fig { width: 280px; }
+  .explain { font-size: 1.25rem; }
+  .play-side { position: sticky; top: 90px; background: rgba(255,255,255,.55); border-radius: 30px; padding: 18px; box-shadow: var(--shadow-sm); }
+  .play-side .keypad, .play-side .choices { margin-top: 0; max-width: none; }
+  .play-side .key { min-height: 74px; font-size: 2rem; }
+  .play-side .choices { grid-template-columns: repeat(3, 1fr); }
+  .play-side .choices:not(.opts) .key { min-height: 96px; }
+  .play-side .choices.opts { grid-template-columns: 1fr; }
+  .play-side .choices.opts.figs { grid-template-columns: repeat(2, 1fr); }
+  .play-side .choices.opts .key { min-height: 64px; font-size: 1.25rem; overflow-wrap: normal; word-break: normal; }
+  .play-side .next-row { margin-top: 16px; }
+  .play-side .next-row .btn { width: 100%; }
+  .kbd-hint { display: block; margin: 14px 4px 0; text-align: center; color: var(--muted); font-weight: 700; font-size: .9rem; }
+  .kbd-hint kbd { display: inline-block; background: #fff; border: 1px solid var(--line); border-bottom-width: 3px; border-radius: 6px; padding: 0 6px; font: inherit; font-weight: 900; color: var(--navy); }
+  .play-top { margin-bottom: 16px; }
+  .play-top .progress { height: 22px; }
+  .score .pill { font-size: 1rem; padding: 8px 14px; }
+  /* резултат */
+  #screen-result .game-wrap { max-width: 820px; }
+}

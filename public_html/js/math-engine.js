@@ -364,10 +364,25 @@
   S.subFromN = function (lv, arg) { var n = pick(list(arg || '11')), b = rnd((n % 10) + 1, 9); return expr(n, MINUS, b, n - b); };
   S.fillTo10 = function (lv, arg) { var f = pick(list(arg || '1')), a = 10 - f, b = rnd(f + 1, 9); var t = Math.random() < .5 ? expr(a, PLUS, b, a + b) : expr(b, PLUS, a, a + b); t.full += ' (' + a + ' + ' + f + ' = 10, 10 + ' + (b - f) + ' = ' + (a + b) + ')'; return t; };
   S.three100 = function () { var a = rnd(1, 4) * 10 + rnd(0, 3), b = rnd(1, 3) * 10 + rnd(0, 3), c = rnd(1, 2) * 10 + rnd(0, 3); return T(a + ' + ' + b + ' + ' + c + ' = {?}', a + b + c, a + ' + ' + b + ' + ' + c + ' = ' + (a + b + c)); };
+  S.add2d1dNo = function () { var t = rnd(1, 9), u = rnd(0, 8), b = rnd(1, 9 - u), a = t * 10 + u; return expr(a, PLUS, b, a + b); }; // 22 + 5 (без преминаване)
+  S.sub2d1dNo = function () { var t = rnd(1, 9), u = rnd(1, 9), b = rnd(1, u), a = t * 10 + u; return expr(a, MINUS, b, a - b); };  // 27 – 4
   S.add2d1dX = function () { var t = rnd(1, 8), u = rnd(2, 9), b = rnd(10 - u, 9); var a = t * 10 + u; return expr(a, PLUS, b, a + b); };
   S.sub2d1dX = function () { var t = rnd(2, 9), u = rnd(0, 7), b = rnd(u + 1, 9); var a = t * 10 + u; return expr(a, MINUS, b, a - b); };
   S.make100 = function () { var b = rnd(11, 89); if (b % 10 === 0) b++; var a = 100 - b; return Math.random() < .5 ? expr(a, PLUS, b, 100) : expr(100, MINUS, b, a); };
   S.repAdd = function () { var a = rnd(2, 9), k = rnd(2, 5), parts = []; for (var i = 0; i < k; i++) parts.push(a); return Math.random() < .5 ? T(parts.join(' + ') + ' = ' + a + ' ' + TIMES + ' {?}', k, parts.join(' + ') + ' = ' + a + ' ' + TIMES + ' ' + k + ' = ' + a * k) : T(parts.join(' + ') + ' = {?}', a * k, a + ' ' + TIMES + ' ' + k + ' = ' + a * k); };
+  S.circle = function (lv) { // окръжност: радиус и диаметър
+    var r = rnd(2, lv > 2 ? 25 : 12), k = Math.random();
+    if (k < .4) return T('Радиусът на окръжност е ' + r + ' см. Колко е диаметърът? {?} см', 2 * r, 'Диаметърът е два пъти радиуса: ' + r + ' · 2 = ' + 2 * r + ' см');
+    if (k < .8) return T('Диаметърът на окръжност е ' + 2 * r + ' см. Колко е радиусът? {?} см', r, 'Радиусът е половината от диаметъра: ' + 2 * r + ' : 2 = ' + r + ' см');
+    return T('Колко радиуса се събират в един диаметър? {?}', 2, 'Диаметърът е равен на два радиуса');
+  };
+  S.divRem = function (lv) { // деление с остатък: 17 : 5 = 3 (ост. 2)
+    var b = rnd(2, lv > 1 ? 9 : 5), q = rnd(2, lv > 2 ? 30 : 9), r = rnd(1, b - 1), a = b * q + r, why = q + ' · ' + b + ' + ' + r + ' = ' + a;
+    if (Math.random() < .5) return T(a + ' : ' + b + ' = {?} (ост. ' + r + ')', q, a + ' : ' + b + ' = ' + q + ' (ост. ' + r + '), защото ' + why);
+    return T('Остатъкът при ' + a + ' : ' + b + ' е {?}', r, a + ' : ' + b + ' = ' + q + ' (ост. ' + r + '), защото ' + why);
+  };
+  S.mulBy = function (lv, arg) { var n = pick(list(arg || '2')), k = rnd(1, 10); return Math.random() < .5 ? expr(n, TIMES, k, n * k) : expr(k, TIMES, n, n * k); };   // само умножение
+  S.divBy = function (lv, arg) { var n = pick(list(arg || '2')), k = rnd(1, 10); return expr(n * k, DIV, n, k); };                                            // само деление
   S.mulDivBy = function (lv, arg) { var n = pick(list(arg || '2')), k = rnd(1, 10); if (Math.random() < .55) return Math.random() < .5 ? expr(n, TIMES, k, n * k) : expr(k, TIMES, n, n * k); return expr(n * k, DIV, n, k); };
   S.orderNoBr = function () { var r = rnd(0, 2), a, b, c; if (r === 0) { a = rnd(5, 40); b = rnd(2, 5); c = rnd(2, 9); return T(a + ' + ' + b + ' ' + TIMES + ' ' + c + ' = {?}', a + b * c, a + ' + ' + b * c + ' = ' + (a + b * c)); } if (r === 1) { c = rnd(2, 5); b = c * rnd(2, 9); a = rnd(b / c + 1, 60); return T(a + ' ' + MINUS + ' ' + b + ' ' + DIV + ' ' + c + ' = {?}', a - b / c, a + ' ' + MINUS + ' ' + b / c + ' = ' + (a - b / c)); } a = rnd(2, 5); b = rnd(2, 9); c = rnd(1, 30); return T(a + ' ' + TIMES + ' ' + b + ' + ' + c + ' = {?}', a * b + c, a * b + ' + ' + c + ' = ' + (a * b + c)); };
   S.mulEqual = function () { var a = rnd(1, 10); return Math.random() < .5 ? expr(a, DIV, a, 1) : expr(a, TIMES, 1, a); };
@@ -431,7 +446,7 @@
   // изпълнява умение по спецификация 'име' или 'име:аргумент'
   function runSkill(spec, lvl) {
     var i = spec.indexOf(':'), name = i < 0 ? spec : spec.slice(0, i), arg = i < 0 ? undefined : spec.slice(i + 1);
-    var t = S[name](lvl, arg); t.skill = name; t.table = /^(mulTable|divTable|unkFactor|mulDivBy)$/.test(name);
+    var t = S[name](lvl, arg); t.skill = name; t.table = /^(mulTable|divTable|unkFactor|mulDivBy|mulBy|divBy)$/.test(name);
     return t;
   }
   /* мисия по учебник: skills = [['addTo:5', тегло], ...] */

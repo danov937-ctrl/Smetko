@@ -60,6 +60,11 @@
       if (has('сравняване на сбор|сравняване на разлика|сбор и разлика с число|сбор със сбор|разлика с разлика')) add('cmpExprTo:' + Math.max(5, ctx.n || 5), 3);
       else if (has('сравняване') && lim && lim <= 10) { add('cmpExprTo:' + lim, 1); add(lim > 5 ? 'cmp10' : 'cmp5', 2); }
       else if (has('по-голямо, равно|сравняване на числа$|числата 1 и 2')) add('cmp5', 3);
+      // заглавия-примери от „Чуден свят“: „3 < 6, 6 > 3“, „2 + 1 > 2, 2 – 1 < 2“, „8 + 1 + 1“, „Сравняване (>, <, =)“
+      if (/\d\s*[+–-]\s*\d+\s*[<>]\s*\d/u.test(t)) add('cmpExprTo:' + Math.max(5, ctx.n || 5), 3);
+      else if (/^\s*\d+\s*[<>]\s*\d+/u.test(t)) { var cn = Math.max.apply(null, (t.match(/\d+/g) || ['5']).map(Number)); var nums0 = (t.match(/\d+/g) || []).map(Number); add(nums0.every(function (x) { return x % 10 === 0; }) && cn >= 20 ? 'tens100' : cn > 10 ? 'cmp20' : cn > 5 ? 'cmp10' : 'cmp5', 3); }
+      if (/\d\s*\+\s*\d\s*\+\s*\d/u.test(t)) add('threeTo:' + Math.max(5, ctx.n || 5), 3);
+      if (has('сравняване \\(')) add('cmp5', 3);
       if (has('действие събиране|^събиране и изваждане$') && !S.length) {
         if ((ctx.n || 3) > 10) { add(ctx.x ? 'add20x' : 'add20no', 2); add(ctx.x ? 'sub20x' : 'sub20no', 2); } else { add('addTo:3', 2); add('subTo:3', 1); }
       }
@@ -87,6 +92,13 @@
       var mfrom = /изваждане (?:на едноцифрен\p{L}* числ\p{L}* )?от ((?:1[1-8])(?:,? (?:и )?1[1-8])*)/u.exec(s);
       if (mfrom && !has('без') && !hasK(['subFromN'])) add('subFromN:' + mfrom[1].match(/1[1-8]/g).join(','), 3);
       var mnine = /събиране на ([6-9]) с едноцифрено/u.exec(s); if (mnine) add('fillTo10:' + (10 - +mnine[1]), 3);
+      // заглавия само с примери („Събиране: 9 + 2“, „9 + 3, 12 – 3“, „50 + 20, 70 – 20“): видът задачи се познава от числата
+      var exA = all(/(\d+)\s*\+\s*(\d+)/u, t).map(function (q) { return [+q[1], +q[2]]; }), exS = all(/(\d+)\s*[–-]\s*(\d+)/u, t).map(function (q) { return [+q[1], +q[2]]; });
+      var fills = uniqSort(exA.filter(function (p) { return p[0] < 10 && p[1] < 10 && p[0] + p[1] > 10; }).map(function (p) { return 10 - Math.max(p[0], p[1]); }));
+      if (fills.length && !hasK(['fillTo10', 'sumN'])) add('fillTo10:' + fills.join(','), 3);
+      var borrow = uniqSort(exS.filter(function (p) { return p[0] >= 11 && p[0] <= 18 && p[1] < 10 && p[0] % 10 < p[1]; }).map(function (p) { return p[0]; }));
+      if (borrow.length && !hasK(['subFromN'])) add('subFromN:' + borrow.join(','), 3);
+      if (exA.concat(exS).some(function (p) { return p[0] % 10 === 0 && p[1] % 10 === 0 && p[0] >= 20; }) && !hasIn(['tens100'])) add('tens100', 3);
       var mfill = /допълване с ([\d, и]+)/u.exec(s); if (mfill) add('fillTo10:' + mfill[1].match(/\d/g).join(','), 3);
       if (has('с преминаване|по-голям от 10|втори начин') && !hasK(['sumN', 'subFromN', 'fillTo10'])) {
         if (!has('изваждане') || has('събиране')) add('add20x', 2);
@@ -128,10 +140,24 @@
       if (has('сбор 100|от 100')) add('make100', 3);
       if (has('до 100') && has('видове триъгълници')) add('add100x', 1);
       if (has('магазин|книжарницата|библиотеката')) { add('notes100', 2); add('word2steps', 2); }
-      var grp = all(R('(?:умножение|деление)[^,.]*?\\b(?:с|със)\\s+((?:\\d+(?:,\\s*|\\s+и\\s+(?:с\\s+)?)?)+)'), s);
+      // примерите в скоби („(22 + 12)“, „(42 – 16)“) показват точно вида: с/без преминаване, с едноцифрено/двуцифрено
+      if (/\(|от вида/.test(s)) {
+        var kinds = [];
+        all(/(\d+)\s*([+–-])\s*(\d+)/u, t).forEach(function (q) {
+          var a = +q[1], op = q[2], b = +q[3]; if (a > 100 || b > 100) return;
+          if (op === '+') kinds.push(a + b === 100 ? 'make100' : (a < 10 || b < 10) ? (a % 10 + b % 10 >= 10 ? 'add2d1dX' : 'add2d1dNo') : (a % 10 + b % 10 >= 10 ? 'add100x' : 'add100no'));
+          else kinds.push(a === 100 ? 'make100' : b < 10 ? (a % 10 < b ? 'sub2d1dX' : 'sub2d1dNo') : (a % 10 < b % 10 ? 'sub100x' : 'sub100no'));
+        });
+        kinds = kinds.filter(function (k, i) { return kinds.indexOf(k) === i; });
+        if (kinds.length) { S = S.filter(function (x) { return ['add2d1dX', 'sub2d1dX', 'add2d1dNo', 'sub2d1dNo', 'add100x', 'sub100x', 'add100no', 'sub100no', 'make100'].indexOf(x[0]) < 0; }); kinds.forEach(function (k) { add(k, 3); }); }
+      }
+      var grp = all(R('(?:умножение|деление)[^,.]*?\\b(?:с|със)\\s+(?:числ(?:ото|ата)\\s+)?((?:\\d+(?:,\\s*|\\s+и\\s+(?:с\\s+)?)?)+)'), s);
       var dl = uniqSort([].concat.apply([], grp.map(function (q) { return (q[1].match(/\d+/g) || []).map(Number); })));
       if (has('до 6$')) dl = [2, 3, 4, 5, 6];
-      if (dl.length && !has('\\bс 0\\b')) add('mulDivBy:' + dl.join(','), 4);
+      if (dl.length && !has('\\bс 0\\b')) { add((has('^умножение') && !has('деление') ? 'mulBy:' : has('^деление') && !has('умножение') ? 'divBy:' : 'mulDivBy:') + dl.join(','), 4); ctx.tl = uniqSort((ctx.tl || []).concat(dl)); }
+      else if (has('^умножение$|^умножение и деление$') && ctx.tl && ctx.tl.length >= 2) { // упражнение след новите таблици: последните две + всичко научено
+        add('mulDivBy:' + ctx.tl.slice(-2).join(','), 3); add('mulDivBy:' + ctx.tl.join(','), 2);
+      }
       else if (has('^умножение$|^умножение и деление$')) { add('repAdd', 2); add('mulDivBy:2,3', 2); }
       else if (has('^деление$')) { add('mulDivBy:2', 2); add('divTable', 1); }
       if (has('разместително свойство на умножението|съдружително свойство на умножението')) add('mulTable', 3);
@@ -142,7 +168,12 @@
       if (has('\\bс 0\\b|нулата')) add('zeroMul', 3);
       if (has('неизвестен множител')) add('unkFactor', 3);
       if (has('таблично')) { add('mulTable', 3); add('divTable', 3); }
-      if (has('минута|денонощие|седмица|месец|година|час')) { add('time2', 3); add('clockHM', 1); }
+      if (has('минута|денонощие|седмица|месец|година|\\bчас\\b')) { add('time2', 3); add('clockHM', 1); }
+      if (has('действие умножение|множител\\. произведение') && !hasK(['mulDivBy', 'mulBy', 'divBy'])) { add('repAdd', 3); add('mulDivBy:2', 1); }
+      if (has('действие деление|делимо\\. делител')) { add('mulDivBy:2', 2); add('divTable', 2); }
+      if (has('^събиране и изваждане на числата до 100$|^числата до 100\\. събиране и изваждане$')) { add('add100x', 2); add('sub100x', 2); add('add100no', 1); }
+      if (has('^геометрични фигури$')) { add('triSides', 2); add('perim2', 2); }
+      if (has('мерни единици за дължина')) add('units2', 2);
       if (has('зоопарка|животните')) { add('mulTable', 2); add('timesWord', 1); }
     } else if (g === 3) {
       if (has('100, 200')) add('place1000', 3);
@@ -150,7 +181,7 @@
       if (has('сравняване')) add('cmp1000', 3);
       if (has('\\bправа\\b|\\bкрива\\b|\\bлъч|\\bлини')) add('lines', 3);
       if (has('километър|милиметър|за време и (за )?дължина|мерни единици$')) add('units3a', 3);
-      if (has('грам|тон\\b|секунда')) add('units3b', 3);
+      if (has('\\bграм|\\bтон\\b|секунда')) add('units3b', 3);
       if (has('\\bвек\\b|миналото|имало едно време')) add('century', 3);
       if (has('неизвестно умаляемо')) add('unkMinuend', 3);
       if (has('неизвестно делимо')) add('unkDividend', 3);
@@ -179,10 +210,14 @@
       if (has('косвена')) add('wordIndirect', 3);
       else if (has('текстов')) add(ctx.mul ? 'word3' : 'wordAddSub1000', 3);
       if (has('таблично')) { add('mulTable', 3); add('divTable', 3); }
-      if (has('умножение на сбор|разпределително')) add('distrib', 3);
+      if (has('остатък')) add('divRem', 3);
+      if (has('разпределително свойство на делението|деление на сбор')) add('divSum', 3);
+      else if (has('умножение на сбор|разпределително')) add('distrib', 3);
+      else if (has('умножение') && has('до 100\\b')) { add('mulTable', 3); add('divTable', 3); }
       else if (has('умножение') && !has('таблично')) { add('mul1d', 3); ctx.mul = true; }
-      if (has('деление на сбор')) add('divSum', 3);
+      if (has('деление на сбор|разпределително свойство на делението|остатък')) { /* вече е добавено */ }
       else if (has('получава 0|0 в реда')) add('div0q', 3);
+      else if (has('деление') && has('до 100\\b')) { /* таблично – добавено горе */ }
       else if (has('деление') && !has('таблично')) { add('div1d', 3); ctx.mul = true; }
       [[2, 'половинка'], [3, 'третинка'], [4, 'четвъртинка'], [10, 'десетинка']].forEach(function (p) { if (has(p[1])) add('partsN:' + p[0], 3); });
       if (has('устно смятане')) { add('mul1d', 2); add('div1d', 2); add('add1000no', 1); }
@@ -190,10 +225,34 @@
       if (has('преминаване') || ex.some(function (e) { return e[1] === '+' ? carryAdd(e[0], e[2]) : (e[1] === '–' || e[1] === '-') && borrowSub(e[0], e[2]); })) ctx.x = true;
     } else if (g === 4) {
       if (has('до 1000\\. преговор') && has('събиране')) { add('add1000x', 2); add('sub1000x', 2); }
-      if (has('1001|10 000|100 000|милион|естествени|клас, ред|бройна система|редове') && !has('събиране|изваждане|умножение|деление')) { add('placeBig', 3); add('nextPrevBig', 1); }
+      // начален преговор (Просвета, Просвета Плюс): числата, действията и фигурите до 1000
+      if (has('числата до 1000') && !has('събиране|изваждане|умножение|деление')) { add('place1000', 3); add('cmp1000', 2); }
+      if (has('до 1000') && has('събиране|изваждане') && !has('умножение|деление')) { add('add1000x', 3); add('sub1000x', 3); }
+      if (has('до 1000') && has('умножение|деление') && !has('с едноцифрено|двуцифрено')) { add('mul1d', 3); add('div1d', 3); }
+      if (has('^геометрични фигури')) { add('angles', 2); add('triAngles', 2); add('area', 1); }
+      if (has('мерни единици за дължина')) { add('units3a', 3); add('units3b', 2); }
+      if (has('неизвестно събираемо|неизвестно умаляемо')) add('unkMinuend', 3);
+      if (has('неизвестен множител|неизвестно делимо')) add('unkDividend', 3);
+      if (has('окръжност|радиус|диаметър')) add('circle', 3);
+      if (has('\\bъгли\\b')) add('degrees', 3);
+      if (has('декар')) { add('areaUnits', 3); add('wordArea', 1); }
+      if (has('свойства на умножението|умножение на (сбор|разлика)')) { add('mulBig1d', 2); add('distrib', 2); }
+      if (has('свойства на делението|деление на (сбор|разлика)')) { add('divBig1d', 2); add('divSum', 2); }
+      if (has('неизвестни числа')) { add('unkSubtrahend', 2); add('unkDivisor', 2); add('unkFactor', 1); }
+      if (has('остатък')) add('divRem', 3);
+      if (has('преминаване') && !has('без') && !has('умножение|деление') && !has('(едно|две|повече от две) преминава')) {
+        if (has('събиране') || !has('изваждане')) add('addBigX', 3);
+        if (has('изваждане') || !has('събиране')) add('subBigX', 3);
+      }
+      if (has('събиране и изваждане на естествени|^събиране и изваждане$')) { add('addBigX', 2); add('subBigX', 2); }
+      if (has('1001|10 000|100 000|\\d 000|милион|естествени|клас, ред|бройна система|редове|числата над 1000') && !has('събиране|изваждане|умножение|деление')) { add('placeBig', 3); add('nextPrevBig', 1); }
       if (has('сравняване')) add('cmpBig', 3);
       if (has('римски')) { add('romanRead', 3); add('romanWrite', 2); }
-      if (has('без преминаване') && !has('умножение|деление')) { add('addBigNo', 3); add('subBigNo', 3); }
+      if (has('без преминаване') && !has('умножение|деление')) { if (has('събиране') || !has('изваждане')) add('addBigNo', 3); if (has('изваждане') || !has('събиране')) add('subBigNo', 3); }
+      if (has('от вида') && !has('умножение|деление')) all(/(\d[\d ]*\d|\d)\s*([+–-])\s*(\d[\d ]*\d|\d)/u, t).forEach(function (q) { // „3000 + 2000; 5000 – 2000“
+        var a = +q[1].replace(/ /g, ''), b = +q[3].replace(/ /g, ''); if (a < 1000 && b < 1000) return;
+        if (q[2] === '+') add(carryAdd(a, b) ? 'addBigX' : 'addBigNo', 3); else add(borrowSub(a, b) ? 'subBigX' : 'subBigNo', 3);
+      });
       if (has('(едно|две|повече от две) преминава') && !has('умножение|деление')) {
         if (has('събиране') || !has('изваждане')) add('addBigX', 3);
         if (has('изваждане') || !has('събиране')) add('subBigX', 3);
@@ -211,7 +270,7 @@
       var mulw = has('умножение'), divw = has('деление');
       if (has('10, 100, 1000|20, 30')) { if (mulw) add('mulRound10', 3); if (divw) add('divRound10', 3); }
       else if (has('двуцифрено')) { if (mulw) add('mul2d', 3); if (divw) add('div2d', 3); }
-      else if (has('едноцифрено') || has('^деление') || has('^умножение')) { if (mulw) add(ctx.d2 ? 'mul2d' : 'mulBig1d', 3); if (divw) add(ctx.d2 ? 'div2d' : 'divBig1d', 3); }
+      else if (has('едноцифрено') || has('^деление') || has('^умножение')) { var d2 = ctx.d2 && !has('едноцифрено'); if (mulw) add(d2 ? 'mul2d' : 'mulBig1d', 3); if (divw) add(d2 ? 'div2d' : 'divBig1d', 3); }
       if (has('двуцифрено') && (mulw || divw)) ctx.d2 = true;
       if (has('до 1000\\. преговор|до 1000 с едноцифрено')) {
         S = S.filter(function (x) { return x[0] !== 'mulBig1d' && x[0] !== 'divBig1d'; });
@@ -287,7 +346,7 @@
     sumN: 'събиране с преминаване', subFromN: 'изваждане с преминаване', fillTo10: 'допълване до 10', add20x: 'събиране с преминаване', sub20x: 'изваждане с преминаване', clockHour: 'час', tens100: 'кръгли десетици',
     place100: 'числата до 100', cmp100: 'сравняване до 100', nextPrev100: 'преди/след до 100', units2: 'см, дм, м', add100no: 'до 100 без преминаване (+)', sub100no: 'до 100 без преминаване (–)', three100: 'сбор на три числа', brackets: 'скоби',
     orderNoBr: 'ред на действията', unkAddend: 'неизвестно събираемо', word2steps: 'задачи с две пресмятания', perim2: 'обиколка', triSides: 'видове триъгълници', add2d1dX: '47 + 5', sub2d1dX: '52 – 7', add100x: 'до 100 с преминаване (+)',
-    sub100x: 'до 100 с преминаване (–)', make100: 'до 100', notes100: 'банкноти', mulDivBy: 'таблично умножение и деление', repAdd: 'умножение като събиране', mulTable: 'таблица за умножение', divTable: 'таблично деление', timesWord: 'пъти повече/по-малко',
+    sub100x: 'до 100 с преминаване (–)', make100: 'до 100', notes100: 'банкноти', mulDivBy: 'таблично умножение и деление', mulBy: 'умножение', divBy: 'деление', divRem: 'деление с остатък', circle: 'окръжност', add2d1dNo: '22 + 5', sub2d1dNo: '27 – 4', repAdd: 'умножение като събиране', mulTable: 'таблица за умножение', divTable: 'таблично деление', timesWord: 'пъти повече/по-малко',
     evenOdd: 'четни/нечетни', mulEqual: 'равни числа', zeroMul: 'с нула', unkFactor: 'неизвестен множител', time2: 'мерки за време', clockHM: 'часовник', place1000: 'числата до 1000', nextPrev1000: 'преди/след до 1000', cmp1000: 'сравняване до 1000',
     lines: 'линии и лъч', units3a: 'мм, см, км', units3b: 'грам, тон, секунда', century: 'век', unkMinuend: 'неизвестно умаляемо', unkDividend: 'неизвестно делимо', triAngles: 'триъгълници по ъгли', angles: 'ъгли',
     add1000no: 'до 1000 без преминаване (+)', sub1000no: 'до 1000 без преминаване (–)', add1000x: 'до 1000 с преминаване (+)', sub1000x: 'до 1000 с преминаване (–)', make1000: 'до 1000', wordIndirect: 'задачи в косвена форма',
@@ -296,7 +355,7 @@
     addBigX: 'събиране с преминаване', subBigX: 'изваждане с преминаване', makeThousand: 'до кръгли хиляди', unkSubtrahend: 'неизвестен умалител', unkDivisor: 'неизвестен делител', degrees: 'градуси', solidsName: 'геометрични тела',
     solidsCount: 'стени, ръбове, върхове', sideFromArea: 'страна по лице', area: 'лице', areaUnits: 'мерки за лице', wordArea: 'задачи за лице', mulRound10: 'умножение с 10, 20…', divRound10: 'деление с 10, 20…', mul2d: 'умножение с двуцифрено',
     div2d: 'деление с двуцифрено', mulBig1d: 'умножение с едноцифрено', divBig1d: 'деление с едноцифрено', calcWord: 'задачи с умножение', wordBig: 'текстови задачи', count: 'броене' };
-  function skillTitle(spec) { var i = spec.indexOf(':'), n = i < 0 ? spec : spec.slice(0, i), a = i < 0 ? '' : spec.slice(i + 1); return (SKILL_TITLES[n] || n) + (a ? (n === 'mulDivBy' ? ' с ' : n === 'subFromN' ? ' от ' : n === 'sumN' ? ' със сбор ' : ' ') + a.replace(/,/g, ', ') : ''); }
+  function skillTitle(spec) { var i = spec.indexOf(':'), n = i < 0 ? spec : spec.slice(0, i), a = i < 0 ? '' : spec.slice(i + 1); return (SKILL_TITLES[n] || n) + (a ? (n === 'mulDivBy' || n === 'mulBy' || n === 'divBy' ? ' с ' : n === 'subFromN' ? ' от ' : n === 'sumN' ? ' със сбор ' : ' ') + a.replace(/,/g, ', ') : ''); }
 
   var api = { build: build, skillTitle: skillTitle, topicSkills: topicSkills };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

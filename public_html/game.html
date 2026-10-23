@@ -22,8 +22,8 @@
 <link rel="icon" href="assets/icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/nunito.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=21">
-<link rel="stylesheet" href="css/animations.css?v=21">
+<link rel="stylesheet" href="css/style.css?v=22">
+<link rel="stylesheet" href="css/animations.css?v=22">
 </head>
 <body class="game-page">
 <a class="skip" href="#main">Към съдържанието</a>
@@ -153,8 +153,10 @@
       <button class="btn btn-sm btn-purple" id="end-btn" hidden style="margin-left:auto">Край</button>
     </div>
     <div class="score"><span class="pill" id="play-mode">Игра</span><span class="pill combo" id="combo"></span><span class="pill" id="level-pill">Трудност 1</span><span class="pill" id="pts">★ 0</span></div>
+    <div class="play-grid"><div class="play-main">
     <div class="stage"><div class="owl" id="play-owl" data-owl="hello"></div><div class="bubble" id="bubble" aria-live="polite">Да започваме!</div></div>
     <div class="qcard" id="qcard"><div id="qbody"></div></div>
+    </div><div class="play-side">
     <div class="keypad" id="keypad">
       <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
       <button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
@@ -163,6 +165,8 @@
     </div>
     <div class="choices" id="choices" hidden></div>
     <div class="next-row" id="next-row" hidden><button class="btn btn-green btn-lg" id="next-btn">Напред →</button></div>
+    <p class="kbd-hint">⌨️ Можеш да пишеш с клавиатурата: цифри, <kbd>Enter</kbd> – провери, <kbd>⌫</kbd> – изтрий</p>
+    </div></div>
   </div>
 </section>
 
@@ -170,17 +174,17 @@
   <div class="game-wrap"><div class="panel result" id="result"></div></div>
 </section>
 </main>
-<script src="js/owl.js?v=21" defer></script>
-<script src="js/gamification.js?v=21" defer></script>
-<script src="js/audio.js?v=21" defer></script>
-<script src="js/access.js?v=21" defer></script>
-<script src="js/account.js?v=21" defer></script>
-<script src="js/math-engine.js?v=21" defer></script>
-<script src="js/lesson-map.js?v=21" defer></script>
-<script src="js/textbooks.js?v=21" defer></script>
-<script src="js/challenge.js?v=21" defer></script>
-<script src="js/homework.js?v=21" defer></script>
-<script src="js/app.js?v=21" defer></script>
-<script src="js/game.js?v=21" defer></script>
+<script src="js/owl.js?v=22" defer></script>
+<script src="js/gamification.js?v=22" defer></script>
+<script src="js/audio.js?v=22" defer></script>
+<script src="js/access.js?v=22" defer></script>
+<script src="js/account.js?v=22" defer></script>
+<script src="js/math-engine.js?v=22" defer></script>
+<script src="js/lesson-map.js?v=22" defer></script>
+<script src="js/textbooks.js?v=22" defer></script>
+<script src="js/challenge.js?v=22" defer></script>
+<script src="js/homework.js?v=22" defer></script>
+<script src="js/app.js?v=22" defer></script>
+<script src="js/game.js?v=22" defer></script>
 </body>
 </html>

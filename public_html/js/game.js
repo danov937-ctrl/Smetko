@@ -77,6 +77,40 @@
 
   // ---------- КАРТА ----------
   var MAP_W = 400, MAP_H = 1180;
+  /* На компютър картата е хоризонтална (като настолна игра): редове по 6 мисии, пътят се вие наляво-надясно. */
+  var WIDE_Q = window.matchMedia ? matchMedia('(min-width: 1000px) and (min-height: 560px)') : null;
+  function isWide() { return !!(WIDE_Q && WIDE_Q.matches); }
+  var PER_ROW = 6, ROW_H = 200;
+  function nodePosWide(i, n) {
+    var r = Math.floor(i / PER_ROW), k = i % PER_ROW, ltr = r % 2 === 0;
+    var x = 120 + (ltr ? k : PER_ROW - 1 - k) * (MAP_W - 240) / (PER_ROW - 1);
+    var y = MAP_H - 120 - r * ROW_H + 16 * Math.sin(i * 1.7);
+    return { x: x, y: y };
+  }
+  function widePathPts(pts) { // завои в краищата на редовете
+    var out = [];
+    pts.forEach(function (p, i) {
+      out.push(p);
+      if ((i + 1) % PER_ROW === 0 && pts[i + 1]) { var ltr = Math.floor(i / PER_ROW) % 2 === 0; out.push({ x: ltr ? MAP_W - 50 : 50, y: (p.y + pts[i + 1].y) / 2 }); }
+    });
+    return out;
+  }
+  function mapDecorWide() {
+    var s = '', W = MAP_W, top = MAP_H - 120 - (Math.ceil(16 / PER_ROW) - 1) * ROW_H;
+    // небе и планини горе
+    s += '<path d="M-20 ' + (top - 60) + ' L90 40 L170 110 L260 20 L360 120 L450 50 L560 130 L650 30 L760 120 L850 60 L1020 ' + (top - 60) + ' Z" fill="#8FB7DB"/>';
+    s += '<path d="M260 20 L232 64 L252 58 L266 72 L280 58 L296 66 Z M650 30 L620 76 L642 70 L656 84 L670 70 L688 78 Z M90 40 L70 76 L86 70 L96 82 L108 72 Z" fill="#fff"/>';
+    s += '<path d="M-20 ' + (top - 40) + ' C 200 ' + (top - 110) + ' 400 ' + (top - 70) + ' 520 ' + (top - 90) + ' C 700 ' + (top - 110) + ' 860 ' + (top - 70) + ' 1020 ' + (top - 90) + ' L1020 ' + (top + 10) + ' L-20 ' + (top + 10) + ' Z" fill="#9BDB72"/>';
+    s += '<g transform="translate(650 22)"><rect x="0" y="0" width="4" height="46" fill="#7B4A22"/><path d="M4 2 L36 12 L4 22 Z" fill="#FF5A5F"/></g>';
+    // река между редовете
+    for (var ry = MAP_H - 120 - ROW_H / 2; ry > top; ry -= ROW_H * 2) s += '<path d="M-20 ' + ry + ' C 200 ' + (ry - 26) + ' 380 ' + (ry + 24) + ' 520 ' + (ry + 6) + ' C 700 ' + (ry - 16) + ' 860 ' + (ry + 20) + ' 1020 ' + ry + ' L1020 ' + (ry + 22) + ' C 860 ' + (ry + 42) + ' 700 ' + (ry + 6) + ' 520 ' + (ry + 28) + ' C 380 ' + (ry + 46) + ' 200 ' + (ry - 4) + ' -20 ' + (ry + 22) + ' Z" fill="#7FD0FF" opacity=".85"/>';
+    // дървета по краищата
+    for (var ty = top + 30, k = 0; ty < MAP_H - 20; ty += 70, k++) [[26 + (k % 3) * 6, ty], [W - 28 - (k % 2) * 8, ty + 30]].forEach(function (t) {
+      s += '<rect x="' + (t[0] - 3) + '" y="' + (t[1] + 10) + '" width="6" height="16" fill="#7B4A22"/><circle cx="' + t[0] + '" cy="' + t[1] + '" r="20" fill="#3E9A36"/><circle cx="' + (t[0] + 12) + '" cy="' + (t[1] + 6) + '" r="13" fill="#4FAE3C"/>';
+    });
+    for (var i = 0; i < 70; i++) { var fx = (i * 137) % W, fy = top + 20 + (i * 211) % (MAP_H - top - 30); s += '<circle cx="' + fx + '" cy="' + fy + '" r="4" fill="' + ['#FFC531', '#FF5A5F', '#fff'][i % 3] + '" opacity=".9"/>'; }
+    return s;
+  }
   function nodePos(i, n) {
     var y = (MAP_H - 80) - i * (MAP_H - 80 - 170) / (n - 1);
     var x = 200 + 105 * Math.sin(i * 1.05 + 0.4);
@@ -123,11 +157,14 @@
     if (chapter === undefined || chapter === null) chapter = Math.floor(gcur / CH);
     chapter = Math.max(0, Math.min(nch - 1, chapter)); st.chapter = chapter;
     var off = chapter * CH, levels = all.slice(off, off + CH), n = levels.length;
-    MAP_H = Math.max(1180, 250 + n * 82);
+    var wide = isWide();
+    if (wide) { MAP_W = 1000; MAP_H = 260 + (Math.ceil(n / PER_ROW) - 1) * ROW_H + 120; }
+    else { MAP_W = 400; MAP_H = Math.max(1180, 250 + n * 82); }
     $('#map').style.aspectRatio = MAP_W + ' / ' + MAP_H;
-    var pts = levels.map(function (_, i) { return nodePos(i, n); });
-    var d = pathThrough(pts);
-    var svg = '<svg viewBox="0 0 ' + MAP_W + ' ' + MAP_H + '" preserveAspectRatio="none" aria-hidden="true">' + mapDecor() +
+    $('#map').classList.toggle('wide', wide);
+    var pts = levels.map(function (_, i) { return wide ? nodePosWide(i, n) : nodePos(i, n); });
+    var d = pathThrough(wide ? widePathPts(pts) : pts);
+    var svg = '<svg viewBox="0 0 ' + MAP_W + ' ' + MAP_H + '" preserveAspectRatio="none" aria-hidden="true">' + (wide ? mapDecorWide() : mapDecor()) +
       '<path d="' + d + '" stroke="#D9B77A" stroke-width="34" fill="none" stroke-linecap="round"/>' +
       '<path d="' + d + '" stroke="#F6DFAE" stroke-width="24" fill="none" stroke-linecap="round"/>' +
       '<path d="' + d + '" stroke="#fff" stroke-width="4" stroke-dasharray="2 14" fill="none" stroke-linecap="round" opacity=".9"/></svg>';
@@ -138,7 +175,7 @@
       var i = off + li, p = pts[li], s = stars[i] || 0;
       var unlocked = G.isUnlocked(key, i);
       var paid = S.config.paywall && !S.hasAccess() && i >= S.config.freeAdventureLevels;
-      var cls = 'map-node ' + (p.x > 200 ? 'left-label' : 'right-label');
+      var cls = 'map-node ' + (wide ? 'below-label' : p.x > 200 ? 'left-label' : 'right-label');
       if (!unlocked || paid) cls += ' locked'; else if (s > 0) cls += ' done';
       if (i === gcur && !paid) cls += ' current';
       var starStr = s ? '<span class="n-stars">' + '★★★'.slice(0, s) + '<span style="opacity:.35">' + '★★★'.slice(0, 3 - s) + '</span></span>' : '';
@@ -146,7 +183,7 @@
         ((!unlocked || paid) ? '<span class="lock">🔒</span>' : (i + 1)) + starStr + '<span class="n-label">' + shortLabel(lv[0]) + '</span></button>';
     });
     var cp = pts[current];
-    if (gcur >= off && gcur < off + n) html += '<div class="map-owl" data-owl="hello" style="left:' + (cp.x / MAP_W * 100 + 9) + '%;top:' + (cp.y / MAP_H * 100 - 2) + '%"></div>';
+    if (gcur >= off && gcur < off + n) html += '<div class="map-owl" data-owl="hello" style="left:' + (cp.x / MAP_W * 100 + (wide ? 6 : 9)) + '%;top:' + (cp.y / MAP_H * 100 - (wide ? 4 : 2)) + '%"></div>';
     var map = $('#map');
     map.innerHTML = html;
     S.renderOwls(map);
@@ -553,6 +590,7 @@
     sndUI();
   }
 
+  if (WIDE_Q) { var onWide = function () { var sc = document.getElementById('screen-map'); if (sc && sc.classList.contains('active')) renderMap(st.chapter); }; if (WIDE_Q.addEventListener) WIDE_Q.addEventListener('change', onWide); else if (WIDE_Q.addListener) WIDE_Q.addListener(onWide); }
   function init() {
     var q = new URLSearchParams(location.search);
     var g = +q.get('grade'), m = q.get('mode'), t = q.get('topic');
