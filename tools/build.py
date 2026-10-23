@@ -2,6 +2,7 @@
 """Генерира основните страници на smetko.com. Стартиране: python3 tools/build.py"""
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from seo_content import TOPICS  # noqa
 from common import *  # noqa
 import legal  # noqa: правните страници
 
@@ -74,14 +75,14 @@ def class_cards():
     for g, d in GRADES.items():
         lis = ''.join(f'<li>{t}</li>' for t in d['short'])
         out += f'''<article class="card class-card {d['c']}"><div class="cc-num">{g}</div><h3>{g}. клас</h3><ul>{lis}</ul>
-<div class="cc-actions"><a class="btn btn-sm" href="game.html?grade={g}&amp;mode=adventure">Играй</a><a class="btn btn-sm btn-ghost" href="class-{g}.html">Теми</a></div></article>'''
+<div class="cc-actions"><a class="btn btn-sm" href="game.html?grade={g}&amp;mode=adventure">Играй</a><a class="btn btn-sm btn-ghost" href="matematika-{g}-klas.html">Теми</a></div></article>'''
     return out
 
 
 # ================= index.html =================
 index = head('Сметко – математика като игра за 1.–4. клас',
              'Онлайн математически игри за 1., 2., 3. и 4. клас по учебната програма на МОН и по уроците в учебника на детето. Мисии, точки и значки – без реклами.',
-             'index.html', [ORG, {"@context": "https://schema.org", "@type": "WebApplication", "name": "Сметко", "url": SITE,
+             'index.html', [ORG, {"@context": "https://schema.org", "@type": "WebSite", "name": "Сметко", "alternateName": "Smetko", "url": SITE + '/', "inLanguage": "bg"}, {"@context": "https://schema.org", "@type": "WebApplication", "name": "Сметко", "url": SITE,
                                   "applicationCategory": "EducationalApplication", "operatingSystem": "Всички (уеб браузър)", "inLanguage": "bg",
                                   "educationalLevel": "1.–4. клас", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}}, faq_ld(FAQ_INDEX)],
              'home') + header(over=True) + f'''
@@ -149,6 +150,20 @@ index = head('Сметко – математика като игра за 1.–
 </section>
 
 <section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Безплатни помагала</h2><p>Онлайн тестове с автоматична проверка, таблици и подготовка за НВО – без регистрация.</p></div>
+    <div class="hub-top">
+      <a class="hub-card" href="testove-po-matematika.html" style="--c:#2F80ED"><span>✏️</span><b>Тестове по математика</b><small>За всяка тема от 1. до 4. клас</small></a>
+      <a class="hub-card" href="tablica-za-umnozhenie.html" style="--c:#FF5A5F"><span>✖️</span><b>Таблица за умножение</b><small>За печат, трикове и тест</small></a>
+      <a class="hub-card" href="nvo-4-klas-matematika.html" style="--c:#8E6CF0"><span>⏱️</span><b>НВО 4. клас</b><small>Тренировъчен тест с часовник</small></a>
+      <a class="hub-card" href="vhodno-nivo-matematika.html" style="--c:#FF9F1C"><span>🌱</span><b>Входно ниво</b><small>Тестове за 1.–4. клас</small></a>
+      <a class="hub-card" href="rimski-cifri.html" style="--c:#19B5A5"><span>Ⅻ</span><b>Римски цифри</b><small>Таблица и преобразувател</small></a>
+      <a class="hub-card" href="merni-edinici.html" style="--c:#4CBB4A"><span>📏</span><b>Мерни единици</b><small>Дължина, маса, време, лице</small></a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
   <div class="wrap split">
     <article class="aud-card parents" id="roditeli">
       <span class="eyebrow">За родители</span>
@@ -207,8 +222,9 @@ index = head('Сметко – математика като игра за 1.–
 write('index.html', index)
 
 # ================= game.html =================
-game = head('Игра – Сметко', 'Играй математически мисии по учебника, бързо смятане и тренировка за 1.–4. клас.', 'game.html', [], 'game-page') + header(game=True) + '''
+game = head('Математически игри онлайн за 1.–4. клас – Сметко', 'Безплатни математически игри онлайн за 1., 2., 3. и 4. клас: мисии по уроците в учебника, „Бързо сметни“ и тренировка по темите от програмата на МОН.', 'game.html', [], 'game-page') + header(game=True) + '''
 <main id="main">
+<h1 class="sr-only">Математически игри за 1.–4. клас</h1>
 <noscript><div class="noscript">За да играете, моля, включете JavaScript в браузъра.</div></noscript>
 
 <section class="screen" id="screen-setup" aria-label="Избор на игра">
@@ -289,19 +305,19 @@ write('game.html', game)
 
 # ================= class pages =================
 for g, d in GRADES.items():
-    items = ''.join(f'''<a class="topic-item" style="--c:{d['color']}" href="game.html?grade={g}&amp;mode=practice&amp;topic={tid}"><span class="t-ico">{i + 1}</span><span>{name}<small>Тема {i + 1} от програмата · тренировка</small></span><span class="t-go">→</span></a>''' for i, (tid, name) in enumerate(d['topics']))
+    items = ''.join(f'''<div class="topic-item" style="--c:{d['color']}"><span class="t-ico">{i + 1}</span><a class="t-link" href="{TOPICS[tid]['slug']}.html">{name}<small>Тема {i + 1} · обяснение, задачи и онлайн тест</small></a><a class="t-play" href="game.html?grade={g}&amp;mode=practice&amp;topic={tid}" aria-label="Тренировка: {name}">▶</a></div>''' for i, (tid, name) in enumerate(d['topics']))
     exs = ''.join(f'<li><b>{e}</b></li>' for e in d['ex'])
     books = ''.join(f'<span class="tag">{b}</span>' for b in BOOKS[g])
     faqs = [(f'Задачите по кой учебник са?', f'В „Приключение“ детето избира учебника си. За {g}. клас мисиите вече са подредени по уроците на: {", ".join(BOOKS[g])}. За останалите учебници мисиите следват учебната програма на МОН – общия ред на всички одобрени учебници.'),
             ('Мога ли да тренирам само една тема?', 'Да. Изберете темата от списъка горе. В „Тренировка“ няма часовник, а при грешка Сметко показва правилното решение.'),
             ('Трудността нагажда ли се?', 'Да. В „Бързо сметни“ и „Тренировка“ задачите стават по-трудни след серия верни отговори и по-лесни след няколко грешки.')]
     title = f'Математика за {g}. клас – задачи и игри онлайн | Сметко'
-    desc = f'Онлайн задачи по математика за {g}. клас по учебната програма на МОН: ' + ', '.join(t[1] for t in d['topics'][:3]).lower() + '. Мисии по уроците в учебника.'
-    ld = [crumbs([('Начало', ''), (f'{g}. клас', f'class-{g}.html')]),
-          {"@context": "https://schema.org", "@type": "LearningResource", "name": f"Математика за {g}. клас – Сметко", "url": f"{SITE}/class-{g}.html",
+    desc = f'Задачи, онлайн тестове и игри по математика за {g}. клас по програмата на МОН – всички {len(d["topics"])} теми с обяснения, примерни задачи и работни листове.'
+    ld = [crumbs([('Начало', ''), (f'Математика {g}. клас', f'matematika-{g}-klas.html')]),
+          {"@context": "https://schema.org", "@type": "LearningResource", "name": f"Математика за {g}. клас – Сметко", "url": f"{SITE}/matematika-{g}-klas.html",
            "inLanguage": "bg", "educationalLevel": f"{g}. клас", "learningResourceType": "Интерактивна игра", "teaches": [t[1] for t in d['topics']],
            "isAccessibleForFree": True}, faq_ld(faqs)]
-    html = head(title, desc, f'class-{g}.html', ld) + header() + page_hero(
+    html = head(title, desc, f'matematika-{g}-klas.html', ld, og=f'assets/og/matematika-{g}-klas.jpg') + header() + page_hero(
         f'Математика за {g}. клас', f'Задачи по учебната програма на МОН за {g}. клас. Мисии по уроците в твоя учебник, точки и значки.', f'{g}. клас',
         ['hello', 'happy', 'think', 'cheer'][g - 1],
         f'<div class="hero-cta"><a class="btn btn-lg btn-green" href="game.html?grade={g}&amp;mode=adventure">🗺️ Приключение</a><a class="btn btn-white" href="game.html?grade={g}&amp;mode=quick">⚡ Бързо сметни</a></div>') + f'''
@@ -327,12 +343,12 @@ for g, d in GRADES.items():
 <section class="section soft">
   <div class="wrap" style="text-align:center">
     <h2>Други класове</h2>
-    <div class="grade-buttons" style="margin:20px auto 0">{''.join(f'<a class="grade-btn g{x}" href="class-{x}.html"><b>{x}</b><small>клас</small></a>' for x in range(1, 5))}</div>
+    <div class="grade-buttons" style="margin:20px auto 0">{''.join(f'<a class="grade-btn g{x}" href="matematika-{x}-klas.html"><b>{x}</b><small>клас</small></a>' for x in range(1, 5))}</div>
   </div>
 </section>
 </main>
 ''' + FOOTER + scripts()
-    write(f'class-{g}.html', html)
+    write(f'matematika-{g}-klas.html', html)
 
 # ================= pricing.html =================
 FAQ_PRICE = [
@@ -344,7 +360,7 @@ FAQ_PRICE = [
     ('Мога ли да се откажа?', 'Да. Правата ви при отказ са описани в <a href="terms.html">Общите условия</a>, а формулярът за отказ е <a href="otkaz.html">тук</a>.'),
 ]
 paid = '<li>Мисии по учебника за всички класове</li><li>Неограничена тренировка</li><li>Точки, нива и значки</li><li>Всички класации</li>'
-pricing = head('Абонаменти – Сметко', 'Абонаменти за Сметко за 6 месеца и 1 година: индивидуален, семеен (4 деца) и за цял клас. Безплатен план и отстъпки за училища.',
+pricing = head('Абонаменти и цени – Сметко, математика за 1.–4. клас', 'Абонаменти за Сметко за 6 месеца и 1 година: индивидуален, семеен (4 деца) и за цял клас. Безплатен план и отстъпки за училища.',
                'pricing.html', [crumbs([('Начало', ''), ('Абонаменти', 'pricing.html')]), faq_ld(FAQ_PRICE)]) + header('pricing') + page_hero(
     'Абонаменти', 'По-малко от цената на една тетрадка на месец. Без реклами. Един код – активира се веднъж в акаунта ви.', 'Абонаменти', 'happy',
     '<div class="hero-cta"><a class="btn btn-lg btn-green" href="#activate">🔑 Имам код</a><a class="btn btn-white" href="#plans">Виж абонаментите</a></div>') + f'''
@@ -482,7 +498,7 @@ about = head('За родители и учители – Сметко', 'Как
 write('about.html', about)
 
 # ================= achievements.html =================
-ach = head('Постижения и класации – Сметко', 'Точки, нива, значки и рекорди в Сметко.', 'achievements.html') + header('ach') + page_hero(
+ach = head('Постижения, значки и класации – Сметко', 'Точки, нива, 51 значки и рекорди в Сметко – математическата игра за 1.–4. клас. Вижте своя напредък и класацията на класа.', 'achievements.html') + header('ach') + page_hero(
     'Постижения и класации', '<span id="rank-line">Ниво 1: Новак</span>', 'Постижения', 'cheer',
     '<div style="max-width:420px"><div class="rank-bar"><i id="rank-bar" style="width:0"></i></div><p class="rank-next" id="rank-next"></p></div>') + '''
 <main id="main">
@@ -566,6 +582,8 @@ def redirect_page(name, to, title):
     write(name, html)
 redirect_page('kod.html', 'pricing.html#activate', 'Активиране на абонамент')
 redirect_page('klasaciya.html', 'tablo.html', 'Табло за учителя')
+for g in range(1, 5):
+    redirect_page(f'class-{g}.html', f'matematika-{g}-klas.html', f'Математика {g}. клас')
 
 # ================= liga.html (общи класации) =================
 LIGA_FAQ = [
@@ -608,7 +626,7 @@ liga_pg = head('Обща класация – училища, класове и 
 write('liga.html', liga_pg)
 
 # ================= novini.html (новини) =================
-news_pg = head('Новини – Сметко', 'Новини от Сметко: нови мисии, предизвикателства, класации и промоции.', 'novini.html', [crumbs([('Начало', ''), ('Новини', 'novini.html')])], 'news-page') + header() + page_hero(
+news_pg = head('Новини – Сметко, математика като игра за 1.–4. клас', 'Новини от Сметко: нови мисии и учебници, седмични предизвикателства, класации, промоции и подобрения в играта по математика за 1.–4. клас.', 'novini.html', [crumbs([('Начало', ''), ('Новини', 'novini.html')])], 'news-page') + header() + page_hero(
     'Новини', 'Какво ново има в Сметко – мисии, предизвикателства, класации и подаръци.', 'Новини', 'cheer') + """
 <main id="main">
 <section class="section"><div class="wrap"><div class="news-list" id="news-list"><p class="lead-dark" style="text-align:center">Зареждам новините…</p></div></div></section>
@@ -635,7 +653,7 @@ write('otchet.html', rep_pg)
 def pw_field(id_, ph, ac):
     return f'<div class="pw-wrap"><input id="{id_}" class="input" type="password" placeholder="{ph}" autocomplete="{ac}" required minlength="{8 if ac == "new-password" else 1}"><button type="button" class="pw-eye" data-pw="{id_}" aria-label="Покажи паролата">👁️</button></div>'
 
-login_pg = head('Вход – Сметко', 'Вход в Сметко: родители и учители с имейл и парола, ученици – с потребител и парола от учителя.', 'vhod.html', [], 'acct-page-body') + header() + page_hero(
+login_pg = head('Вход за родители, учители и ученици – Сметко', 'Вход в Сметко: родители и учители с имейл и парола, ученици – с потребител и парола от учителя.', 'vhod.html', [], 'acct-page-body') + header() + page_hero(
     'Вход', 'Родители и учители – с имейл. Ученици – с името и паролата от картата от учителя.', 'Вход', 'hello') + f"""
 <main id="main">
 <section class="section"><div class="wrap acct-wrap">
@@ -755,7 +773,7 @@ tablo_pg = head('Табло – Сметко', 'Табло за учителя: 
 write('tablo.html', tablo_pg)
 
 # ================= za-nas.html (за нас) =================
-about_us = head('За нас – Сметко', 'Кои сме и защо направихме Сметко – математика като игра за 1.–4. клас, по учебната програма на МОН и по учебника на детето.', 'za-nas.html',
+about_us = head('За нас – Сметко, математика като игра за 1.–4. клас', 'Кои сме и защо направихме Сметко – математика като игра за 1.–4. клас, по учебната програма на МОН и по учебника на детето.', 'za-nas.html',
                 [crumbs([('Начало', ''), ('За нас', 'za-nas.html')]), ORG], 'about-us') + header('parents') + page_hero(
     'За нас', 'Направихме Сметко, защото математиката в началното училище заслужава да бъде толкова интересна, колкото любимата игра.', 'За нас', 'hello') + """
 <main id="main">
@@ -838,4 +856,5 @@ nf = head('Страницата не е намерена – Сметко', 'С�
 write('404.html', nf)
 
 legal.build()
+import seo  # noqa: страници по теми, помагала, sitemap-pages.xml
 print('ok')

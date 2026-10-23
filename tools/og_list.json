@@ -1,0 +1,233 @@
+[
+{
+"slug": "1-klas-chislata-do-5-i-nula",
+"title": "Числата до 5 и нула",
+"sub": "1. клас · задачи и онлайн тест",
+"color": "#FF5A5F",
+"pose": "hello"
+},
+{
+"slug": "1-klas-sabirane-i-izvazhdane-do-10",
+"title": "Числата до 10. Събиране и изваждане до 10",
+"sub": "1. клас · задачи и онлайн тест",
+"color": "#FF5A5F",
+"pose": "hello"
+},
+{
+"slug": "1-klas-chislata-ot-11-do-20",
+"title": "Числата от 11 до 20",
+"sub": "1. клас · задачи и онлайн тест",
+"color": "#FF5A5F",
+"pose": "hello"
+},
+{
+"slug": "1-klas-sabirane-i-izvazhdane-do-20-bez-preminavane",
+"title": "Събиране и изваждане до 20 без преминаване",
+"sub": "1. клас · задачи и онлайн тест",
+"color": "#FF5A5F",
+"pose": "hello"
+},
+{
+"slug": "1-klas-sabirane-i-izvazhdane-do-20-s-preminavane",
+"title": "Събиране и изваждане до 20 с преминаване",
+"sub": "1. клас · задачи и онлайн тест",
+"color": "#FF5A5F",
+"pose": "hello"
+},
+{
+"slug": "1-klas-kragli-desetici-do-100",
+"title": "Числата 10, 20, 30, … 100 (кръгли десетици)",
+"sub": "1. клас · задачи и онлайн тест",
+"color": "#FF5A5F",
+"pose": "hello"
+},
+{
+"slug": "2-klas-chislata-do-100",
+"title": "Числата до 100",
+"sub": "2. клас · задачи и онлайн тест",
+"color": "#FF9F1C",
+"pose": "happy"
+},
+{
+"slug": "2-klas-sabirane-i-izvazhdane-do-100-bez-preminavane",
+"title": "Събиране и изваждане до 100 без преминаване",
+"sub": "2. клас · задачи и онлайн тест",
+"color": "#FF9F1C",
+"pose": "happy"
+},
+{
+"slug": "2-klas-sabirane-i-izvazhdane-do-100-s-preminavane",
+"title": "Събиране и изваждане до 100 с преминаване",
+"sub": "2. клас · задачи и онлайн тест",
+"color": "#FF9F1C",
+"pose": "happy"
+},
+{
+"slug": "2-klas-umnozhenie-i-delenie",
+"title": "Таблично умножение и деление",
+"sub": "2. клас · задачи и онлайн тест",
+"color": "#FF9F1C",
+"pose": "happy"
+},
+{
+"slug": "3-klas-chislata-do-1000",
+"title": "Числата до 1000",
+"sub": "3. клас · задачи и онлайн тест",
+"color": "#4CBB4A",
+"pose": "think"
+},
+{
+"slug": "3-klas-sabirane-i-izvazhdane-do-1000-bez-preminavane",
+"title": "Събиране и изваждане до 1000 без преминаване",
+"sub": "3. клас · задачи и онлайн тест",
+"color": "#4CBB4A",
+"pose": "think"
+},
+{
+"slug": "3-klas-sabirane-i-izvazhdane-do-1000-s-preminavane",
+"title": "Събиране и изваждане до 1000 с преминаване",
+"sub": "3. клас · задачи и онлайн тест",
+"color": "#4CBB4A",
+"pose": "think"
+},
+{
+"slug": "3-klas-umnozhenie-s-ednotsifreno-chislo",
+"title": "Умножение на двуцифрено и трицифрено число с едноцифрено",
+"sub": "3. клас · задачи и онлайн тест",
+"color": "#4CBB4A",
+"pose": "think"
+},
+{
+"slug": "3-klas-delenie-s-ednotsifreno-chislo",
+"title": "Деление на двуцифрено и трицифрено число с едноцифрено",
+"sub": "3. клас · задачи и онлайн тест",
+"color": "#4CBB4A",
+"pose": "think"
+},
+{
+"slug": "4-klas-mnogotsifreni-chisla",
+"title": "Числата над 1000 (многоцифрени числа)",
+"sub": "4. клас · задачи и онлайн тест",
+"color": "#2F80ED",
+"pose": "cheer"
+},
+{
+"slug": "4-klas-sabirane-i-izvazhdane-bez-preminavane",
+"title": "Събиране и изваждане на многоцифрени числа без преминаване",
+"sub": "4. клас · задачи и онлайн тест",
+"color": "#2F80ED",
+"pose": "cheer"
+},
+{
+"slug": "4-klas-sabirane-i-izvazhdane-s-preminavane",
+"title": "Събиране и изваждане на многоцифрени числа с преминаване",
+"sub": "4. клас · задачи и онлайн тест",
+"color": "#2F80ED",
+"pose": "cheer"
+},
+{
+"slug": "4-klas-umnozhenie-s-ednotsifreno-chislo",
+"title": "Умножение на многоцифрено число с едноцифрено",
+"sub": "4. клас · задачи и онлайн тест",
+"color": "#2F80ED",
+"pose": "cheer"
+},
+{
+"slug": "4-klas-delenie-s-ednotsifreno-chislo",
+"title": "Деление на многоцифрено число с едноцифрено",
+"sub": "4. клас · задачи и онлайн тест",
+"color": "#2F80ED",
+"pose": "cheer"
+},
+{
+"slug": "4-klas-umnozhenie-s-dvutsifreno-chislo",
+"title": "Умножение на многоцифрено число с двуцифрено",
+"sub": "4. клас · задачи и онлайн тест",
+"color": "#2F80ED",
+"pose": "cheer"
+},
+{
+"slug": "4-klas-delenie-s-dvutsifreno-chislo",
+"title": "Деление на многоцифрено число с двуцифрено",
+"sub": "4. клас · задачи и онлайн тест",
+"color": "#2F80ED",
+"pose": "cheer"
+},
+{
+"slug": "tablica-za-umnozhenie",
+"title": "Таблица за умножение",
+"sub": "За печат, трикове и онлайн тест",
+"color": "#FF5A5F",
+"pose": "think"
+},
+{
+"slug": "rimski-cifri",
+"title": "Римски цифри",
+"sub": "Таблица, правила и преобразувател",
+"color": "#19B5A5",
+"pose": "think"
+},
+{
+"slug": "merni-edinici",
+"title": "Мерни единици",
+"sub": "Дължина, маса, време, лице, пари",
+"color": "#4CBB4A",
+"pose": "hello"
+},
+{
+"slug": "nvo-4-klas-matematika",
+"title": "НВО по математика 4. клас",
+"sub": "Тренировъчен тест: 25 задачи, 60 минути",
+"color": "#8E6CF0",
+"pose": "cheer"
+},
+{
+"slug": "vhodno-nivo-matematika",
+"title": "Входно ниво по математика",
+"sub": "1.–4. клас · онлайн тестове",
+"color": "#FF9F1C",
+"pose": "happy"
+},
+{
+"slug": "izhodno-nivo-matematika",
+"title": "Изходно ниво по математика",
+"sub": "1.–4. клас · онлайн тестове",
+"color": "#4CBB4A",
+"pose": "happy"
+},
+{
+"slug": "testove-po-matematika",
+"title": "Тестове по математика",
+"sub": "1.–4. клас · безплатно, онлайн",
+"color": "#2F80ED",
+"pose": "cheer"
+},
+{
+"slug": "matematika-1-klas",
+"title": "Математика за 1. клас",
+"sub": "Задачи, тестове и игри по програмата на МОН",
+"color": "#FF5A5F",
+"pose": "hello"
+},
+{
+"slug": "matematika-2-klas",
+"title": "Математика за 2. клас",
+"sub": "Задачи, тестове и игри по програмата на МОН",
+"color": "#FF9F1C",
+"pose": "happy"
+},
+{
+"slug": "matematika-3-klas",
+"title": "Математика за 3. клас",
+"sub": "Задачи, тестове и игри по програмата на МОН",
+"color": "#4CBB4A",
+"pose": "think"
+},
+{
+"slug": "matematika-4-klas",
+"title": "Математика за 4. клас",
+"sub": "Задачи, тестове и игри по програмата на МОН",
+"color": "#2F80ED",
+"pose": "cheer"
+}
+]

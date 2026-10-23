@@ -37,3 +37,12 @@ jobs:
             **/.git*/**
             api/data/*.sqlite
             api/data/*.sqlite-*
+
+      # IndexNow: известява Bing, Yandex и др. за страниците от картата на сайта (Google чете sitemap.xml през Search Console)
+      - name: IndexNow
+        continue-on-error: true
+        run: |
+          sleep 20
+          URLS=$(curl -s https://smetko.com/sitemap.xml | grep -o '<loc>[^<]*' | sed 's/<loc>//' | head -9000 | python3 -c "import sys,json;print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))")
+          curl -s -o /dev/null -w "IndexNow: %{http_code}\n" -X POST https://api.indexnow.org/indexnow -H 'Content-Type: application/json; charset=utf-8' \
+            -d "{\"host\":\"smetko.com\",\"key\":\"107b68eb892200bf27411226663f8987\",\"keyLocation\":\"https://smetko.com/107b68eb892200bf27411226663f8987.txt\",\"urlList\":$URLS}"

@@ -41,6 +41,8 @@
   function initWorksheet() {
     var g = $('ws-grade'), t = $('ws-topic'), lv = $('ws-level'), cnt = $('ws-count'), ans = $('ws-answers');
     function fillTopics() { t.innerHTML = topicOptions(+g.value, true); render(); }
+    var P = new URLSearchParams(location.search); // ?grade=2&topic=g2t4 – от страниците по теми
+    if (/^[1-4]$/.test(P.get('grade') || '')) { g.value = P.get('grade'); t.innerHTML = topicOptions(+g.value, true); if (t.querySelector('option[value="' + (P.get('topic') || '').replace(/[^a-z0-9]/g, '') + '"]')) t.value = P.get('topic'); render(); }
     function render() {
       var gr = +g.value, n = +cnt.value, seen = {}, tasks = [], guard = 0;
       while (tasks.length < n && guard++ < n * 60) {
@@ -66,7 +68,7 @@
     ans.addEventListener('change', function () { $('ws-key').hidden = !ans.checked; });
     $('ws-new').addEventListener('click', render);
     $('ws-print').addEventListener('click', function () { window.print(); });
-    fillTopics();
+    if (!/^[1-4]$/.test(P.get('grade') || '')) fillTopics();
   }
 
 

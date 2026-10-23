@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '18'
+VER = '19'
 EMAIL = 'info@smetko.com'
 
 # Данни за търговеца — попълват се след регистрация на фирмата (търсете „[ПОПЪЛНЕТЕ“ във всички файлове)
@@ -19,7 +19,7 @@ LOGO = ('<a class="logo" href="index.html" aria-label="Сметко – нача
         '<span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>')
 
 
-def head(title, desc, path, ld=None, body_class='', noindex=False):
+def head(title, desc, path, ld=None, body_class='', noindex=False, og=None):
     lds = ''.join('<script type="application/ld+json">%s</script>\n' % json.dumps(x, ensure_ascii=False) for x in (ld or []))
     canon = SITE + '/' + ('' if path == 'index.html' else path)
     robots = '<meta name="robots" content="noindex">\n' if noindex else ''
@@ -37,7 +37,9 @@ def head(title, desc, path, ld=None, body_class='', noindex=False):
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
 <meta property="og:url" content="{canon}">
-<meta property="og:image" content="{SITE}/assets/images/og-image.png">
+<meta property="og:image" content="{SITE}/{og or 'assets/images/og-image.png'}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:locale" content="bg_BG">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="manifest.json">
@@ -56,10 +58,12 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">Мисии <span class="chev">▾</span></button>
         <div class="dd-panel">
           <a href="game.html"><b>Всички игри</b><small>Приключение, Бързо сметни, Тренировка</small></a>
-          <a href="class-1.html"><b>1. клас</b><small>Числата до 20 и кръглите десетици</small></a>
-          <a href="class-2.html"><b>2. клас</b><small>До 100 и таблицата за умножение</small></a>
-          <a href="class-3.html"><b>3. клас</b><small>До 1000, умножение и деление</small></a>
-          <a href="class-4.html"><b>4. клас</b><small>Многоцифрени числа, лице, тела</small></a>
+          <a href="matematika-1-klas.html"><b>1. клас</b><small>Числата до 20 и кръглите десетици</small></a>
+          <a href="matematika-2-klas.html"><b>2. клас</b><small>До 100 и таблицата за умножение</small></a>
+          <a href="matematika-3-klas.html"><b>3. клас</b><small>До 1000, умножение и деление</small></a>
+          <a href="matematika-4-klas.html"><b>4. клас</b><small>Многоцифрени числа, лице, тела</small></a>
+          <a href="testove-po-matematika.html"><b>✏️ Онлайн тестове</b><small>По теми, входно ниво, НВО 4. клас</small></a>
+          <a href="tablica-za-umnozhenie.html"><b>✖️ Таблица за умножение</b><small>За печат, трикове и тест</small></a>
         </div></div>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="ach">Класации <span class="chev">▾</span></button>
         <div class="dd-panel">
@@ -89,7 +93,9 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
 MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
     <div class="m-auth" data-acct-m><a class="btn btn-ghost" href="vhod.html">Вход</a><a class="btn btn-teal" href="registracia.html">Регистрация</a></div>
     <a href="game.html">🎮 Мисии и игри</a>
-    <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
+    <div class="m-grades"><a href="matematika-1-klas.html">1. клас</a><a href="matematika-2-klas.html">2. клас</a><a href="matematika-3-klas.html">3. клас</a><a href="matematika-4-klas.html">4. клас</a></div>
+    <a href="testove-po-matematika.html">✏️ Онлайн тестове</a>
+    <a href="tablica-za-umnozhenie.html">✖️ Таблица за умножение</a>
     <a href="liga.html">🏆 Обща класация</a>
     <a href="achievements.html">⭐ Моите постижения</a>
     <a href="novini.html">📰 Новини <b class="m-news" data-news-count hidden></b></a>
@@ -134,10 +140,19 @@ FOOTER = '''<footer class="site-footer">
       </div>
       <div><h4>Игри</h4><ul>
         <li><a href="game.html">Мисии</a></li>
-        <li><a href="class-1.html">Математика 1. клас</a></li>
-        <li><a href="class-2.html">Математика 2. клас</a></li>
-        <li><a href="class-3.html">Математика 3. клас</a></li>
-        <li><a href="class-4.html">Математика 4. клас</a></li>
+        <li><a href="matematika-1-klas.html">Математика 1. клас</a></li>
+        <li><a href="matematika-2-klas.html">Математика 2. клас</a></li>
+        <li><a href="matematika-3-klas.html">Математика 3. клас</a></li>
+        <li><a href="matematika-4-klas.html">Математика 4. клас</a></li>
+      </ul></div>
+      <div><h4>Помагала</h4><ul>
+        <li><a href="testove-po-matematika.html">Тестове по математика</a></li>
+        <li><a href="tablica-za-umnozhenie.html">Таблица за умножение</a></li>
+        <li><a href="nvo-4-klas-matematika.html">НВО 4. клас математика</a></li>
+        <li><a href="vhodno-nivo-matematika.html">Входно ниво</a> · <a href="izhodno-nivo-matematika.html">Изходно ниво</a></li>
+        <li><a href="rimski-cifri.html">Римски цифри</a></li>
+        <li><a href="merni-edinici.html">Мерни единици</a></li>
+        <li><a href="rabotni-listove.html">Работни листове</a></li>
       </ul></div>
       <div><h4>За възрастните</h4><ul>
         <li><a href="about.html#roditeli">За родители</a></li>

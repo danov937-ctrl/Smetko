@@ -42,7 +42,6 @@ function db(): PDO {
     }
     // абонаментите се активират от акаунт; ученикът от клас влиза с потребител и парола (ред в redemptions)
     foreach (['account_id INTEGER', 'activated_at TEXT', 'order_id INTEGER'] as $col) if (!$has('codes', strtok($col, ' '))) $pdo->exec('ALTER TABLE codes ADD COLUMN ' . $col);
-    if (!$has('accounts', 'google_sub')) { $pdo->exec('ALTER TABLE accounts ADD COLUMN google_sub TEXT'); $pdo->exec('CREATE INDEX IF NOT EXISTS idx_acc_gsub ON accounts(google_sub)'); }
     foreach (['account_id INTEGER', 'book TEXT', 'message TEXT', 'message_at TEXT'] as $col) if (!$has('batches', strtok($col, ' '))) $pdo->exec('ALTER TABLE batches ADD COLUMN ' . $col);
     foreach (['username TEXT', 'pass_hash TEXT', 'pass_enc TEXT', 'avatar TEXT', 'state TEXT', 'rev INTEGER DEFAULT 0'] as $col) if (!$has('redemptions', strtok($col, ' '))) $pdo->exec('ALTER TABLE redemptions ADD COLUMN ' . $col);
     $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_red_user ON redemptions(username); CREATE INDEX IF NOT EXISTS idx_codes_acc ON codes(account_id); CREATE INDEX IF NOT EXISTS idx_batch_acc ON batches(account_id)');
@@ -64,6 +63,8 @@ function db(): PDO {
       CREATE TABLE IF NOT EXISTS challenges (week TEXT, grade INTEGER, title TEXT, skills TEXT, PRIMARY KEY(week, grade));
       CREATE TABLE IF NOT EXISTS challenge_scores (rid INTEGER, week TEXT, grade INTEGER, best INTEGER, at TEXT, PRIMARY KEY(rid, week, grade));
       CREATE TABLE IF NOT EXISTS books (id INTEGER PRIMARY KEY AUTOINCREMENT, grade INTEGER, bid TEXT UNIQUE, publisher TEXT, title TEXT, source TEXT, lessons TEXT, active INTEGER DEFAULT 1, created_at TEXT);");
+    // вход с Google (след създаването на таблицата accounts – важи и за нова база)
+    if (!$has('accounts', 'google_sub')) { $pdo->exec('ALTER TABLE accounts ADD COLUMN google_sub TEXT'); $pdo->exec('CREATE INDEX IF NOT EXISTS idx_acc_gsub ON accounts(google_sub)'); }
     return $pdo;
 }
 

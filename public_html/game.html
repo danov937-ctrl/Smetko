@@ -3,16 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Игра – Сметко</title>
-<meta name="description" content="Играй математически мисии по учебника, бързо смятане и тренировка за 1.–4. клас.">
+<title>Математически игри онлайн за 1.–4. клас – Сметко</title>
+<meta name="description" content="Безплатни математически игри онлайн за 1., 2., 3. и 4. клас: мисии по уроците в учебника, „Бързо сметни“ и тренировка по темите от програмата на МОН.">
 <link rel="canonical" href="https://smetko.com/game.html">
 <meta name="theme-color" content="#3299FF">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Сметко">
-<meta property="og:title" content="Игра – Сметко">
-<meta property="og:description" content="Играй математически мисии по учебника, бързо смятане и тренировка за 1.–4. клас.">
+<meta property="og:title" content="Математически игри онлайн за 1.–4. клас – Сметко">
+<meta property="og:description" content="Безплатни математически игри онлайн за 1., 2., 3. и 4. клас: мисии по уроците в учебника, „Бързо сметни“ и тренировка по темите от програмата на МОН.">
 <meta property="og:url" content="https://smetko.com/game.html">
 <meta property="og:image" content="https://smetko.com/assets/images/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:locale" content="bg_BG">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="manifest.json">
@@ -20,8 +22,8 @@
 <link rel="icon" href="assets/icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/nunito.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=18">
-<link rel="stylesheet" href="css/animations.css?v=18">
+<link rel="stylesheet" href="css/style.css?v=19">
+<link rel="stylesheet" href="css/animations.css?v=19">
 </head>
 <body class="game-page">
 <a class="skip" href="#main">Към съдържанието</a>
@@ -32,10 +34,12 @@
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true">Мисии <span class="chev">▾</span></button>
         <div class="dd-panel">
           <a href="game.html"><b>Всички игри</b><small>Приключение, Бързо сметни, Тренировка</small></a>
-          <a href="class-1.html"><b>1. клас</b><small>Числата до 20 и кръглите десетици</small></a>
-          <a href="class-2.html"><b>2. клас</b><small>До 100 и таблицата за умножение</small></a>
-          <a href="class-3.html"><b>3. клас</b><small>До 1000, умножение и деление</small></a>
-          <a href="class-4.html"><b>4. клас</b><small>Многоцифрени числа, лице, тела</small></a>
+          <a href="matematika-1-klas.html"><b>1. клас</b><small>Числата до 20 и кръглите десетици</small></a>
+          <a href="matematika-2-klas.html"><b>2. клас</b><small>До 100 и таблицата за умножение</small></a>
+          <a href="matematika-3-klas.html"><b>3. клас</b><small>До 1000, умножение и деление</small></a>
+          <a href="matematika-4-klas.html"><b>4. клас</b><small>Многоцифрени числа, лице, тела</small></a>
+          <a href="testove-po-matematika.html"><b>✏️ Онлайн тестове</b><small>По теми, входно ниво, НВО 4. клас</small></a>
+          <a href="tablica-za-umnozhenie.html"><b>✖️ Таблица за умножение</b><small>За печат, трикове и тест</small></a>
         </div></div>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="ach">Класации <span class="chev">▾</span></button>
         <div class="dd-panel">
@@ -71,7 +75,9 @@
   <nav class="mobile-nav" aria-label="Мобилно меню">
     <div class="m-auth" data-acct-m><a class="btn btn-ghost" href="vhod.html">Вход</a><a class="btn btn-teal" href="registracia.html">Регистрация</a></div>
     <a href="game.html">🎮 Мисии и игри</a>
-    <div class="m-grades"><a href="class-1.html">1. клас</a><a href="class-2.html">2. клас</a><a href="class-3.html">3. клас</a><a href="class-4.html">4. клас</a></div>
+    <div class="m-grades"><a href="matematika-1-klas.html">1. клас</a><a href="matematika-2-klas.html">2. клас</a><a href="matematika-3-klas.html">3. клас</a><a href="matematika-4-klas.html">4. клас</a></div>
+    <a href="testove-po-matematika.html">✏️ Онлайн тестове</a>
+    <a href="tablica-za-umnozhenie.html">✖️ Таблица за умножение</a>
     <a href="liga.html">🏆 Обща класация</a>
     <a href="achievements.html">⭐ Моите постижения</a>
     <a href="novini.html">📰 Новини <b class="m-news" data-news-count hidden></b></a>
@@ -87,6 +93,7 @@
 </header>
 
 <main id="main">
+<h1 class="sr-only">Математически игри за 1.–4. клас</h1>
 <noscript><div class="noscript">За да играете, моля, включете JavaScript в браузъра.</div></noscript>
 
 <section class="screen" id="screen-setup" aria-label="Избор на игра">
@@ -162,17 +169,17 @@
   <div class="game-wrap"><div class="panel result" id="result"></div></div>
 </section>
 </main>
-<script src="js/owl.js?v=18" defer></script>
-<script src="js/gamification.js?v=18" defer></script>
-<script src="js/audio.js?v=18" defer></script>
-<script src="js/access.js?v=18" defer></script>
-<script src="js/account.js?v=18" defer></script>
-<script src="js/math-engine.js?v=18" defer></script>
-<script src="js/lesson-map.js?v=18" defer></script>
-<script src="js/textbooks.js?v=18" defer></script>
-<script src="js/challenge.js?v=18" defer></script>
-<script src="js/homework.js?v=18" defer></script>
-<script src="js/app.js?v=18" defer></script>
-<script src="js/game.js?v=18" defer></script>
+<script src="js/owl.js?v=19" defer></script>
+<script src="js/gamification.js?v=19" defer></script>
+<script src="js/audio.js?v=19" defer></script>
+<script src="js/access.js?v=19" defer></script>
+<script src="js/account.js?v=19" defer></script>
+<script src="js/math-engine.js?v=19" defer></script>
+<script src="js/lesson-map.js?v=19" defer></script>
+<script src="js/textbooks.js?v=19" defer></script>
+<script src="js/challenge.js?v=19" defer></script>
+<script src="js/homework.js?v=19" defer></script>
+<script src="js/app.js?v=19" defer></script>
+<script src="js/game.js?v=19" defer></script>
 </body>
 </html>

@@ -23,6 +23,10 @@
   var PLUS = '+', MINUS = '−', TIMES = '.', DIV = ':';
   TIMES = '·';
 
+  function U(n) { return n + (n === 1 ? ' единица' : ' единици'); } // 1 единица, 3 единици
+  function D(n) { return n + (n === 1 ? ' десетица' : ' десетици'); }
+  function H(n) { return n + (n === 1 ? ' стотица' : ' стотици'); }
+  function K(n) { return fmt(n) + (n === 1 ? ' хиляда' : ' хиляди'); }
   function T(q, answer, full, extra) {
     var t = { q: q, answer: answer, kind: 'number', full: full };
     if (extra) for (var k in extra) t[k] = extra[k];
@@ -170,7 +174,7 @@
     if (Math.random() < .5) { a = rnd(2, 7); b = rnd(1, 10 - a); return word(m + ' има ' + a + ' топчета. Получава още ' + b + '. Колко топчета има сега?', a + b, a + ' + ' + b + ' = ' + (a + b)); }
     a = rnd(4, 10); b = rnd(1, a - 1); return word('На дървото има ' + a + ' птички. Отлитат ' + b + '. Колко птички остават?', a - b, a + ' ' + MINUS + ' ' + b + ' = ' + (a - b));
   };
-  S.place20 = function () { var u = rnd(0, 9); if (Math.random() < .5) return T('1 десетица и ' + u + ' единици = {?}', 10 + u, '1 десетица и ' + u + ' единици = ' + (10 + u)); return T('В числото ' + (10 + u) + ' има 1 десетица и {?} единици.', u, (10 + u) + ' = 10 + ' + u); };
+  S.place20 = function () { var u = rnd(0, 9); if (Math.random() < .5) return T('1 десетица и ' + U(u) + ' = {?}', 10 + u, '1 десетица и ' + U(u) + ' = ' + (10 + u)); return T('В числото ' + (10 + u) + ' има 1 десетица и {?} ' + (u === 1 ? 'единица.' : 'единици.'), u, (10 + u) + ' = 10 + ' + u); };
   S.nextPrev20 = function () { var n = rnd(11, 19); return Math.random() < .5 ? T('Кое число е <b>след</b> ' + n + '? {?}', n + 1, 'След ' + n + ' е ' + (n + 1) + '.') : T('Кое число е <b>преди</b> ' + n + '? {?}', n - 1, 'Преди ' + n + ' е ' + (n - 1) + '.'); };
   S.cmp20 = function () { var x = rnd(10, 20), y = Math.random() < .2 ? x : rnd(10, 20); return cmpNums(x, y); };
   S.cm20 = function () {
@@ -205,7 +209,7 @@
   S.notes100 = function () { var opts = [5, 10, 20, 50], a = pick(opts), b = pick(opts.filter(function (x) { return x + a <= 100; })); var items = [a, b]; if (Math.random() < .4) { var c = pick([10, 20].filter(function (x) { return x + a + b <= 100; })); if (c) items.push(c); } var sum = items.reduce(function (p, q) { return p + q; }, 0); return T('Колко евро са общо? {?} €', sum, items.join(' + ') + ' = ' + sum + ' евро', { figure: money(items.map(note)) }); };
 
   // ===== 2. КЛАС =====
-  S.place100 = function () { var t = rnd(2, 9), u = rnd(0, 9); var r = Math.random(); if (r < .4) return T(t + ' десетици и ' + u + ' единици = {?}', t * 10 + u, t + ' дес. и ' + u + ' ед. = ' + (t * 10 + u)); if (r < .7) return T('Колко десетици има в числото ' + (t * 10 + u) + '? {?}', t, (t * 10 + u) + ' = ' + t + ' десетици и ' + u + ' единици'); return T('Колко единици има в числото ' + (t * 10 + u) + '? {?}', u, (t * 10 + u) + ' = ' + t + ' десетици и ' + u + ' единици'); };
+  S.place100 = function () { var t = rnd(2, 9), u = rnd(0, 9); var r = Math.random(); if (r < .4) return T(D(t) + ' и ' + U(u) + ' = {?}', t * 10 + u, t + ' дес. и ' + u + ' ед. = ' + (t * 10 + u)); if (r < .7) return T('Колко десетици има в числото ' + (t * 10 + u) + '? {?}', t, (t * 10 + u) + ' = ' + D(t) + ' и ' + U(u)); return T('Колко единици има в числото ' + (t * 10 + u) + '? {?}', u, (t * 10 + u) + ' = ' + D(t) + ' и ' + U(u)); };
   S.cmp100 = function (lv) { var x = rnd(10, 100), y = Math.random() < .15 ? x : (lv === 1 ? rnd(10, 100) : Math.max(0, Math.min(100, x + pick([-10, -1, 1, 10, 9, -9])))); return cmpNums(x, y); };
   S.nextPrev100 = function () { var n = rnd(21, 99); return Math.random() < .5 ? T('Кое число е <b>след</b> ' + n + '? {?}', n + 1, 'След ' + n + ' е ' + (n + 1)) : T('Кое число е <b>преди</b> ' + n + '? {?}', n - 1, 'Преди ' + n + ' е ' + (n - 1)); };
   S.units2 = function () {
@@ -276,7 +280,7 @@
   };
 
   // ===== 3. КЛАС =====
-  S.place1000 = function () { var h = rnd(1, 9), t = rnd(0, 9), u = rnd(0, 9), n = h * 100 + t * 10 + u, r = Math.random(); if (r < .45) return T(h + ' стотици, ' + t + ' десетици и ' + u + ' единици = {?}', n, n + ' = ' + h + '00 + ' + t + '0 + ' + u); if (r < .75) return T('Колко стотици има в числото ' + n + '? {?}', h, n + ' има ' + h + ' стотици'); return T('Колко десетици има в числото ' + n + ' (без стотиците)? {?}', t, n + ' = ' + h + ' ст., ' + t + ' дес., ' + u + ' ед.'); };
+  S.place1000 = function () { var h = rnd(1, 9), t = rnd(0, 9), u = rnd(0, 9), n = h * 100 + t * 10 + u, r = Math.random(); if (r < .45) return T(H(h) + ', ' + D(t) + ' и ' + U(u) + ' = {?}', n, n + ' = ' + h + '00 + ' + t + '0 + ' + u); if (r < .75) return T('Колко стотици има в числото ' + n + '? {?}', h, n + ' има ' + H(h)); return T('Колко десетици има в числото ' + n + ' (без стотиците)? {?}', t, n + ' = ' + h + ' ст., ' + t + ' дес., ' + u + ' ед.'); };
   S.cmp1000 = function () { var x = rnd(100, 999), y = Math.random() < .15 ? x : x + pick([-100, -10, -1, 1, 10, 100, 90, -90]); y = Math.max(100, Math.min(1000, y)); return cmpNums(x, y); };
   S.nextPrev1000 = function () { var n = rnd(100, 998); if (Math.random() < .3) n = rnd(1, 9) * 100 - (Math.random() < .5 ? 1 : 0); return Math.random() < .5 ? T('Кое число е <b>след</b> ' + n + '? {?}', n + 1, 'След ' + n + ' е ' + (n + 1)) : T('Кое число е <b>преди</b> ' + n + '? {?}', n - 1, 'Преди ' + n + ' е ' + (n - 1)); };
   S.lines = function () { var names = ['права', 'крива', 'лъч', 'отсечка'], t = pick(names), lbl = { 'права': 'права линия', 'крива': 'крива линия', 'лъч': 'лъч', 'отсечка': 'отсечка' }[t]; return choose('Намери: <b>' + lbl + '</b>', names.map(function (n) { return { v: n, html: lineFig(n) }; }), t, 'Това е ' + t + '.', { optFigs: true }); };
@@ -304,7 +308,7 @@
   S.units3b = function () { var k = rnd(2, 9), x = rnd(1, 9) * 100, r = rnd(0, 4); if (r === 0) return T('1 кг = {?} г', 1000, '1 кг = 1000 г'); if (r === 1) return T('1 т = {?} кг', 1000, '1 т = 1000 кг'); if (r === 2) return T('1 мин = {?} сек', 60, '1 мин = 60 сек'); if (r === 3) return T(k + ' кг ' + x + ' г = {?} г', k * 1000 + x, k + ' кг ' + x + ' г = ' + (k * 1000 + x) + ' г'); return T(k + ' мин = {?} сек', k * 60, k + ' ' + TIMES + ' 60 = ' + k * 60 + ' сек'); };
 
   // ===== 4. КЛАС =====
-  S.placeBig = function () { var th = rnd(1, 99), h = rnd(0, 9), u = rnd(0, 9), n = th * 1000 + h * 100 + u; if (Math.random() < .5) return T(fmt(th) + ' хиляди, ' + h + ' стотици и ' + u + ' единици = {?}', n, '= ' + fmt(n)); return T('Колко хиляди има в числото ' + fmt(n) + '? {?}', th, fmt(n) + ' има ' + th + ' хиляди'); };
+  S.placeBig = function () { var th = rnd(1, 99), h = rnd(0, 9), u = rnd(0, 9), n = th * 1000 + h * 100 + u; if (Math.random() < .5) return T(K(th) + ', ' + H(h) + ' и ' + U(u) + ' = {?}', n, '= ' + fmt(n)); return T('Колко хиляди има в числото ' + fmt(n) + '? {?}', th, fmt(n) + ' има ' + K(th)); };
   S.cmpBig = function () { var x = rnd(1000, 999999), y = Math.random() < .1 ? x : x + pick([-1000, -100, -10, 10, 100, 1000, 9000, -9000]); return cmpNums(x, Math.max(1000, y)); };
   S.nextPrevBig = function () { var n = rnd(1, 99) * 1000 + (Math.random() < .5 ? 0 : rnd(1, 999)); return Math.random() < .5 ? T('Кое число е <b>след</b> ' + fmt(n) + '? {?}', n + 1, 'След ' + fmt(n) + ' е ' + fmt(n + 1)) : T('Кое число е <b>преди</b> ' + fmt(n) + '? {?}', n - 1, 'Преди ' + fmt(n) + ' е ' + fmt(n - 1)); };
   S.romanRead = function (lv) { var n = lv === 1 ? rnd(1, 12) : pick([rnd(1, 20), rnd(1, 20), 50, 100]); return T('Римското число <b class="rom">' + roman(n) + '</b> е {?}', n, roman(n) + ' = ' + n); };

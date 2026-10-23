@@ -5,6 +5,7 @@ require __DIR__ . '/../api/lib.php';
 require __DIR__ . '/../api/blog_seed.php';
 $pdo = db();
 blog_seed($pdo);
+blog_seed2($pdo);
 
 function e($s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 function bdate(?string $d): string {
