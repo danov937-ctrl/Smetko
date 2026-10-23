@@ -42,6 +42,7 @@ function db(): PDO {
     }
     // абонаментите се активират от акаунт; ученикът от клас влиза с потребител и парола (ред в redemptions)
     foreach (['account_id INTEGER', 'activated_at TEXT', 'order_id INTEGER'] as $col) if (!$has('codes', strtok($col, ' '))) $pdo->exec('ALTER TABLE codes ADD COLUMN ' . $col);
+    if (!$has('accounts', 'google_sub')) { $pdo->exec('ALTER TABLE accounts ADD COLUMN google_sub TEXT'); $pdo->exec('CREATE INDEX IF NOT EXISTS idx_acc_gsub ON accounts(google_sub)'); }
     foreach (['account_id INTEGER', 'book TEXT', 'message TEXT', 'message_at TEXT'] as $col) if (!$has('batches', strtok($col, ' '))) $pdo->exec('ALTER TABLE batches ADD COLUMN ' . $col);
     foreach (['username TEXT', 'pass_hash TEXT', 'pass_enc TEXT', 'avatar TEXT', 'state TEXT', 'rev INTEGER DEFAULT 0'] as $col) if (!$has('redemptions', strtok($col, ' '))) $pdo->exec('ALTER TABLE redemptions ADD COLUMN ' . $col);
     $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_red_user ON redemptions(username); CREATE INDEX IF NOT EXISTS idx_codes_acc ON codes(account_id); CREATE INDEX IF NOT EXISTS idx_batch_acc ON batches(account_id)');
@@ -134,6 +135,40 @@ function auth_logout(): void {
     if ($tok !== '') db()->prepare('DELETE FROM auth_sessions WHERE hash = ?')->execute([hash('sha256', $tok)]);
     auth_set_cookie('', time() - 3600);
 }
+/* ---------- вход с Google: проверка на ID token (RS256) с публичните сертификати на Google ---------- */
+function http_get(string $url, int $timeout = 6): ?array { // [тяло, заглавия]
+    if (function_exists('curl_init')) {
+        $h = []; $ch = curl_init($url);
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => $timeout, CURLOPT_FOLLOWLOCATION => true, CURLOPT_HEADERFUNCTION => function ($c, $line) use (&$h) { $h[] = trim($line); return strlen($line); }]);
+        $b = curl_exec($ch); $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE); curl_close($ch);
+        return ($b !== false && $code === 200) ? [$b, $h] : null;
+    }
+    $b = @file_get_contents($url, false, stream_context_create(['http' => ['timeout' => $timeout]]));
+    return $b === false ? null : [$b, $http_response_header ?? []];
+}
+function google_certs(bool $force = false): array {
+    $c = json_decode((string)setting('g_certs', '{}'), true) ?: [];
+    if (!$force && !empty($c['certs']) && ($c['until'] ?? 0) > time()) return $c['certs'];
+    $r = http_get('https://www.googleapis.com/oauth2/v1/certs');
+    if (!$r) return $c['certs'] ?? [];
+    $certs = json_decode($r[0], true) ?: [];
+    $age = 3600; foreach ($r[1] as $line) if (preg_match('/max-age=(\d+)/i', $line, $m)) $age = (int)$m[1];
+    set_setting('g_certs', json_encode(['certs' => $certs, 'until' => time() + min($age, 86400)]));
+    return $certs;
+}
+function google_verify(string $jwt, string $clientId): ?array {
+    $p = explode('.', $jwt);
+    if (count($p) !== 3 || $clientId === '') return null;
+    $head = json_decode(b64u_dec($p[0]), true); $body = json_decode(b64u_dec($p[1]), true); $sig = b64u_dec($p[2]);
+    if (!is_array($head) || !is_array($body) || ($head['alg'] ?? '') !== 'RS256') return null;
+    $certs = google_certs(); $kid = (string)($head['kid'] ?? '');
+    if (!isset($certs[$kid])) { $certs = google_certs(true); if (!isset($certs[$kid])) return null; }
+    if (openssl_verify($p[0] . '.' . $p[1], $sig, $certs[$kid], OPENSSL_ALGO_SHA256) !== 1) return null;
+    if (($body['aud'] ?? '') !== $clientId || !in_array($body['iss'] ?? '', ['accounts.google.com', 'https://accounts.google.com'], true)) return null;
+    if ((int)($body['exp'] ?? 0) < time() - 60 || empty($body['email']) || empty($body['email_verified']) || empty($body['sub'])) return null;
+    return $body;
+}
+
 /* ---------- абонаменти ----------
    Един код = един абонамент. Активира се веднъж от акаунт (страница „Абонаменти“).
    Индивидуален → 1 детски профил, семеен → до 4, клас → до 30 ученици с потребител и парола (създава ги учителят в „Табло“). */
@@ -347,6 +382,7 @@ const DEFAULT_CONFIG = [
     'company' => ['name' => '', 'eik' => '', 'addr' => '', 'vat' => '', 'date' => '', 'phone' => '', 'iban' => '', 'bank' => '', 'mol' => ''],
     'blockedWords' => '',
     'diplomas' => 'auto', // грамоти: auto = от 1 юни до 30 септември, on = винаги, off = никога
+    'google' => ['gsc' => '', 'ga' => '', 'clientId' => ''], // Search Console (файл за потвърждение), Google Analytics (G-…), вход с Google (Client ID)
 ];
 function site_config(): array {
     $c = json_decode((string)setting('site_config', '{}'), true) ?: [];

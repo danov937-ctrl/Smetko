@@ -1292,3 +1292,12 @@ dialog.ck-dialog { width: min(94vw, 560px); }
 .ck-opt small { display: block; color: var(--muted); font-weight: 700; line-height: 1.4; margin-top: 2px; }
 .ck-foot { border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; padding: 0; }
 @media print { .cookie-bar { display: none !important; } }
+
+/* ---------- вход с Google ---------- */
+.g-auth{margin:2px 0 6px}
+.g-btn{display:flex;justify-content:center;min-height:44px}
+.g-btn iframe{margin:0 auto!important}
+.g-or{display:flex;align-items:center;gap:10px;margin:14px 0 4px;color:var(--muted,#6B7A90);font-size:.88rem;font-weight:700}
+.g-or::before,.g-or::after{content:"";flex:1;height:2px;background:#E2EAF6;border-radius:2px}
+.g-pending .ck-link{margin-left:4px}
+.g-note{margin:0 0 4px}

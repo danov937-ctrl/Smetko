@@ -48,7 +48,7 @@ function acc_subs(int $aid): array { // абонаментите на акаун
 function acc_me(?array $a): array {
     if (!$a) return ['ok' => true, 'account' => null];
     $profiles = acc_profiles((int)$a['id']); // първо профилите – там се разпределят свободните места
-    return ['ok' => true, 'account' => ['email' => $a['email'], 'name' => $a['name'], 'role' => $a['role'], 'since' => substr((string)$a['created_at'], 0, 10)],
+    return ['ok' => true, 'account' => ['email' => $a['email'], 'name' => $a['name'], 'role' => $a['role'], 'since' => substr((string)$a['created_at'], 0, 10), 'hasPass' => (string)$a['pass'] !== '', 'google' => !empty($a['google_sub'])],
         'profiles' => $profiles, 'classes' => acc_classes((int)$a['id']), 'subs' => acc_subs((int)$a['id'])];
 }
 function need(): array { $a = auth_account(); if (!$a) json_out(['ok' => false, 'error' => 'Влезте в акаунта си.', 'auth' => false], 401); return $a; }
@@ -101,10 +101,33 @@ case 'register':
     mail_welcome($email, $name, $role);
     json_out(acc_me(auth_account()));
 
+case 'google': // вход или регистрация с Google профила (Google Identity Services → ID token)
+    if (too_many('google_fail', 20, 900)) json_out(['ok' => false, 'error' => 'Твърде много опити. Опитайте след 15 минути.'], 429);
+    $cid = (string)(site_config()['google']['clientId'] ?? '');
+    $g = google_verify((string)($in['credential'] ?? ''), $cid);
+    if (!$g) { note_attempt('google_fail'); json_out(['ok' => false, 'error' => 'Входът с Google не успя. Опитайте отново или влезте с имейл и парола.'], 403); }
+    $gEmail = mb_strtolower((string)$g['email']);
+    $st = $pdo->prepare('SELECT * FROM accounts WHERE google_sub = ? OR email = ? ORDER BY google_sub = ? DESC LIMIT 1'); $st->execute([(string)$g['sub'], $gEmail, (string)$g['sub']]);
+    $a = $st->fetch(); $st->closeCursor();
+    if ($a) {
+        if ((int)$a['disabled']) json_out(['ok' => false, 'error' => 'Акаунтът е спрян. Пишете ни на ' . site_config()['contactEmail'] . '.'], 403);
+        if (!$a['google_sub']) $pdo->prepare('UPDATE accounts SET google_sub = ? WHERE id = ?')->execute([(string)$g['sub'], (int)$a['id']]);
+        auth_login((int)$a['id']);
+        json_out(acc_me(auth_account(true)) + ['google' => 'login']);
+    }
+    if (empty($in['terms'])) json_out(['ok' => false, 'need_terms' => true, 'error' => 'Нов акаунт: отметнете съгласието с Общите условия и натиснете „Продължи с Google“ отново.'], 400);
+    $role = ($in['role'] ?? '') === 'teacher' ? 'teacher' : 'parent';
+    $name = clean_name((string)($g['name'] ?? ''), 60) ?: explode('@', $gEmail)[0];
+    $pdo->prepare('INSERT INTO accounts(email, pass, name, role, created_at, google_sub) VALUES(?, ?, ?, ?, ?, ?)')->execute([$gEmail, '', $name, $role, now(), (string)$g['sub']]);
+    auth_login((int)$pdo->lastInsertId());
+    mail_welcome($gEmail, $name, $role);
+    json_out(acc_me(auth_account(true)) + ['google' => 'register']);
+
 case 'login':
     if (too_many('login_fail', 10, 900)) json_out(['ok' => false, 'error' => 'Твърде много грешни опити. Опитайте след 15 минути или възстановете паролата си.'], 429);
     $st = $pdo->prepare('SELECT * FROM accounts WHERE email = ?'); $st->execute([$email]);
     $a = $st->fetch(); $st->closeCursor();
+    if ($a && (string)$a['pass'] === '' && $a['google_sub']) json_out(['ok' => false, 'error' => 'Този акаунт е създаден с Google – натиснете „Вход с Google“. (Можете да си зададете и парола чрез „Забравена парола“.)'], 403);
     if (!$a || !password_verify((string)($in['password'] ?? ''), (string)$a['pass'])) { note_attempt('login_fail'); json_out(['ok' => false, 'error' => 'Грешен имейл или парола.'], 403); }
     if ((int)$a['disabled']) json_out(['ok' => false, 'error' => 'Акаунтът е спрян. Пишете ни на ' . site_config()['contactEmail'] . '.'], 403);
     if (password_needs_rehash((string)$a['pass'], PASSWORD_DEFAULT)) $pdo->prepare('UPDATE accounts SET pass = ? WHERE id = ?')->execute([password_hash((string)$in['password'], PASSWORD_DEFAULT), (int)$a['id']]);
@@ -141,7 +164,7 @@ case 'reset':
 
 case 'password':
     $a = need();
-    if (!password_verify((string)($in['old'] ?? ''), (string)$a['pass'])) json_out(['ok' => false, 'error' => 'Грешна текуща парола.', 'field' => 'old'], 403);
+    if ((string)$a['pass'] !== '' && !password_verify((string)($in['old'] ?? ''), (string)$a['pass'])) json_out(['ok' => false, 'error' => 'Грешна текуща парола.', 'field' => 'old'], 403); // акаунт само с Google: първа парола без стара
     if ($e = check_pass((string)($in['password'] ?? ''))) json_out(['ok' => false, 'error' => $e, 'field' => 'password'], 400);
     $pdo->prepare('UPDATE accounts SET pass = ? WHERE id = ?')->execute([password_hash((string)$in['password'], PASSWORD_DEFAULT), (int)$a['id']]);
     $pdo->prepare('DELETE FROM auth_sessions WHERE account_id = ?')->execute([(int)$a['id']]);
@@ -157,7 +180,8 @@ case 'update':
 
 case 'delete': // самостоятелно изтриване на акаунта и профилите (GDPR)
     $a = need();
-    if (!password_verify((string)($in['password'] ?? ''), (string)$a['pass'])) json_out(['ok' => false, 'error' => 'Грешна парола.', 'field' => 'password'], 403);
+    if ((string)$a['pass'] === '') { if (mb_strtolower(trim((string)($in['password'] ?? ''))) !== mb_strtolower((string)$a['email'])) json_out(['ok' => false, 'error' => 'Напишете имейла на акаунта, за да потвърдите.', 'field' => 'password'], 403); }
+    elseif (!password_verify((string)($in['password'] ?? ''), (string)$a['pass'])) json_out(['ok' => false, 'error' => 'Грешна парола.', 'field' => 'password'], 403);
     $aid = (int)$a['id'];
     foreach (['profiles', 'auth_sessions'] as $t) $pdo->prepare("DELETE FROM $t WHERE account_id = ?")->execute([$aid]);
     $pdo->prepare('DELETE FROM accounts WHERE id = ?')->execute([$aid]);

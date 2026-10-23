@@ -20,8 +20,8 @@
 <link rel="icon" href="assets/icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/nunito.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=17">
-<link rel="stylesheet" href="css/animations.css?v=17">
+<link rel="stylesheet" href="css/style.css?v=18">
+<link rel="stylesheet" href="css/animations.css?v=18">
 </head>
 <body>
 <a class="skip" href="#main">Към съдържанието</a>
@@ -94,7 +94,7 @@
 <p class="meta">Последна актуализация: <span data-co="date"><mark class="fill">[ПОПЪЛНЕТЕ: дата]</mark></span></p>
 <div class="callout"><b>Вашият избор:</b> <span data-consent-state>…</span> <button class="btn btn-sm" data-consent>🍪 Промени избора</button></div>
 <h2>Какво са бисквитките?</h2>
-<p>Бисквитките (cookies) и локалното хранилище (localStorage) са малки файлове, които сайтът записва в браузъра ви. Сметко ги използва, за да работи играта и – само ако сте съгласни – за анонимна статистика. <b>Не използваме рекламни бисквитки и не позволяваме на други сайтове да ви проследяват.</b></p>
+<p>Бисквитките (cookies) и локалното хранилище (localStorage) са малки файлове, които сайтът записва в браузъра ви. Сметко ги използва, за да работи играта и – само ако сте съгласни – за статистика на посещенията. <b>Не използваме рекламни бисквитки.</b></p>
 <h2>1. Необходими (винаги включени)</h2>
 <p>Без тях сайтът не може да работи. Според чл. 4а от Закона за електронните съобщения и Директива 2002/58/ЕО за тях не се изисква съгласие.</p>
 <table class="info-table">
@@ -107,8 +107,15 @@
 </table>
 <h2>2. Статистика (само със съгласие)</h2>
 <p>Ако приемете „Статистика“, браузърът изпраща до нашия сървър при отваряне на страница само: адреса на страницата, сайта, от който идвате (напр. google.com), и дали това е ново посещение. Сървърът увеличава брояч за деня. <b>Не пазим IP адрес, браузър, бисквитка или друг идентификатор</b> и не можем да разберем кой сте. Данните не се предават на трети лица. Знакът за „ново посещение“ се пази в <code>sessionStorage</code> (<code>smetko.visit</code>) до затваряне на раздела.</p>
+<p>Със същото съгласие използваме и <b>Google Analytics 4</b> (Google Ireland Limited). Изключени са Google Signals и рекламната персонализация. Скриптът на Google Analytics не се зарежда, докато не приемете „Статистика“, а при оттегляне на съгласието бисквитките му се изтриват.</p>
+<table class="info-table">
+<tr><th>Име</th><th>Доставчик</th><th>Какво пази</th><th>Срок</th></tr>
+<tr><td><code>_ga</code></td><td>Google Analytics</td><td>Случаен идентификатор, за да се разграничават посетителите</td><td>2 години</td></tr>
+<tr><td><code>_ga_&lt;ID&gt;</code></td><td>Google Analytics</td><td>Текущото посещение (сесия)</td><td>2 години</td></tr>
+</table>
 <h2>Външни услуги</h2>
-<p>Сайтът не зарежда скриптове, шрифтове или реклами от други компании. Шрифтът Nunito е качен на нашия сървър (лиценз SIL Open Font License).</p>
+<p><b>Вход с Google:</b> само на страниците „Вход“ и „Регистрация“ се зарежда бутонът на Google (Google Identity Services от accounts.google.com), за да можете да влезете с Google профила си. Google може да използва свои бисквитки на домейна google.com според <a href="https://policies.google.com/technologies/cookies?hl=bg" rel="noopener">своята политика</a>; Сметко получава данни от Google само ако натиснете бутона.</p>
+<p>Шрифтът Nunito е качен на нашия сървър (лиценз SIL Open Font License). Сайтът не показва реклами.</p>
 <h2>Как да променя или изтрия?</h2>
 <p>Натиснете <button class="btn btn-sm btn-ghost" data-consent>🍪 Настройки за бисквитки</button> (бутонът е и в долната част на всяка страница). Прогресът в играта се изтрива от „Изтрий прогреса“ на страница <a href="achievements.html">Постижения</a> или от настройките на браузъра (Изчистване на данните за сайта). Тогава изчезва и изборът ви и банерът се показва отново.</p>
 
@@ -152,11 +159,11 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=17" defer></script>
-<script src="js/gamification.js?v=17" defer></script>
-<script src="js/audio.js?v=17" defer></script>
-<script src="js/access.js?v=17" defer></script>
-<script src="js/account.js?v=17" defer></script>
-<script src="js/app.js?v=17" defer></script>
+<script src="js/owl.js?v=18" defer></script>
+<script src="js/gamification.js?v=18" defer></script>
+<script src="js/audio.js?v=18" defer></script>
+<script src="js/access.js?v=18" defer></script>
+<script src="js/account.js?v=18" defer></script>
+<script src="js/app.js?v=18" defer></script>
 </body>
 </html>

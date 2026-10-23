@@ -34,6 +34,14 @@ if ($action === 'contact') {
     if (!filter_var($e, FILTER_VALIDATE_EMAIL)) { flash('Невалиден имейл.', 'err'); go('nastroyki.php#contact'); }
     $c['contactEmail'] = $e; save_site_config($c); audit('Имейл за контакт', $e); flash('Запазено.'); go('nastroyki.php#contact');
 }
+if ($action === 'google') {
+    $gsc = post('gsc'); $ga = strtoupper(post('ga')); $cid = strtolower(post('clientId'));
+    if ($gsc !== '') { if (preg_match('/(google[a-f0-9]{8,32})(\.html)?/i', $gsc, $m)) $gsc = strtolower($m[1]) . '.html'; else { flash('Файлът за Search Console трябва да е като google1a2b3c4d5e6f7a8b.html.', 'err'); go('nastroyki.php#google'); } }
+    if ($ga !== '' && !preg_match('/^G-[A-Z0-9]{4,15}$/', $ga)) { flash('Идентификаторът за Google Analytics започва с G- (напр. G-ABC123XYZ9).', 'err'); go('nastroyki.php#google'); }
+    if ($cid !== '' && !preg_match('/^[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com$/', $cid)) { flash('Client ID за вход с Google завършва на .apps.googleusercontent.com.', 'err'); go('nastroyki.php#google'); }
+    $c['google'] = ['gsc' => $gsc, 'ga' => $ga, 'clientId' => $cid];
+    save_site_config($c); audit('Google', trim(($gsc ? 'Search Console ' : '') . ($ga ? 'Analytics ' . $ga . ' ' : '') . ($cid ? 'вход с Google' : '')) ?: 'изключено'); flash('Настройките за Google са запазени.'); go('nastroyki.php#google');
+}
 if ($action === 'test_mail') {
     $to = (string)$c['contactEmail'];
     $ok = mail_admin_text($to, '✅ Тестово писмо от Сметко', "Здравейте!\n\nАко четете това писмо във „Входящи“ (а не в „Спам“), имейлите на сайта работят: писмата за добре дошли, новите пароли и поръчките.\n\nАко е в „Спам“: cPanel → Имейл → Email Deliverability → до smetko.com натиснете Repair (Поправи).\n\nЕкипът на Сметко\nsmetko.com", 'Имейлите работят! 🎉');
@@ -78,6 +86,14 @@ $body .= $f('banner') . '<h2>📣 Банер най-отгоре на сайта
     '<label>Цвят<select name="color">' . $col . '</select></label></div><p class="hint">Посетителят може да затвори банера; при нов текст той се показва отново.</p><button>💾 Запази банера</button></form>';
 $body .= $f('contact') . '<h2>✉️ Имейл за контакт</h2><div class="grid g2"><label>Имейл, който се показва на сайта<input type="email" name="contactEmail" value="' . h($c['contactEmail']) . '"></label></div><div class="row"><button>💾 Запази</button><button class="ghost" name="action" value="test_mail">✉️ Изпрати тестово писмо</button></div><p class="hint">От този адрес сайтът праща писмата (добре дошли, нова парола, поръчки). Пощата трябва да съществува в cPanel.</p></form>';
 $cf = fn($k, $l, $ph = '') => '<label>' . $l . '<input name="' . $k . '" maxlength="200" value="' . h($C[$k]) . '" placeholder="' . h($ph) . '"></label>';
+$G = ($c['google'] ?? []) + ['gsc' => '', 'ga' => '', 'clientId' => ''];
+$gst = fn($on) => $on ? '<span class="tag tg">✓ включено</span>' : '<span class="tag">не е настроено</span>';
+$body .= $f('google') . '<h2>🔗 Google</h2><p class="hint">Поставете кодовете от вашия Google профил – всичко тръгва автоматично. Оставете празно, за да изключите. Стъпките са в <a href="pomosht.php#google">Помощ</a>.</p><div class="grid g3">' .
+    '<label>🔍 Search Console – име на файла ' . $gst($G['gsc'] !== '') . '<input name="gsc" value="' . h($G['gsc']) . '" placeholder="google1a2b3c4d5e6f7a8b.html" autocomplete="off"></label>' .
+    '<label>📊 Google Analytics – Measurement ID ' . $gst($G['ga'] !== '') . '<input name="ga" value="' . h($G['ga']) . '" placeholder="G-XXXXXXXXXX" autocomplete="off"></label>' .
+    '<label>👤 Вход с Google – Client ID ' . $gst($G['clientId'] !== '') . '<input name="clientId" value="' . h($G['clientId']) . '" placeholder="123…-abc….apps.googleusercontent.com" autocomplete="off"></label></div>' .
+    ($G['gsc'] !== '' ? '<p class="hint">Проверка: <a href="/' . h($G['gsc']) . '" target="_blank" rel="noopener">smetko.com/' . h($G['gsc']) . '</a> трябва да показва „google-site-verification: ' . h($G['gsc']) . '“. След това натиснете „Потвърждаване“ в Search Console и добавете картата на сайта: <b>sitemap.xml</b>.</p>' : '') .
+    '<p class="hint">Google Analytics се зарежда само при посетители, приели „Статистика“ в банера за бисквитки (без Google Signals и без реклами). Бутонът „Вход с Google“ се появява на страниците „Вход“ и „Регистрация“.</p><button>💾 Запази</button></form>';
 $body .= $f('company') . '<h2>🏢 Данни на фирмата</h2><p class="hint">Показват се в Общите условия, Политиката за поверителност и другите документи на мястото на „[ПОПЪЛНЕТЕ…]“, и в проформите.</p><div class="grid g3">' .
     $cf('name', 'Наименование', 'Сметко ЕООД') . $cf('eik', 'ЕИК', '123456789') . $cf('vat', 'ДДС номер (ако има)', 'BG123456789') . '<label class="wide">Седалище и адрес на управление<input name="addr" maxlength="200" value="' . h($C['addr']) . '"></label>' .
     $cf('mol', 'Управител (МОЛ)') . $cf('phone', 'Телефон') . $cf('date', 'Дата на документите', date('d.m.Y')) . $cf('iban', 'IBAN (за проформи)') . $cf('bank', 'Банка') . '</div><button>💾 Запази</button></form>';

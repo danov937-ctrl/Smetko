@@ -35,6 +35,9 @@
     if (+c.questions >= 5) S.config.questionsPerMission = +c.questions;
     S.siteConfig = c;
     if (!dom) return;
+    gaLoad();
+    document.querySelectorAll('[data-ga-txt]').forEach(function (el) { el.textContent = gaTxt(); });
+    try { document.dispatchEvent(new CustomEvent('smetko:config', { detail: c })); } catch (e) {}
     var P = c.prices || {};
     document.querySelectorAll('[data-price]').forEach(function (el) { var v = P[el.getAttribute('data-price')]; if (v !== undefined && v !== '') el.textContent = String(v).replace('.', '.'); });
     var per = { single6: [6, 'на месец'], single12: [12, 'на месец'], family6: [4, 'на дете'], family12: [4, 'на дете'], class6: [30, 'на ученик'], class12: [30, 'на ученик'] };
@@ -147,6 +150,33 @@
     var m = document.cookie.match(/(?:^|; )smetko_consent=([^;]+)/);
     return m ? { v: CV, stats: m[1].indexOf('stats') >= 0, t: Date.now() } : null;
   }
+  /* Google Analytics 4 – зарежда се САМО при съгласие „Статистика“ и ако в админ панела е въведен Measurement ID (G-…).
+     Без Google Signals и без рекламна персонализация. При оттегляне на съгласието бисквитките _ga се изтриват. */
+  var gaOn = false;
+  function gaId() { var g = (S.siteConfig || {}).google || {}; return /^G-[A-Z0-9]{4,15}$/.test(g.ga || '') ? g.ga : ''; }
+  S.gaId = gaId;
+  function gaTxt() { return gaId() ? ' (и с Google Analytics)' : ' анонимно'; }
+  function gaLoad() {
+    var id = gaId(), c = getConsent();
+    if (gaOn || !id || !c || !c.stats || !/^https?:$/.test(location.protocol)) return;
+    gaOn = true;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    gtag('consent', 'default', { analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    gtag('js', new Date());
+    gtag('config', id, { allow_google_signals: false, allow_ad_personalization_signals: false });
+    var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+    document.head.appendChild(s);
+  }
+  function gaOff() {
+    if (window.gtag) gtag('consent', 'update', { analytics_storage: 'denied' });
+    var host = location.hostname, doms = ['', host, '.' + host, '.' + host.replace(/^www\./, '')];
+    document.cookie.split(';').forEach(function (k) {
+      var n = k.split('=')[0].trim();
+      if (/^_ga/.test(n)) doms.forEach(function (d) { document.cookie = n + '=; max-age=0; path=/' + (d ? '; domain=' + d : ''); });
+    });
+  }
+  S.track = function (name, params) { if (gaOn && window.gtag) try { gtag('event', name, params || {}); } catch (e) {} };
   var hitSent = false;
   function hit() {
     if (hitSent || !/^https?:$/.test(location.protocol)) return; hitSent = true;
@@ -159,7 +189,7 @@
     try { localStorage.setItem(CONSENT, JSON.stringify(c)); } catch (e) {}
     document.cookie = 'smetko_consent=' + (stats ? 'necessary,stats' : 'necessary') + '; max-age=' + 365 * 86400 + '; path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
     var bar = document.getElementById('cookie-bar'); if (bar) { bar.classList.remove('show'); setTimeout(function () { bar.remove(); if (S._newsAfterConsent) { var l = S._newsAfterConsent; S._newsAfterConsent = null; showNews(l); } }, 250); }
-    if (stats) hit();
+    if (stats) { hit(); gaLoad(); } else gaOff();
     document.querySelectorAll('[data-consent-state]').forEach(function (el) { el.textContent = stats ? 'Приети: необходими и статистика' : 'Приети: само необходимите'; });
   }
   S.consent = getConsent;
@@ -167,7 +197,7 @@
     var c = getConsent() || { stats: false };
     var d = S.modal('<div class="ck-modal"><h3>🍪 Настройки за бисквитки</h3><p>Изберете кои бисквитки и данни в браузъра да използва Сметко. Може да промените избора по всяко време от долната част на всяка страница.</p>' +
       '<label class="ck-opt"><input type="checkbox" checked disabled><span><b>Необходими</b><small>Вход в акаунта, прогресът в играта, абонаментът, избраният учебник и тази настройка. Без тях сайтът не работи – винаги са включени.</small></span></label>' +
-      '<label class="ck-opt"><input type="checkbox" id="ck-stats"' + (c.stats ? ' checked' : '') + '><span><b>Статистика</b><small>Анонимно броим колко пъти са отваряни страниците и от кой сайт идват посетителите, за да подобряваме Сметко. Без IP адрес, без реклами и без проследяване от други сайтове.</small></span></label>' +
+      '<label class="ck-opt"><input type="checkbox" id="ck-stats"' + (c.stats ? ' checked' : '') + '><span><b>Статистика</b><small>Броим колко пъти са отваряни страниците и от кой сайт идват посетителите, за да подобряваме Сметко. ' + (gaId() ? 'Използваме собствен анонимен брояч и Google Analytics (бисквитки _ga, до 2 години, без реклами и без Google Signals).' : 'Без IP адрес, без реклами и без проследяване от други сайтове.') + '</small></span></label>' +
       '<p class="hint"><a href="cookies.html">Политика за бисквитките</a> · <a href="privacy-policy.html">Поверителност</a></p>' +
       '<div class="modal-actions"><button class="btn btn-ghost" id="ck-save">Запази избора</button><button class="btn btn-green" id="ck-all">Приемам всички</button></div></div>');
     d.classList.add('ck-dialog');
@@ -177,10 +207,10 @@
   function cookieBar() {
     var c = getConsent();
     document.querySelectorAll('[data-consent-state]').forEach(function (el) { el.textContent = !c ? 'Още не сте избрали' : c.stats ? 'Приети: необходими и статистика' : 'Приети: само необходимите'; });
-    if (c) { if (c.stats) hit(); return; }
+    if (c) { if (c.stats) { hit(); gaLoad(); } return; }
     if (navigator.webdriver && /[?&]noconsent=1/.test(location.search)) return;
     var bar = document.createElement('div'); bar.id = 'cookie-bar'; bar.className = 'cookie-bar'; bar.setAttribute('role', 'dialog'); bar.setAttribute('aria-label', 'Бисквитки');
-    bar.innerHTML = '<div class="ck-in"><div class="ck-txt"><b>🍪 Сметко използва бисквитки</b><p>Необходимите поддържат входа и пазят прогреса в играта. С ваше съгласие броим анонимно посещенията, за да правим Сметко по-добър – без реклами и без проследяване. <a href="cookies.html">Научете повече</a></p></div>' +
+    bar.innerHTML = '<div class="ck-in"><div class="ck-txt"><b>🍪 Сметко използва бисквитки</b><p>Необходимите поддържат входа и пазят прогреса в играта. С ваше съгласие броим посещенията<span data-ga-txt>' + gaTxt() + '</span>, за да правим Сметко по-добър – без реклами. <a href="cookies.html">Научете повече</a></p></div>' +
       '<div class="ck-btns"><button class="btn btn-green btn-sm" data-ck="all">Приемам всички</button><button class="btn btn-white btn-sm" data-ck="min">Само необходимите</button><button class="ck-link" data-ck="set">Настройки</button></div></div>';
     document.body.appendChild(bar);
     requestAnimationFrame(function () { bar.classList.add('show'); });
@@ -258,6 +288,7 @@
         .then(function (r) { return r.json(); }).then(function (j) {
           if (!j.ok) { var f = { name: 'o-name', email: 'o-email', phone: 'o-phone', school: 'o-school', terms: 'o-terms', 'inv-eik': 'o-eik' }[j.field]; if (f && $(f)) $(f).focus(); throw new Error(j.error || 'Грешка.'); }
           var b = j.bank;
+          S.track('generate_lead', { currency: 'EUR', value: +j.amount || 0, items: [{ item_name: j.plan || data.plan, quantity: j.qty || 1 }] });
           d.querySelector('.modal-body').innerHTML = '<div class="ord-done"><div data-owl="cheer" style="width:120px;margin:0 auto"></div><h3>Поръчка № ' + escH(j.no) + ' е приета! 🎉</h3>' +
             '<p>Сума за плащане: <b>' + money(j.amount) + ' €</b> · ' + escH(j.plan) + ', ' + (j.period === 12 ? '1 година' : '6 месеца') + (j.qty > 1 ? ' × ' + j.qty + (pl === 'class' ? ' класа' : '') : '') + '</p>' +
             (b ? '<div class="ord-bank"><div><small>Получател</small><b>' + escH(b.name) + '</b></div><div><small>IBAN</small><b class="mono">' + escH(b.iban) + '</b>' + (b.bank ? ' <small>' + escH(b.bank) + '</small>' : '') + '</div><div><small>Основание</small><b>' + escH(b.reason) + '</b></div></div><p class="hint">Изпратихме ви тези данни и на имейла. След плащането кодът идва на ' + escH(data.email) + ' – обикновено до 1 работен ден.</p>'

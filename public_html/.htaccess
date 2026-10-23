@@ -25,6 +25,7 @@ AddDefaultCharset UTF-8
   RewriteRule ^vhod/?$ /vhod.html [L]
   RewriteRule ^registracia/?$ /registracia.html [L]
   RewriteRule ^profil/?$ /profil.html [L]
+  RewriteRule ^(google[a-z0-9]+\.html)$ /api/gverify.php?f=$1 [L]
   RewriteRule ^tablo/?$ /tablo.html [L]
   RewriteRule ^abonamenti/?$ /pricing.html [L]
   RewriteRule ^blog/?$ /blog/index.php [L]

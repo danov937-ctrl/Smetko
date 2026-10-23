@@ -32,7 +32,7 @@
     if (!online) return Promise.reject(new Error('Нужна е интернет връзка.'));
     var o = data ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), credentials: 'same-origin', keepalive: !!keepalive } : { credentials: 'same-origin', cache: 'no-store' };
     return fetch(url, o).then(function (r) { return r.json().catch(function () { throw new Error('Сървърът не отговаря. Опитайте пак след малко.'); }); })
-      .then(function (j) { if (!j.ok) { var e = new Error(j.error || 'Грешка.'); e.field = j.field; e.auth = j.auth; throw e; } return j; });
+      .then(function (j) { if (!j.ok) { var e = new Error(j.error || 'Грешка.'); e.field = j.field; e.auth = j.auth; e.needTerms = !!j.need_terms; throw e; } return j; });
   }
   function api(data, keepalive) { return call('/api/account.php', data, keepalive); }
   function sapi(data, keepalive) { return call('/api/student.php', data, keepalive); }
@@ -265,6 +265,35 @@
   function pending() { try { return sessionStorage.getItem(PEND) || ''; } catch (e) { return ''; } }
   function setPending(v) { try { if (v) sessionStorage.setItem(PEND, v); else sessionStorage.removeItem(PEND); } catch (e) {} }
 
+  /* ---------- вход с Google (Google Identity Services) – само ако в админ панела има Client ID ---------- */
+  var GCRED = 'smetko.gcred';
+  function gCid() { var g = (S.siteConfig || {}).google || {}; return /^[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com$/.test(g.clientId || '') ? g.clientId : ''; }
+  function whenCfg(fn) { if (S.siteConfig) fn(); document.addEventListener('smetko:config', fn); }
+  function gis(cb) {
+    var cid = gCid(); if (!cid || !/^https?:$/.test(location.protocol)) return;
+    if (window.google && google.accounts && google.accounts.id) { cb(cid); return; }
+    var s = document.querySelector('script[data-gis]');
+    if (!s) { s = document.createElement('script'); s.src = 'https://accounts.google.com/gsi/client'; s.async = true; s.setAttribute('data-gis', '1'); document.head.appendChild(s); }
+    s.addEventListener('load', function () { cb(cid); });
+  }
+  function gButton(box, ctx, onCred) {
+    if (!box) return;
+    whenCfg(function () {
+      gis(function (cid) {
+        if (box.dataset.on) return; box.dataset.on = '1';
+        google.accounts.id.initialize({ client_id: cid, callback: function (r) { if (r && r.credential) onCred(r.credential); }, ux_mode: 'popup', context: ctx, itp_support: true });
+        if (!box.dataset.off) box.hidden = false;
+        var w = Math.max(200, Math.min(400, Math.floor((box.clientWidth || box.parentNode.clientWidth || 320))));
+        google.accounts.id.renderButton(box.querySelector('.g-btn'), { type: 'standard', theme: 'outline', size: 'large', text: ctx === 'signup' ? 'signup_with' : 'continue_with', shape: 'pill', logo_alignment: 'center', width: w, locale: 'bg' });
+      });
+    });
+  }
+  function gPayload(cred) { try { return JSON.parse(decodeURIComponent(escape(atob(cred.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))))); } catch (e) { return null; } }
+  function gStore(v) { try { if (v) sessionStorage.setItem(GCRED, v); else sessionStorage.removeItem(GCRED); } catch (e) {} }
+  function gStored() { try { var v = sessionStorage.getItem(GCRED) || '', p = v && gPayload(v); return p && p.exp * 1000 > Date.now() + 60000 ? v : ''; } catch (e) { return ''; } }
+  function google_(cred, extra) { var d = Object.assign({ action: 'google', credential: cred }, extra || {}); return api(d).then(function (j) { applyMe(j); return j; }); }
+  S.Account && (S.Account.google = google_);
+
   function initLogin() {
     var tabs = document.querySelectorAll('[data-lt]');
     function tab(k) { tabs.forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-lt') === k)); }); $('login-form').hidden = k !== 'adult'; $('kid-form').hidden = k !== 'kid'; }
@@ -275,6 +304,14 @@
     f.addEventListener('submit', function (ev) {
       ev.preventDefault(); e.textContent = ''; busy(btn, true, 'Влизам…');
       login($('l-email').value.trim(), $('l-pass').value).then(afterLogin).catch(function (x) { err(e, x); busy(btn, false); });
+    });
+    gButton($('g-login'), 'signin', function (cred) {
+      e.textContent = ''; busy(btn, true, 'Влизам с Google…');
+      google_(cred).then(afterLogin).catch(function (x) {
+        busy(btn, false);
+        if (x.needTerms) { gStore(cred); location.href = 'registracia.html?g=1' + (qs('next') ? '&next=' + encodeURIComponent(qs('next')) : ''); return; }
+        err(e, x);
+      });
     });
     var k = $('kid-form'), ke = $('kid-err'), kb = k.querySelector('button[type=submit]');
     k.addEventListener('submit', function (ev) {
@@ -289,13 +326,38 @@
     if (c) { location.replace(home()); return; }
     if (qs('role') === 'teacher') { var t = f.querySelector('input[name=role][value=teacher]'); if (t) t.checked = true; }
     if (pending()) { var n = $('reg-pending'); if (n) { n.hidden = false; n.querySelector('b').textContent = pending(); } }
+    function roleNow() { return (f.querySelector('input[name=role]:checked') || {}).value || 'parent'; }
+    function done(role) { if (S.track) S.track('sign_up', { method: 'google' }); location.href = safeNext(qs('next')) || (pending() ? 'pricing.html#activate' : (role === 'teacher' ? 'tablo.html?new=1' : 'profil.html?new=1')); }
+    var gWait = '', gBox = $('g-reg');
+    function gGo(cred) {
+      e.textContent = '';
+      if (!$('r-terms').checked) { // първо съгласие с условията – после продължаваме автоматично
+        gWait = cred; gStore(cred); showG(cred);
+        e.textContent = 'Още една стъпка: отметнете съгласието с Общите условия по-долу.'; $('r-terms').focus(); return;
+      }
+      var role = roleNow(); busy(btn, true, 'Създавам акаунта…');
+      google_(cred, { role: role, terms: 1 }).then(function (j) { gStore(''); if (j.google === 'login') location.href = safeNext(qs('next')) || home(); else done(role); })
+        .catch(function (x) { busy(btn, false); err(e, x); if (/Google/.test(x.message)) { gWait = ''; gStore(''); } });
+    }
+    function showG(cred) {
+      var p = gPayload(cred), n = $('reg-g'); if (!p || !n) return;
+      n.hidden = false; n.querySelector('b').textContent = p.email || '';
+      ['r-name', 'r-email', 'r-pass'].forEach(function (id) { var i = $(id); i.required = false; i.closest('.pw-wrap') ? i.closest('.pw-wrap').hidden = true : (i.hidden = true); var l = f.querySelector('label[for=' + id + ']'); if (l) l.hidden = true; });
+      if (gBox) { gBox.hidden = true; gBox.dataset.off = '1'; }
+      btn.textContent = 'Създай акаунт с Google';
+    }
+    $('r-terms').addEventListener('change', function () { if (this.checked && gWait) gGo(gWait); });
+    gButton(gBox, 'signup', gGo);
+    var g0 = gStored(); if (g0) { gWait = g0; showG(g0); }
+    var gCancel = $('reg-g-x'); if (gCancel) gCancel.addEventListener('click', function () { gWait = ''; gStore(''); location.replace('registracia.html' + (qs('role') ? '?role=' + qs('role') : '')); });
     f.addEventListener('submit', function (ev) {
       ev.preventDefault(); e.textContent = '';
-      var role = (f.querySelector('input[name=role]:checked') || {}).value || 'parent';
+      var role = roleNow();
+      if (gWait) { if (!$('r-terms').checked) { e.textContent = 'Отметнете съгласието с Общите условия.'; $('r-terms').focus(); return; } gGo(gWait); return; }
       if ($('r-pass').value.length < 8) { e.textContent = 'Паролата трябва да е поне 8 знака.'; $('r-pass').focus(); return; }
       busy(btn, true, 'Създавам акаунта…');
       register({ role: role, name: $('r-name').value.trim(), email: $('r-email').value.trim(), password: $('r-pass').value, terms: $('r-terms').checked ? 1 : 0 })
-        .then(function () { location.href = safeNext(qs('next')) || (pending() ? 'pricing.html#activate' : (role === 'teacher' ? 'tablo.html?new=1' : 'profil.html?new=1')); })
+        .then(function () { if (S.track) S.track('sign_up', { method: 'email' }); location.href = safeNext(qs('next')) || (pending() ? 'pricing.html#activate' : (role === 'teacher' ? 'tablo.html?new=1' : 'profil.html?new=1')); })
         .catch(function (x) { err(e, x); busy(btn, false); var fld = { email: 'r-email', name: 'r-name', password: 'r-pass', terms: 'r-terms' }[x.field]; if (fld && $(fld)) $(fld).focus(); });
     });
   }
@@ -391,8 +453,9 @@
       '<div class="ws-actions"><span class="hint">Без фамилия – името се вижда само от вас (и в класацията като прякор).</span><button class="btn" type="submit">Създай профила</button></div><p class="code-err" id="pf-err" role="alert"></p></form></section>';
     h += '<section class="acct-sec" id="settings"><h2 class="lined">⚙️ Акаунт</h2><div class="acct-set">' +
       '<details class="panel"><summary>Име</summary><form id="nm-form"><input id="nm-name" class="input" maxlength="60" value="' + esc(A.name) + '" required><button class="btn btn-sm" type="submit">Запази</button></form></details>' +
-      '<details class="panel"><summary>Смяна на паролата</summary><form id="pw-form"><input id="pw-old" class="input" type="password" autocomplete="current-password" placeholder="Текуща парола" required><input id="pw-new" class="input" type="password" autocomplete="new-password" minlength="8" placeholder="Нова парола (поне 8 знака)" required><button class="btn btn-sm" type="submit">Смени</button><p class="code-err" id="pw-err" role="alert"></p></form></details>' +
-      '<details class="panel"><summary>Изтриване на акаунта</summary><form id="del-form"><p class="hint">Изтриват се акаунтът, детските профили и запазеният прогрес. Това не може да се върне.</p><input id="del-pass" class="input" type="password" autocomplete="current-password" placeholder="Парола за потвърждение" required><button class="btn btn-sm btn-red" type="submit">Изтрий акаунта завинаги</button><p class="code-err" id="del-err" role="alert"></p></form></details>' +
+      (A.google ? '<p class="hint g-note">🔗 Свързан с Google профила ви – може да влизате с бутона „Вход с Google“.</p>' : '') +
+      '<details class="panel"><summary>' + (A.hasPass === false ? 'Задайте парола (по желание)' : 'Смяна на паролата') + '</summary><form id="pw-form">' + (A.hasPass === false ? '<p class="hint">Влизате с Google. Ако искате да влизате и с имейл и парола, задайте парола тук.</p>' : '<input id="pw-old" class="input" type="password" autocomplete="current-password" placeholder="Текуща парола" required>') + '<input id="pw-new" class="input" type="password" autocomplete="new-password" minlength="8" placeholder="Нова парола (поне 8 знака)" required><button class="btn btn-sm" type="submit">Смени</button><p class="code-err" id="pw-err" role="alert"></p></form></details>' +
+      '<details class="panel"><summary>Изтриване на акаунта</summary><form id="del-form"><p class="hint">Изтриват се акаунтът, детските профили и запазеният прогрес. Това не може да се върне.</p>' + (A.hasPass === false ? '<input id="del-pass" class="input" type="email" autocomplete="off" placeholder="Напишете имейла си за потвърждение" required>' : '<input id="del-pass" class="input" type="password" autocomplete="current-password" placeholder="Парола за потвърждение" required>') + '<button class="btn btn-sm btn-red" type="submit">Изтрий акаунта завинаги</button><p class="code-err" id="del-err" role="alert"></p></form></details>' +
       '</div></section>';
     box.innerHTML = h;
     bindPage(j);
@@ -446,7 +509,7 @@
     $('nm-form').addEventListener('submit', function (ev) { ev.preventDefault(); api({ action: 'update', name: $('nm-name').value.trim() }).then(function () { return api(); }).then(function (r) { S.toast('Запазено ✓'); reload(r); }).catch(function (x) { S.toast(esc(x.message)); }); });
     $('pw-form').addEventListener('submit', function (ev) {
       ev.preventDefault(); $('pw-err').textContent = '';
-      api({ action: 'password', old: $('pw-old').value, password: $('pw-new').value }).then(function () { S.toast('✓ Паролата е сменена. Другите устройства са изведени.'); $('pw-form').reset(); }).catch(function (x) { err($('pw-err'), x); });
+      api({ action: 'password', old: $('pw-old') ? $('pw-old').value : '', password: $('pw-new').value }).then(function () { S.toast('✓ Паролата е ' + (j.account.hasPass === false ? 'зададена.' : 'сменена. Другите устройства са изведени.')); $('pw-form').reset(); if (j.account.hasPass === false) setTimeout(function () { location.reload(); }, 1200); }).catch(function (x) { err($('pw-err'), x); });
     });
     $('del-form').addEventListener('submit', function (ev) {
       ev.preventDefault(); $('del-err').textContent = '';
