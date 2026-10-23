@@ -48,6 +48,9 @@ function db(): PDO {
     $pdo->exec("CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, client TEXT, contact TEXT, email TEXT, phone TEXT, school_id INTEGER,
         plan TEXT, qty INTEGER DEFAULT 1, amount REAL DEFAULT 0, status TEXT DEFAULT 'new', invoice TEXT, paid_at TEXT, batch_id INTEGER, notes TEXT);
       CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, ip TEXT, action TEXT, details TEXT);
+      CREATE TABLE IF NOT EXISTS stats_pages (day TEXT, path TEXT, views INTEGER DEFAULT 0, visits INTEGER DEFAULT 0, PRIMARY KEY(day, path));
+      CREATE TABLE IF NOT EXISTS stats_refs (day TEXT, host TEXT, n INTEGER DEFAULT 0, PRIMARY KEY(day, host));
+      CREATE TABLE IF NOT EXISTS stats_dev (day TEXT, kind TEXT, n INTEGER DEFAULT 0, PRIMARY KEY(day, kind));
       CREATE TABLE IF NOT EXISTS homework (id INTEGER PRIMARY KEY AUTOINCREMENT, batch_id INTEGER, grade INTEGER, topic TEXT, title TEXT, count INTEGER, level INTEGER DEFAULT 2, due TEXT, created_at TEXT);
       CREATE INDEX IF NOT EXISTS idx_hw_batch ON homework(batch_id, due);
       CREATE TABLE IF NOT EXISTS homework_done (hw_id INTEGER, rid INTEGER, correct INTEGER, answered INTEGER, tries INTEGER DEFAULT 1, done_at TEXT, PRIMARY KEY(hw_id, rid));

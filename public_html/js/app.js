@@ -117,6 +117,7 @@
       box.innerHTML = list.length ? list.map(newsCard).join('') : '<p class="lead-dark" style="text-align:center">Още няма новини.</p>';
       markSeen(list.map(function (x) { return x.id; })); return;
     }
+    if (document.getElementById('cookie-bar')) { S._newsAfterConsent = list; return; } // първо банерът за бисквитки
     if (document.querySelector('dialog[open]') || /[?&]start=1/.test(location.search)) return;
     var seen = seenIds(), fresh = list.filter(function (x) { return x.popup && seen.indexOf(x.id) < 0; }).slice(0, 3);
     if (!fresh.length) return;
@@ -136,6 +137,57 @@
       setTimeout(function () { showNews(j.news); }, 600);
     }).catch(function () { if (cached) showNews(cached); });
   };
+
+  /* ---------- БИСКВИТКИ: съгласие ----------
+     Необходими (вход, прогрес в играта, настройки) – винаги. „Статистика“ – анонимно броене на посещенията
+     (/api/hit.php, без IP, без бисквитка за проследяване) – само със съгласие. Изборът се пази 12 месеца. */
+  var CONSENT = 'smetko.consent', CV = 1;
+  function getConsent() {
+    try { var c = JSON.parse(localStorage.getItem(CONSENT) || 'null'); if (c && c.v === CV && Date.now() - c.t < 365 * 864e5) return c; } catch (e) {}
+    var m = document.cookie.match(/(?:^|; )smetko_consent=([^;]+)/);
+    return m ? { v: CV, stats: m[1].indexOf('stats') >= 0, t: Date.now() } : null;
+  }
+  var hitSent = false;
+  function hit() {
+    if (hitSent || !/^https?:$/.test(location.protocol)) return; hitSent = true;
+    var n = 0; try { if (!sessionStorage.getItem('smetko.visit')) { sessionStorage.setItem('smetko.visit', '1'); n = 1; } } catch (e) {}
+    var r = ''; try { if (document.referrer) { var u = new URL(document.referrer); if (u.hostname !== location.hostname) r = u.hostname; } } catch (e) {}
+    try { fetch('/api/hit.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ p: location.pathname, r: r, n: n }), keepalive: true }).catch(function () {}); } catch (e) {}
+  }
+  function setConsent(stats) {
+    var c = { v: CV, stats: !!stats, t: Date.now() };
+    try { localStorage.setItem(CONSENT, JSON.stringify(c)); } catch (e) {}
+    document.cookie = 'smetko_consent=' + (stats ? 'necessary,stats' : 'necessary') + '; max-age=' + 365 * 86400 + '; path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+    var bar = document.getElementById('cookie-bar'); if (bar) { bar.classList.remove('show'); setTimeout(function () { bar.remove(); if (S._newsAfterConsent) { var l = S._newsAfterConsent; S._newsAfterConsent = null; showNews(l); } }, 250); }
+    if (stats) hit();
+    document.querySelectorAll('[data-consent-state]').forEach(function (el) { el.textContent = stats ? 'Приети: необходими и статистика' : 'Приети: само необходимите'; });
+  }
+  S.consent = getConsent;
+  S.cookieSettings = function () {
+    var c = getConsent() || { stats: false };
+    var d = S.modal('<div class="ck-modal"><h3>🍪 Настройки за бисквитки</h3><p>Изберете кои бисквитки и данни в браузъра да използва Сметко. Може да промените избора по всяко време от долната част на всяка страница.</p>' +
+      '<label class="ck-opt"><input type="checkbox" checked disabled><span><b>Необходими</b><small>Вход в акаунта, прогресът в играта, абонаментът, избраният учебник и тази настройка. Без тях сайтът не работи – винаги са включени.</small></span></label>' +
+      '<label class="ck-opt"><input type="checkbox" id="ck-stats"' + (c.stats ? ' checked' : '') + '><span><b>Статистика</b><small>Анонимно броим колко пъти са отваряни страниците и от кой сайт идват посетителите, за да подобряваме Сметко. Без IP адрес, без реклами и без проследяване от други сайтове.</small></span></label>' +
+      '<p class="hint"><a href="cookies.html">Политика за бисквитките</a> · <a href="privacy-policy.html">Поверителност</a></p>' +
+      '<div class="modal-actions"><button class="btn btn-ghost" id="ck-save">Запази избора</button><button class="btn btn-green" id="ck-all">Приемам всички</button></div></div>');
+    d.classList.add('ck-dialog');
+    d.querySelector('#ck-save').addEventListener('click', function () { setConsent(d.querySelector('#ck-stats').checked); d.close(); S.toast('Изборът е запазен ✓'); });
+    d.querySelector('#ck-all').addEventListener('click', function () { setConsent(true); d.close(); S.toast('Благодарим! ✓'); });
+  };
+  function cookieBar() {
+    var c = getConsent();
+    document.querySelectorAll('[data-consent-state]').forEach(function (el) { el.textContent = !c ? 'Още не сте избрали' : c.stats ? 'Приети: необходими и статистика' : 'Приети: само необходимите'; });
+    if (c) { if (c.stats) hit(); return; }
+    if (navigator.webdriver && /[?&]noconsent=1/.test(location.search)) return;
+    var bar = document.createElement('div'); bar.id = 'cookie-bar'; bar.className = 'cookie-bar'; bar.setAttribute('role', 'dialog'); bar.setAttribute('aria-label', 'Бисквитки');
+    bar.innerHTML = '<div class="ck-in"><div class="ck-txt"><b>🍪 Сметко използва бисквитки</b><p>Необходимите поддържат входа и пазят прогреса в играта. С ваше съгласие броим анонимно посещенията, за да правим Сметко по-добър – без реклами и без проследяване. <a href="cookies.html">Научете повече</a></p></div>' +
+      '<div class="ck-btns"><button class="btn btn-green btn-sm" data-ck="all">Приемам всички</button><button class="btn btn-white btn-sm" data-ck="min">Само необходимите</button><button class="ck-link" data-ck="set">Настройки</button></div></div>';
+    document.body.appendChild(bar);
+    requestAnimationFrame(function () { bar.classList.add('show'); });
+    bar.querySelector('[data-ck="all"]').addEventListener('click', function () { setConsent(true); });
+    bar.querySelector('[data-ck="min"]').addEventListener('click', function () { setConsent(false); });
+    bar.querySelector('[data-ck="set"]').addEventListener('click', function () { S.cookieSettings(); });
+  }
 
   S.toast = function (html, ms) {
     var t = document.createElement('div');
@@ -272,6 +324,8 @@
   S.updateChip = updateChip;
 
   document.addEventListener('DOMContentLoaded', function () {
+    cookieBar();
+    document.querySelectorAll('[data-consent]').forEach(function (b) { b.addEventListener('click', function (e) { e.preventDefault(); S.cookieSettings(); }); });
     S.loadConfig();
     S.loadNews();
     S.renderOwls();

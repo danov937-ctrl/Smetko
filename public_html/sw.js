@@ -1,13 +1,13 @@
 /* Сметко — Service Worker: офлайн игра и бързо зареждане.
    При всяка промяна на файловете увеличете VERSION, за да се обнови кешът. */
-const VERSION = 'smetko-v16';
+const VERSION = 'smetko-v17';
 const CORE = [
   '/', '/game.html', '/achievements.html', '/pricing.html', '/about.html', '/uchilishta.html', '/rabotni-listove.html',
   '/kod.html', '/klasaciya.html', '/liga.html', '/otchet.html', '/za-nas.html', '/novini.html', '/vhod.html', '/registracia.html', '/profil.html', '/tablo.html', '/class-1.html', '/class-2.html', '/class-3.html', '/class-4.html', '/404.html',
-  '/css/style.css?v=16', '/css/animations.css?v=16',
-  '/js/owl.js?v=16', '/js/gamification.js?v=16', '/js/audio.js?v=16', '/js/math-engine.js?v=16', '/js/lesson-map.js?v=16', '/js/textbooks.js?v=16',
-  '/js/access.js?v=16', '/js/account.js?v=16', '/js/app.js?v=16', '/js/game.js?v=16', '/js/achievements.js?v=16', '/js/tools.js?v=16', '/js/league.js?v=16', '/js/report.js?v=16', '/js/homework.js?v=16', '/js/tablo.js?v=16', '/js/challenge.js?v=16',
-  '/assets/images/landscape.svg', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/manifest.json'
+  '/css/style.css?v=17', '/css/animations.css?v=17',
+  '/js/owl.js?v=17', '/js/gamification.js?v=17', '/js/audio.js?v=17', '/js/math-engine.js?v=17', '/js/lesson-map.js?v=17', '/js/textbooks.js?v=17',
+  '/js/access.js?v=17', '/js/account.js?v=17', '/js/app.js?v=17', '/js/game.js?v=17', '/js/achievements.js?v=17', '/js/tools.js?v=17', '/js/league.js?v=17', '/js/report.js?v=17', '/js/homework.js?v=17', '/js/tablo.js?v=17', '/js/challenge.js?v=17',
+  '/assets/images/landscape.svg', '/assets/fonts/nunito.woff', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/manifest.json'
 ];
 
 self.addEventListener('install', (e) => {

@@ -27,7 +27,7 @@ foreach ($codes as $i => $c) {
       </div></div>';
 }
 ?><!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Картички – Сметко</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>@font-face { font-family: Nunito; src: url(../assets/fonts/nunito.woff) format("woff"); font-weight: 600 900; }</style>
 <style>
 @page { size: A4; margin: 0; }
 * { box-sizing: border-box; }

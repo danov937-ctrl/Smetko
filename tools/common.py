@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '16'
+VER = '17'
 EMAIL = 'info@smetko.com'
 
 # Данни за търговеца — попълват се след регистрация на фирмата (търсете „[ПОПЪЛНЕТЕ“ във всички файлове)
@@ -44,9 +44,7 @@ def head(title, desc, path, ld=None, body_class='', noindex=False):
 <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="assets/icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/nunito.woff" as="font" type="font/woff" crossorigin>
 <link rel="stylesheet" href="css/style.css?v={VER}">
 <link rel="stylesheet" href="css/animations.css?v={VER}">
 {lds}</head>
@@ -156,7 +154,7 @@ FOOTER = '''<footer class="site-footer">
       <div><h4>Правна информация</h4><ul>
         <li><a href="terms.html">Общи условия</a></li>
         <li><a href="privacy-policy.html">Поверителност</a></li>
-        <li><a href="cookies.html">Бисквитки и хранилище</a></li>
+        <li><a href="cookies.html">Бисквитки</a> · <button class="ck-foot" data-consent>🍪 Настройки</button></li>
         <li><a href="pravna-informacia.html">Всички документи</a></li>
         <li><a href="mailto:''' + EMAIL + '''">''' + EMAIL + '''</a></li>
       </ul></div>

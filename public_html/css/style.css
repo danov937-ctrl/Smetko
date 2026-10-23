@@ -1,3 +1,5 @@
+/* Шрифтът Nunito е на нашия сървър (SIL Open Font License, assets/fonts/OFL-Nunito.txt) – без връзка с Google */
+@font-face { font-family: 'Nunito'; src: url('../assets/fonts/nunito.woff') format('woff'); font-weight: 600 900; font-style: normal; font-display: swap; }
 /* =========================================================
    Сметко — основни стилове (mobile-first)
    ========================================================= */
@@ -1268,3 +1270,25 @@ dialog.tb-modal h3 { text-align: center; }
 .badge-group h3 small { color: var(--muted); font-size: .85rem; margin-left: 6px; }
 .badge-group .badges { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 .badge small { line-height: 1.35; }
+
+/* ---------- банер за бисквитки ---------- */
+.cookie-bar { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 900; display: flex; justify-content: center; pointer-events: none; transform: translateY(140%); transition: transform .3s ease; padding-bottom: env(safe-area-inset-bottom); }
+.cookie-bar.show { transform: none; }
+.ck-in { pointer-events: auto; max-width: 820px; width: 100%; background: #fff; border-radius: 22px; box-shadow: 0 14px 50px rgba(29,43,79,.28); padding: 16px 18px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; border: 2px solid var(--line); }
+.ck-txt { flex: 1 1 340px; min-width: 0; }
+.ck-txt b { color: var(--navy); font-size: 1.05rem; }
+.ck-txt p { margin: 4px 0 0; color: var(--ink); font-size: .92rem; line-height: 1.45; }
+.ck-btns { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.ck-btns .btn { min-height: 44px; }
+.ck-btns .btn-white { box-shadow: inset 0 0 0 2px var(--line); }
+.ck-link { border: 0; background: none; font: inherit; font-weight: 800; color: var(--blue-dark); text-decoration: underline; cursor: pointer; padding: 10px 6px; }
+@media (max-width: 560px) { .ck-btns { width: 100%; } .ck-btns .btn { flex: 1 1 45%; } .ck-link { flex: 1 1 100%; text-align: center; padding: 4px; } .ck-txt p { font-size: .86rem; } }
+dialog.ck-dialog { width: min(94vw, 560px); }
+.ck-modal { text-align: left; }
+.ck-modal h3 { text-align: center; }
+.ck-opt { display: flex; gap: 12px; align-items: flex-start; background: var(--bg-soft); border-radius: 16px; padding: 12px 14px; margin: 10px 0; cursor: pointer; }
+.ck-opt input { width: 22px; height: 22px; flex: none; margin-top: 2px; accent-color: var(--green); }
+.ck-opt b { display: block; color: var(--navy); }
+.ck-opt small { display: block; color: var(--muted); font-weight: 700; line-height: 1.4; margin-top: 2px; }
+.ck-foot { border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; padding: 0; }
+@media print { .cookie-bar { display: none !important; } }
