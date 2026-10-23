@@ -283,8 +283,15 @@
         if (box.dataset.on) return; box.dataset.on = '1';
         google.accounts.id.initialize({ client_id: cid, callback: function (r) { if (r && r.credential) onCred(r.credential); }, ux_mode: 'popup', context: ctx, itp_support: true });
         if (!box.dataset.off) box.hidden = false;
-        var w = Math.max(200, Math.min(400, Math.floor((box.clientWidth || box.parentNode.clientWidth || 320))));
-        google.accounts.id.renderButton(box.querySelector('.g-btn'), { type: 'standard', theme: 'outline', size: 'large', text: ctx === 'signup' ? 'signup_with' : 'continue_with', shape: 'pill', logo_alignment: 'center', width: w, locale: 'bg' });
+        /* Видимият бутон е в стила на Сметко; логото рисува самият Google (бутон тип „icon“).
+           Истинският бутон на Google стои отгоре прозрачен и поема натискането – така входът е изцяло през Google. */
+        var real = box.querySelector('.g-btn'), wrap = document.createElement('div');
+        wrap.className = 'g-wrap';
+        wrap.innerHTML = '<span class="g-face" aria-hidden="true"><span class="g-ico"></span><span class="g-txt">' + (ctx === 'signup' ? 'Регистрация с Google' : 'Продължи с Google') + '</span></span>';
+        real.parentNode.insertBefore(wrap, real); wrap.appendChild(real);
+        var w = Math.max(200, Math.min(400, Math.floor(wrap.clientWidth || 320)));
+        google.accounts.id.renderButton(real, { type: 'standard', theme: 'outline', size: 'large', text: ctx === 'signup' ? 'signup_with' : 'continue_with', shape: 'pill', logo_alignment: 'center', width: w, locale: 'bg' });
+        google.accounts.id.renderButton(wrap.querySelector('.g-ico'), { type: 'icon', theme: 'outline', size: 'medium', shape: 'circle' });
       });
     });
   }

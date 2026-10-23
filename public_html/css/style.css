@@ -1295,7 +1295,15 @@ dialog.ck-dialog { width: min(94vw, 560px); }
 
 /* ---------- вход с Google ---------- */
 .g-auth{margin:2px 0 6px}
-.g-btn{display:flex;justify-content:center;min-height:44px}
+/* бутонът „Продължи с Google“ в стила на сайта */
+.g-wrap{position:relative;max-width:400px;margin:0 auto;height:58px;border-radius:999px}
+.g-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px;background:#fff;border:2px solid #DDE6F3;border-radius:999px;box-shadow:0 4px 0 #DDE6F3;color:var(--navy);font-weight:900;font-size:1.08rem;transition:transform .1s,box-shadow .1s,border-color .1s;pointer-events:none}
+.g-ico{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex:none;border-radius:50%;overflow:hidden}
+.g-ico iframe{pointer-events:none}
+.g-wrap:hover .g-face{border-color:#B9D4F5;box-shadow:0 4px 0 #B9D4F5;transform:translateY(-1px)}
+.g-wrap:active .g-face{transform:translateY(3px);box-shadow:0 1px 0 #B9D4F5}
+.g-wrap:focus-within .g-face{border-color:var(--blue);box-shadow:0 4px 0 var(--blue),0 0 0 4px rgba(47,128,237,.18)}
+.g-btn{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%) scaleY(1.45);display:flex;justify-content:center;opacity:.001;overflow:hidden}
 .g-btn iframe{margin:0 auto!important}
 .g-or{display:flex;align-items:center;gap:10px;margin:14px 0 4px;color:var(--muted,#6B7A90);font-size:.88rem;font-weight:700}
 .g-or::before,.g-or::after{content:"";flex:1;height:2px;background:#E2EAF6;border-radius:2px}
