@@ -1429,3 +1429,17 @@ dialog.ck-dialog { width: min(94vw, 560px); }
 }
 /* декоративните облаци никога не правят хоризонтален скрол */
 body { overflow-x: clip; }
+/* меню: „Новини“ и „За нас“ са отделни линкове; на компютър звънчето е излишно – броят е до „Новини“ */
+.nav-news { position: relative; }
+.nav-news b { min-width: 18px; height: 18px; padding: 0 5px; margin-left: 2px; border-radius: 999px; background: var(--red); color: #fff; font-size: .68rem; font-weight: 900; display: inline-grid; place-items: center; line-height: 1; text-shadow: none; }
+.nav-news b[hidden] { display: none !important; }
+@media (min-width: 1100px) { .site-header .news-bell { display: none; } }
+@media (min-width: 1100px) and (max-width: 1499px) {
+  .nav { gap: 0; }
+  .nav > a, .dd-btn { font-size: .96rem; padding: 8px 9px; }
+  .site-header .wrap { gap: 8px; }
+  .acct-btn { padding: 0 10px 0 8px; }
+}
+.nav > a, .dd-btn { white-space: nowrap; }
+@media (min-width: 1100px) and (max-width: 1199px) { .nav > a, .dd-btn { font-size: .93rem; padding: 8px 7px; } .logo-word { font-size: .92em; } }
+@media (min-width: 1100px) and (max-width: 1259px) { .game-header .header-actions { gap: 5px; } .game-header .wrap { gap: 4px; } .game-header .logo-word { font-size: .85em; } }

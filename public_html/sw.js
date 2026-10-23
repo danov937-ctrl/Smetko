@@ -1,12 +1,12 @@
 /* Сметко — Service Worker: офлайн игра и бързо зареждане.
    При всяка промяна на файловете увеличете VERSION, за да се обнови кешът. */
-const VERSION = 'smetko-v19';
+const VERSION = 'smetko-v20';
 const CORE = [
   '/', '/game.html', '/achievements.html', '/pricing.html', '/about.html', '/uchilishta.html', '/rabotni-listove.html',
   '/kod.html', '/klasaciya.html', '/liga.html', '/otchet.html', '/za-nas.html', '/novini.html', '/vhod.html', '/registracia.html', '/profil.html', '/tablo.html', '/matematika-1-klas.html', '/matematika-2-klas.html', '/matematika-3-klas.html', '/matematika-4-klas.html', '/404.html',
-  '/css/style.css?v=19', '/css/animations.css?v=19',
-  '/js/owl.js?v=19', '/js/gamification.js?v=19', '/js/audio.js?v=19', '/js/math-engine.js?v=19', '/js/lesson-map.js?v=19', '/js/textbooks.js?v=19',
-  '/js/access.js?v=19', '/js/account.js?v=19', '/js/app.js?v=19', '/js/game.js?v=19', '/js/achievements.js?v=19', '/js/tools.js?v=19', '/js/league.js?v=19', '/js/report.js?v=19', '/js/homework.js?v=19', '/js/tablo.js?v=19', '/js/challenge.js?v=19', '/js/quiz.js?v=19', '/tablica-za-umnozhenie.html', '/testove-po-matematika.html',
+  '/css/style.css?v=20', '/css/animations.css?v=20',
+  '/js/owl.js?v=20', '/js/gamification.js?v=20', '/js/audio.js?v=20', '/js/math-engine.js?v=20', '/js/lesson-map.js?v=20', '/js/textbooks.js?v=20',
+  '/js/access.js?v=20', '/js/account.js?v=20', '/js/app.js?v=20', '/js/game.js?v=20', '/js/achievements.js?v=20', '/js/tools.js?v=20', '/js/league.js?v=20', '/js/report.js?v=20', '/js/homework.js?v=20', '/js/tablo.js?v=20', '/js/challenge.js?v=20', '/js/quiz.js?v=20', '/tablica-za-umnozhenie.html', '/testove-po-matematika.html',
   '/assets/images/landscape.svg', '/assets/fonts/nunito.woff', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/manifest.json'
 ];
 

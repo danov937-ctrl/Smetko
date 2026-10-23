@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '19'
+VER = '20'
 EMAIL = 'info@smetko.com'
 
 # Данни за търговеца — попълват се след регистрация на фирмата (търсете „[ПОПЪЛНЕТЕ“ във всички файлове)
@@ -83,10 +83,11 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
         <div class="dd-panel">
           <a href="about.html#roditeli"><b>За родители</b><small>Как Сметко помага на детето</small></a>
           <a href="profil.html"><b>Отчет за родителя</b><small>В профила ви – за всяко дете</small></a>
-          <a href="za-nas.html"><b>За нас</b><small>Кои сме и защо направихме Сметко</small></a>
-          <a href="novini.html"><b>Новини</b><small>Какво ново има</small></a>
+          <a href="testove-po-matematika.html"><b>Онлайн тестове</b><small>По теми, входно ниво, НВО 4. клас</small></a>
         </div></div>
       <a href="blog/" data-nav="blog">Блог</a>
+      <a href="novini.html" data-nav="news" class="nav-news">Новини<b data-news-count hidden></b></a>
+      <a href="za-nas.html" data-nav="about">За нас</a>
       <a href="pricing.html" data-nav="pricing">Абонаменти</a>
     </nav>'''
 
