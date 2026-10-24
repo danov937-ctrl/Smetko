@@ -243,9 +243,13 @@
   function price(k) { var P = (S.siteConfig || {}).prices || {}; var v = parseFloat(P[k]); return isNaN(v) ? DEF_PRICES[k] : v; }
   // продажбите са спрени до края на проучването (meta smetko-sales в <head>)
   S.SALES = (function () { var m = document.querySelector('meta[name="smetko-sales"]'); return !!(m && m.content === '1'); })();
+  // затворен тест: пълният достъп е само с код за достъп (текстовете при катинарите)
+  S.PAID = S.SALES ? 'с абонамент' : 'с код за достъп';
+  S.PAID_URL = S.SALES ? 'pricing.html' : 'pricing.html#activate';
+  S.PAID_BTN = S.SALES ? 'Абонаменти' : '🔑 Имам код';
   S.soonModal = function () {
-    S.modal('<div data-owl="happy"></div><h3>Очаквайте скоро!</h3><p>Абонаментите ще бъдат пуснати скоро. Дотогава Сметко е безплатен за опознаване. Ако искате да ви уведомим, пишете ни на <a href="mailto:info@smetko.com">info@smetko.com</a>.</p>' +
-      '<div class="modal-actions"><a class="btn btn-green" href="game.html">Играй безплатно</a><a class="btn btn-ghost" href="pricing.html#activate">Имам код</a></div>');
+    S.modal('<div data-owl="happy"></div><h3>Очаквайте скоро!</h3><p>Абонаментите ще бъдат пуснати скоро. Сега Сметко е в затворен тест – пълният достъп е само с код за достъп от нас. Искате да участвате? Пишете ни на <a href="mailto:info@smetko.com?subject=Затворен%20тест">info@smetko.com</a>.</p>' +
+      '<div class="modal-actions"><a class="btn btn-green" href="pricing.html#activate">🔑 Имам код</a><a class="btn btn-ghost" href="game.html">Безплатен план</a></div>');
   };
   S.subscribeModal = function (kind, qty0) {
     if (!S.SALES) { S.soonModal(); return; }
@@ -310,8 +314,8 @@
     S.modal(
       '<div data-owl="encourage"></div><h3>Тази мисия е с пълен достъп</h3>' +
       '<p>В безплатния план са първите ' + S.config.freeAdventureLevels + ' мисии от всеки клас, „Бързо сметни“ и ' + S.config.freePracticePerDay + ' задачи на ден в „Тренировка“. ' +
-      (S.SALES ? 'Всичко останало се отключва с абонамент.' : 'Пълният достъп ще можете да поръчате скоро.') + ' Ученик от клас? Влез с името и паролата от учителя.</p>' +
-      '<div class="modal-actions"><a class="btn btn-green" href="' + (S.SALES ? 'pricing.html">Абонаменти' : 'pricing.html#activate">Имам код') + '</a><a class="btn btn-ghost" href="vhod.html">Вход</a></div>'
+      (S.SALES ? 'Всичко останало се отключва с абонамент.' : 'Сега Сметко е в затворен тест – всичко останало е само с код за достъп от нас.') + ' Ученик от клас? Влез с името и паролата от учителя.</p>' +
+      '<div class="modal-actions"><a class="btn btn-green" href="' + S.PAID_URL + '">' + S.PAID_BTN + '</a><a class="btn btn-ghost" href="vhod.html">Вход</a></div>'
     );
   };
   S.loginModal = function () { location.href = 'vhod.html'; };

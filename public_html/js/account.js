@@ -442,7 +442,7 @@
     // абонамент
     h += '<section class="acct-sec"><div class="sub-card panel' + (vsub ? ' on' : '') + '">' + (vsub
       ? '<div><small>Абонамент</small><b>' + esc(plan(vsub.type)) + ' <span class="hint">(' + esc(vsub.typeName) + ')</span></b><span>до ' + fmt(vsub.expires) + ' · включени деца: ' + vsub.used + ' от ' + vsub.seats + '</span></div><a class="btn btn-sm btn-ghost" href="pricing.html">Поднови</a>'
-      : '<div><small>Абонамент</small><b>Безплатен план</b><span>' + (subs.length ? 'Абонаментът изтече на ' + fmt(subs[0].expires) + '.' : 'Всички мисии, точки, значки и класации – с абонамент.') + '</span></div><a class="btn btn-sm" href="pricing.html">Абонаменти</a>') + '</div>';
+      : '<div><small>Абонамент</small><b>Безплатен план</b><span>' + (subs.length ? 'Абонаментът изтече на ' + fmt(subs[0].expires) + '.' : 'Всички мисии, точки, значки и класации – ' + S.PAID + '.') + '</span></div><a class="btn btn-sm" href="' + S.PAID_URL + '">' + S.PAID_BTN + '</a>') + '</div>';
     if (j.classes && j.classes.length) h += '<div class="sub-card panel on"><div><small>Класове</small><b>' + j.classes.length + (j.classes.length === 1 ? ' клас' : ' класа') + '</b><span>' + esc(j.classes.map(function (k) { return k.name; }).join(' · ')) + '</span></div><a class="btn btn-sm" href="tablo.html">📋 Табло</a></div>';
     h += '</section>';
     var local = progressOf(G().state), canImport = !owner(G().state) && (local.answered > 0 || local.stars > 0);

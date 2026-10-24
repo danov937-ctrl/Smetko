@@ -34,7 +34,7 @@
   function render(j) {
     var out = $('#liga-out');
     if (j.locked) {
-      out.innerHTML = '<div class="panel liga-locked"><div data-owl="think"></div><h3>Класациите са за абонати</h3><p>Училища, класове, учители и ученици от цялата страна – с всеки абонамент (индивидуален, семеен или за клас).</p><p><a class="btn btn-green" href="pricing.html">Абонаменти</a> <a class="btn btn-white" href="vhod.html">Вход</a></p><p class="hint">Ученик от клас? Влез с името и паролата от учителя.</p></div>';
+      out.innerHTML = '<div class="panel liga-locked"><div data-owl="think"></div><h3>' + (S.SALES ? 'Класациите са за абонати' : 'Класациите са за участниците в теста') + '</h3><p>Училища, класове, учители и ученици от цялата страна – ' + (S.SALES ? 'с всеки абонамент (индивидуален, семеен или за клас).' : 'с код за достъп от затворения тест.') + '</p><p><a class="btn btn-green" href="' + S.PAID_URL + '">' + S.PAID_BTN + '</a> <a class="btn btn-white" href="vhod.html">Вход</a></p><p class="hint">Ученик от клас? Влез с името и паролата от учителя.</p></div>';
       if (S.renderOwls) S.renderOwls(out);
       return;
     }
@@ -54,7 +54,7 @@
 
   function mine(j) {
     var box = $('#liga-mine'), a = S.Access && S.Access.get();
-    if (!a) { box.innerHTML = '<div class="liga-note">⭐ <span>С абонамент твоите точки влизат в класацията на класа и на училището. <a href="pricing.html">Абонаменти</a></span></div>'; return; }
+    if (!a) { box.innerHTML = '<div class="liga-note">⭐ <span>' + (S.SALES ? 'С абонамент' : 'С код за достъп') + ' твоите точки влизат в класацията на класа и на училището. <a href="' + S.PAID_URL + '">' + S.PAID_BTN + '</a></span></div>'; return; }
     if (q.scope === 'students' && j.myPlace) box.innerHTML = '<div class="liga-note me">⭐ <span>Ти си <b>' + ord(j.myPlace) + '</b> ' + (q.period === 'week' ? 'тази седмица' : 'тази година') + '. Продължавай!</span></div>';
     else if (q.scope === 'students') box.innerHTML = '<div class="liga-note">⭐ <span>Спечели точки' + (q.period === 'week' ? ' тази седмица' : '') + ', за да влезеш в класацията!</span></div>';
     else { var m = j.list.filter(function (r) { return r.mine; })[0]; box.innerHTML = m ? '<div class="liga-note me">🏆 <span>' + ({ schools: 'Твоето училище', classes: 'Твоят клас', teachers: 'Твоят учител' }[q.scope]) + ' е <b>' + ord(m.place, q.scope === 'schools') + '</b>!</span></div>' : ''; }
@@ -86,7 +86,7 @@
       return S.Challenge.board(g).then(function (j) {
         if (my !== seq) return;
         $('#liga-mine').innerHTML = '';
-        if (j.locked) { out.innerHTML = head + '<div class="panel liga-locked"><div data-owl="think"></div><h3>Класациите са за абонати</h3><p>Училища, класове, учители и ученици от цялата страна – с всеки абонамент (индивидуален, семеен или за клас).</p><p><a class="btn btn-green" href="pricing.html">Абонаменти</a> <a class="btn btn-white" href="vhod.html">Вход</a></p><p class="hint">Ученик от клас? Влез с името и паролата от учителя.</p></div>'; if (S.renderOwls) S.renderOwls(out); return; }
+        if (j.locked) { out.innerHTML = head + '<div class="panel liga-locked"><div data-owl="think"></div><h3>' + (S.SALES ? 'Класациите са за абонати' : 'Класациите са за участниците в теста') + '</h3><p>Училища, класове, учители и ученици от цялата страна – ' + (S.SALES ? 'с всеки абонамент (индивидуален, семеен или за клас).' : 'с код за достъп от затворения тест.') + '</p><p><a class="btn btn-green" href="' + S.PAID_URL + '">' + S.PAID_BTN + '</a> <a class="btn btn-white" href="vhod.html">Вход</a></p><p class="hint">Ученик от клас? Влез с името и паролата от учителя.</p></div>'; if (S.renderOwls) S.renderOwls(out); return; }
         if (!j.list.length) { out.innerHTML = head + '<div class="panel" style="text-align:center"><p class="lead-dark">Още никой не е играл тази седмица. Бъди първият!</p></div>'; return; }
         out.innerHTML = head + '<div class="table-wrap"><table class="compare board liga-table"><tbody>' + j.list.map(function (r) {
           return '<tr class="' + (r.mine ? 'me' : '') + '"><td class="pl">' + r.place + '</td><td><b>' + esc(r.name) + '</b>' + (r.mine ? ' <span class="tag">ти</span>' : '') + '<small class="liga-sub">' + [r['class'], r.school, r.town].filter(Boolean).map(esc).join(' · ') + '</small></td><td class="sc">' + r.best + '<small>верни за 60 с</small></td></tr>';

@@ -34,14 +34,14 @@
   function render() {
     var st = G.state, r = G.rank();
     if (!G.earns()) { // без абонамент: без точки, нива и значки
-      $('#rank-line').textContent = '🔒 Точки, нива и значки – с абонамент';
+      $('#rank-line').textContent = '🔒 Точки, нива и значки – ' + S.PAID;
       $('#rank-bar').style.width = '0';
-      $('#rank-next').innerHTML = S.SALES ? 'С абонамент печелиш точки, вдигаш ниво, събираш значки и влизаш в класациите. <a href="pricing.html" style="color:#fff;text-decoration:underline">Абонаменти</a>' : 'С пълния достъп печелиш точки, вдигаш ниво, събираш значки и влизаш в класациите – очаквайте скоро.';
+      $('#rank-next').innerHTML = S.SALES ? 'С абонамент печелиш точки, вдигаш ниво, събираш значки и влизаш в класациите. <a href="pricing.html" style="color:#fff;text-decoration:underline">Абонаменти</a>' : 'С код за достъп печелиш точки, вдигаш ниво, събираш значки и влизаш в класациите. <a href="pricing.html#activate" style="color:#fff;text-decoration:underline">Имам код</a>';
       var acc0 = st.answered ? Math.round(st.correct / st.answered * 100) : 0;
-      $('#stats').innerHTML = [[st.correct, 'верни задачи'], [acc0 + '%', 'точност'], ['🔒', 'точки – с абонамент'], ['🔒', 'серия от дни – с абонамент']]
+      $('#stats').innerHTML = [[st.correct, 'верни задачи'], [acc0 + '%', 'точност'], ['🔒', 'точки – ' + S.PAID], ['🔒', 'серия от дни – ' + S.PAID]]
         .map(function (x) { return '<div class="stat"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('');
       $('#badges').innerHTML = badgeGroups(st, true);
-      $('#badge-count').innerHTML = 'Значките се събират с абонамент. <a href="pricing.html">Виж абонаментите</a>';
+      $('#badge-count').innerHTML = 'Значките се събират ' + S.PAID + '. <a href="' + S.PAID_URL + '">' + (S.SALES ? 'Виж абонаментите' : 'Имам код') + '</a>';
       renderGrades(st);
       return;
     }

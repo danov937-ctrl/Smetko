@@ -45,7 +45,7 @@
     var streak = (s.streak.last === G.today() || isYesterday(s.streak.last)) ? s.streak.count : 0;
     $('#streak-num').textContent = streak;
     var r = G.rank();
-    $('#rank-name').innerHTML = G.earns() ? 'Ниво ' + r.level + ': ' + r.name : '🔒 Точки и нива – <a href="pricing.html">с абонамент</a>';
+    $('#rank-name').innerHTML = G.earns() ? 'Ниво ' + r.level + ': ' + r.name : '🔒 Точки и нива – <a href="' + S.PAID_URL + '">' + S.PAID + '</a>';
   }
   function isYesterday(d) { if (!d) return false; var y = new Date(); y.setDate(y.getDate() - 1); return d === y.toISOString().slice(0, 10) || Math.round((new Date(G.today()) - new Date(d)) / 864e5) === 1; }
 
@@ -505,7 +505,7 @@
     html += '<div class="result-actions">';
     if (p.mode === 'adventure') {
       var nextIdx = p.missionIdx + 1, hasNext = nextIdx < p.book.missions.length;
-      if (stars > 0 && hasNext && missionLocked(nextIdx)) html += '<button class="btn btn-green btn-lg" data-act="next">🔒 Следваща мисия</button><p class="lock-note" style="width:100%">Безплатни са първите ' + S.config.freeAdventureLevels + ' мисии. Следващите се отключват с абонамент.</p>';
+      if (stars > 0 && hasNext && missionLocked(nextIdx)) html += '<button class="btn btn-green btn-lg" data-act="next">🔒 Следваща мисия</button><p class="lock-note" style="width:100%">Безплатни са първите ' + S.config.freeAdventureLevels + ' мисии. Следващите се отключват ' + S.PAID + '.</p>';
       else if (stars > 0 && hasNext) html += '<button class="btn btn-green btn-lg" data-act="next">Следваща мисия →</button>';
       html += '<button class="btn ' + (stars > 0 ? 'btn-white' : 'btn-lg') + '" data-act="retry">Опитай пак</button>';
       html += '<button class="btn btn-ghost" data-act="map">Към картата</button>';
@@ -540,7 +540,7 @@
     if (p.mode === 'challenge' && S.Challenge) setTimeout(function () { // мястото в класацията на седмицата (след синхронизацията)
       S.Challenge.board(p.grade).then(function (j) {
         var el = $('#ch-board'); if (!el) return;
-        if (j.locked) { el.innerHTML = '<p class="hint">С абонамент ще видиш на кое място си сред всички ученици. <a href="pricing.html">Абонаменти</a></p>'; return; }
+        if (j.locked) { el.innerHTML = '<p class="hint">' + (S.SALES ? 'С абонамент' : 'С код за достъп') + ' ще видиш на кое място си сред всички ученици. <a href="' + S.PAID_URL + '">' + S.PAID_BTN + '</a></p>'; return; }
         if (j.mine) el.innerHTML = '<p class="ch-place">Ти си <b>' + j.mine.place + '-' + (j.mine.place % 10 === 1 && j.mine.place % 100 !== 11 ? 'ви' : j.mine.place % 10 === 2 && j.mine.place % 100 !== 12 ? 'ри' : (j.mine.place % 10 === 7 || j.mine.place % 10 === 8) && Math.floor(j.mine.place / 10) % 10 !== 1 ? 'ми' : 'ти') + '</b> от ' + j.list.length + ' в ' + p.grade + '. клас тази седмица!</p>';
       }).catch(function () {});
     }, 1500);
@@ -559,7 +559,7 @@
     if (cl === 'точки' && !G.earns()) { // без абонамент няма точки
       return '<div class="result-stats"><div><b>' + a + '</b><span>' + al + '</span></div><div><b>' + b + '</b><span>' + bl + '</span></div><div><b>🔒</b><span>точки</span></div></div>' +
         (S.SALES ? '<p class="lock-note free-note">⭐ С абонамент печелиш <b>точки, нива и значки</b> и влизаш в класациите. <a href="pricing.html">Абонаменти</a></p>'
-          : '<p class="lock-note free-note">⭐ <b>Точките, нивата и значките</b> идват с пълния достъп – очаквайте скоро. Ученик от клас? <a href="vhod.html#uchenik">Влез</a>.</p>');
+          : '<p class="lock-note free-note">⭐ <b>Точките, нивата и значките</b> са за участниците в затворения тест – с код за достъп. <a href="pricing.html#activate">Имам код</a> · <a href="vhod.html#uchenik">Ученик от клас</a></p>');
     }
     return '<div class="result-stats"><div><b>' + a + '</b><span>' + al + '</span></div><div><b>' + b + '</b><span>' + bl + '</span></div><div><b>' + c + '</b><span>' + cl + '</span></div></div>';
   }
