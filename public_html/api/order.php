@@ -5,6 +5,7 @@
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
 require_post();
+if (!SALES_OPEN) json_out(['ok' => false, 'error' => 'Абонаментите ще бъдат пуснати скоро. Пишете ни на info@smetko.com.'], 403);
 $origin = (string)($_SERVER['HTTP_ORIGIN'] ?? '');
 if ($origin !== '' && parse_url($origin, PHP_URL_HOST) !== preg_replace('/:\d+$/', '', (string)($_SERVER['HTTP_HOST'] ?? ''))) json_out(['ok' => false, 'error' => 'Забранено.'], 403);
 if (too_many('order', 6, 3600)) json_out(['ok' => false, 'error' => 'Твърде много поръчки от тази мрежа. Пишете ни на ' . site_config()['contactEmail'] . '.'], 429);

@@ -36,7 +36,7 @@
     if (!G.earns()) { // без абонамент: без точки, нива и значки
       $('#rank-line').textContent = '🔒 Точки, нива и значки – с абонамент';
       $('#rank-bar').style.width = '0';
-      $('#rank-next').innerHTML = 'С абонамент печелиш точки, вдигаш ниво, събираш значки и влизаш в класациите. <a href="pricing.html" style="color:#fff;text-decoration:underline">Абонаменти</a>';
+      $('#rank-next').innerHTML = S.SALES ? 'С абонамент печелиш точки, вдигаш ниво, събираш значки и влизаш в класациите. <a href="pricing.html" style="color:#fff;text-decoration:underline">Абонаменти</a>' : 'С пълния достъп печелиш точки, вдигаш ниво, събираш значки и влизаш в класациите – очаквайте скоро.';
       var acc0 = st.answered ? Math.round(st.correct / st.answered * 100) : 0;
       $('#stats').innerHTML = [[st.correct, 'верни задачи'], [acc0 + '%', 'точност'], ['🔒', 'точки – с абонамент'], ['🔒', 'серия от дни – с абонамент']]
         .map(function (x) { return '<div class="stat"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('');

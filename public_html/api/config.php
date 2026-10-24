@@ -4,6 +4,8 @@ declare(strict_types=1);
 require __DIR__ . '/lib.php';
 $c = site_config();
 unset($c['blockedWords']);
+if (!SALES_OPEN) unset($c['prices']); // цените не се показват, докато продажбите са спрени
+$c['sales'] = SALES_OPEN;
 foreach (['iban', 'bank', 'mol', 'phone'] as $k) unset($c['company'][$k]); // само за фактури в админ панела
 header('Cache-Control: public, max-age=120');
 header('Content-Type: application/json; charset=utf-8');

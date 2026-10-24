@@ -8,11 +8,14 @@
   var MODE_NAMES = { quick: 'Бързо сметни', adventure: 'Приключение', practice: 'Тренировка', challenge: 'Предизвикателство', homework: 'Домашна' };
   function fixed(m) { return m === 'adventure' || m === 'homework'; } // с точен брой задачи
   function timed(m) { return m === 'quick' || m === 'challenge'; }
+  // помощни настройки (СОП) – js/a11y.js
+  function ax(k) { return !!(S.A11y && S.A11y.on(k)); }
   var SAY = {
     ok: ['Браво!', 'Супер!', 'Точно така!', 'Страхотно!', 'Отлично!', 'Уха!', 'Как умееш!', 'Вярно!'],
     combo: ['Комбо! Двойни точки!', 'Огън си! 🔥', 'Не спирай!'],
     bad: ['Нищо, следващата ще стане!', 'Почти! Виж как е:', 'Грешките ни учат!', 'Спокойно, продължаваме!'],
-    think: ['Помисли спокойно…', 'Ти можеш!', 'Хм, интересна задача!']
+    think: ['Помисли спокойно…', 'Ти можеш!', 'Хм, интересна задача!'],
+    okSay: ['Браво!', 'Точно така!', 'Вярно!', 'Супер!', 'Отлично!']
   };
   function say(k) { var a = SAY[k]; return a[Math.floor(Math.random() * a.length)]; }
 
@@ -234,10 +237,12 @@
     var mode = opts.mode || st.mode;
     play = {
       mode: mode, grade: st.grade, topic: opts.topic || st.topic || 'mix', level: opts.level || 1,
-      missionIdx: opts.missionIdx, title: opts.title, book: opts.book, mission: opts.mission, key: advKey(), hw: opts.hw, total: mode === 'adventure' ? S.config.questionsPerMission : mode === 'homework' ? opts.hw.count : 0,
+      missionIdx: opts.missionIdx, title: opts.title, book: opts.book, mission: opts.mission, key: advKey(), hw: opts.hw, total: mode === 'adventure' ? (ax('short') ? Math.min(5, S.config.questionsPerMission) : S.config.questionsPerMission) : mode === 'homework' ? opts.hw.count : 0,
       idx: 0, correct: 0, wrong: 0, streak: 0, wrongStreak: 0, input: '', busy: false, waitNext: false,
       timeLeft: S.config.quickSeconds, task: null, lastQ: ''
     };
+    if (mode === 'quick' && ax('calm')) play.timeLeft = S.config.quickSeconds * 2; // спокоен режим: двойно време (не и в състезанието)
+    play.timeTotal = play.timeLeft;
     G.startSession(mode, st.grade, play.topic);
     $('#play-mode').textContent = MODE_NAMES[mode] + (play.title ? ': ' + play.title : '');
     var pr = $('#progress'); pr.classList.toggle('timer', timed(mode)); pr.classList.remove('low');
@@ -248,7 +253,7 @@
     $('#pts').textContent = '★ 0'; $('#pts').hidden = !G.earns();
     setCombo(0);
     S.setOwl($('#play-owl'), 'hello');
-    bubble(mode === 'challenge' ? 'Предизвикателство: ' + play.title + '! 60 секунди ⚡' : mode === 'quick' ? '60 секунди! Готов ли си? 🚀' : mode === 'adventure' ? 'Мисия ' + (play.missionIdx + 1) + ': ' + play.title + '!' : mode === 'homework' ? 'Домашна: ' + play.total + ' задачи. Без бързане! 📚' : 'Спокойно, без бързане. Ти можеш!');
+    bubble(mode === 'challenge' ? 'Предизвикателство: ' + play.title + '! 60 секунди ⚡' : mode === 'quick' ? play.timeTotal + ' секунди! Готов ли си? 🚀' : mode === 'adventure' ? 'Мисия ' + (play.missionIdx + 1) + ': ' + play.title + '!' : mode === 'homework' ? 'Домашна: ' + play.total + ' задачи. Без бързане! 📚' : 'Спокойно, без бързане. Ти можеш!');
     show('screen-play');
     updateProgress();
     if (timed(mode)) {
@@ -263,13 +268,13 @@
     play.timeLeft -= 1;
     $('#timer-num').textContent = Math.max(0, play.timeLeft);
     updateProgress();
-    if (play.timeLeft <= 5 && play.timeLeft > 0) { A.tick(); $('#progress').classList.add('low'); }
+    if (play.timeLeft <= 5 && play.timeLeft > 0 && !ax('calm')) { A.tick(); $('#progress').classList.add('low'); }
     if (play.timeLeft <= 0) { clearInterval(play.interval); finish(); }
   }
 
   function updateProgress() {
     var w = 0;
-    if (timed(play.mode)) w = play.timeLeft / S.config.quickSeconds * 100;
+    if (timed(play.mode)) w = play.timeLeft / (play.timeTotal || S.config.quickSeconds) * 100;
     else if (fixed(play.mode)) w = play.idx / play.total * 100;
     $('#progress i').style.width = Math.max(0, w) + '%';
     $('#level-pill').textContent = 'Трудност ' + play.level;
@@ -279,7 +284,8 @@
     if (!play) return;
     var t, tries = 0;
     do { t = st.skill ? E.generateSkill(play.grade, st.skill, play.level) : (play.mission && play.mission[1]) ? E.generateFrom(play.grade, play.mission[1], play.level) : E.generate(play.grade, play.topic, play.level); tries++; } while (t.q === play.lastQ && tries < 6);
-    play.task = t; S._task = t; play.lastQ = t.q; play.input = ''; play.busy = false; play.waitNext = false; play.qStart = Date.now();
+    if (S.A11y) { if (ax('choices')) S.A11y.toChoices(t); if (ax('dots')) S.A11y.addDots(t); }
+    play.task = t; S._task = t; play.lastQ = t.q; play.input = ''; play.busy = false; play.waitNext = false; play.tried = false; play.qStart = Date.now();
     var qc = $('#qcard'); qc.classList.remove('ok', 'bad');
     var html = '';
     if (t.dots) html += dotsHTML(t.dots);
@@ -288,7 +294,10 @@
     var cls = t.word ? ' long' : (plainLen > 26 ? ' mid' : '');
     html += '<div class="q-text' + cls + '">' + t.q.replace('{?}', '<span class="slot empty" id="slot"></span>') + '</div>';
     html += '<div class="explain" id="explain" aria-live="polite"></div>';
+    if (ax('read') && S.A11y.canSpeak) html += '<button class="say-btn" id="say-btn" aria-label="Прочети задачата на глас">🔈</button>';
     $('#qbody').innerHTML = html;
+    var sb = $('#say-btn'); if (sb) sb.addEventListener('click', function () { A.unlock(); S.A11y.speak(S.A11y.taskText(play.task)); });
+    if (ax('read')) later(function () { if (play && play.task === t) S.A11y.speak(S.A11y.taskText(t)); }, 350);
     $('#keypad').hidden = t.kind !== 'number';
     renderChoices(t);
     $('#next-row').hidden = true;
@@ -319,6 +328,10 @@
       for (i = 0; i < d.b; i++) b += '<i></i>';
       return '<div class="dots" aria-hidden="true"><span class="grp">' + a + '</span><span class="op">+</span><span class="grp b">' + b + '</span></div>';
     }
+    if (d.op === 'x') { // умножение: b групи по a точици
+      for (i = 0; i < d.b; i++) { var g = ''; for (var j = 0; j < d.a; j++) g += '<i></i>'; a += '<span class="grp' + (i % 2 ? ' b' : '') + '">' + g + '</span>'; }
+      return '<div class="dots mul" aria-hidden="true">' + a + '</div>';
+    }
     if (d.op === 'count') { for (i = 0; i < d.a; i++) a += '<i></i>'; return '<div class="dots big" aria-hidden="true"><span class="grp">' + a + '</span></div>'; }
     for (i = 0; i < d.a; i++) a += '<i' + (i >= d.a - d.b ? ' class="x"' : '') + '></i>';
     return '<div class="dots" aria-hidden="true"><span class="grp">' + a + '</span></div>';
@@ -336,6 +349,7 @@
       var t = play.task, vals = t.choices.map(function (c) { return typeof c === 'string' ? c : c.v; });
       if (typeof t.choices[0] !== 'string' && /^\d$/.test(k)) k = vals[+k - 1];
       if (vals.indexOf(k) < 0) return;
+      if ($$('#choices .key').some(function (b) { return b.disabled && b.getAttribute('data-k') === k; })) return; // вече опитан (втори опит)
       play.input = k;
       var s = $('#slot'); if (s) { s.textContent = k; s.classList.remove('empty'); }
       $$('#choices .key').forEach(function (b) { b.classList.toggle('picked', b.getAttribute('data-k') === k); });
@@ -352,6 +366,16 @@
     if (play.input === '') { var s = $('#slot'); if (s) { s.classList.remove('owl-jump'); void s.offsetWidth; s.classList.add('owl-jump'); } return; }
     play.busy = true;
     var ok = E.check(t, play.input), ms = Date.now() - play.qStart;
+    if (!ok && ax('retry') && !play.tried && !timed(play.mode)) { // втори опит с подсказка (не се брои за грешка)
+      play.tried = true; A.wrong();
+      var exr = $('#explain'); exr.textContent = S.A11y.hint(t, play.input);
+      if (ax('read')) S.A11y.speak(exr.textContent.replace(/[🙂]/g, ''));
+      S.setOwl($('#play-owl'), 'think'); bubble('Нищо страшно – опитай още веднъж!');
+      if (t.kind === 'choice') $$('#choices .key').forEach(function (b) { if (b.getAttribute('data-k') === play.input) { b.disabled = true; b.classList.add('tried'); b.classList.remove('picked'); } });
+      play.input = ''; renderInput(); var sl = $('#slot'); if (sl && t.kind === 'choice') { sl.textContent = ''; sl.classList.add('empty'); }
+      later(function () { if (play && play.task === t) play.busy = false; }, 250);
+      return;
+    }
     var res = G.answer({ correct: ok, topic: t.topic, table: t.table, mode: play.mode, grade: play.grade, ms: ms, skill: t.skill });
     var qc = $('#qcard'), ex = $('#explain');
     if (t.kind === 'choice') $$('#choices .key').forEach(function (b) { var v = b.getAttribute('data-k'); if (v === String(t.answer)) b.classList.add('right'); else if (v === play.input) b.classList.add('wrong'); });
@@ -363,16 +387,18 @@
       if (res.gained > 0) { var fp = document.createElement('div'); fp.className = 'float-pts'; fp.textContent = '+' + res.gained; qc.appendChild(fp); }
       setCombo(res.combo, res.mult);
       adapt(true);
-      later(goNext, timed(play.mode) ? 380 : 650);
+      if (ax('read') && !timed(play.mode)) S.A11y.speak(say('okSay'));
+      later(goNext, timed(play.mode) ? 380 : ax('calm') ? 1100 : 650);
     } else {
       play.wrong++; play.streak = 0; play.wrongStreak++;
       qc.classList.add('bad'); A.wrong();
       S.setOwl($('#play-owl'), 'encourage');
       bubble(say('bad'));
       ex.textContent = 'Вярно е: ' + t.full;
+      if (ax('read')) S.A11y.speak('Вярно е: ' + S.A11y.mathWords(S.A11y.plain(t.full)));
       setCombo(0);
       adapt(false);
-      if (play.mode === 'practice') { play.waitNext = true; $('#next-row').hidden = false; $('#next-btn').focus({ preventScroll: true }); }
+      if (play.mode === 'practice' || (ax('calm') && !timed(play.mode))) { play.waitNext = true; $('#next-row').hidden = false; $('#next-btn').focus({ preventScroll: true }); }
       else later(goNext, timed(play.mode) ? 1300 : 1700);
     }
     $('#pts').textContent = '★ ' + (G.session ? G.session.points : 0); $('#pts').hidden = !G.earns();
@@ -417,7 +443,7 @@
   // ---------- РЕЗУЛТАТИ ----------
   function finish() {
     if (!play) return;
-    clearTimers();
+    clearTimers(); if (S.A11y) S.A11y.stop();
     var p = play; play = null;
     var s = G.endSession() || { correct: p.correct, wrong: p.wrong, points: 0, newBadges: [] };
     if (S.Access) setTimeout(function () { S.Access.sync(); }, 300);
@@ -425,7 +451,8 @@
     var html = '', owlPose = 'happy', extraBadges = [], stars = 0, celebrate = false;
 
     if (p.mode === 'adventure') {
-      stars = p.correct >= p.total ? 3 : p.correct >= p.total - 1 ? 2 : p.correct >= Math.ceil(p.total * 0.625) ? 1 : 0;
+      var need = Math.ceil(p.total * (p.total <= 5 ? 0.6 : 0.625)); // кратка мисия (СОП): 3 от 5
+      stars = p.correct >= p.total ? 3 : p.correct >= p.total - 1 ? 2 : p.correct >= need ? 1 : 0;
       if (stars > 0) {
         G.addBonus(stars * 20);
         extraBadges = G.setStars(p.key, p.missionIdx, stars, p.book.missions.length);
@@ -434,7 +461,7 @@
       celebrate = stars >= 2;
       html += '<div class="big-stars">' + [1, 2, 3].map(function (i) { return '<span class="' + (i <= stars ? '' : 'off') + '">⭐</span>'; }).join('') + '</div>';
       html += '<h2>' + (stars === 3 ? 'Перфектно!' : stars === 2 ? 'Много добре!' : stars === 1 ? 'Мисията е изпълнена!' : 'Още малко!') + '</h2>';
-      html += '<p class="sub">' + (stars ? 'Мисия ' + (p.missionIdx + 1) + ' „' + p.title + '“' + (stars < 3 ? ' — опитай пак за 3 звезди!' : '') : 'Нужни са ' + Math.ceil(p.total * 0.625) + ' верни от ' + p.total + ', за да продължиш. Опитай пак!') + '</p>';
+      html += '<p class="sub">' + (stars ? 'Мисия ' + (p.missionIdx + 1) + ' „' + p.title + '“' + (stars < 3 ? ' — опитай пак за 3 звезди!' : '') : 'Нужни са ' + need + ' верни от ' + p.total + ', за да продължиш. Опитай пак!') + '</p>';
       html += stats(p.correct + '/' + p.total, 'верни', acc + '%', 'точност', '★ ' + (s.points + stars * 20), 'точки');
       if (stars) html += '<p class="lock-note">Включени ' + (stars * 20) + ' бонус точки за звездите</p>';
     } else if (p.mode === 'challenge') {
@@ -531,7 +558,8 @@
   function stats(a, al, b, bl, c, cl) {
     if (cl === 'точки' && !G.earns()) { // без абонамент няма точки
       return '<div class="result-stats"><div><b>' + a + '</b><span>' + al + '</span></div><div><b>' + b + '</b><span>' + bl + '</span></div><div><b>🔒</b><span>точки</span></div></div>' +
-        '<p class="lock-note free-note">⭐ С абонамент печелиш <b>точки, нива и значки</b> и влизаш в класациите. <a href="pricing.html">Абонаменти</a></p>';
+        (S.SALES ? '<p class="lock-note free-note">⭐ С абонамент печелиш <b>точки, нива и значки</b> и влизаш в класациите. <a href="pricing.html">Абонаменти</a></p>'
+          : '<p class="lock-note free-note">⭐ <b>Точките, нивата и значките</b> идват с пълния достъп – очаквайте скоро. Ученик от клас? <a href="vhod.html#uchenik">Влез</a>.</p>');
     }
     return '<div class="result-stats"><div><b>' + a + '</b><span>' + al + '</span></div><div><b>' + b + '</b><span>' + bl + '</span></div><div><b>' + c + '</b><span>' + cl + '</span></div></div>';
   }
@@ -546,7 +574,7 @@
       { onClose: function () { if (play && wasQuick && !play.quit) play.interval = setInterval(tickTimer, 1000); } });
     d.querySelector('[data-quit]').addEventListener('click', function () {
       if (play) play.quit = true;
-      var m = play.mode; clearTimers(); G.endSession(); play = null; d.close();
+      var m = play.mode; clearTimers(); if (S.A11y) S.A11y.stop(); G.endSession(); play = null; d.close();
       if (m === 'adventure') renderMap(); else { renderSetup(); show('screen-setup'); }
     });
   }
@@ -601,6 +629,8 @@
     var qb = q.get('book'); if (qb && st.grade) { G.state.books = G.state.books || {}; G.state.books[st.grade] = qb; G.save(); }
     bind();
     renderSetup();
+    // ученик от клас: помощните настройки от учителя се проверяват най-много веднъж на час
+    if (S.Access && S.Access.isClass() && Date.now() - (G.state.adaptAt || 0) > 36e5) S.Access.sync(true);
     var hw = +q.get('hw');
     if (hw && S.Homework) {
       show('screen-setup');

@@ -182,6 +182,7 @@
       delete next.accessLost; delete next.freeCleaned; delete next.profileId;
       next.studentId = j.student.id; next.nickname = j.student.name;
       next.access = accessFrom(j.access);
+      if (j.adapt) next.teacherAdapt = j.adapt; else delete next.teacherAdapt; // помощни настройки от учителя (СОП)
       var g = j['class'].grade; if (g) { next.lastGrade = next.lastGrade || g; if (j['class'].book) { next.books = next.books || {}; if (!next.books[g]) next.books[g] = j['class'].book; } }
       if (c && c.pid) { c.pid = 0; write(); }
       stu = { id: j.student.id, name: j.student.name, avatar: j.student.avatar, username: j.student.username, cls: j['class'], rev: j.rev };

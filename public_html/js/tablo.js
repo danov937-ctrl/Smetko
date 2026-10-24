@@ -41,7 +41,7 @@
   }
   function empty() {
     root.innerHTML = '<div class="panel tb-empty"><div class="owl" data-owl="cheer" style="width:140px;margin:0 auto"></div><h2>Здравейте' + (teacherName ? ', ' + esc(teacherName.split(' ')[0]) : '') + '! Да създадем класа ви</h2>' +
-      '<ol class="tb-steps"><li><b>Абонамент за клас</b><span>Поръчайте го от „Абонаменти“ – получавате един код по имейл.</span></li><li><b>Активирайте кода</b><span>В „Абонаменти“ → „Имате код?“. Класът се появява тук.</span></li><li><b>Добавете учениците</b><span>Пишете имената им – всеки получава потребител и парола. Отпечатвате картите и ги раздавате.</span></li></ol>' +
+      '<ol class="tb-steps"><li><b>Абонамент за клас</b><span>' + (S.SALES ? 'Поръчайте го от „Абонаменти“ – получавате един код по имейл.' : 'Абонаментите – очаквайте скоро. Ако участвате в пилотния проект, активирайте кода от нас в „Абонаменти“.') + '</span></li><li><b>Активирайте кода</b><span>В „Абонаменти“ → „Имате код?“. Класът се появява тук.</span></li><li><b>Добавете учениците</b><span>Пишете имената им – всеки получава потребител и парола. Отпечатвате картите и ги раздавате.</span></li></ol>' +
       '<div class="hero-cta" style="justify-content:center"><a class="btn btn-lg" href="pricing.html#activate">🔑 Имам код</a><a class="btn btn-ghost" href="pricing.html">Абонаменти</a></div></div>';
     S.renderOwls(root);
   }
@@ -99,10 +99,10 @@
         '<p class="hint">Децата влизат от <b>smetko.com</b> → <b>Вход</b> → <b>Ученик</b> с потребителя и паролата си.</p>' +
         '<div class="table-wrap"><table class="compare tb-table"><thead><tr><th>Ученик</th><th>Потребител</th><th>Парола</th><th>Точки</th><th>Дни (7)</th><th>Задачи</th><th>Точност</th><th>Последно</th><th></th></tr></thead><tbody>' +
         L.map(function (s) {
-          return '<tr class="' + (s.hidden ? 'hid' : '') + '"><td><button class="linkish" data-rep="' + s.id + '"><span class="tb-av">' + esc(s.avatar) + '</span><b>' + esc(s.name) + '</b></button>' + (s.hidden ? ' <span class="tag">скрит</span>' : '') + '</td>' +
+          return '<tr class="' + (s.hidden ? 'hid' : '') + '"><td><button class="linkish" data-rep="' + s.id + '"><span class="tb-av">' + esc(s.avatar) + '</span><b>' + esc(s.name) + '</b></button>' + (s.hidden ? ' <span class="tag">скрит</span>' : '') + (s.adapt ? ' <span class="tag tag-adapt" title="Има помощни настройки">🤝 помощ</span>' : '') + '</td>' +
             '<td class="mono-sm">' + esc(s.username) + '</td><td class="mono-sm"><span class="pw" data-pw="' + esc(s.password) + '">••••••</span></td><td>★ ' + s.points + '</td><td>' + s.active7 + '/7</td><td>' + s.answered + '</td><td>' + (s.answered ? pct(s.correct, s.answered) + '%' : '–') + '</td><td>' + (s.last ? fmt(s.last) : '<span class="hint">не е влизал</span>') + '</td>' +
-            '<td class="nowrap"><button class="btn btn-sm btn-ghost" data-ed="' + s.id + '" title="Редактирай">✏️</button> <button class="btn btn-sm btn-ghost" data-pwr="' + s.id + '" title="Нова парола">🔑</button></td></tr>';
-        }).join('') + '</tbody></table></div><p class="hint">Натиснете име за отчета на ученика. Скритите ученици не се виждат в класациите.</p></div>' : '');
+            '<td class="nowrap"><button class="btn btn-sm btn-ghost" data-ed="' + s.id + '" title="Редактирай">✏️</button> <button class="btn btn-sm btn-ghost" data-pwr="' + s.id + '" title="Нова парола">🔑</button> <button class="btn btn-sm btn-ghost' + (s.adapt ? ' on' : '') + '" data-adapt="' + s.id + '" title="Помощни настройки (СОП)" aria-label="Помощни настройки за ' + esc(s.name) + '">🤝</button></td></tr>';
+        }).join('') + '</tbody></table></div><p class="hint">Натиснете име за отчета на ученика. Скритите ученици не се виждат в класациите. С 🤝 задавате помощни настройки за дете със СОП.</p></div>' : '');
     $('add-form').addEventListener('submit', function (e) {
       e.preventDefault(); $('add-err').textContent = '';
       var names = $('add-names').value.split(/\n/).map(function (x) { return x.trim(); }).filter(Boolean);
@@ -116,6 +116,7 @@
     $('print-cards').addEventListener('click', function () { printCards(L.filter(function (s) { return !s.hidden; })); });
     el.querySelectorAll('[data-rep]').forEach(function (b) { b.addEventListener('click', function () { report(+b.getAttribute('data-rep')); }); });
     el.querySelectorAll('[data-ed]').forEach(function (b) { b.addEventListener('click', function () { editStudent(+b.getAttribute('data-ed')); }); });
+    el.querySelectorAll('[data-adapt]').forEach(function (b) { b.addEventListener('click', function () { adaptStudent(+b.getAttribute('data-adapt')); }); });
     el.querySelectorAll('[data-pwr]').forEach(function (b) { b.addEventListener('click', function () {
       var s = byId(+b.getAttribute('data-pwr'));
       var d = S.modal('<h3>🔑 Нова парола за ' + esc(s.name) + '?</h3><p>Старата парола спира да работи. Прогресът на детето се запазва.</p><div class="modal-actions"><button class="btn btn-ghost" data-close>Отказ</button><button class="btn" id="pw-ok">Нова парола</button></div>');
@@ -123,6 +124,27 @@
         act('reset', { sid: s.id }).then(function (j) { d.close(); draw(); var dd = S.modal('<h3>Новата парола на ' + esc(s.name) + '</h3><p class="tb-bigpw"><span>' + esc(s.username) + '</span><b>' + esc(j.password) + '</b></p><div class="modal-actions"><button class="btn" data-close>Готово</button></div>'); dd.classList.add('tb-modal'); }).catch(function (x) { S.toast(esc(x.message)); });
       });
     }); });
+  }
+  /* помощни настройки за ученик със СОП – детето не може да ги изключи */
+  function adaptStudent(id) {
+    var s = byId(id), A11 = S.A11y; if (!A11) return;
+    var a = s.adapt || {};
+    var d = S.modal('<h3>🤝 Помощни настройки за ' + esc(s.name) + '</h3><p class="a11y-intro">За дете със СОП, дислексия, дискалкулия или трудности с вниманието. Включените настройки важат на всяко устройство, от което детето влиза, и то не може да ги изключи. Прилагат се при следващото му влизане или след до 1 час.</p>' +
+      '<div class="a11y-preset"><button class="btn btn-green btn-sm" type="button" data-preset>✨ Препоръчани</button><button class="btn btn-ghost btn-sm" type="button" data-none>Без настройки</button></div>' +
+      '<div class="a11y-list">' + A11.OPTS.map(function (o) {
+        return '<label class="a11y-row"><span class="a11y-ico" aria-hidden="true">' + o.ico + '</span><span class="a11y-txt"><b>' + o.name + '</b><small>' + o.desc + '</small></span><input type="checkbox" class="sw" data-k="' + o.k + '"' + (a[o.k] ? ' checked' : '') + '></label>';
+      }).join('') + '</div><p class="hint a11y-foot">Резултатите на детето в отчетите остават видими. „Втори опит“ брои задачата за вярна, ако детето я реши от втория път. <a href="deca-sas-sop.html" target="_blank">Повече за СОП в Сметко</a></p>' +
+      '<div class="modal-actions"><button class="btn btn-ghost" data-close>Отказ</button><button class="btn" id="ad-save">Запази</button></div>');
+    d.classList.add('a11y-modal');
+    function boxes() { return Array.prototype.slice.call(d.querySelectorAll('input[data-k]')); }
+    d.querySelector('[data-preset]').addEventListener('click', function () { boxes().forEach(function (i) { i.checked = A11.PRESET.indexOf(i.getAttribute('data-k')) >= 0; }); });
+    d.querySelector('[data-none]').addEventListener('click', function () { boxes().forEach(function (i) { i.checked = false; }); });
+    d.querySelector('#ad-save').addEventListener('click', function () {
+      var o = {}; boxes().forEach(function (i) { if (i.checked) o[i.getAttribute('data-k')] = 1; });
+      this.disabled = true;
+      act('adapt', { sid: s.id, adapt: o }).then(function () { d.close(); draw(); S.toast(Object.keys(o).length ? '🤝 Настройките за ' + esc(s.name) + ' са запазени' : 'Настройките за ' + esc(s.name) + ' са изключени'); })
+        .catch(function (x) { S.toast(esc(x.message)); d.querySelector('#ad-save').disabled = false; });
+    });
   }
   function byId(id) { return cur.students.filter(function (s) { return s.id === id; })[0]; }
   function created(list) {

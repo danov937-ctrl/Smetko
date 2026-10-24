@@ -241,7 +241,14 @@
   var PLAN_OF = { 'Индивидуален': 'single', 'Семеен': 'family', 'Цял клас': 'class' };
   var DEF_PRICES = { single6: 10, single12: 18, family6: 18, family12: 30, class6: 45, class12: 80, disc3: 15, disc8: 25 };
   function price(k) { var P = (S.siteConfig || {}).prices || {}; var v = parseFloat(P[k]); return isNaN(v) ? DEF_PRICES[k] : v; }
+  // продажбите са спрени до края на проучването (meta smetko-sales в <head>)
+  S.SALES = (function () { var m = document.querySelector('meta[name="smetko-sales"]'); return !!(m && m.content === '1'); })();
+  S.soonModal = function () {
+    S.modal('<div data-owl="happy"></div><h3>Очаквайте скоро!</h3><p>Абонаментите ще бъдат пуснати скоро. Дотогава Сметко е безплатен за опознаване. Ако искате да ви уведомим, пишете ни на <a href="mailto:info@smetko.com">info@smetko.com</a>.</p>' +
+      '<div class="modal-actions"><a class="btn btn-green" href="game.html">Играй безплатно</a><a class="btn btn-ghost" href="pricing.html#activate">Имам код</a></div>');
+  };
   S.subscribeModal = function (kind, qty0) {
+    if (!S.SALES) { S.soonModal(); return; }
     var plan = PLAN_OF[kind] || kind || 'single';
     var A = S.Account && S.Account.data, per = S.period === 6 ? 6 : 12;
     var opt = function (k) { return '<option value="' + k + '"' + (k === plan ? ' selected' : '') + '>' + escH(S.planName(k)) + ' – ' + { single: 'индивидуален', family: 'семеен (до 4 деца)', 'class': 'цял клас (30 ученици)' }[k] + '</option>'; };
@@ -303,8 +310,8 @@
     S.modal(
       '<div data-owl="encourage"></div><h3>Тази мисия е с пълен достъп</h3>' +
       '<p>В безплатния план са първите ' + S.config.freeAdventureLevels + ' мисии от всеки клас, „Бързо сметни“ и ' + S.config.freePracticePerDay + ' задачи на ден в „Тренировка“. ' +
-      'Всичко останало се отключва с абонамент. Ученик от клас? Влез с името и паролата от учителя.</p>' +
-      '<div class="modal-actions"><a class="btn btn-green" href="pricing.html">Абонаменти</a><a class="btn btn-ghost" href="vhod.html">Вход</a></div>'
+      (S.SALES ? 'Всичко останало се отключва с абонамент.' : 'Пълният достъп ще можете да поръчате скоро.') + ' Ученик от клас? Влез с името и паролата от учителя.</p>' +
+      '<div class="modal-actions"><a class="btn btn-green" href="' + (S.SALES ? 'pricing.html">Абонаменти' : 'pricing.html#activate">Имам код') + '</a><a class="btn btn-ghost" href="vhod.html">Вход</a></div>'
     );
   };
   S.loginModal = function () { location.href = 'vhod.html'; };
@@ -312,6 +319,7 @@
   /* ---------- Конфети ---------- */
   S.confetti = function (count) {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (document.documentElement.classList.contains('a11y-calm')) return; // спокоен режим (СОП)
     var c = document.getElementById('confetti');
     if (!c) { c = document.createElement('canvas'); c.id = 'confetti'; document.body.appendChild(c); }
     var ctx = c.getContext('2d'), W, H, dpr = window.devicePixelRatio || 1;

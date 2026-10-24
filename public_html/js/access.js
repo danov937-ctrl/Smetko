@@ -40,9 +40,19 @@
     for (var k in s.adventure) for (var i in s.adventure[k]) { stars += s.adventure[k][i]; if (s.adventure[k][i]) missions++; }
     var days = {}, dk = Object.keys(s.days || {}).sort().slice(-28); dk.forEach(function (k) { days[k] = s.days[k]; });
     post('sync.php', { token: a.token, nickname: s.nickname || '', grade: s.lastGrade || 0, points: s.points || 0, correct: s.correct || 0, answered: s.answered || 0, stars: stars, missions: missions,
-      stats: { s: s.skills || {}, d: days }, ch: s.challenge && s.challenge.week ? s.challenge : null }).catch(function () {});
+      stats: { s: s.skills || {}, d: days }, ch: s.challenge && s.challenge.week ? s.challenge : null }).then(function (j) {
+      if (j && 'adapt' in j) setAdapt(j.adapt); // помощни настройки от учителя (СОП)
+    }).catch(function () {});
   }
 
+  function setAdapt(a) {
+    var s = st(), cur = JSON.stringify(s.teacherAdapt || null), nx = JSON.stringify(a || null);
+    s.adaptAt = Date.now();
+    if (cur === nx) { save(); return; }
+    if (a) s.teacherAdapt = a; else delete s.teacherAdapt;
+    save();
+    if (S.A11y) S.A11y.apply();
+  }
   function classBoard() { var a = access(); return a ? post('class.php', { token: a.token }) : Promise.reject(new Error('Само за ученици от клас.')); }
   function withAccess(q) { var a = access(); q = q || {}; if (a) q.token = a.token; return q; } // влезлият акаунт се разпознава по бисквитката
   function league(q) { return post('league.php', withAccess(q)); }

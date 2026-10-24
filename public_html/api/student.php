@@ -18,7 +18,7 @@ $pdo = db();
 
 function student_out(array $r, array $c): array {
     $b = db()->prepare('SELECT b.*, s.name AS school, s.town FROM batches b LEFT JOIN schools s ON s.id = b.school_id WHERE b.id = ?'); $b->execute([(int)$c['batch_id']]); $b = $b->fetch() ?: [];
-    return ['ok' => true, 'student' => ['id' => (int)$r['id'], 'name' => (string)$r['nickname'], 'avatar' => $r['avatar'] ?: '🦉', 'username' => $r['username']],
+    return ['ok' => true, 'student' => ['id' => (int)$r['id'], 'name' => (string)$r['nickname'], 'avatar' => $r['avatar'] ?: '🦉', 'username' => $r['username']], 'adapt' => adapt_out($r['adapt'] ?? null),
         'class' => ['name' => trim(($b['class_name'] ?? '') ? $b['class_name'] . ' клас' : ''), 'school' => $b['school'] ?? '', 'grade' => (int)($b['grade'] ?? 0), 'book' => $b['book'] ?? ''],
         'access' => access_obj($c, (string)$r['device']) + ['student' => true], 'state' => $r['state'] ? json_decode((string)$r['state']) : null, 'rev' => (int)$r['rev']];
 }

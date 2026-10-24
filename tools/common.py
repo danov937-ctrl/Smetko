@@ -5,8 +5,10 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '22'
+VER = '23'
 EMAIL = 'info@smetko.com'
+# Продажбите (цени, поръчки) са спрени до края на проучването. За пускане: True тук и SALES_OPEN в public_html/api/lib.php, после build.
+SALES_OPEN = False
 
 # Данни за търговеца — попълват се след регистрация на фирмата (търсете „[ПОПЪЛНЕТЕ“ във всички файлове)
 F_NAME = '<span data-co="name"><mark class="fill">[ПОПЪЛНЕТЕ: наименование на дружеството]</mark></span>'
@@ -32,6 +34,7 @@ def head(title, desc, path, ld=None, body_class='', noindex=False, og=None):
 <meta name="description" content="{desc}">
 {robots}<link rel="canonical" href="{canon}">
 <meta name="theme-color" content="#3299FF">
+<meta name="smetko-sales" content="{1 if SALES_OPEN else 0}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Сметко">
 <meta property="og:title" content="{title}">
@@ -78,10 +81,12 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
           <a href="rabotni-listove.html"><b>Работни листове</b><small>Задачи за печат с отговори</small></a>
           <a href="uchilishta.html#domashna"><b>Линк за домашна</b><small>Конкретна тема с един линк</small></a>
           <a href="about.html#uchiteli"><b>Как работи в клас</b><small>Идеи за часа по математика</small></a>
+          <a href="deca-sas-sop.html"><b>🤝 Ученици със СОП</b><small>Помощни настройки за всяко дете</small></a>
         </div></div>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="parents">Родители <span class="chev">▾</span></button>
         <div class="dd-panel">
           <a href="about.html#roditeli"><b>За родители</b><small>Как Сметко помага на детето</small></a>
+          <a href="deca-sas-sop.html"><b>🤝 Деца със СОП</b><small>Четене на глас, едър текст, спокойно темпо</small></a>
           <a href="profil.html"><b>Отчет за родителя</b><small>В профила ви – за всяко дете</small></a>
           <a href="testove-po-matematika.html"><b>Онлайн тестове</b><small>По теми, входно ниво, НВО 4. клас</small></a>
         </div></div>
@@ -104,6 +109,7 @@ MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
     <a href="uchilishta.html">🏫 За учители и училища</a>
     <a href="rabotni-listove.html">🖨️ Работни листове</a>
     <a href="about.html#roditeli">👨‍👩‍👧 За родители</a>
+    <a href="deca-sas-sop.html">🤝 Деца със СОП</a>
     <a href="otchet.html">📊 Отчет за родителя</a>
     <a href="blog/">✍️ Блог</a>
     <a href="za-nas.html">🦉 За нас</a>
@@ -113,7 +119,8 @@ MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
 
 def header(active='', over=False, game=False):
     nav = NAV_HTML.replace(f'data-nav="{active}"', 'aria-current="page"') if active else NAV_HTML
-    snd = '<button class="icon-btn" id="sound-btn" aria-label="Звук">🔊</button>' if game else ''
+    snd = ('<button class="icon-btn a11y-btn" data-a11y-open aria-label="Помощни настройки (СОП)" title="Помощни настройки">🤝</button>'
+           '<button class="icon-btn" id="sound-btn" aria-label="Звук">🔊</button>') if game else ''
     cls = 'site-header' + (' over' if over else '') + (' game-header' if game else '')
     return f'''<a class="skip" href="#main">Към съдържанието</a>
 <header class="{cls}">
@@ -157,6 +164,7 @@ FOOTER = '''<footer class="site-footer">
       </ul></div>
       <div><h4>За възрастните</h4><ul>
         <li><a href="about.html#roditeli">За родители</a></li>
+        <li><a href="deca-sas-sop.html">Деца със СОП</a></li>
         <li><a href="otchet.html">Отчет за родителя</a></li>
         <li><a href="blog/">Блог</a></li>
         <li><a href="za-nas.html">За нас</a></li>

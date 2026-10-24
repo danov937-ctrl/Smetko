@@ -8,6 +8,7 @@ date_default_timezone_set('Europe/Sofia');
 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // без O, 0, I, 1, L
 const CODE_PREFIX = 'SMET';
 const SITE_URL = 'https://smetko.com';
+const SALES_OPEN = false; // продажбите (цени и поръчки) са спрени до края на проучването; при пускане – true и SALES_OPEN в tools/common.py
 
 function db(): PDO {
     static $pdo = null;
@@ -43,7 +44,7 @@ function db(): PDO {
     // абонаментите се активират от акаунт; ученикът от клас влиза с потребител и парола (ред в redemptions)
     foreach (['account_id INTEGER', 'activated_at TEXT', 'order_id INTEGER'] as $col) if (!$has('codes', strtok($col, ' '))) $pdo->exec('ALTER TABLE codes ADD COLUMN ' . $col);
     foreach (['account_id INTEGER', 'book TEXT', 'message TEXT', 'message_at TEXT'] as $col) if (!$has('batches', strtok($col, ' '))) $pdo->exec('ALTER TABLE batches ADD COLUMN ' . $col);
-    foreach (['username TEXT', 'pass_hash TEXT', 'pass_enc TEXT', 'avatar TEXT', 'state TEXT', 'rev INTEGER DEFAULT 0'] as $col) if (!$has('redemptions', strtok($col, ' '))) $pdo->exec('ALTER TABLE redemptions ADD COLUMN ' . $col);
+    foreach (['username TEXT', 'pass_hash TEXT', 'pass_enc TEXT', 'avatar TEXT', 'state TEXT', 'rev INTEGER DEFAULT 0', 'adapt TEXT'] as $col) if (!$has('redemptions', strtok($col, ' '))) $pdo->exec('ALTER TABLE redemptions ADD COLUMN ' . $col);
     $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_red_user ON redemptions(username); CREATE INDEX IF NOT EXISTS idx_codes_acc ON codes(account_id); CREATE INDEX IF NOT EXISTS idx_batch_acc ON batches(account_id)');
     $pdo->exec("CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, client TEXT, contact TEXT, email TEXT, phone TEXT, school_id INTEGER,
         plan TEXT, qty INTEGER DEFAULT 1, amount REAL DEFAULT 0, status TEXT DEFAULT 'new', invoice TEXT, paid_at TEXT, batch_id INTEGER, notes TEXT);
@@ -336,6 +337,19 @@ function read_token(string $t): ?array {
 }
 
 /* ---------- защита от налучкване ---------- */
+/* Помощни настройки за деца със СОП (задава ги учителят за всеки ученик; детето не може да ги изключи) */
+const ADAPT_KEYS = ['calm', 'read', 'big', 'spaced', 'choices', 'short', 'dots', 'retry'];
+function adapt_clean($a): ?string {
+    if (!is_array($a)) return null;
+    $o = []; foreach (ADAPT_KEYS as $k) if (!empty($a[$k])) $o[$k] = 1;
+    return $o ? json_encode($o) : null;
+}
+function adapt_out($json): ?object {
+    $a = $json ? json_decode((string)$json, true) : null;
+    if (!is_array($a)) return null;
+    $o = []; foreach (ADAPT_KEYS as $k) if (!empty($a[$k])) $o[$k] = 1;
+    return $o ? (object)$o : null;
+}
 function too_many(string $kind, int $max, int $window): bool {
     $pdo = db(); $t = time();
     if (random_int(1, 40) === 1) $pdo->prepare('DELETE FROM attempts WHERE ts < ?')->execute([$t - 86400]); // почистване от време на време

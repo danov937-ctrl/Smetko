@@ -4,7 +4,7 @@
    POST {action: class, id}                     → целият клас: ученици (с потребител и парола), отчет по теми, домашни, настройки
    POST {action: update, id, ...}               → име/клас/училище/учител/обща класация/учебник/съобщение до класа
    POST {action: add, id, names[]}              → нови ученици (потребител + парола се правят сами)
-   POST {action: edit|reset|remove|hide, id, sid, ...}
+   POST {action: edit|reset|remove|hide|adapt, id, sid, ...}  (adapt: помощни настройки за дете със СОП)
    POST {action: hw_create|hw_delete, id, ...}  → домашни */
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
@@ -40,7 +40,7 @@ function students_of(array $b, bool $full): array {
         $dy = is_array($stt['d'] ?? null) ? $stt['d'] : [];
         $a7 = 0; $t7 = 0; $c7 = 0; for ($q = 0; $q < 7; $q++) { $d = $dy[day_ago($q)] ?? null; if (!empty($d[0])) { $a7++; $t7 += (int)$d[0]; $c7 += (int)($d[1] ?? 0); } }
         $x = ['id' => (int)$r['id'], 'name' => (string)($r['nickname'] ?: 'Ученик'), 'avatar' => $r['avatar'] ?: '🦉', 'points' => (int)$r['pts'], 'stars' => (int)$r['stars'], 'missions' => (int)$r['missions'],
-            'correct' => (int)$r['correct'], 'answered' => (int)$r['answered'], 'active7' => $a7, 'tasks7' => $t7, 'correct7' => $c7, 'today' => !empty($dy[date('Y-m-d')][0]), 'last' => $r['last_seen'], 'hidden' => (int)$r['hidden'] === 1, 'grade' => (int)$r['grade'], 'username' => (string)$r['username']];
+            'correct' => (int)$r['correct'], 'answered' => (int)$r['answered'], 'active7' => $a7, 'tasks7' => $t7, 'correct7' => $c7, 'today' => !empty($dy[date('Y-m-d')][0]), 'last' => $r['last_seen'], 'hidden' => (int)$r['hidden'] === 1, 'grade' => (int)$r['grade'], 'username' => (string)$r['username'], 'adapt' => adapt_out($r['adapt'] ?? null)];
         if ($full) $x += ['password' => kid_dec($r['pass_enc']), 'skills' => (object)(is_array($stt['s'] ?? null) ? $stt['s'] : []), 'days' => (object)$dy];
         $out[] = $x;
     }
@@ -156,6 +156,11 @@ case 'reset':
     $r = student_of($b, $in['sid'] ?? 0); $p = kid_password();
     $pdo->prepare('UPDATE redemptions SET pass_hash = ?, pass_enc = ? WHERE id = ?')->execute([password_hash($p, PASSWORD_DEFAULT), kid_enc($p), (int)$r['id']]);
     json_out($reload() + ['password' => $p, 'sid' => (int)$r['id']]);
+
+case 'adapt': // помощни настройки (СОП) за един ученик
+    $r = student_of($b, $in['sid'] ?? 0);
+    $pdo->prepare('UPDATE redemptions SET adapt = ? WHERE id = ?')->execute([adapt_clean($in['adapt'] ?? null), (int)$r['id']]);
+    json_out($reload());
 
 case 'hide':
     $r = student_of($b, $in['sid'] ?? 0);
