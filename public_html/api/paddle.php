@@ -53,8 +53,8 @@ if ($kind !== 'transaction.completed') { pd_log($eid, $kind, $txn, 'skip'); echo
 $cd = is_array($d['custom_data'] ?? null) ? $d['custom_data'] : [];
 $plan = in_array($cd['plan'] ?? '', ['single', 'family', 'class'], true) ? (string)$cd['plan'] : '';
 $period = (int)($cd['period'] ?? 12) === 6 ? 6 : 12;
-$qty = max(1, min(60, (int)($cd['qty'] ?? 0)));
-if (!$qty) { foreach (($d['items'] ?? []) as $it) $qty = max($qty, (int)($it['quantity'] ?? 1)); }
+$qty = max(0, (int)($cd['qty'] ?? 0));
+foreach (($d['items'] ?? []) as $it) $qty = max($qty, (int)($it['quantity'] ?? 1)); // платеното количество е водещо
 $qty = max(1, min(60, $qty));
 $aid = isset($cd['acc']) ? paddle_acc_id((string)$cd['acc']) : 0;
 
