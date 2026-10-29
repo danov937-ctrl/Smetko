@@ -536,7 +536,7 @@ STATIC = [('', '1.0', 'weekly'), ('game.html', '0.9', 'weekly')] + [(class_url(g
     ('liga.html', '0.6', 'daily'), ('za-nas.html', '0.6', 'monthly'), ('otchet.html', '0.5', 'monthly'), ('novini.html', '0.4', 'weekly'),
     ('registracia.html', '0.5', 'yearly'), ('vhod.html', '0.4', 'yearly'), ('achievements.html', '0.3', 'monthly'),
     ('pravna-informacia.html', '0.3', 'yearly'), ('terms.html', '0.2', 'yearly'), ('privacy-policy.html', '0.2', 'yearly'), ('cookies.html', '0.2', 'yearly'),
-    ('otkaz.html', '0.1', 'yearly'), ('dogovor-uchilishte.html', '0.3', 'yearly'), ('pismo-roditeli.html', '0.3', 'yearly'), ('dogovor-danni.html', '0.2', 'yearly')]
+    ('otkaz.html', '0.1', 'yearly'), ('vrashtane.html', '0.2', 'yearly'), ('dogovor-uchilishte.html', '0.3', 'yearly'), ('pismo-roditeli.html', '0.3', 'yearly'), ('dogovor-danni.html', '0.2', 'yearly')]
 xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(
     f'  <url><loc>{SITE}/{u}</loc><lastmod>{TODAY}</lastmod><changefreq>{c}</changefreq><priority>{p}</priority></url>\n' for u, p, c in STATIC + SITEMAP) + '</urlset>\n'
 missing = [u for u, _, _ in STATIC + SITEMAP if u and not os.path.exists(os.path.join(OUT, u))]

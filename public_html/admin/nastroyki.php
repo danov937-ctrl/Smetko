@@ -50,7 +50,7 @@ if ($action === 'test_mail') {
 }
 if ($action === 'company') {
     foreach (array_keys(DEFAULT_CONFIG['company']) as $k) $c['company'][$k] = mb_substr(post($k), 0, 200);
-    save_site_config($c); audit('Данни на фирмата', $c['company']['name'] . ' ' . $c['company']['eik']); flash('Данните на фирмата са запазени – вече се показват в правните документи.'); go('nastroyki.php#company');
+    save_site_config($c); audit('Данни на собственика', $c['company']['name']); flash('Данните са запазени – вече се показват в правните документи.'); go('nastroyki.php#company');
 }
 if ($action === 'password') {
     $p = (string)($_POST['password'] ?? '');
@@ -94,9 +94,9 @@ $body .= $f('google') . '<h2>🔗 Google</h2><p class="hint">Поставете 
     '<label>👤 Вход с Google – Client ID ' . $gst($G['clientId'] !== '') . '<input name="clientId" value="' . h($G['clientId']) . '" placeholder="123…-abc….apps.googleusercontent.com" autocomplete="off"></label></div>' .
     ($G['gsc'] !== '' ? '<p class="hint">Проверка: <a href="/' . h($G['gsc']) . '" target="_blank" rel="noopener">smetko.com/' . h($G['gsc']) . '</a> трябва да показва „google-site-verification: ' . h($G['gsc']) . '“. След това натиснете „Потвърждаване“ в Search Console и добавете картата на сайта: <b>sitemap.xml</b>.</p>' : '') .
     '<p class="hint">Google Analytics се зарежда само при посетители, приели „Статистика“ в банера за бисквитки (без Google Signals и без реклами). Бутонът „Вход с Google“ се появява на страниците „Вход“ и „Регистрация“.</p><button>💾 Запази</button></form>';
-$body .= $f('company') . '<h2>🏢 Данни на фирмата</h2><p class="hint">Показват се в Общите условия, Политиката за поверителност и другите документи на мястото на „[ПОПЪЛНЕТЕ…]“, и в проформите.</p><div class="grid g3">' .
-    $cf('name', 'Наименование', 'Сметко ЕООД') . $cf('eik', 'ЕИК', '123456789') . $cf('vat', 'ДДС номер (ако има)', 'BG123456789') . '<label class="wide">Седалище и адрес на управление<input name="addr" maxlength="200" value="' . h($C['addr']) . '"></label>' .
-    $cf('mol', 'Управител (МОЛ)') . $cf('phone', 'Телефон') . $cf('date', 'Дата на документите', date('d.m.Y')) . $cf('iban', 'IBAN (за проформи)') . $cf('bank', 'Банка') . '</div><button>💾 Запази</button></form>';
+$body .= $f('company') . '<h2>👤 Собственик на Сметко</h2><p class="hint">Сметко се продава от физическо лице, а плащанията минават през Paddle (търговец – Merchant of Record), затова не са нужни ЕИК и ДДС номер. Името и адресът се показват в Общите условия, Политиката за поверителност и другите документи на мястото на „[ПОПЪЛНЕТЕ…]“. За одобрението от Paddle е най-добре да се впишат и в <code>tools/common.py</code> (OWNER_NAME, OWNER_ADDR) – тогава са направо в страницата.</p><div class="grid g3">' .
+    $cf('name', 'Име и фамилия', 'Иван Петров Иванов') . '<label class="wide">Адрес за кореспонденция<input name="addr" maxlength="200" value="' . h($C['addr']) . '" placeholder="гр. София, ул. …"></label>' .
+    $cf('phone', 'Телефон (по желание)') . '<details class="wide"><summary class="hint">Ако по-късно регистрирате фирма</summary><div class="grid g3">' . $cf('eik', 'ЕИК', '123456789') . $cf('vat', 'ДДС номер (ако има)', 'BG123456789') . $cf('mol', 'Управител (МОЛ)') . $cf('iban', 'IBAN') . $cf('bank', 'Банка') . '</div></details></div><button>💾 Запази</button></form>';
 $body .= '<form method="post" class="card" id="security">' . csrf_field() . '<input type="hidden" name="action" value="password"><h2>🔒 Сигурност</h2><div class="grid g3"><label>Текуща парола<input type="password" name="old" autocomplete="current-password"></label><label>Нова парола (мин. 10 знака)<input type="password" name="password" minlength="10" autocomplete="new-password"></label><label>Повтори новата<input type="password" name="password2" minlength="10" autocomplete="new-password"></label></div><button>Смени паролата</button></form>' .
     '<form method="post" class="card">' . csrf_field() . '<input type="hidden" name="action" value="logout_all"><h3>Изход от всички устройства</h3><p class="hint">Ако сте влизали от чужд компютър или телефон – всички други сесии спират веднага.</p><button class="ghost">🚪 Изведи другите устройства</button></form>';
 page('Настройки на сайта', $body);

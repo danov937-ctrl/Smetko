@@ -1705,3 +1705,4 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .st-link { margin-top: 14px; }
 .hw-st { font-weight: 800; white-space: nowrap; }
 .hw-st.ok { color: var(--green-dark); } .hw-st.miss { color: var(--red-dark); } .hw-st.wait { color: var(--orange-dark); }
+@media (min-width: 1100px) { .footer-grid { grid-template-columns: 1.3fr 1fr 1.1fr 1fr 1fr; gap: 24px; } }

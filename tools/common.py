@@ -5,17 +5,23 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '26'
+VER = '27'
 EMAIL = 'info@smetko.com'
 # Продажбите (цени, поръчки) са спрени до края на проучването. За пускане: True тук и SALES_OPEN в public_html/api/lib.php, после build.
 SALES_OPEN = False
 
-# Данни за търговеца — попълват се след регистрация на фирмата (търсете „[ПОПЪЛНЕТЕ“ във всички файлове)
-F_NAME = '<span data-co="name"><mark class="fill">[ПОПЪЛНЕТЕ: наименование на дружеството]</mark></span>'
-F_EIK = '<span data-co="eik"><mark class="fill">[ПОПЪЛНЕТЕ: ЕИК]</mark></span>'
-F_ADDR = '<span data-co="addr"><mark class="fill">[ПОПЪЛНЕТЕ: седалище и адрес на управление]</mark></span>'
-F_VAT = '<span data-co="vat"><mark class="fill">[ПОПЪЛНЕТЕ: ДДС номер, ако има регистрация]</mark></span>'
-F_DATE = '<span data-co="date"><mark class="fill">[ПОПЪЛНЕТЕ: дата]</mark></span>'
+# Собственик на Сметко – физическо лице (без фирма). Продажбите минават през Paddle като търговец (Merchant of Record).
+# Попълнете името и адреса за кореспонденция → python3 tools/build.py. Докато са празни, в документите стои „[ПОПЪЛНЕТЕ…]“
+# (може да се попълнят и от админ → Настройки → „Собственик“, но за одобрението от Paddle е по-добре да са тук – в самия HTML).
+OWNER_NAME = ''   # напр. 'Иван Петров Иванов'
+OWNER_ADDR = ''   # напр. 'гр. София, ул. „…“ № …' (адрес за кореспонденция)
+TERMS_DATE = '29.10.2026'
+F_NAME = f'<span>{OWNER_NAME}</span>' if OWNER_NAME else '<span data-co="name"><mark class="fill">[ПОПЪЛНЕТЕ: име и фамилия на собственика]</mark></span>'
+F_ADDR = f'<span>{OWNER_ADDR}</span>' if OWNER_ADDR else '<span data-co="addr"><mark class="fill">[ПОПЪЛНЕТЕ: адрес за кореспонденция]</mark></span>'
+F_DATE = TERMS_DATE
+PADDLE = 'Paddle.com Market Limited (30 Old Bailey, Лондон EC4M 7AU, Великобритания, рег. № 08172165)'
+PADDLE_TERMS = 'https://www.paddle.com/legal/buyer-terms'
+PADDLE_PRIVACY = 'https://www.paddle.com/legal/privacy'
 
 LOGO = ('<a class="logo" href="index.html" aria-label="Сметко – начало"><span class="owl-mini" data-owl="idle"></span>'
         '<span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>')
@@ -178,6 +184,7 @@ FOOTER = '''<footer class="site-footer">
       <div><h4>Правна информация</h4><ul>
         <li><a href="terms.html">Общи условия</a></li>
         <li><a href="privacy-policy.html">Поверителност</a></li>
+        <li><a href="vrashtane.html">Връщане на парите</a></li>
         <li><a href="cookies.html">Бисквитки</a> · <button class="ck-foot" data-consent>🍪 Настройки</button></li>
         <li><a href="pravna-informacia.html">Всички документи</a></li>
         <li><a href="mailto:''' + EMAIL + '''">''' + EMAIL + '''</a></li>
