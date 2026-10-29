@@ -7,11 +7,11 @@ if (!function_exists('db')) { http_response_code(404); exit; }
 const MAIL_FONT = "'Nunito','Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 const MAIL_NAVY = '#1D2B4F';
 
-function send_mail(string $to, string $subject, string $text, ?string $html = null): bool {
+function send_mail(string $to, string $subject, string $text, ?string $html = null, string $extra = ''): bool {
     $from = (string)(site_config()['contactEmail'] ?? 'info@smetko.com');
     $enc = fn($s) => '=?UTF-8?B?' . base64_encode($s) . '?=';
     $dom = substr(strrchr($from, '@') ?: '@smetko.com', 1);
-    $h = "From: " . $enc('Сметко') . " <$from>\r\nReply-To: $from\r\nMIME-Version: 1.0\r\nMessage-ID: <" . bin2hex(random_bytes(12)) . "@$dom>\r\nX-Mailer: Smetko";
+    $h = "From: " . $enc('Сметко') . " <$from>\r\nReply-To: $from\r\nMIME-Version: 1.0\r\nMessage-ID: <" . bin2hex(random_bytes(12)) . "@$dom>\r\nX-Mailer: Smetko" . ($extra !== '' ? "\r\n" . trim($extra) : '');
     if ($html === null) {
         $h .= "\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64";
         $body = chunk_split(base64_encode($text));

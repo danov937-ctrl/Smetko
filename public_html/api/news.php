@@ -21,3 +21,10 @@ $out = array_map(fn($n) => ['id' => (int)$n['id'], 'emoji' => $n['emoji'] ?: '�
 header('Cache-Control: public, max-age=120');
 header('Content-Type: application/json; charset=utf-8');
 echo json_encode(['ok' => true, 'news' => $out], JSON_UNESCAPED_UNICODE);
+// седмичният имейл до родителите – в понеделник, на порции, след като отговорът вече е изпратен (няма отделен cron)
+if (setting('weekly_on', '1') === '1' && (int)date('N') === 1 && (int)date('G') >= 8 && setting('weekly_done') !== date('o-\\WW')) {
+    if (function_exists('fastcgi_finish_request')) fastcgi_finish_request(); elseif (function_exists('litespeed_finish_request')) litespeed_finish_request();
+    ignore_user_abort(true); @set_time_limit(60);
+    require_once __DIR__ . '/weekly.php';
+    try { if (weekly_due()) weekly_run(function_exists('fastcgi_finish_request') || function_exists('litespeed_finish_request') ? 25 : 5); } catch (Throwable $e) { set_setting('weekly_lock', '0'); }
+}

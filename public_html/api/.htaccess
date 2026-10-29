@@ -1,5 +1,5 @@
 # API: без листинг, JSON само през PHP
 Options -Indexes
-<FilesMatch "^(lib|mail|blog_seed)\.php$">
+<FilesMatch "^(lib|mail|blog_seed|weekly)\.php$">
   Require all denied
 </FilesMatch>

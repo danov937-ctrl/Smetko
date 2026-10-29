@@ -69,6 +69,8 @@ function db(): PDO {
     $pdo->exec('CREATE TABLE IF NOT EXISTS reports (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, last_at TEXT, kind TEXT, reason TEXT, text TEXT, data TEXT, page TEXT, ua TEXT, ver TEXT, sig TEXT UNIQUE, n INTEGER DEFAULT 1, status TEXT DEFAULT \'new\'); CREATE INDEX IF NOT EXISTS idx_rep_kind ON reports(kind, status)');
     // анкета за затворения тест (api/survey.php, админ → Анкета)
     $pdo->exec('CREATE TABLE IF NOT EXISTS survey (id INTEGER PRIMARY KEY AUTOINCREMENT, sid TEXT UNIQUE, created_at TEXT, updated_at TEXT, role INTEGER, grp TEXT, nps INTEGER, email TEXT, account_id INTEGER, access INTEGER DEFAULT 0, answers TEXT)');
+    // седмичен имейл до родителя (api/weekly.php): включен по подразбиране, отписване с един клик
+    foreach (['weekly INTEGER DEFAULT 1', 'weekly_sent TEXT'] as $col) if (!$has('accounts', strtok($col, ' '))) $pdo->exec('ALTER TABLE accounts ADD COLUMN ' . $col);
     if (!$has('accounts', 'google_sub')) { $pdo->exec('ALTER TABLE accounts ADD COLUMN google_sub TEXT'); $pdo->exec('CREATE INDEX IF NOT EXISTS idx_acc_gsub ON accounts(google_sub)'); }
     return $pdo;
 }

@@ -48,7 +48,7 @@ function acc_subs(int $aid): array { // абонаментите на акаун
 function acc_me(?array $a): array {
     if (!$a) return ['ok' => true, 'account' => null];
     $profiles = acc_profiles((int)$a['id']); // първо профилите – там се разпределят свободните места
-    return ['ok' => true, 'account' => ['email' => $a['email'], 'name' => $a['name'], 'role' => $a['role'], 'since' => substr((string)$a['created_at'], 0, 10), 'hasPass' => (string)$a['pass'] !== '', 'google' => !empty($a['google_sub'])],
+    return ['ok' => true, 'account' => ['email' => $a['email'], 'name' => $a['name'], 'role' => $a['role'], 'since' => substr((string)$a['created_at'], 0, 10), 'hasPass' => (string)$a['pass'] !== '', 'google' => !empty($a['google_sub']), 'weekly' => (int)($a['weekly'] ?? 1) === 1],
         'profiles' => $profiles, 'classes' => acc_classes((int)$a['id']), 'subs' => acc_subs((int)$a['id'])];
 }
 function need(): array { $a = auth_account(); if (!$a) json_out(['ok' => false, 'error' => 'Влезте в акаунта си.', 'auth' => false], 401); return $a; }
@@ -169,6 +169,11 @@ case 'password':
     $pdo->prepare('UPDATE accounts SET pass = ? WHERE id = ?')->execute([password_hash((string)$in['password'], PASSWORD_DEFAULT), (int)$a['id']]);
     $pdo->prepare('DELETE FROM auth_sessions WHERE account_id = ?')->execute([(int)$a['id']]);
     auth_login((int)$a['id']);
+    json_out(['ok' => true]);
+
+case 'weekly': // седмичен имейл с напредъка – вкл./изкл.
+    $a = need();
+    $pdo->prepare('UPDATE accounts SET weekly = ? WHERE id = ?')->execute([empty($in['on']) ? 0 : 1, (int)$a['id']]);
     json_out(['ok' => true]);
 
 case 'update':
