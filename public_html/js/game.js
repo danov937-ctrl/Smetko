@@ -5,8 +5,8 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
-  var MODE_NAMES = { quick: 'Бързо сметни', adventure: 'Приключение', practice: 'Тренировка', challenge: 'Предизвикателство', homework: 'Домашна' };
-  function fixed(m) { return m === 'adventure' || m === 'homework'; } // с точен брой задачи
+  var MODE_NAMES = { quick: 'Бързо сметни', adventure: 'Приключение', practice: 'Тренировка', challenge: 'Предизвикателство', homework: 'Домашна', daily: 'Задача на деня' };
+  function fixed(m) { return m === 'adventure' || m === 'homework' || m === 'daily'; } // с точен брой задачи
   function timed(m) { return m === 'quick' || m === 'challenge'; }
   // помощни настройки (СОП) – js/a11y.js
   function ax(k) { return !!(S.A11y && S.A11y.on(k)); }
@@ -55,7 +55,13 @@
   }
   function isYesterday(d) { if (!d) return false; var y = new Date(); y.setDate(y.getDate() - 1); return d === y.toISOString().slice(0, 10) || Math.round((new Date(G.today()) - new Date(d)) / 864e5) === 1; }
 
+  function renderDayTask() {
+    var box = $('#dt-box'); if (!box || !S.DayTask) return;
+    box.innerHTML = S.DayTask.card(); if (S.Wardrobe) S.Wardrobe.badge();
+  }
+  function startDaily() { A.unlock(); A.click(); startPlay({ mode: 'daily', topic: 'mix', level: 2 }); }
   function renderSetup() {
+    renderDayTask();
     $$('.grade-tab').forEach(function (b) { b.setAttribute('aria-pressed', +b.dataset.g === st.grade ? 'true' : 'false'); });
     $$('.mode-btn').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.mode === st.mode ? 'true' : 'false'); });
     var wrap = $('#topic-wrap'), chips = $('#topic-chips');
@@ -243,7 +249,7 @@
     var mode = opts.mode || st.mode;
     play = {
       mode: mode, grade: st.grade, topic: opts.topic || st.topic || 'mix', level: opts.level || 1,
-      missionIdx: opts.missionIdx, title: opts.title, book: opts.book, mission: opts.mission, key: advKey(), hw: opts.hw, total: mode === 'adventure' ? (ax('short') ? Math.min(5, S.config.questionsPerMission) : S.config.questionsPerMission) : mode === 'homework' ? opts.hw.count : 0,
+      missionIdx: opts.missionIdx, title: opts.title, book: opts.book, mission: opts.mission, key: advKey(), hw: opts.hw, total: mode === 'daily' ? 5 : mode === 'adventure' ? (ax('short') ? Math.min(5, S.config.questionsPerMission) : S.config.questionsPerMission) : mode === 'homework' ? opts.hw.count : 0,
       idx: 0, correct: 0, wrong: 0, streak: 0, wrongStreak: 0, input: '', busy: false, waitNext: false,
       timeLeft: S.config.quickSeconds, task: null, lastQ: ''
     };
@@ -259,7 +265,7 @@
     $('#pts').textContent = '★ 0'; $('#pts').hidden = !G.earns();
     setCombo(0);
     S.setOwl($('#play-owl'), 'hello');
-    bubble(mode === 'challenge' ? 'Предизвикателство: ' + play.title + '! 60 секунди ⚡' : mode === 'quick' ? play.timeTotal + ' секунди! Готов ли си? 🚀' : mode === 'adventure' ? 'Мисия ' + (play.missionIdx + 1) + ': ' + play.title + '!' : mode === 'homework' ? 'Домашна: ' + play.total + ' задачи. Без бързане! 📚' : 'Спокойно, без бързане. Ти можеш!');
+    bubble(mode === 'challenge' ? 'Предизвикателство: ' + play.title + '! 60 секунди ⚡' : mode === 'quick' ? play.timeTotal + ' секунди! Готов ли си? 🚀' : mode === 'adventure' ? 'Мисия ' + (play.missionIdx + 1) + ': ' + play.title + '!' : mode === 'homework' ? 'Домашна: ' + play.total + ' задачи. Без бързане! 📚' : mode === 'daily' ? 'Задачата на деня: 5 задачи. Хайде! 🌞' : 'Спокойно, без бързане. Ти можеш!');
     show('screen-play');
     updateProgress();
     if (timed(mode)) {
@@ -488,13 +494,21 @@
       html += '<p class="sub">' + p.hw.title + ' · ' + E.GRADES[p.grade].name + '</p>';
       html += stats(p.correct + '/' + p.total, 'верни', acc + '%', 'точност', '★ ' + s.points, 'точки');
       html += '<p class="hw-sent" id="hw-sent">⏳ Изпращам на учителя…</p>';
+    } else if (p.mode === 'daily') {
+      var dr = S.DayTask ? S.DayTask.record(p.correct, p.total) : { items: [], days: 0, passed: true, first: true };
+      owlPose = dr.passed ? 'cheer' : 'encourage'; celebrate = dr.first && dr.passed;
+      html += '<div class="big-stars">' + [1, 2, 3, 4, 5].map(function (i) { return '<span class="' + (i <= p.correct ? '' : 'off') + '">🌞</span>'; }).join('') + '</div>';
+      html += '<h2>' + (p.correct === p.total ? 'Перфектен ден! 🌟' : dr.passed ? 'Задачата на деня е готова!' : 'Браво, че опита!') + '</h2>';
+      html += '<p class="sub">' + E.GRADES[p.grade].name + ' · ' + dr.days + (dr.days === 1 ? ' ден' : ' дни') + ' със задача на деня' + (dr.first ? '' : ' · днес вече беше решена') + '</p>';
+      html += stats(p.correct + '/' + p.total, 'верни', acc + '%', 'точност', '★ ' + s.points, 'точки');
+      if (!dr.passed) html += '<p class="lock-note">С 3 верни от 5 задачата на деня се брои. Опитай пак!</p>';
     } else if (p.mode === 'quick') {
       owlPose = p.correct >= 10 ? 'cheer' : 'happy';
       celebrate = s.isRecord && p.correct > 0;
       html += '<h2>' + (p.correct >= 20 ? 'Светкавица! ⚡' : p.correct >= 10 ? 'Браво!' : 'Добро начало!') + '</h2>';
       if (s.isRecord && p.correct > 0) html += '<div class="record">🏆 Нов рекорд!</div>';
       html += '<p class="sub">' + E.GRADES[p.grade].name + ' · ' + E.topicName(p.grade, p.topic) + (s.prevBest && !s.isRecord ? ' · Рекорд: ' + s.prevBest : '') + '</p>';
-      html += stats(p.correct, 'верни за 60 сек.', acc + '%', 'точност', '★ ' + s.points, 'точки');
+      html += stats(p.correct, 'верни за ' + (p.timeTotal || 60) + ' сек.', acc + '%', 'точност', '★ ' + s.points, 'точки');
     } else {
       owlPose = 'happy';
       html += '<h2>Добра тренировка!</h2><p class="sub">' + E.GRADES[p.grade].name + ' · ' + E.topicName(p.grade, p.topic) + '</p>';
@@ -508,6 +522,9 @@
       }).join('') + '</div>';
     }
 
+    var wNew = S.Wardrobe ? S.Wardrobe.newly() : [];
+    if (wNew.length) html += '<div class="wd-got"><div class="wd-got-owls">' + wNew.slice(0, 3).map(function (it) { return '<span>' + S.owl('cheer', it.kind === 'hat' ? { hat: it.id, acc: 'none' } : { hat: S.Wardrobe.outfit().hat, acc: it.id }) + '</span>'; }).join('') + '</div>' +
+      '<div><b>👕 Ново в гардероба: ' + wNew.map(function (it) { return it.name; }).join(', ') + '!</b><button class="btn btn-sm btn-purple" type="button" data-wardrobe>Облечи Сметко</button></div></div>';
     html += '<div class="result-actions">';
     if (p.mode === 'adventure') {
       var nextIdx = p.missionIdx + 1, hasNext = nextIdx < p.book.missions.length;
@@ -517,9 +534,10 @@
       html += '<button class="btn btn-ghost" data-act="map">Към картата</button>';
       if (stars > 0 && !hasNext) html += '<p class="lock-note" style="width:100%">🏔️ Стигна върха на ' + E.GRADES[p.grade].name + '! Опитай следващия клас.</p>';
     } else {
-      html += '<button class="btn btn-lg" data-act="retry">' + (timed(p.mode) ? 'Пак! ⚡' : p.mode === 'homework' ? 'Реши пак (пази се най-добрият резултат)' : 'Още тренировка') + '</button>';
+      if (p.mode === 'daily') html += '<button class="btn btn-lg btn-green" data-act="setup">Към игрите →</button>';
+      else html += '<button class="btn btn-lg" data-act="retry">' + (timed(p.mode) ? 'Пак! ⚡' : p.mode === 'homework' ? 'Реши пак (пази се най-добрият резултат)' : 'Още тренировка') + '</button>';
       if (p.mode === 'challenge') html += '<a class="btn btn-white" href="liga.html#challenge">🏆 Класация на седмицата</a>';
-      html += '<button class="btn btn-ghost" data-act="setup">Друга игра</button>';
+      if (p.mode !== 'daily') html += '<button class="btn btn-ghost" data-act="setup">Друга игра</button>';
     }
     html += '</div>';
 
@@ -575,7 +593,7 @@
     if (play.mode === 'practice') { finish(); return; }
     var wasQuick = timed(play.mode);
     if (wasQuick && play.interval) clearInterval(play.interval);
-    var d = S.modal('<div data-owl="think"></div><h3>Да спрем ли играта?</h3><p>Ако излезеш сега, ' + (wasQuick ? 'резултатът няма да се запише като рекорд.' : 'мисията няма да е завършена.') + '</p>' +
+    var d = S.modal('<div data-owl="think"></div><h3>Да спрем ли играта?</h3><p>Ако излезеш сега, ' + (wasQuick ? 'резултатът няма да се запише като рекорд.' : play.mode === 'daily' ? 'задачата на деня няма да се брои.' : play.mode === 'homework' ? 'домашната няма да се изпрати.' : 'мисията няма да е завършена.') + '</p>' +
       '<div class="modal-actions"><button class="btn btn-green" data-close data-resume>Продължи</button><button class="btn btn-ghost" data-quit>Изход</button></div>',
       { onClose: function () { if (play && wasQuick && !play.quit) play.interval = setInterval(tickTimer, 1000); } });
     d.querySelector('[data-quit]').addEventListener('click', function () {
@@ -600,6 +618,7 @@
     });
     $('#map-back').addEventListener('click', function () { A.click(); renderSetup(); show('screen-setup'); });
     $('#exit-btn').addEventListener('click', exitPlay);
+    document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('[data-daytask]')) startDaily(); });
     $('#end-btn').addEventListener('click', function () { if (play) finish(); });
     $('#next-btn').addEventListener('click', function () { goNext(); });
     $$('#keypad .key').forEach(function (k) {

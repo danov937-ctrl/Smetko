@@ -57,6 +57,10 @@
     var ca = a.challenge || {}, cb = b.challenge || {};
     if (ca.week && ca.week === cb.week) { m.challenge = { week: ca.week, best: {}, done: Object.assign({}, ca.done, cb.done), total: mx(ca.total, cb.total) }; [ca.best, cb.best].forEach(function (o) { for (var g in o || {}) m.challenge.best[g] = mx(o[g], m.challenge.best[g]); }); }
     else if ((ca.week || '') > (cb.week || '')) m.challenge = ca;
+    // гардероб и задача на деня (js/wardrobe.js)
+    ['wardrobe', 'wardrobeSeen'].forEach(function (x) { if (a[x] || b[x]) m[x] = Object.assign({}, b[x] || {}, a[x] || {}); });
+    if (a.dayTask || b.dayTask) { var da = (a.dayTask || {}).done || {}, db = (b.dayTask || {}).done || {}; m.dayTask = { done: Object.assign({}, db) }; for (k in da) m.dayTask.done[k] = mx(da[k], db[k]); }
+    if (a.outfit) m.outfit = a.outfit;
     if (a.lastGrade) m.lastGrade = a.lastGrade;
     if (a.settings) m.settings = a.settings;
     if (!m.nickname && a.nickname) m.nickname = a.nickname;

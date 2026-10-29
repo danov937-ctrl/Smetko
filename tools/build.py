@@ -225,6 +225,7 @@ game = head('Математически игри онлайн за 1.–4. кл�
 <section class="screen" id="screen-setup" aria-label="Избор на игра">
   <div class="game-wrap">
     <div class="hw-cards" data-hw-cards hidden></div>
+    <div id="dt-box"></div>
     <div class="today">
       <div class="owl" data-owl="hello"></div>
       <div class="goal"><div id="rank-name">Ниво 1: Новак</div><div id="goal-text" class="goal-text">Днешна цел</div><div class="goal-bar"><i id="goal-bar"></i></div></div>
@@ -301,7 +302,7 @@ game = head('Математически игри онлайн за 1.–4. кл�
   <div class="game-wrap"><div class="panel result" id="result"></div></div>
 </section>
 </main>
-''' + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/challenge.js', 'js/homework.js', 'js/a11y.js', 'js/game.js'])
+''' + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/challenge.js', 'js/homework.js', 'js/a11y.js', 'js/wardrobe.js', 'js/game.js'])
 write('game.html', game)
 
 # ================= class pages =================
@@ -535,6 +536,8 @@ ach = head('Постижения, значки и класации – Смет�
     '<div style="max-width:420px"><div class="rank-bar"><i id="rank-bar" style="width:0"></i></div><p class="rank-next" id="rank-next"></p></div>') + '''
 <main id="main">
 <section class="section"><div class="wrap"><div class="stat-row" id="stats"></div></div></section>
+<section class="section wd-sec"><div class="wrap"><div class="wd-panel panel"><div class="wd-me-big" data-owl="cheer"></div><div><h2>👕 Гардеробът на Сметко</h2><p>Шапки, корона, наметало на герой… Отключват се със звездите от мисиите и със задачата на деня. По празници има и специални предмети!</p>
+  <p class="wd-prog" id="wd-prog"></p><button class="btn btn-purple" type="button" data-wardrobe>Облечи Сметко <b class="dt-new" data-wardrobe-new hidden></b></button></div></div></div></section>
 <section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Значки</h2><p id="badge-count"></p></div><div id="badges" class="badge-groups"></div></div></section>
 <section class="section" id="myclass-sec" hidden><div class="wrap"><div class="section-head"><h2 class="lined">Моят клас</h2><p id="myclass-sub"></p></div><div id="myclass"></div></div></section>
 <section class="section"><div class="wrap"><div class="section-head"><h2 class="lined">Звезди и рекорди</h2><p>Звезди от „Приключение“ и най-добри резултати в „Бързо сметни“.</p></div><div class="grid grid-4" id="grades"></div></div></section>
@@ -548,7 +551,7 @@ ach = head('Постижения, значки и класации – Смет�
   </div>
 </section>
 </main>
-''' + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/tools.js', 'js/achievements.js'])
+''' + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/tools.js', 'js/wardrobe.js', 'js/achievements.js'])
 write('achievements.html', ach)
 
 # ================= uchilishta.html (училища) =================

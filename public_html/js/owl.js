@@ -1,12 +1,15 @@
 /* Сметко — бухалът на smetko.com (SVG с обемни градиенти)
    Употреба: <div class="owl" data-owl="hero"></div> (app.js ги рисува автоматично) или Smetko.owl('cheer').
-   Пози: hero (молив и книга), hello (маха), happy, cheer (празнува), think, encourage, idle */
+   Пози: hero (молив и книга), hello (маха), happy, cheer (празнува), think, encourage, idle
+   Облекло (js/wardrobe.js): Smetko.owl(pose, {hat, acc}); без втори аргумент – облеклото на детето от state.outfit; false – обикновеният Сметко. */
 (function () {
   'use strict';
   var uid = 0;
 
-  function owl(pose) {
+  function owl(pose, outfit) {
     pose = pose || 'hello';
+    if (outfit === undefined) { try { outfit = window.Smetko.Game.state.outfit; } catch (e) { outfit = null; } }
+    var hat = (outfit && outfit.hat) || 'cap', acc = (outfit && outfit.acc) || 'none';
     var id = 'ow' + (++uid);
     var g = function (n) { return 'url(#' + id + n + ')'; };
     var defs = '<defs>' +
@@ -33,6 +36,7 @@
     var s = '<svg class="owl-svg" viewBox="0 0 260 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Сметко – бухалът">' + defs;
     // сянка
     s += '<ellipse cx="130" cy="270" rx="70" ry="8" fill="#0B2545" opacity=".14"/>';
+    if (acc === 'cape') s += '<path d="M72 150 Q40 226 50 262 L210 262 Q220 226 188 150 Z" fill="#E63946"/><path d="M72 150 Q46 222 54 258" stroke="#B8282E" stroke-width="5" fill="none" opacity=".6"/>';
     // крака
     s += '<g fill="' + g('k') + '"><path d="M96 252 q-14 6 -10 14 q12 2 26 -2 q4 -8 -4 -12 z"/><path d="M164 252 q14 6 10 14 q-12 2 -26 -2 q-4 -8 4 -12 z"/></g>';
     // тяло
@@ -67,18 +71,62 @@
     if (mouth === 'open') s += '<path d="M118 146 h24 l-12 22 z" fill="' + g('k') + '" stroke="#D86F00" stroke-width="2.5" stroke-linejoin="round"/><path d="M122 153 h16 l-8 9 z" fill="#B23A0C"/>';
     else s += '<path d="M118 146 q12 -4 24 0 l-12 20 z" fill="' + g('k') + '" stroke="#D86F00" stroke-width="2.5" stroke-linejoin="round"/>';
     // шапка
-    s += '<path d="M54 74 C 54 6 206 6 206 74 Z" fill="' + g('c') + '"/>' +
-      '<path d="M72 44 C 94 26 128 22 150 28" stroke="#A7EBA0" stroke-width="7" fill="none" stroke-linecap="round" opacity=".75"/>' +
-      '<path d="M50 70 Q130 58 210 70 L210 82 Q130 70 50 82 Z" fill="#2A8A35"/>' +
-      '<path d="M60 76 Q16 74 12 88 Q18 98 76 88 Z" fill="#2A8A35"/><path d="M58 78 Q24 78 20 86" stroke="#5FC45E" stroke-width="3" fill="none" stroke-linecap="round"/>' +
-      '<circle cx="130" cy="22" r="7" fill="#2A8A35"/>';
+    s += hatSVG(hat, g, id);
+    if (acc === 'bow') s += '<g><path d="M130 176 L104 162 L104 190 Z M130 176 L156 162 L156 190 Z" fill="#E63946" stroke="#B8282E" stroke-width="3" stroke-linejoin="round"/><circle cx="130" cy="176" r="7" fill="#B8282E"/></g>';
+    if (acc === 'scarf') s += '<g><path d="M66 162 Q130 196 194 162 L198 178 Q130 214 62 178 Z" fill="#2F80ED"/><path d="M84 172 l6 12 M108 180 l4 13 M152 180 l-4 13 M176 172 l-6 12" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M150 188 L168 236 L188 228 L170 184 Z" fill="#1C64C8"/></g>';
+    if (acc === 'cape') s += '<circle cx="94" cy="168" r="6" fill="#FFC531"/><circle cx="166" cy="168" r="6" fill="#FFC531"/>';
     // предмети
     if (prop === 'abacus') s += abacus();
     if (prop === 'pencilbook') s += book();
     if (R !== 'holdR') s += wingSVG('R', R, g);
     if (prop === 'pencilbook') s += pencil();
+    if (acc === 'medal') s += '<g><path d="M118 160 L130 186 L142 160" stroke="#2F80ED" stroke-width="9" fill="none" stroke-linejoin="round"/><circle cx="130" cy="192" r="14" fill="#FFC531" stroke="#E0A500" stroke-width="3"/><path d="M130 184 l2.6 5.4 5.9 .8 -4.3 4.1 1 5.9 -5.2 -2.8 -5.2 2.8 1 -5.9 -4.3 -4.1 5.9 -.8 z" fill="#fff"/></g>';
+    if (acc === 'martenitsa') s += '<g><path d="M176 166 q8 8 2 16 q-6 8 2 16" stroke="#E63946" stroke-width="4" fill="none" stroke-dasharray="5 4"/><path d="M178 166 q8 8 2 16 q-6 8 2 16" stroke="#fff" stroke-width="4" fill="none" stroke-dasharray="5 4" stroke-dashoffset="4.5"/>' +
+      '<circle cx="172" cy="206" r="6" fill="#fff" stroke="#D0D6E2" stroke-width="1.5"/><rect x="166" y="211" width="12" height="16" rx="3" fill="#fff" stroke="#D0D6E2" stroke-width="1.5"/><circle cx="190" cy="206" r="6" fill="#E63946"/><path d="M184 228 L190 211 L196 228 Z" fill="#E63946"/></g>';
     s += '</svg>';
     return s;
+  }
+
+  /* шапки: cap (зелена, по подразбиране), cap_red, cap_blue, cap_purple, crown, wizard, pirate, grad, santa, party, pumpkin, flowers, none */
+  var CAPS = { cap: ['#6FD06A', '#2F9A3A', '#2A8A35', '#A7EBA0', '#5FC45E'], cap_red: ['#FF8A8A', '#D93D43', '#B8282E', '#FFC9C9', '#FF8F8F'],
+    cap_blue: ['#7CC0FF', '#1C64C8', '#1550A6', '#C7E4FF', '#6FB6FF'], cap_purple: ['#B49BFF', '#6C4BD6', '#5636B8', '#DDD1FF', '#A58BF5'] };
+  function hatSVG(hat, g, id) {
+    var c = CAPS[hat];
+    if (c) {
+      return '<defs><linearGradient id="' + id + 'h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + c[0] + '"/><stop offset="1" stop-color="' + c[1] + '"/></linearGradient></defs>' +
+        '<path d="M54 74 C 54 6 206 6 206 74 Z" fill="url(#' + id + 'h)"/>' +
+        '<path d="M72 44 C 94 26 128 22 150 28" stroke="' + c[3] + '" stroke-width="7" fill="none" stroke-linecap="round" opacity=".75"/>' +
+        '<path d="M50 70 Q130 58 210 70 L210 82 Q130 70 50 82 Z" fill="' + c[2] + '"/>' +
+        '<path d="M60 76 Q16 74 12 88 Q18 98 76 88 Z" fill="' + c[2] + '"/><path d="M58 78 Q24 78 20 86" stroke="' + c[4] + '" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+        '<circle cx="130" cy="22" r="7" fill="' + c[2] + '"/>';
+    }
+    switch (hat) {
+      case 'crown': return '<path d="M74 74 L68 26 L100 50 L130 12 L160 50 L192 26 L186 74 Z" fill="#FFC531" stroke="#D99A00" stroke-width="4" stroke-linejoin="round"/><rect x="74" y="60" width="112" height="14" rx="4" fill="#F0A500"/>' +
+        '<circle cx="68" cy="24" r="7" fill="#FFE07A"/><circle cx="130" cy="10" r="8" fill="#FFE07A"/><circle cx="192" cy="24" r="7" fill="#FFE07A"/><circle cx="104" cy="67" r="5" fill="#2F80ED"/><circle cx="130" cy="67" r="6" fill="#E63946"/><circle cx="156" cy="67" r="5" fill="#4CBB4A"/>' +
+        '<path d="M92 40 l8 6" stroke="#FFF3C4" stroke-width="4" stroke-linecap="round"/>';
+      case 'wizard': return '<ellipse cx="130" cy="72" rx="94" ry="14" fill="#4A2FA8"/><path d="M64 72 Q104 40 122 6 Q132 -2 140 8 Q158 42 196 72 Z" fill="#6C4BD6"/><path d="M70 66 Q130 54 190 66" stroke="#FFC531" stroke-width="6" fill="none"/>' +
+        star(108, 46, 7) + star(146, 28, 6) + star(160, 56, 5) + star(124, 20, 4);
+      case 'pirate': return '<path d="M42 74 Q56 30 92 42 Q130 4 168 42 Q204 30 218 74 Q130 56 42 74 Z" fill="#1F2430"/><path d="M42 74 Q130 56 218 74" stroke="#E0A500" stroke-width="5" fill="none"/>' +
+        '<circle cx="130" cy="44" r="11" fill="#fff"/><circle cx="126" cy="43" r="2.6" fill="#1F2430"/><circle cx="134" cy="43" r="2.6" fill="#1F2430"/><path d="M114 58 L146 66 M146 58 L114 66" stroke="#fff" stroke-width="4" stroke-linecap="round"/>';
+      case 'grad': return '<path d="M80 76 Q80 46 130 46 Q180 46 180 76 Z" fill="#1E2A47"/><path d="M36 44 L130 14 L224 44 L130 74 Z" fill="#2B3A67" stroke="#1E2A47" stroke-width="3" stroke-linejoin="round"/>' +
+        '<path d="M130 44 L204 54 L204 86" stroke="#FFC531" stroke-width="4" fill="none"/><rect x="198" y="84" width="12" height="18" rx="3" fill="#FFC531"/><circle cx="130" cy="44" r="6" fill="#FFC531"/>';
+      case 'santa': return '<path d="M58 74 C 58 12 196 8 202 74 Z" fill="#E63946"/><path d="M168 24 Q214 30 222 84" stroke="#E63946" stroke-width="24" fill="none" stroke-linecap="round"/>' +
+        '<path d="M88 34 C 110 22 136 20 156 24" stroke="#FF9AA2" stroke-width="7" fill="none" stroke-linecap="round" opacity=".7"/><rect x="48" y="62" width="164" height="22" rx="11" fill="#fff"/><circle cx="224" cy="92" r="14" fill="#fff"/>';
+      case 'party': return '<g transform="rotate(-10 130 74)"><path d="M98 74 L130 2 L162 74 Z" fill="#FF7A1A"/><path d="M114 38 L146 38 L152 52 L108 52 Z M104 62 L156 62 L160 72 L100 72 Z" fill="#FFC531"/><path d="M124 16 L136 16 L140 26 L120 26 Z" fill="#FFC531"/>' +
+        '<circle cx="130" cy="4" r="9" fill="#2F80ED"/></g><circle cx="80" cy="50" r="4" fill="#E63946"/><circle cx="182" cy="44" r="4" fill="#4CBB4A"/><circle cx="170" cy="20" r="3" fill="#2F80ED"/>';
+      case 'pumpkin': return '<path d="M130 18 q4 -10 14 -12" stroke="#3E7B2C" stroke-width="7" fill="none" stroke-linecap="round"/><ellipse cx="130" cy="50" rx="66" ry="34" fill="#FF8A1F"/>' +
+        '<path d="M130 18 Q108 50 130 84 M130 18 Q152 50 130 84 M98 22 Q78 50 96 82 M162 22 Q182 50 164 82" stroke="#E06A00" stroke-width="4" fill="none"/><path d="M146 12 q18 -6 22 8 q-14 4 -22 -8 z" fill="#5FC45E"/>' +
+        '<path d="M84 34 q10 -8 22 -8" stroke="#FFC48A" stroke-width="5" fill="none" stroke-linecap="round" opacity=".8"/>';
+      case 'flowers': var pts = [[62, 72], [74, 52], [94, 37], [117, 30], [143, 30], [166, 37], [186, 52], [198, 72]], cols = ['#FF8FA3', '#fff', '#B49BFF', '#FFC531'], h = '<path d="M60 74 Q130 8 200 74" stroke="#4CBB4A" stroke-width="6" fill="none"/>';
+        pts.forEach(function (p, i) { var col = cols[i % 4]; h += '<g>'; for (var k = 0; k < 5; k++) { var a = k * 72 * Math.PI / 180; h += '<circle cx="' + (p[0] + Math.cos(a) * 7).toFixed(1) + '" cy="' + (p[1] + Math.sin(a) * 7).toFixed(1) + '" r="6" fill="' + col + '" stroke="#E5B8C4" stroke-width="1"/>'; } h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="4.5" fill="#FFB020"/></g>'; });
+        return h;
+      case 'none': return '';
+    }
+    return hatSVG('cap', g, id);
+  }
+  function star(x, y, r) {
+    var p = []; for (var i = 0; i < 10; i++) { var a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; p.push((x + Math.cos(a) * rr).toFixed(1) + ' ' + (y + Math.sin(a) * rr).toFixed(1)); }
+    return '<path d="M' + p.join(' L') + ' Z" fill="#FFC531"/>';
   }
 
   function wingSVG(side, kind, g) {

@@ -1651,3 +1651,49 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .wk-set span b { display: block; color: var(--navy); }
 .wk-set span small { display: block; color: var(--muted); font-weight: 600; }
 .wk-set input.sw { order: 2; margin-left: auto; }
+
+/* ================= Задача на деня ================= */
+.dt-card { display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 22px; padding: 12px 14px; margin: 0 0 14px; box-shadow: var(--shadow-sm); border: 2px solid #FFE08A; }
+.dt-card.done { border-color: #BDE5BF; }
+.dt-card.season-autumn { background: linear-gradient(100deg, #FFF4E5, #fff 70%); border-color: #FFC48A; }
+.dt-card.season-xmas { background: linear-gradient(100deg, #FFEDEE, #fff 70%); border-color: #FFB3B8; }
+.dt-card.season-march { background: linear-gradient(100deg, #FFF0F2, #fff 70%); border-color: #FFC2CB; }
+.dt-card.season-june1 { background: linear-gradient(100deg, #EEF6FF, #fff 70%); border-color: #BFDDFF; }
+.dt-ico { font-size: 2rem; flex: none; }
+.dt-txt { flex: 1; min-width: 0; }
+.dt-txt b { display: block; color: var(--navy); font-size: 1.08rem; }
+.dt-txt small { display: block; color: var(--muted); font-weight: 700; line-height: 1.35; }
+.dt-season { color: var(--orange-dark); }
+.dt-card .btn { flex: none; }
+.dt-wd { position: relative; padding-left: 12px; padding-right: 12px; }
+.dt-new { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 99px; background: var(--red); color: #fff; font-size: .75rem; line-height: 20px; font-weight: 900; }
+.btn .dt-new { position: static; display: inline-block; margin-left: 6px; }
+@media (max-width: 480px) { .dt-card { flex-wrap: wrap; } .dt-txt { flex-basis: calc(100% - 60px); } .dt-card .btn[data-daytask] { flex: 1; } }
+
+/* ================= Гардероб ================= */
+.wd-modal .modal-body { max-width: 720px; }
+.wd-head { display: flex; gap: 14px; align-items: center; text-align: left; margin-bottom: 6px; }
+.wd-me { width: 110px; flex: none; }
+.wd-head h3 { margin: 0 0 4px; }
+.wd-head p { margin: 0; color: var(--muted); font-weight: 700; font-size: .95rem; }
+.wd-h { text-align: left; margin: 14px 0 8px; color: var(--navy); }
+.wd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+.wd-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 6px 10px; border: 2px solid var(--line); border-radius: 16px; background: #fff; cursor: pointer; font: inherit; color: var(--navy); transition: .12s; }
+.wd-item:hover { border-color: #BFD3EE; }
+.wd-item.on { border-color: var(--green); background: #F2FBF4; box-shadow: 0 0 0 2px var(--green) inset; }
+.wd-item.locked { cursor: default; background: #F7F9FC; }
+.wd-item.locked .wd-owl { filter: grayscale(1) brightness(1.1); opacity: .45; }
+.wd-item.new::after { content: 'НОВО'; position: absolute; top: 6px; right: 6px; background: var(--red); color: #fff; font-size: .62rem; font-weight: 900; padding: 2px 6px; border-radius: 99px; }
+.wd-owl { width: 78px; display: block; }
+.wd-item b { font-size: .85rem; line-height: 1.2; text-align: center; }
+.wd-item small { font-size: .7rem; color: var(--muted); font-weight: 700; line-height: 1.25; text-align: center; }
+@media (max-width: 480px) { .wd-grid { grid-template-columns: repeat(3, 1fr); } .wd-owl { width: 64px; } .wd-me { width: 80px; } }
+.wd-got { display: flex; align-items: center; gap: 12px; justify-content: center; flex-wrap: wrap; background: #F4F0FF; border: 2px solid #D9CDFF; border-radius: 20px; padding: 10px 14px; margin: 10px auto 14px; max-width: 520px; text-align: left; }
+.wd-got-owls { display: flex; }
+.wd-got-owls span { width: 64px; display: block; }
+.wd-got b { display: block; color: var(--navy); margin-bottom: 6px; }
+.wd-panel { display: flex; gap: 20px; align-items: center; }
+.wd-me-big { width: 150px; flex: none; }
+.wd-panel h2 { margin: 0 0 6px; }
+.wd-prog { color: var(--muted); font-weight: 700; }
+@media (max-width: 600px) { .wd-panel { flex-direction: column; text-align: center; } .wd-me-big { width: 120px; } }
