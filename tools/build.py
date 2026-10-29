@@ -470,6 +470,12 @@ if not SALES_OPEN:  # продажбите са спрени: страницат
   </div>
 </section>
 {act}
+<section class="section soft" id="paddle-test" data-paddle-test hidden><div class="wrap narrow-wrap">
+  <div class="panel"><h2>🧪 Проба на плащането (Paddle)</h2>
+  <p class="hint">Виждате това, защото отворихте <code>pricing.html?test=paddle</code>. Купувачите не го виждат, докато продажбите са спрени. Плащането минава през тестовия (sandbox) режим на Paddle – истински пари не се теглят.</p>
+  <div class="hero-cta"><button class="btn btn-green" type="button" data-paddle-buy="single">Индивидуален</button><button class="btn btn-white" type="button" data-paddle-buy="family">Семеен</button><button class="btn btn-white" type="button" data-paddle-buy="class" data-qty="1">Цял клас</button></div>
+  <p class="hint">Тестова карта на Paddle: <b>4242 4242 4242 4242</b>, произволна бъдеща дата и CVC. След плащането кодът идва на имейла, а ако сте влезли в акаунта си – абонаментът се включва сам.</p></div>
+</div></section>
 <section class="section"><div class="wrap"><div class="section-head"><h2 class="lined">Въпроси</h2></div>{faq(FAQ_SOON)}</div></section>
 </main>
 ''' + FOOTER + scripts()

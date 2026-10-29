@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '27'
+VER = '28'
 EMAIL = 'info@smetko.com'
 # Продажбите (цени, поръчки) са спрени до края на проучването. За пускане: True тук и SALES_OPEN в public_html/api/lib.php, после build.
 SALES_OPEN = False
@@ -198,8 +198,8 @@ FOOTER = '''<footer class="site-footer">
 
 
 def scripts(extra=()):
-    base = ['js/owl.js', 'js/gamification.js', 'js/audio.js', 'js/access.js', 'js/account.js', 'js/app.js']
-    order = base[:5] + [e for e in extra if e not in ('js/game.js', 'js/achievements.js', 'js/tools.js')] + ['js/app.js'] + \
+    base = ['js/owl.js', 'js/gamification.js', 'js/audio.js', 'js/access.js', 'js/account.js', 'js/paddle.js', 'js/app.js']
+    order = base[:6] + [e for e in extra if e not in ('js/game.js', 'js/achievements.js', 'js/tools.js')] + ['js/app.js'] + \
         [e for e in extra if e in ('js/game.js', 'js/achievements.js', 'js/tools.js')]
     return ''.join(f'<script src="{s}?v={VER}" defer></script>\n' for s in order) + '</body>\n</html>\n'
 

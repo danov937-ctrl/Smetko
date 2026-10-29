@@ -1706,3 +1706,12 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .hw-st { font-weight: 800; white-space: nowrap; }
 .hw-st.ok { color: var(--green-dark); } .hw-st.miss { color: var(--red-dark); } .hw-st.wait { color: var(--orange-dark); }
 @media (min-width: 1100px) { .footer-grid { grid-template-columns: 1.3fr 1fr 1.1fr 1fr 1fr; gap: 24px; } }
+/* плащане през Paddle */
+.pd-modal .modal-body { max-width: 440px; }
+.pd-modal h3 { padding-right: 34px; }
+.pd-modal .period-mini { margin-top: 10px; }
+.pd-modal .ord { text-align: left; }
+.pd-test { background: #FFF6DB; border-radius: 12px; padding: 8px 10px; }
+.pd-sum { background: var(--bg-soft); border-radius: 12px; padding: 10px 12px; font-weight: 700; color: var(--navy); margin: 12px 0 0; }
+.pd-note { margin-top: 10px; text-align: center; }
+.pd-qty { display: block; margin-top: 10px; }

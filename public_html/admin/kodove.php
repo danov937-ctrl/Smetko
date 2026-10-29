@@ -18,18 +18,8 @@ if ($action === 'create') {
     $label = mb_substr(post('label'), 0, 120);
     $oid = (int)($_POST['order_id'] ?? 0);
     $seats = PLAN_SEATS[$type];
-    $pdo->beginTransaction();
     $sid = $type === 'class' ? school_from_post($pdo) : null;
-    $ins = $pdo->prepare('INSERT OR IGNORE INTO codes(code, batch_id, type, max_uses, expires_at, pin, label, created_at, role, order_id) VALUES(?, ?, ?, ?, ?, NULL, ?, ?, ?, ?)');
-    $newBatch = fn() => ($pdo->prepare('INSERT INTO batches(label, type, max_uses, expires_at, created_at, school_id, public) VALUES(?, ?, ?, ?, ?, ?, 1)')->execute([$label, $type, $seats, $exp, now(), $sid]) ? (int)$pdo->lastInsertId() : 0);
-    $made = []; $bid = $type === 'class' ? 0 : $newBatch(); $first = 0;
-    while (count($made) < $count) {
-        $b = $type === 'class' ? $newBatch() : $bid; // всеки клас е отделна група за класациите
-        $c = random_code(); $ins->execute([$c, $b, $type, $seats, $exp, $label, now(), 'student', $oid ?: null]);
-        if ($ins->rowCount()) { $made[] = $c; $first = $first ?: $b; } elseif ($type === 'class') $pdo->prepare('DELETE FROM batches WHERE id = ?')->execute([$b]);
-    }
-    if ($oid) $pdo->prepare("UPDATE orders SET batch_id = COALESCE(batch_id, ?), status = CASE WHEN status = 'new' THEN 'codes' ELSE status END WHERE id = ?")->execute([$first, $oid]);
-    $pdo->commit();
+    $made = make_codes($type, $count, $exp, $label, $oid ?: null, $sid);
     audit('Нови кодове', TYPE_NAMES[$type] . " × $count до $exp · $label" . ($oid ? " · поръчка #$oid" : ''));
     flash("Създадени са $count кода ($PLANS[$type]). Изпратете ги на клиента – активират се в „Абонаменти“.");
     go($oid ? 'porachki.php?id=' . $oid : 'kodove.php?made=' . urlencode(implode(',', $made)));

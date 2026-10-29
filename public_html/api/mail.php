@@ -129,6 +129,33 @@ function mail_order_admin(string $to, array $o, array $details, string $url): bo
     return send_mail($to, '💶 Нова поръчка №' . $o['no'] . ' – ' . $o['pname'] . ' – ' . $m($o['amount']), $text, $html);
 }
 /* писмо, написано в админ панела (напр. кодовете към поръчка) – текстът става красив HTML */
+/* След плащане през Paddle: кодът(овете) за абонамент. */
+function mail_paddle_codes(string $email, string $name, string $plan, int $period, array $codes, string $exp, bool $activated): bool {
+    $pn = site_config()['planNames'][$plan] ?? '';
+    $planTxt = (TYPE_NAMES[$plan] ?? $plan) . ' · ' . ($period === 6 ? '6 месеца' : '1 година') . ' · до ' . date('d.m.Y', strtotime($exp));
+    $first = explode(' ', trim($name))[0] ?: 'приятели';
+    $one = count($codes) === 1;
+    $list = implode(' ', array_map(fn($c) => m_code($c), $codes));
+    $inner = m_h('Благодарим за покупката! 🎉') . m_p('Здравейте, ' . me($first) . '! Абонаментът „' . me($pn) . '“ е ваш.') .
+        m_box(m_rows(['Абонамент' => me($planTxt)] + ($one ? [] : ['Брой кодове' => count($codes)])));
+    if ($activated) {
+        $inner .= m_p('✅ <b>Абонаментът вече е активен във вашия акаунт</b> – нищо повече не е нужно. Влезте и играйте.') .
+            m_p('Кодът ви за всеки случай: ' . $list, 'font-size:14px') . m_btn(SITE_URL . '/profil.html', '👤 Моят профил');
+    } elseif ($one) {
+        $inner .= m_p('Вашият код за активиране:') . '<div style="text-align:center;margin:6px 0 16px">' . $list . '</div>' .
+            m_steps([['Направете безплатен акаунт', 'Или влезте в своя на smetko.com.'], ['Въведете кода', 'В „Абонаменти“ → „Имате код?“. Въвежда се само веднъж.'], ['Играйте', $plan === 'class' ? 'В „Табло“ добавете учениците – всеки получава потребител и парола.' : 'Добавете профил за детето и готово.']]) .
+            m_btn(SITE_URL . '/pricing.html#activate', '🔑 Активирай кода');
+    } else {
+        $inner .= m_p('Вашите кодове – по един за всеки клас:') . '<div style="text-align:center;margin:6px 0 16px;line-height:2.2">' . $list . '</div>' .
+            m_p('Всеки учител активира своя код в акаунта си („Абонаменти“ → „Имате код?“) и управлява класа от „Табло“.') . m_btn(SITE_URL . '/pricing.html#activate', '🔑 Активирай код');
+    }
+    $inner .= m_small('Поръчката е обработена от Paddle.com – търговецът (Merchant of Record) по нашите продажби. Документът за покупката и връщането на парите са на <a href="https://paddle.net" style="color:#2F80ED">paddle.net</a>. В срок от 14 дни връщаме цялата сума – вижте <a href="' . SITE_URL . '/vrashtane.html" style="color:#2F80ED">Политиката за връщане</a>.');
+    $text = "Здравейте, $first!\n\nБлагодарим за покупката на абонамент „$pn“ ($planTxt).\n" .
+        ($activated ? "Абонаментът вече е активен във вашия акаунт – влезте в " . SITE_URL . "/profil.html\nКодът ви за всеки случай: " : "Код" . ($one ? '' : 'ове') . " за активиране: ") . implode(', ', $codes) .
+        "\n\nАктивиране: " . SITE_URL . "/pricing.html#activate (само веднъж).\n\nПоръчката е обработена от Paddle.com (Merchant of Record). Документ за покупката и връщане на парите: https://paddle.net\n14 дни гаранция: " . SITE_URL . "/vrashtane.html\n\nЕкипът на Сметко\n" . SITE_URL;
+    return send_mail($email, 'Вашият абонамент за Сметко 🦉', $text, mail_layout('Кодът за активиране е вътре.', $inner, 'Получавате това писмо, защото купихте абонамент за Сметко.'));
+}
+
 function mail_admin_text(string $to, string $subject, string $text, string $title = ''): bool {
     $html = mail_layout(mb_substr(preg_replace('/\s+/u', ' ', $text) ?? '', 0, 110), ($title !== '' ? m_h(me($title)) : '') . mail_text_to_html($text));
     return send_mail($to, $subject, $text, $html);

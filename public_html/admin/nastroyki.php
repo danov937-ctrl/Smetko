@@ -52,6 +52,15 @@ if ($action === 'company') {
     foreach (array_keys(DEFAULT_CONFIG['company']) as $k) $c['company'][$k] = mb_substr(post($k), 0, 200);
     save_site_config($c); audit('Данни на собственика', $c['company']['name']); flash('Данните са запазени – вече се показват в правните документи.'); go('nastroyki.php#company');
 }
+if ($action === 'paddle') {
+    $P = $c['paddle'];
+    $P['env'] = post('env') === 'live' ? 'live' : 'sandbox';
+    foreach (['token', 'secret', 'apiKey'] as $k) { $v = post($k); if ($v !== '' || post('clear_' . $k) !== '') $P[$k] = mb_substr($v, 0, 200); } // празно поле = без промяна
+    foreach (array_keys(DEFAULT_CONFIG['paddle']['prices']) as $k) { if (!array_key_exists('p_' . $k, $_POST)) continue; $v = post('p_' . $k); if (preg_match('/^(pri_[a-z0-9]+)?$/i', $v)) $P['prices'][$k] = $v; }
+    $c['paddle'] = $P; save_site_config($c);
+    audit('Настройки на Paddle', $P['env'] . ($P['token'] ? ' · token' : '') . ($P['secret'] ? ' · secret' : ''));
+    flash('Настройките на Paddle са запазени.'); go('nastroyki.php#paddle');
+}
 if ($action === 'password') {
     $p = (string)($_POST['password'] ?? '');
     if (!password_verify((string)($_POST['old'] ?? ''), (string)setting('admin_hash'))) { flash('Грешна текуща парола.', 'err'); go('nastroyki.php#security'); }
@@ -97,6 +106,33 @@ $body .= $f('google') . '<h2>🔗 Google</h2><p class="hint">Поставете 
 $body .= $f('company') . '<h2>👤 Собственик на Сметко</h2><p class="hint">Сметко се продава от физическо лице, а плащанията минават през Paddle (търговец – Merchant of Record), затова не са нужни ЕИК и ДДС номер. Името и адресът се показват в Общите условия, Политиката за поверителност и другите документи на мястото на „[ПОПЪЛНЕТЕ…]“. За одобрението от Paddle е най-добре да се впишат и в <code>tools/common.py</code> (OWNER_NAME, OWNER_ADDR) – тогава са направо в страницата.</p><div class="grid g3">' .
     $cf('name', 'Име и фамилия', 'Иван Петров Иванов') . '<label class="wide">Адрес за кореспонденция<input name="addr" maxlength="200" value="' . h($C['addr']) . '" placeholder="гр. София, ул. …"></label>' .
     $cf('phone', 'Телефон (по желание)') . '<details class="wide"><summary class="hint">Ако по-късно регистрирате фирма</summary><div class="grid g3">' . $cf('eik', 'ЕИК', '123456789') . $cf('vat', 'ДДС номер (ако има)', 'BG123456789') . $cf('mol', 'Управител (МОЛ)') . $cf('iban', 'IBAN') . $cf('bank', 'Банка') . '</div></details></div><button>💾 Запази</button></form>';
+// ---------- Paddle ----------
+$PD = $c['paddle'];
+$st = db()->query("SELECT status, COUNT(*) n FROM paddle_events GROUP BY status")->fetchAll();
+$evn = []; foreach ($st as $r) $evn[$r['status']] = (int)$r['n'];
+$last = db()->query('SELECT * FROM paddle_events ORDER BY at DESC LIMIT 8')->fetchAll();
+$mask = fn(string $v) => $v === '' ? '' : mb_substr($v, 0, 6) . '••••••' . mb_substr($v, -4);
+$sec = fn($k, $l, $ph, $hint) => '<label>' . $l . ($PD[$k] !== '' ? ' <span class="pill ok">запазен: ' . h($mask($PD[$k])) . '</span>' : ' <span class="pill">празно</span>') .
+    '<input name="' . $k . '" maxlength="200" value="" placeholder="' . h($PD[$k] !== '' ? 'оставете празно, за да не се променя' : $ph) . '" autocomplete="off"><small class="hint">' . $hint . '</small></label>';
+$pf = fn($k, $l) => '<label>' . $l . '<input name="p_' . $k . '" maxlength="60" value="' . h($PD['prices'][$k]) . '" placeholder="pri_01h…" autocomplete="off"></label>';
+$body .= $f('paddle') . '<h2>💳 Paddle – плащания</h2>' .
+    '<p class="hint">Paddle е търговецът (Merchant of Record): приема плащането, начислява данъците, издава документа и връща парите. Ключовете се пазят в базата (не влизат в GitHub). „Client-side token“ е публичен и се вижда в страницата; другите две не излизат от сървъра.</p>' .
+    '<div class="grid g3"><label>Режим<select name="env"><option value="sandbox"' . ($PD['env'] === 'sandbox' ? ' selected' : '') . '>Sandbox (проба)</option><option value="live"' . ($PD['env'] === 'live' ? ' selected' : '') . '>Live (истински плащания)</option></select><small class="hint">Ключовете за sandbox и live са различни.</small></label>' .
+    $sec('token', 'Client-side token', 'test_… / live_…', 'Paddle → Developer tools → Authentication → Client-side tokens') .
+    $sec('secret', 'Webhook secret key', 'pdl_ntfset_…', 'Paddle → Notifications → новата дестинация') .
+    $sec('apiKey', 'API key (по желание)', 'pdl_sdbx_apikey_…', 'Само за имейла на купувача, ако Paddle не го прати в събитието') . '</div>' .
+    '<h3>Цени (Price ID от Paddle)</h3><p class="hint">За всеки план направете продукт с две цени – за 6 и за 12 месеца (еднократно плащане, в евро) – и поставете тук техните <code>pri_…</code>.</p><div class="grid g3">' .
+    $pf('single12', 'Индивидуален · 1 година') . $pf('family12', 'Семеен · 1 година') . $pf('class12', 'Клас · 1 година') .
+    $pf('single6', 'Индивидуален · 6 месеца') . $pf('family6', 'Семеен · 6 месеца') . $pf('class6', 'Клас · 6 месеца') . '</div>' .
+    '<button>💾 Запази</button></form>';
+$body .= '<div class="card"><h3>Адрес за Paddle (webhook)</h3><div class="row"><input id="pd-url" readonly value="' . h(SITE_URL . '/api/paddle.php') . '" style="flex:1;min-width:240px"><button type="button" class="btn sm" data-copy="pd-url">Копирай</button></div>' .
+    '<p class="hint">В Paddle → Notifications → <b>+ New destination</b>: поставете адреса, изберете <b>transaction.completed</b> и копирайте тук „secret key“.</p>' .
+    '<p class="hint">Проба, докато продажбите са спрени: отворете <a href="../pricing.html?test=paddle" target="_blank">pricing.html?test=paddle</a> – бутоните за купуване се показват само на вас.</p>' .
+    ($last ? '<h3>Последни събития</h3><div class="tw"><table><thead><tr><th>Кога</th><th>Събитие</th><th>Транзакция</th><th>Резултат</th></tr></thead><tbody>' .
+        implode('', array_map(fn($e) => '<tr><td>' . h(substr((string)$e['at'], 0, 16)) . '</td><td>' . h($e['kind']) . '</td><td class="mono-sm">' . h($e['txn']) . '</td><td>' . ['ok' => '✅ код издаден', 'activated' => '✅ активиран в акаунт', 'skip' => '– пропуснато', 'err' => '⚠️ грешка'][$e['status']] . ' <small class="muted">' . h((string)$e['note']) . '</small></td></tr>', $last)) . '</tbody></table></div>'
+        : '<p class="hint">Още няма получени събития от Paddle.</p>') .
+    ($evn ? '<p class="hint">Общо: ' . h(implode(' · ', array_map(fn($k, $v) => "$k: $v", array_keys($evn), $evn))) . '</p>' : '') . '</div>';
+
 $body .= '<form method="post" class="card" id="security">' . csrf_field() . '<input type="hidden" name="action" value="password"><h2>🔒 Сигурност</h2><div class="grid g3"><label>Текуща парола<input type="password" name="old" autocomplete="current-password"></label><label>Нова парола (мин. 10 знака)<input type="password" name="password" minlength="10" autocomplete="new-password"></label><label>Повтори новата<input type="password" name="password2" minlength="10" autocomplete="new-password"></label></div><button>Смени паролата</button></form>' .
     '<form method="post" class="card">' . csrf_field() . '<input type="hidden" name="action" value="logout_all"><h3>Изход от всички устройства</h3><p class="hint">Ако сте влизали от чужд компютър или телефон – всички други сесии спират веднага.</p><button class="ghost">🚪 Изведи другите устройства</button></form>';
 page('Настройки на сайта', $body);

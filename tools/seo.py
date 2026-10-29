@@ -558,6 +558,8 @@ for g in (1, 2, 3, 4):
     sw = sw.replace(f"'/class-{g}.html'", f"'/{class_url(g)}'")
 if "/js/quiz.js" not in sw:
     sw = sw.replace("'/js/challenge.js?v=" + VER + "',", "'/js/challenge.js?v=" + VER + "', '/js/quiz.js?v=" + VER + "', '/tablica-za-umnozhenie.html', '/testove-po-matematika.html',")
+if "/js/paddle.js" not in sw:
+    sw = sw.replace("'/js/app.js?v=" + VER + "',", "'/js/paddle.js?v=" + VER + "', '/js/app.js?v=" + VER + "',")
 if "/js/wardrobe.js" not in sw:
     sw = sw.replace("'/js/game.js?v=" + VER + "',", "'/js/wardrobe.js?v=" + VER + "', '/js/game.js?v=" + VER + "',")
 if "/js/a11y.js" not in sw:

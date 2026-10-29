@@ -69,6 +69,8 @@ function db(): PDO {
     $pdo->exec('CREATE TABLE IF NOT EXISTS reports (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, last_at TEXT, kind TEXT, reason TEXT, text TEXT, data TEXT, page TEXT, ua TEXT, ver TEXT, sig TEXT UNIQUE, n INTEGER DEFAULT 1, status TEXT DEFAULT \'new\'); CREATE INDEX IF NOT EXISTS idx_rep_kind ON reports(kind, status)');
     // родител ↔ ученик от клас (родителят вижда отчета, домашните и съобщенията от учителя)
     $pdo->exec('CREATE TABLE IF NOT EXISTS parent_links (account_id INTEGER, rid INTEGER, created_at TEXT, PRIMARY KEY(account_id, rid)); CREATE INDEX IF NOT EXISTS idx_pl_rid ON parent_links(rid)');
+    // плащания през Paddle: всяко събитие се обработва веднъж (webhook може да дойде няколко пъти)
+    $pdo->exec('CREATE TABLE IF NOT EXISTS paddle_events (id TEXT PRIMARY KEY, kind TEXT, txn TEXT, at TEXT, status TEXT, note TEXT)');
     // анкета за затворения тест (api/survey.php, админ → Анкета)
     $pdo->exec('CREATE TABLE IF NOT EXISTS survey (id INTEGER PRIMARY KEY AUTOINCREMENT, sid TEXT UNIQUE, created_at TEXT, updated_at TEXT, role INTEGER, grp TEXT, nps INTEGER, email TEXT, account_id INTEGER, access INTEGER DEFAULT 0, answers TEXT)');
     // седмичен имейл до родителя (api/weekly.php): включен по подразбиране, отписване с един клик
@@ -358,6 +360,40 @@ function adapt_out($json): ?object {
     $o = []; foreach (ADAPT_KEYS as $k) if (!empty($a[$k])) $o[$k] = 1;
     return $o ? (object)$o : null;
 }
+/* Дневник на действията (показва се в админ → Дневник). Админ панелът ползва audit(), който вика тази функция. */
+function audit_add(string $action, string $details = ''): void {
+    db()->prepare('INSERT INTO audit(ts, ip, action, details) VALUES(?, ?, ?, ?)')->execute([now(), client_ip(), $action, mb_substr($details, 0, 500)]);
+}
+
+/* Подписан, кратко валиден ключ за акаунта – слага се в плащането през Paddle, за да може абонаментът
+   да се активира направо в акаунта на купувача. Данните идват от браузъра, затова се подписват тук. */
+function paddle_acc_token(int $aid): string { $p = $aid . '.' . (time() + 7200); return $p . '.' . substr(b64u(hash_hmac('sha256', 'paddle|' . $p, secret(), true)), 0, 24); }
+function paddle_acc_id(string $t): int {
+    $x = explode('.', $t);
+    if (count($x) !== 3 || !ctype_digit($x[0]) || !ctype_digit($x[1])) return 0;
+    $p = $x[0] . '.' . $x[1];
+    if (!hash_equals(substr(b64u(hash_hmac('sha256', 'paddle|' . $p, secret(), true)), 0, 24), $x[2])) return 0;
+    return (int)$x[1] >= time() - 86400 ? (int)$x[0] : 0; // ключът важи 2 часа, плащането – до 1 ден след това
+}
+
+/* Нови кодове за абонамент (от админ панела и от плащане през Paddle). Връща списък с кодовете. */
+function make_codes(string $type, int $count, string $exp, string $label = '', ?int $orderId = null, ?int $schoolId = null): array {
+    $pdo = db();
+    $seats = PLAN_SEATS[$type] ?? 1;
+    $own = !$pdo->inTransaction(); if ($own) $pdo->beginTransaction();
+    $ins = $pdo->prepare('INSERT OR IGNORE INTO codes(code, batch_id, type, max_uses, expires_at, pin, label, created_at, role, order_id) VALUES(?, ?, ?, ?, ?, NULL, ?, ?, ?, ?)');
+    $newBatch = fn() => ($pdo->prepare('INSERT INTO batches(label, type, max_uses, expires_at, created_at, school_id, public) VALUES(?, ?, ?, ?, ?, ?, 1)')->execute([$label, $type, $seats, $exp, now(), $schoolId]) ? (int)$pdo->lastInsertId() : 0);
+    $made = []; $bid = $type === 'class' ? 0 : $newBatch(); $first = 0; $guard = 0;
+    while (count($made) < $count && $guard++ < $count * 20) {
+        $b = $type === 'class' ? $newBatch() : $bid; // всеки клас е отделна група за класациите
+        $c = random_code(); $ins->execute([$c, $b, $type, $seats, $exp, $label, now(), 'student', $orderId ?: null]);
+        if ($ins->rowCount()) { $made[] = $c; $first = $first ?: $b; } elseif ($type === 'class') $pdo->prepare('DELETE FROM batches WHERE id = ?')->execute([$b]);
+    }
+    if ($orderId) $pdo->prepare("UPDATE orders SET batch_id = COALESCE(batch_id, ?), status = CASE WHEN status = 'new' THEN 'codes' ELSE status END WHERE id = ?")->execute([$first, $orderId]);
+    if ($own) $pdo->commit();
+    return $made;
+}
+
 function too_many(string $kind, int $max, int $window): bool {
     $pdo = db(); $t = time();
     if (random_int(1, 40) === 1) $pdo->prepare('DELETE FROM attempts WHERE ts < ?')->execute([$t - 86400]); // почистване от време на време
@@ -406,6 +442,8 @@ const DEFAULT_CONFIG = [
     'blockedWords' => '',
     'diplomas' => 'auto', // грамоти: auto = от 1 юни до 30 септември, on = винаги, off = никога
     'google' => ['gsc' => '', 'ga' => '', 'clientId' => ''], // Search Console (файл за потвърждение), Google Analytics (G-…), вход с Google (Client ID)
+    // Paddle – търговец (Merchant of Record) за плащанията. token и prices са публични; secret и apiKey не излизат от сървъра.
+    'paddle' => ['env' => 'sandbox', 'token' => '', 'secret' => '', 'apiKey' => '', 'prices' => ['single6' => '', 'single12' => '', 'family6' => '', 'family12' => '', 'class6' => '', 'class12' => '']],
 ];
 function site_config(): array {
     $c = json_decode((string)setting('site_config', '{}'), true) ?: [];

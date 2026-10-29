@@ -24,9 +24,7 @@ function post(string $k, string $d = ''): string { return trim((string)($_POST[$
 function school_year_end(): string { $y = (int)date('Y'); if ((int)date('n') >= 7) $y++; return $y . '-06-30'; }
 function fdate(?string $d): string { return $d ? date('d.m.Y', strtotime($d)) : '–'; }
 function money($x): string { return number_format((float)$x, 2, '.', ' ') . ' €'; }
-function audit(string $action, string $details = ''): void {
-    db()->prepare('INSERT INTO audit(ts, ip, action, details) VALUES(?, ?, ?, ?)')->execute([now(), client_ip(), $action, mb_substr($details, 0, 500)]);
-}
+function audit(string $action, string $details = ''): void { audit_add($action, $details); }
 function auto_backup(): void { // едно копие на базата на ден, пазят се последните 14
     $dir = __DIR__ . '/../api/data/backups';
     if (!is_dir($dir)) @mkdir($dir, 0750, true);
@@ -128,6 +126,7 @@ function css(): string {
     .bars{display:flex;align-items:flex-end;gap:3px;height:120px;padding-top:6px}.bars i{flex:1;background:#3299FF;border-radius:4px 4px 0 0;min-height:2px;position:relative}.bars i:hover{background:#FF7B00}
     .bars-x{display:flex;justify-content:space-between;font-size:.72rem;color:#7A879F;margin-top:4px}
     .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:12px}.filters label{margin:0}.filters input,.filters select{width:auto;min-width:150px}
+    .pill{display:inline-block;background:#EEF3FB;color:#5B6B8C;border-radius:99px;padding:1px 8px;font-size:11px;font-weight:800}.pill.ok{background:#E3F7E0;color:#2E7D32}
     .pill-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
     @media(max-width:860px){.shell{grid-template-columns:1fr}.side{position:sticky;top:0;height:auto;z-index:5;display:flex;gap:4px;overflow-x:auto;padding:8px;align-items:center}.side .logo{padding:0 8px 0 4px;font-size:1rem;white-space:nowrap}.side .logo small{display:none}.side a{padding:7px 10px;white-space:nowrap;font-size:.86rem}.side .sep,.side .lbl{display:none}main{padding:16px 12px 50px}}
     @media print{.side,.noprint{display:none!important}.shell{display:block}main{padding:0}.card{box-shadow:none}}';

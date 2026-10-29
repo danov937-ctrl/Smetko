@@ -252,6 +252,8 @@
       '<div class="modal-actions"><a class="btn btn-green" href="pricing.html#activate">🔑 Имам код</a><a class="btn btn-ghost" href="game.html">Безплатен план</a></div>');
   };
   S.subscribeModal = function (kind, qty0) {
+    var pl = PLAN_OF[kind] || kind || 'single';
+    if (S.Paddle && S.Paddle.on(pl) && S.Paddle.allowed()) { S.Paddle.modal(pl, qty0); return; } // плащане с карта през Paddle
     if (!S.SALES) { S.soonModal(); return; }
     var plan = PLAN_OF[kind] || kind || 'single';
     var A = S.Account && S.Account.data, per = S.period === 6 ? 6 : 12;

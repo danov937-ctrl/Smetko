@@ -209,6 +209,10 @@ case 'unlink_student':
     $pdo->prepare('DELETE FROM parent_links WHERE account_id = ? AND rid = ?')->execute([(int)$a['id'], (int)($in['rid'] ?? 0)]);
     json_out(acc_me(auth_account(true)));
 
+case 'paddle_token': // кратко валиден ключ за плащане през Paddle (за автоматично активиране)
+    $a = need();
+    json_out(['ok' => true, 'token' => paddle_acc_token((int)$a['id'])]);
+
 case 'weekly': // седмичен имейл с напредъка – вкл./изкл.
     $a = need();
     $pdo->prepare('UPDATE accounts SET weekly = ? WHERE id = ?')->execute([empty($in['on']) ? 0 : 1, (int)$a['id']]);
