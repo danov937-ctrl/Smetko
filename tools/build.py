@@ -131,6 +131,7 @@ index = head('Сметко – математика като игра за 1.–
       <div class="book-card"><b>Архимед</b><small>1. клас</small></div>
       <div class="book-card more"><b>Скоро още</b><small>Клет, Анубис, Булвест</small></div>
     </div>
+    <p class="hint book-note">Сметко не е свързан с издателствата и не е одобрен от тях. Имената на учебниците посочват само по кой учебник са подредени мисиите; задачите са създадени от Сметко.</p>
   </div>
 </section>
 
@@ -250,7 +251,7 @@ game = head('Математически игри онлайн за 1.–4. кл�
       <div id="book-wrap" class="book-wrap">
         <label class="step-label" for="book-select">3. По кой учебник учиш?</label>
         <select id="book-select" class="select"></select>
-        <p class="hint">Мисиите се подреждат по заглавията на уроците в учебника. Не намираш своя? Избери „По учебната програма“ – общият ред за всички учебници.</p>
+        <p class="hint">Мисиите се подреждат по заглавията на уроците в учебника. Не намираш своя? Избери „По учебната програма“ – общият ред за всички учебници. <span class="book-note">Сметко не е свързан с издателствата и не е одобрен от тях. Имената на учебниците посочват само по кой учебник са подредени мисиите; задачите са създадени от Сметко.</span></p>
       </div>
       <div id="topic-wrap" style="margin-top:18px">
         <div class="step-label">3. Избери тема</div>
@@ -281,6 +282,7 @@ game = head('Математически игри онлайн за 1.–4. кл�
     <div class="play-grid"><div class="play-main">
     <div class="stage"><div class="owl" id="play-owl" data-owl="hello"></div><div class="bubble" id="bubble" aria-live="polite">Да започваме!</div></div>
     <div class="qcard" id="qcard"><div id="qbody"></div></div>
+    <button class="fb-btn" type="button" data-feedback>🚩 Нещо не е наред със задачата?</button>
     </div><div class="play-side">
     <div class="keypad" id="keypad">
       <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
@@ -333,6 +335,7 @@ for g, d in GRADES.items():
     <p>{d['about']}</p>
     <h3>Мисии по учебник</h3>
     <p>В „Приключение“ избираш учебника си и мисиите носят заглавията на уроците в него. За {g}. клас вече са налични: {books}</p>
+    <p class="hint">Сметко не е свързан с издателствата и не е одобрен от тях. Имената на учебниците посочват само по кой учебник са подредени мисиите; задачите са създадени от Сметко.</p>
     <h3>Примерни задачи</h3>
     <ul>{exs}</ul>
     <div class="callout">Съвет: 10 минути на ден са по-полезни от един час веднъж седмично. Сметко отбелязва поредните дни игра с огънче 🔥.</div>

@@ -38,6 +38,9 @@ $body = '<div class="kpis">' .
     $kpi(money($k['rev_m']), 'приходи този месец') . $kpi(money($k['rev_y']), 'приходи тази уч. година') .
     $kpi('<a href="porachki.php?status=open">' . $k['unpaid'] . '</a>', 'неприключени поръчки') .
     $kpi('<a href="klasacii.php">' . $k['flags'] . '</a>', '⚠ за проверка') . '</div>';
+// нови сигнали и отговори от анкетата
+$nRep = (int)$one("SELECT COUNT(*) FROM reports WHERE kind IN ('task','bug') AND status = 'new'"); $nJs = (int)$one("SELECT COUNT(*) FROM reports WHERE kind = 'js' AND status = 'new'"); $nSv = (int)$one('SELECT COUNT(*) FROM survey');
+if ($nRep || $nJs || $nSv) $body .= '<div class="card"><div class="row">' . ($nRep ? '<a class="btn sm" href="signali.php">🚩 ' . $nRep . ' нови сигнала</a>' : '') . ($nJs ? '<a class="btn sm ghost" href="signali.php?t=js">⚠️ ' . $nJs . ' грешки в браузъра</a>' : '') . ($nSv ? '<a class="btn sm ghost" href="anketa.php">📝 ' . $nSv . ' отговора на анкетата</a>' : '') . '</div></div>';
 
 // активирания и активност по дни (30 дни)
 $days = []; for ($i = 29; $i >= 0; $i--) $days[date('Y-m-d', strtotime("-$i days"))] = [0, 0];

@@ -1633,3 +1633,17 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .survey-cta small { display: block; color: var(--ink); font-weight: 600; }
 .survey-cta em { margin-left: auto; flex: none; font-style: normal; font-weight: 900; background: var(--orange); color: #fff; border-radius: 99px; padding: 8px 14px; white-space: nowrap; }
 @media (max-width: 520px) { .survey-cta { flex-wrap: wrap; } .survey-cta em { margin-left: 0; } }
+.book-note { display: block; margin-top: 8px; font-size: .85rem; }
+/* сигнали „Нещо не е наред?“ */
+.fb-btn { display: block; margin: 10px auto 0; border: 0; background: transparent; color: rgba(29,43,79,.62); font: inherit; font-weight: 800; font-size: .85rem; cursor: pointer; padding: 6px 10px; border-radius: 10px; }
+.fb-btn:hover { color: var(--navy); background: rgba(255,255,255,.6); }
+.fb-modal .modal-body { max-width: 480px; }
+.fb-task { background: var(--bg-soft); border-radius: 14px; padding: 10px 14px; font-weight: 900; color: var(--navy); font-size: 1.15rem; text-align: center; }
+.fb-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; text-align: left; }
+.fb-opts label { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border: 2px solid var(--line); border-radius: 12px; cursor: pointer; font-weight: 700; font-size: .92rem; }
+.fb-opts label:has(input:checked) { border-color: var(--blue); background: #EEF6FF; }
+.fb-opts input { accent-color: var(--blue); margin: 0; }
+.fb-lbl { display: block; text-align: left; font-weight: 800; color: var(--navy); }
+.fb-lbl textarea { width: 100%; margin-top: 6px; }
+@media (max-width: 420px) { .fb-opts { grid-template-columns: 1fr; } }
+.modal-body .fb-task { font-weight: 900; color: var(--navy); }

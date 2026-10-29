@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '23'
+VER = '24'
 EMAIL = 'info@smetko.com'
 # Продажбите (цени, поръчки) са спрени до края на проучването. За пускане: True тук и SALES_OPEN в public_html/api/lib.php, после build.
 SALES_OPEN = False
@@ -181,6 +181,7 @@ FOOTER = '''<footer class="site-footer">
         <li><a href="cookies.html">Бисквитки</a> · <button class="ck-foot" data-consent>🍪 Настройки</button></li>
         <li><a href="pravna-informacia.html">Всички документи</a></li>
         <li><a href="mailto:''' + EMAIL + '''">''' + EMAIL + '''</a></li>
+        <li><button class="ck-foot" data-feedback>🚩 Съобщи за проблем</button></li>
       </ul></div>
     </div>
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>

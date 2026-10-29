@@ -320,6 +320,46 @@
   };
   S.loginModal = function () { location.href = 'vhod.html'; };
 
+  /* ---------- Сигнали: „Нещо не е наред?“ и грешки в браузъра (/api/feedback.php) ---------- */
+  var VER = (function () { var sc = document.querySelector('script[src*="js/app.js"]'); var m = sc && sc.src.match(/v=(\d+)/); return m ? m[1] : ''; })();
+  function fbPost(d) {
+    if (!/^https?:$/.test(location.protocol)) return Promise.reject(new Error('offline'));
+    d.page = location.pathname + location.search; d.ver = VER; d.vw = innerWidth + 'x' + innerHeight;
+    return fetch('/api/feedback.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d), credentials: 'same-origin', keepalive: true })
+      .then(function (r) { return r.json(); }).then(function (j) { if (!j.ok) throw new Error(j.error || 'Грешка.'); return j; });
+  }
+  var jsSent = {}, jsCount = 0;
+  function logJs(msg, src, line, col, stack) {
+    msg = String(msg || '').slice(0, 300); if (!msg || jsCount >= 5) return;
+    if (/ResizeObserver loop|Script error\.?$|extension:\/\/|chrome-extension|moz-extension/i.test(msg + ' ' + (src || ''))) return; // шум от браузъра и разширения
+    var k = msg + '|' + line; if (jsSent[k]) return; jsSent[k] = 1; jsCount++;
+    fbPost({ kind: 'js', msg: msg, src: String(src || '').slice(0, 200), line: line || 0, col: col || 0, stack: String(stack || '').slice(0, 1500) }).catch(function () {});
+  }
+  window.addEventListener('error', function (e) { if (e && e.message) logJs(e.message, e.filename, e.lineno, e.colno, e.error && e.error.stack); });
+  window.addEventListener('unhandledrejection', function (e) { var r = e && e.reason; if (r && r.message === 'Failed to fetch') return; logJs('Promise: ' + (r && r.message || r), '', 0, 0, r && r.stack); });
+  S.feedback = function () {
+    var ctx = S.fbContext ? S.fbContext() : null, t = ctx && ctx.task;
+    var plain = function (h) { var d = document.createElement('div'); d.innerHTML = String(h || '').replace(/\{\?\}/g, '?'); return (d.textContent || '').replace(/\s+/g, ' ').trim(); };
+    var d = S.modal('<h3>Нещо не е наред?</h3>' + (t ? '<p class="fb-task">' + escH(plain(t.q)) + '</p>' : '<p>Пишете ни какво не работи – ще го оправим.</p>') +
+      '<form id="fb-form" class="fb-form">' + (t ? '<div class="fb-opts">' + [['wrong', '❌ Отговорът е грешен'], ['unclear', '🤔 Задачата е неясна'], ['broken', '🛠️ Нещо не работи'], ['other', '💬 Друго']].map(function (o, i) {
+        return '<label><input type="radio" name="fb-r" value="' + o[0] + '"' + (i === 0 ? ' checked' : '') + '><span>' + o[1] + '</span></label>'; }).join('') + '</div>' : '') +
+      '<label class="fb-lbl">' + (t ? 'Опишете (по желание)' : 'Какво се случи?') + '<textarea class="input" id="fb-text" rows="3" maxlength="1000" placeholder="' + (t ? 'Например: верният отговор е 12' : 'Например: на телефона бутонът не се натиска') + '"></textarea></label>' +
+      '<p class="hint">Не пишете имена, телефони или адреси. Изпращаме само задачата и вида на устройството.</p><p class="code-err" id="fb-err" role="alert"></p>' +
+      '<div class="modal-actions"><button class="btn btn-ghost" type="button" data-close>Отказ</button><button class="btn" type="submit">Изпрати</button></div></form>');
+    d.classList.add('fb-modal');
+    var f = d.querySelector('#fb-form');
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var r = f.querySelector('input[name="fb-r"]:checked'), txt = d.querySelector('#fb-text').value.trim(), err = d.querySelector('#fb-err');
+      if (!t && !txt) { err.textContent = 'Опишете накратко какво не е наред.'; return; }
+      var b = f.querySelector('button[type=submit]'); b.disabled = true; b.textContent = 'Изпращам…';
+      var task = t ? { q: plain(t.q), full: plain(t.full), answer: String(t.answer), input: ctx.input || '', skill: t.skill || '', grade: t.grade || ctx.grade, level: t.level || ctx.level, mode: ctx.mode, book: ctx.book || '', mission: ctx.mission || '', a11y: ctx.a11y || '' } : null;
+      fbPost({ kind: t ? 'task' : 'bug', reason: r ? r.value : 'other', text: txt, task: task })
+        .then(function () { d.close(); S.toast('🦉 Благодарим! Сигналът е изпратен.'); })
+        .catch(function (x) { err.textContent = x.message === 'offline' || x.message === 'Failed to fetch' ? 'Няма връзка. Опитайте пак.' : x.message; b.disabled = false; b.textContent = 'Изпрати'; });
+    });
+  };
+
   /* ---------- Конфети ---------- */
   S.confetti = function (count) {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -389,6 +429,7 @@
     });
     document.addEventListener('click', function () { document.querySelectorAll('.dd.open').forEach(function (o) { o.classList.remove('open'); o.querySelector('.dd-btn').setAttribute('aria-expanded', 'false'); }); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') document.querySelectorAll('.dd.open').forEach(function (o) { o.classList.remove('open'); }); });
+    document.querySelectorAll('[data-feedback]').forEach(function (b) { b.addEventListener('click', function (e) { e.preventDefault(); S.feedback(); }); });
     document.querySelectorAll('[data-login]').forEach(function (b) { b.addEventListener('click', function (e) { e.preventDefault(); S.loginModal(); }); });
     document.querySelectorAll('[data-subscribe]').forEach(function (b) { b.addEventListener('click', function (e) { e.preventDefault(); S.subscribeModal(b.getAttribute('data-subscribe'), +b.getAttribute('data-qty') || 1); }); });
     document.querySelectorAll('[data-year]').forEach(function (el) { el.textContent = new Date().getFullYear(); });

@@ -10,6 +10,12 @@
   function timed(m) { return m === 'quick' || m === 'challenge'; }
   // помощни настройки (СОП) – js/a11y.js
   function ax(k) { return !!(S.A11y && S.A11y.on(k)); }
+  // за бутона „Нещо не е наред?“ (js/app.js): текущата задача и къде е детето
+  S.fbContext = function () {
+    if (!play || !play.task) return null;
+    return { task: play.task, input: play.input, mode: play.mode, grade: play.grade, level: play.level, book: play.book ? play.book.id : '', mission: play.title || '',
+      a11y: S.A11y ? S.A11y.OPTS.filter(function (o) { return S.A11y.on(o.k); }).map(function (o) { return o.k; }).join(',') : '' };
+  };
   var SAY = {
     ok: ['Браво!', 'Супер!', 'Точно така!', 'Страхотно!', 'Отлично!', 'Уха!', 'Как умееш!', 'Вярно!'],
     combo: ['Комбо! Двойни точки!', 'Огън си! 🔥', 'Не спирай!'],
