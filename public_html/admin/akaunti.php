@@ -36,7 +36,7 @@ if ($acc && $action === 'unlink') { // кодът се маха от профи�
 }
 if ($acc && $action === 'delete') {
     if (mb_strtolower(post('confirm')) !== mb_strtolower($acc['email'])) { flash('За потвърждение напишете имейла на акаунта.', 'err'); $back(); }
-    foreach (['profiles', 'auth_sessions'] as $t) $pdo->prepare("DELETE FROM $t WHERE account_id = ?")->execute([$id]);
+    foreach (['profiles', 'auth_sessions', 'parent_links'] as $t) $pdo->prepare("DELETE FROM $t WHERE account_id = ?")->execute([$id]);
     $pdo->prepare('DELETE FROM accounts WHERE id = ?')->execute([$id]);
     audit('Изтрит акаунт', $acc['email']); flash('Акаунтът и профилите са изтрити.'); go('akaunti.php');
 }

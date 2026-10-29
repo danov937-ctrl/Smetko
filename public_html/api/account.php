@@ -45,11 +45,32 @@ function acc_subs(int $aid): array { // абонаментите на акаун
     return array_map(fn($c) => ['code' => $c['code'], 'type' => $c['type'], 'typeName' => TYPE_NAMES[$c['type']] ?? $c['type'], 'planName' => $pn[$c['type']] ?? '', 'expires' => $c['expires_at'], 'valid' => code_valid($c),
         'seats' => code_seats($c), 'used' => $c['type'] === 'class' ? (int)$c['used_r'] : (int)$c['used_p'], 'activated' => substr((string)$c['activated_at'], 0, 10)], $st->fetchAll());
 }
+/* ученици от клас, свързани с акаунта на родителя (с потребителя и паролата от картата) */
+function acc_students(int $aid): array {
+    $st = db()->prepare('SELECT r.*, c.expires_at AS cexp, c.revoked, b.id AS bid, b.class_name, b.label, b.teacher_name, b.message, b.message_at, b.grade AS bgrade, s.name AS school, s.town
+        FROM parent_links l JOIN redemptions r ON r.id = l.rid JOIN codes c ON c.code = r.code JOIN batches b ON b.id = c.batch_id LEFT JOIN schools s ON s.id = b.school_id WHERE l.account_id = ? ORDER BY l.created_at');
+    $st->execute([$aid]);
+    $out = [];
+    foreach ($st->fetchAll() as $r) {
+        $s = $r['state'] ? (json_decode((string)$r['state'], true) ?: []) : [];
+        $stt = $r['stats'] ? (json_decode((string)$r['stats'], true) ?: []) : [];
+        $stars = 0; $missions = 0; foreach ((array)($s['adventure'] ?? []) as $g) foreach ((array)$g as $v) { $stars += (int)$v; if ((int)$v > 0) $missions++; }
+        $hw = db()->prepare('SELECT h.id, h.title, h.count, h.due, h.grade, d.correct, d.tries, d.done_at FROM homework h LEFT JOIN homework_done d ON d.hw_id = h.id AND d.rid = ? WHERE h.batch_id = ? ORDER BY h.due DESC, h.id DESC LIMIT 15');
+        $hw->execute([(int)$r['id'], (int)$r['bid']]);
+        $out[] = ['rid' => (int)$r['id'], 'name' => (string)$r['nickname'], 'avatar' => $r['avatar'] ?: '🦉', 'username' => (string)$r['username'], 'grade' => (int)($r['grade'] ?: $r['bgrade']),
+            'className' => trim(($r['class_name'] ? $r['class_name'] . ' клас' : (string)$r['label']) . ($r['school'] ? ' · ' . $r['school'] . ($r['town'] ? ', ' . $r['town'] : '') : '')),
+            'teacher' => (string)$r['teacher_name'], 'message' => (string)$r['message'], 'messageAt' => (string)$r['message_at'], 'valid' => !(int)$r['revoked'] && $r['cexp'] >= today(), 'expires' => $r['cexp'],
+            'points' => (int)($s['points'] ?? $r['points']), 'correct' => (int)($s['correct'] ?? $r['correct']), 'answered' => (int)($s['answered'] ?? $r['answered']), 'stars' => $stars ?: (int)$r['stars'], 'missions' => $missions ?: (int)$r['missions'],
+            'skills' => $s['skills'] ?? ($stt['s'] ?? new stdClass()), 'days' => $s['days'] ?? ($stt['d'] ?? new stdClass()), 'last' => $r['last_seen'], 'streak' => (int)($s['streak']['count'] ?? 0),
+            'homework' => array_map(fn($h) => ['title' => $h['title'], 'count' => (int)$h['count'], 'due' => $h['due'], 'done' => $h['done_at'] !== null, 'correct' => $h['correct'] === null ? null : (int)$h['correct'], 'tries' => (int)$h['tries'], 'late' => $h['done_at'] !== null && substr((string)$h['done_at'], 0, 10) > $h['due']], $hw->fetchAll())];
+    }
+    return $out;
+}
 function acc_me(?array $a): array {
     if (!$a) return ['ok' => true, 'account' => null];
     $profiles = acc_profiles((int)$a['id']); // първо профилите – там се разпределят свободните места
     return ['ok' => true, 'account' => ['email' => $a['email'], 'name' => $a['name'], 'role' => $a['role'], 'since' => substr((string)$a['created_at'], 0, 10), 'hasPass' => (string)$a['pass'] !== '', 'google' => !empty($a['google_sub']), 'weekly' => (int)($a['weekly'] ?? 1) === 1],
-        'profiles' => $profiles, 'classes' => acc_classes((int)$a['id']), 'subs' => acc_subs((int)$a['id'])];
+        'profiles' => $profiles, 'students' => acc_students((int)$a['id']), 'classes' => acc_classes((int)$a['id']), 'subs' => acc_subs((int)$a['id'])];
 }
 function need(): array { $a = auth_account(); if (!$a) json_out(['ok' => false, 'error' => 'Влезте в акаунта си.', 'auth' => false], 401); return $a; }
 function my_profile(array $a, $id): array {
@@ -171,6 +192,23 @@ case 'password':
     auth_login((int)$a['id']);
     json_out(['ok' => true]);
 
+case 'link_student': // родителят свързва ученик от клас с потребителя и паролата от картата от учителя
+    $a = need();
+    if (too_many('kid_fail', 15, 900)) json_out(['ok' => false, 'error' => 'Твърде много грешни опити. Опитайте пак след 15 минути.'], 429);
+    $u = strtolower(trim((string)($in['username'] ?? '')));
+    $st = $pdo->prepare('SELECT * FROM redemptions WHERE username = ?'); $st->execute([$u]); $r = $st->fetch(); $st->closeCursor();
+    if (!$r || !password_verify(strtolower(trim((string)($in['password'] ?? ''))), (string)$r['pass_hash'])) { note_attempt('kid_fail'); json_out(['ok' => false, 'error' => 'Грешен потребител или парола. Проверете картата от учителя.', 'field' => 'username'], 403); }
+    $c = get_code((string)$r['code']); if (!$c || (int)$c['revoked']) json_out(['ok' => false, 'error' => 'Класът е спрян. Попитайте учителя.'], 403);
+    $n = $pdo->prepare('SELECT COUNT(*) FROM parent_links WHERE account_id = ?'); $n->execute([(int)$a['id']]); if ((int)$n->fetchColumn() >= 6) json_out(['ok' => false, 'error' => 'Може да свържете до 6 ученици.'], 400);
+    $n = $pdo->prepare('SELECT COUNT(*) FROM parent_links WHERE rid = ? AND account_id <> ?'); $n->execute([(int)$r['id'], (int)$a['id']]); if ((int)$n->fetchColumn() >= 4) json_out(['ok' => false, 'error' => 'Този ученик вече е свързан с 4 родителски акаунта. Попитайте учителя.'], 400);
+    $pdo->prepare('INSERT OR IGNORE INTO parent_links(account_id, rid, created_at) VALUES(?, ?, ?)')->execute([(int)$a['id'], (int)$r['id'], now()]);
+    json_out(acc_me(auth_account(true)) + ['linked' => (string)$r['nickname']]);
+
+case 'unlink_student':
+    $a = need();
+    $pdo->prepare('DELETE FROM parent_links WHERE account_id = ? AND rid = ?')->execute([(int)$a['id'], (int)($in['rid'] ?? 0)]);
+    json_out(acc_me(auth_account(true)));
+
 case 'weekly': // седмичен имейл с напредъка – вкл./изкл.
     $a = need();
     $pdo->prepare('UPDATE accounts SET weekly = ? WHERE id = ?')->execute([empty($in['on']) ? 0 : 1, (int)$a['id']]);
@@ -188,7 +226,7 @@ case 'delete': // самостоятелно изтриване на акаун�
     if ((string)$a['pass'] === '') { if (mb_strtolower(trim((string)($in['password'] ?? ''))) !== mb_strtolower((string)$a['email'])) json_out(['ok' => false, 'error' => 'Напишете имейла на акаунта, за да потвърдите.', 'field' => 'password'], 403); }
     elseif (!password_verify((string)($in['password'] ?? ''), (string)$a['pass'])) json_out(['ok' => false, 'error' => 'Грешна парола.', 'field' => 'password'], 403);
     $aid = (int)$a['id'];
-    foreach (['profiles', 'auth_sessions'] as $t) $pdo->prepare("DELETE FROM $t WHERE account_id = ?")->execute([$aid]);
+    foreach (['profiles', 'auth_sessions', 'parent_links'] as $t) $pdo->prepare("DELETE FROM $t WHERE account_id = ?")->execute([$aid]);
     $pdo->prepare('DELETE FROM accounts WHERE id = ?')->execute([$aid]);
     auth_set_cookie('', time() - 3600);
     json_out(['ok' => true, 'account' => null]);

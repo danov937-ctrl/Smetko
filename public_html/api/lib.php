@@ -67,6 +67,8 @@ function db(): PDO {
     // вход с Google (след създаването на таблицата accounts – важи и за нова база)
     // сигнали „Нещо не е наред?“ и грешки в браузъра (api/feedback.php, админ → Сигнали)
     $pdo->exec('CREATE TABLE IF NOT EXISTS reports (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, last_at TEXT, kind TEXT, reason TEXT, text TEXT, data TEXT, page TEXT, ua TEXT, ver TEXT, sig TEXT UNIQUE, n INTEGER DEFAULT 1, status TEXT DEFAULT \'new\'); CREATE INDEX IF NOT EXISTS idx_rep_kind ON reports(kind, status)');
+    // родител ↔ ученик от клас (родителят вижда отчета, домашните и съобщенията от учителя)
+    $pdo->exec('CREATE TABLE IF NOT EXISTS parent_links (account_id INTEGER, rid INTEGER, created_at TEXT, PRIMARY KEY(account_id, rid)); CREATE INDEX IF NOT EXISTS idx_pl_rid ON parent_links(rid)');
     // анкета за затворения тест (api/survey.php, админ → Анкета)
     $pdo->exec('CREATE TABLE IF NOT EXISTS survey (id INTEGER PRIMARY KEY AUTOINCREMENT, sid TEXT UNIQUE, created_at TEXT, updated_at TEXT, role INTEGER, grp TEXT, nps INTEGER, email TEXT, account_id INTEGER, access INTEGER DEFAULT 0, answers TEXT)');
     // седмичен имейл до родителя (api/weekly.php): включен по подразбиране, отписване с един клик

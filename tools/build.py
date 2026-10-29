@@ -716,6 +716,7 @@ login_pg = head('Вход за родители, учители и учениц�
       <button class="btn btn-lg btn-green" type="submit">Влез и играй</button>
       <p class="code-err" id="kid-err" role="alert"></p>
       <p class="hint acct-alt">Потребителят и паролата са на картата от учителя. Забравил си ги? Попитай учителя.</p>
+      <p class="hint acct-alt">👪 <b>Родител сте?</b> Влезте в своя акаунт (раздел „Родител/учител“) и свържете детето в „Моят профил“ → „Ученици от клас“ – ще виждате отчета и домашните му.</p>
     </form>
   </div>
   <aside class="panel acct-side">

@@ -1263,6 +1263,7 @@ dialog.tb-modal h3 { text-align: center; }
   .kc-row small { color: #66728F; font-size: 8pt; }
   .kc-row b { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13pt; color: #1D2B4F; }
   .kc-how { font-size: 8pt; color: #66728F; margin-top: 2mm; }
+  .kc-par { font-size: 6.5pt; color: #8A95AE; margin-top: 1.5mm; line-height: 1.3; border-top: 1px dotted #C9D3E5; padding-top: 1.5mm; }
   .tb-tabs, .tb-top .btn, .tb-quick, .tb-classes { display: none !important; }
 }
 .badge-groups { display: grid; gap: 22px; }
@@ -1697,3 +1698,10 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .wd-panel h2 { margin: 0 0 6px; }
 .wd-prog { color: var(--muted); font-weight: 700; }
 @media (max-width: 600px) { .wd-panel { flex-direction: column; text-align: center; } .wd-me-big { width: 120px; } }
+/* ученици от клас в профила на родителя */
+.st-msg { background: #FFF6DB; border-radius: 12px; padding: 8px 10px; font-size: .9rem; margin: 8px 0 0; }
+.st-last { margin: 6px 0 0; }
+.st-badge { display: inline-block; min-width: 18px; height: 18px; line-height: 18px; border-radius: 99px; background: var(--orange); color: #fff; font-size: .72rem; margin-left: 4px; }
+.st-link { margin-top: 14px; }
+.hw-st { font-weight: 800; white-space: nowrap; }
+.hw-st.ok { color: var(--green-dark); } .hw-st.miss { color: var(--red-dark); } .hw-st.wait { color: var(--orange-dark); }

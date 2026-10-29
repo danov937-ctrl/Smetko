@@ -463,6 +463,22 @@
       '<p class="step-label">Картинка</p>' + avatarPick('', 'pf-av') +
       (canImport ? '<label class="check"><input type="checkbox" id="pf-import" checked> Прехвърли прогреса от това устройство (' + local.answered + ' задачи, ' + local.stars + ' ★)</label>' : '') +
       '<div class="ws-actions"><span class="hint">Без фамилия – името се вижда само от вас (и в класацията като прякор).</span><button class="btn" type="submit">Създай профила</button></div><p class="code-err" id="pf-err" role="alert"></p></form></section>';
+    // ученици от клас, свързани с картата от учителя
+    var SU = j.students || [];
+    h += '<section class="acct-sec" id="students"><h2 class="lined">🏫 Ученици от клас <small>' + SU.length + '</small></h2>' +
+      '<p class="hint">Детето има карта от учителя (потребител и парола)? Свържете го тук и ще виждате отчета му, домашните и съобщенията от учителя. Детето продължава да влиза само с картата си: <b>Вход → Ученик</b>.</p>' +
+      (SU.length ? '<div class="pf-grid">' + SU.map(function (s) {
+        var hwOpen = s.homework.filter(function (x) { return !x.done && x.due >= today(); }).length;
+        return '<div class="pf-card panel st-card"><div class="pf-top"><span class="pf-av">' + esc(s.avatar) + '</span><div><b>' + esc(s.name) + '</b><small>' + esc(s.className || (s.grade + '. клас')) + (s.teacher ? ' · ' + esc(s.teacher) : '') + '</small></div><button class="icon-btn pf-edit" data-unlink="' + s.rid + '" aria-label="Премахни връзката">✕</button></div>' +
+          (s.valid ? '<span class="pf-plan ok">✓ Пълен достъп от класа</span>' : '<span class="pf-plan free">Абонаментът на класа е изтекъл</span>') +
+          '<div class="pf-stats"><span>★ ' + s.points + '</span><span>' + s.answered + ' задачи</span><span>' + (s.answered ? Math.round(s.correct / s.answered * 100) : 0) + '% точност</span></div>' +
+          (s.message ? '<p class="st-msg">💬 <b>От учителя:</b> ' + esc(s.message) + '</p>' : '') +
+          '<p class="hint st-last">' + (s.last ? 'Последно игра: ' + fmt(String(s.last).slice(0, 10)) : 'Още не е влизал(а) с картата') + '</p>' +
+          '<div class="pf-act"><button class="btn btn-sm btn-green" data-srep="' + s.rid + '">📊 Отчет</button><button class="btn btn-sm btn-ghost" data-shw="' + s.rid + '">📚 Домашни' + (hwOpen ? ' <b class="st-badge">' + hwOpen + '</b>' : '') + '</button></div></div>';
+      }).join('') + '</div>' : '') +
+      '<form class="panel tool-panel st-link" id="st-form" autocomplete="off"><h3>➕ Свържи ученик от клас</h3><div class="tool-grid"><label>Потребител от картата<input id="st-user" class="input" maxlength="30" autocapitalize="none" spellcheck="false" placeholder="напр. ani47" required></label>' +
+      '<label>Парола от картата<input id="st-pass" class="input" maxlength="30" autocapitalize="none" spellcheck="false" placeholder="напр. sova42" required></label></div>' +
+      '<div class="ws-actions"><span class="hint">Паролата се проверява и не се пази във вашия акаунт.</span><button class="btn" type="submit">Свържи</button></div><p class="code-err" id="st-err" role="alert"></p></form></section>';
     h += '<section class="acct-sec" id="settings"><h2 class="lined">⚙️ Акаунт</h2><div class="acct-set">' +
       '<details class="panel"><summary>Име</summary><form id="nm-form"><input id="nm-name" class="input" maxlength="60" value="' + esc(A.name) + '" required><button class="btn btn-sm" type="submit">Запази</button></form></details>' +
       (A.role !== 'teacher' ? '<label class="panel wk-set"><input type="checkbox" class="sw" id="wk-on"' + (A.weekly !== false ? ' checked' : '') + '><span><b>📬 Седмичен имейл с напредъка</b><small>Всеки понеделник: колко е играло детето, силните теми и какво да поупражнява.</small></span></label>' : '') +
@@ -518,6 +534,33 @@
         if (!sure.dataset.sure) { sure.dataset.sure = '1'; sure.textContent = 'Сигурни ли сте? Натиснете пак'; return; }
         api({ action: 'profile_delete', id: p.id }).then(function (r) { d.close(); if (c && c.pid === p.id) { c.pid = 0; write(); silent(function () { G().reset(); }); } reload(r); }).catch(function (x) { S.toast(esc(x.message)); });
       });
+    }); });
+    // ученици от клас
+    var SU = j.students || []; function stu1(id) { return SU.filter(function (s) { return s.rid === id; })[0]; }
+    var sf = $('st-form');
+    if (sf) sf.addEventListener('submit', function (ev) {
+      ev.preventDefault(); var b = sf.querySelector('button[type=submit]'); busy(b, true); $('st-err').textContent = '';
+      api({ action: 'link_student', username: $('st-user').value.trim(), password: $('st-pass').value.trim() }).then(function (r) { S.toast('🏫 Свързахте ' + esc(r.linked) + '!'); reload(r); var el = $('students'); if (el) el.scrollIntoView({ behavior: 'smooth' }); })
+        .catch(function (x) { err($('st-err'), x); busy(b, false); });
+    });
+    box.querySelectorAll('[data-srep]').forEach(function (b) { b.addEventListener('click', function () {
+      var s = stu1(+b.getAttribute('data-srep')); if (!s || !S.Report) return;
+      var d = S.modal('<div id="rep-m"></div><div class="modal-actions"><button class="btn btn-ghost" onclick="window.print()">🖨️ Печат</button></div>'); d.classList.add('wide-modal');
+      S.Report.render(d.querySelector('#rep-m'), { nickname: s.name, grade: s.grade, answered: s.answered, correct: s.correct, stars: s.stars, missions: s.missions, skills: s.skills, days: s.days });
+    }); });
+    box.querySelectorAll('[data-shw]').forEach(function (b) { b.addEventListener('click', function () {
+      var s = stu1(+b.getAttribute('data-shw')), t = today(); if (!s) return;
+      var rows = s.homework.map(function (x) {
+        var st = x.done ? '<span class="hw-st ok">✅ ' + x.correct + '/' + x.count + (x.late ? ' <small>след срока</small>' : '') + '</span>' : x.due < t ? '<span class="hw-st miss">❗ Пропусната</span>' : '<span class="hw-st wait">⏳ До ' + fmt(x.due) + '</span>';
+        return '<tr><td><b>' + esc(x.title) + '</b><br><small class="hint">' + x.count + ' задачи · срок ' + fmt(x.due) + (x.tries > 1 ? ' · ' + x.tries + ' опита' : '') + '</small></td><td>' + st + '</td></tr>';
+      }).join('');
+      S.modal('<h3>📚 Домашни – ' + esc(s.name) + '</h3>' + (rows ? '<div class="table-wrap"><table class="compare"><tbody>' + rows + '</tbody></table></div><p class="hint">Детето решава домашните, като влезе с картата си: Вход → Ученик → играта показва домашната най-горе.</p>' : '<p>Учителят още не е задавал домашни в Сметко.</p>') +
+        '<div class="modal-actions"><button class="btn" data-close>Готово</button></div>').classList.add('wide-modal');
+    }); });
+    box.querySelectorAll('[data-unlink]').forEach(function (b) { b.addEventListener('click', function () {
+      var s = stu1(+b.getAttribute('data-unlink'));
+      var d = S.modal('<h3>Да премахна ли ' + esc(s.name) + ' от акаунта ви?</h3><p>Прогресът на детето остава в класа. Може да го свържете пак с картата от учителя.</p><div class="modal-actions"><button class="btn btn-ghost" data-close>Отказ</button><button class="btn btn-red" id="ul-ok">Премахни</button></div>');
+      d.querySelector('#ul-ok').addEventListener('click', function () { api({ action: 'unlink_student', rid: s.rid }).then(function (r) { d.close(); reload(r); }).catch(function (x) { S.toast(esc(x.message)); }); });
     }); });
     var wk = $('wk-on'); if (wk) wk.addEventListener('change', function () { api({ action: 'weekly', on: wk.checked }).then(function () { S.toast(wk.checked ? '📬 Ще получавате седмичния имейл' : 'Седмичният имейл е изключен'); }).catch(function (x) { wk.checked = !wk.checked; S.toast(esc(x.message)); }); });
     $('nm-form').addEventListener('submit', function (ev) { ev.preventDefault(); api({ action: 'update', name: $('nm-name').value.trim() }).then(function () { return api(); }).then(function (r) { S.toast('Запазено ✓'); reload(r); }).catch(function (x) { S.toast(esc(x.message)); }); });

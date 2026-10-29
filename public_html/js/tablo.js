@@ -99,7 +99,7 @@
         '<p class="hint">Децата влизат от <b>smetko.com</b> → <b>Вход</b> → <b>Ученик</b> с потребителя и паролата си.</p>' +
         '<div class="table-wrap"><table class="compare tb-table"><thead><tr><th>Ученик</th><th>Потребител</th><th>Парола</th><th>Точки</th><th>Дни (7)</th><th>Задачи</th><th>Точност</th><th>Последно</th><th></th></tr></thead><tbody>' +
         L.map(function (s) {
-          return '<tr class="' + (s.hidden ? 'hid' : '') + '"><td><button class="linkish" data-rep="' + s.id + '"><span class="tb-av">' + esc(s.avatar) + '</span><b>' + esc(s.name) + '</b></button>' + (s.hidden ? ' <span class="tag">скрит</span>' : '') + (s.adapt ? ' <span class="tag tag-adapt" title="Има помощни настройки">🤝 помощ</span>' : '') + '</td>' +
+          return '<tr class="' + (s.hidden ? 'hid' : '') + '"><td><button class="linkish" data-rep="' + s.id + '"><span class="tb-av">' + esc(s.avatar) + '</span><b>' + esc(s.name) + '</b></button>' + (s.hidden ? ' <span class="tag">скрит</span>' : '') + (s.adapt ? ' <span class="tag tag-adapt" title="Има помощни настройки">🤝 помощ</span>' : '') + (s.parents ? ' <span class="tag" title="Родителят вижда отчета и домашните">👪 ' + s.parents + '</span>' : '') + '</td>' +
             '<td class="mono-sm">' + esc(s.username) + '</td><td class="mono-sm"><span class="pw" data-pw="' + esc(s.password) + '">••••••</span></td><td>★ ' + s.points + '</td><td>' + s.active7 + '/7</td><td>' + s.answered + '</td><td>' + (s.answered ? pct(s.correct, s.answered) + '%' : '–') + '</td><td>' + (s.last ? fmt(s.last) : '<span class="hint">не е влизал</span>') + '</td>' +
             '<td class="nowrap"><button class="btn btn-sm btn-ghost" data-ed="' + s.id + '" title="Редактирай">✏️</button> <button class="btn btn-sm btn-ghost" data-pwr="' + s.id + '" title="Нова парола">🔑</button> <button class="btn btn-sm btn-ghost' + (s.adapt ? ' on' : '') + '" data-adapt="' + s.id + '" title="Помощни настройки (СОП)" aria-label="Помощни настройки за ' + esc(s.name) + '">🤝</button></td></tr>';
         }).join('') + '</tbody></table></div><p class="hint">Натиснете име за отчета на ученика. Скритите ученици не се виждат в класациите. С 🤝 задавате помощни настройки за дете със СОП.</p></div>' : '');
@@ -160,8 +160,10 @@
       '<label>Потребител (латиница)<input class="input" id="ed-user" maxlength="20" value="' + esc(s.username) + '" autocapitalize="none" spellcheck="false"></label><p class="step-label">Картинка</p><div class="av-pick">' +
       AV.map(function (a) { return '<label><input type="radio" name="ed-av" value="' + a + '"' + (a === s.avatar ? ' checked' : '') + '><span>' + a + '</span></label>'; }).join('') + '</div>' +
       '<label class="check"><input type="checkbox" id="ed-hid"' + (s.hidden ? ' checked' : '') + '> Скрит от класациите</label><p class="code-err" id="ed-err"></p>' +
+      (s.parents ? '<p class="hint">👪 Свързан с ' + s.parents + (s.parents === 1 ? ' родителски акаунт' : ' родителски акаунта') + ' – те виждат отчета и домашните. <button class="btn btn-sm btn-ghost" type="button" id="ed-unp">Прекъсни връзката</button></p>' : '') +
       '<div class="modal-actions"><button class="btn btn-ghost btn-red-text" type="button" id="ed-del">Премахни от класа</button><button class="btn" type="submit">Запази</button></div></form>');
     d.classList.add('tb-modal');
+    var unp = d.querySelector('#ed-unp'); if (unp) unp.addEventListener('click', function () { act('unlink_parents', { sid: id }).then(function () { d.close(); draw(); S.toast('Връзката с родителите е прекъсната. Сменете паролата (🔑), ако не искате да се свържат отново.'); }).catch(function (x) { S.toast(esc(x.message)); }); });
     d.querySelector('#ed-form').addEventListener('submit', function (e) {
       e.preventDefault();
       var hid = d.querySelector('#ed-hid').checked;
@@ -185,7 +187,7 @@
     var area = document.createElement('div'); area.id = 'print-area';
     area.innerHTML = '<div class="kc-grid">' + L.map(function (s) {
       return '<div class="kc"><div class="kc-top"><span class="kc-logo">Сметко</span><small>' + esc(K.name) + '</small></div><div class="kc-av">' + esc(s.avatar || '🦉') + '</div><div class="kc-name">' + esc(s.name) + '</div>' +
-        '<div class="kc-row"><small>Потребител</small><b>' + esc(s.username) + '</b></div><div class="kc-row"><small>Парола</small><b>' + esc(s.password) + '</b></div><div class="kc-how">smetko.com → Вход → Ученик</div></div>';
+        '<div class="kc-row"><small>Потребител</small><b>' + esc(s.username) + '</b></div><div class="kc-row"><small>Парола</small><b>' + esc(s.password) + '</b></div><div class="kc-how">smetko.com → Вход → Ученик</div><div class="kc-par">За родителя: влезте в своя профил в smetko.com → „Ученици от клас“ и въведете същите данни, за да виждате отчета и домашните.</div></div>';
     }).join('') + '</div>';
     document.body.appendChild(area); document.body.classList.add('printing-cards');
     setTimeout(function () { window.print(); setTimeout(function () { document.body.classList.remove('printing-cards'); area.remove(); }, 500); }, 100);

@@ -37,7 +37,14 @@ function weekly_kid(array $p, string $from, string $to, string $prev): array {
 function weekly_build(array $acc, bool $force = false): ?array {
     [$from, $to, $prev] = weekly_range();
     $st = db()->prepare('SELECT * FROM profiles WHERE account_id = ? ORDER BY id'); $st->execute([(int)$acc['id']]);
-    $kids = array_map(fn($p) => weekly_kid($p, $from, $to, $prev), $st->fetchAll());
+    $rows = $st->fetchAll();
+    // и учениците от клас, свързани от родителя (картата от учителя)
+    $sl = db()->prepare('SELECT r.nickname AS name, r.avatar, r.grade, COALESCE(r.state, \'\') AS state, r.stats FROM parent_links l JOIN redemptions r ON r.id = l.rid WHERE l.account_id = ?'); $sl->execute([(int)$acc['id']]);
+    foreach ($sl->fetchAll() as $r) {
+        if ($r['state'] === '' && $r['stats']) { $x = json_decode((string)$r['stats'], true) ?: []; $r['state'] = json_encode(['days' => $x['d'] ?? [], 'skills' => $x['s'] ?? []]); }
+        $rows[] = $r;
+    }
+    $kids = array_map(fn($p) => weekly_kid($p, $from, $to, $prev), $rows);
     if (!$kids) return null;
     $played = array_filter($kids, fn($k) => $k['tasks'] > 0);
     $before = array_filter($kids, fn($k) => $k['prev'] > 0);
