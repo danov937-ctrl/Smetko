@@ -392,6 +392,9 @@
     document.querySelectorAll('[data-login]').forEach(function (b) { b.addEventListener('click', function (e) { e.preventDefault(); S.loginModal(); }); });
     document.querySelectorAll('[data-subscribe]').forEach(function (b) { b.addEventListener('click', function (e) { e.preventDefault(); S.subscribeModal(b.getAttribute('data-subscribe'), +b.getAttribute('data-qty') || 1); }); });
     document.querySelectorAll('[data-year]').forEach(function (el) { el.textContent = new Date().getFullYear(); });
+    // покана за анкетата – докато човек не я е попълнил на това устройство
+    var svDone = false; try { svDone = !!(JSON.parse(localStorage.getItem('smetko.survey') || 'null') || {}).sent; } catch (e) {}
+    document.querySelectorAll('[data-survey-cta]').forEach(function (el) { el.hidden = svDone; });
     // запомнен клас → маркира бутона
     try { var lg = S.Game && S.Game.state.lastGrade; if (lg) { var gb = document.querySelector('.grade-btn.g' + lg); if (gb) gb.setAttribute('data-last', '1'); } } catch (e) {}
   });

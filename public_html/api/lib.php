@@ -65,6 +65,8 @@ function db(): PDO {
       CREATE TABLE IF NOT EXISTS challenge_scores (rid INTEGER, week TEXT, grade INTEGER, best INTEGER, at TEXT, PRIMARY KEY(rid, week, grade));
       CREATE TABLE IF NOT EXISTS books (id INTEGER PRIMARY KEY AUTOINCREMENT, grade INTEGER, bid TEXT UNIQUE, publisher TEXT, title TEXT, source TEXT, lessons TEXT, active INTEGER DEFAULT 1, created_at TEXT);");
     // вход с Google (след създаването на таблицата accounts – важи и за нова база)
+    // анкета за затворения тест (api/survey.php, админ → Анкета)
+    $pdo->exec('CREATE TABLE IF NOT EXISTS survey (id INTEGER PRIMARY KEY AUTOINCREMENT, sid TEXT UNIQUE, created_at TEXT, updated_at TEXT, role INTEGER, grp TEXT, nps INTEGER, email TEXT, account_id INTEGER, access INTEGER DEFAULT 0, answers TEXT)');
     if (!$has('accounts', 'google_sub')) { $pdo->exec('ALTER TABLE accounts ADD COLUMN google_sub TEXT'); $pdo->exec('CREATE INDEX IF NOT EXISTS idx_acc_gsub ON accounts(google_sub)'); }
     return $pdo;
 }

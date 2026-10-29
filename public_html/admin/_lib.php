@@ -77,6 +77,7 @@ function require_admin(): void {
 const NAV = [
     ['index.php', '📊', 'Табло'],
     ['statistika.php', '📈', 'Посещения'],
+    ['anketa.php', '📝', 'Анкета'],
     ['kodove.php', '🔑', 'Кодове'],
     ['porachki.php', '🧾', 'Поръчки'],
     ['uchilishta.php', '🏫', 'Училища'],

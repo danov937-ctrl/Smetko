@@ -461,7 +461,7 @@ if not SALES_OPEN:  # продажбите са спрени: страницат
       <div class="owl" data-owl="cheer"></div>
       <div><span class="eyebrow">Затворен тест</span><h2>Абонаментите идват скоро</h2>
       <p>Сега тестваме Сметко със затворена група родители, учители и училища, за да предложим планове, които наистина помагат. Пълният достъп е само за участниците с код за достъп от нас. Безплатният план остава отворен за всички: „Бързо сметни“, първите мисии от всеки клас, „Тренировка“, онлайн тестове и работни листове.</p>
-      <div class="hero-cta"><a class="btn btn-white" href="mailto:info@smetko.com?subject=Затворен%20тест">✉️ Искам да участвам</a></div></div>
+      <div class="hero-cta"><a class="btn btn-white" href="mailto:info@smetko.com?subject=Затворен%20тест">✉️ Искам да участвам</a><a class="btn btn-white" href="anketa.html">📝 Анкета за участниците</a></div></div>
     </div>
   </div>
 </section>
@@ -792,14 +792,14 @@ write('zabravena-parola.html', fp_pg)
 
 prof_pg = head('Моят профил – Сметко', 'Детски профили, абонамент и отчети.', 'profil.html', [], 'acct-page-body', noindex=True) + header() + """
 <main id="main">
-<section class="section acct-main"><div class="wrap"><div id="acct-page"></div></div></section>
+<section class="section acct-main"><div class="wrap"><a class="survey-cta" href="anketa.html" data-survey-cta hidden><span aria-hidden="true">📝</span><span><b>Анкета за затворения тест</b><small>3 минути – помогнете ни да решим какво да подобрим и какви да са абонаментите.</small></span><em>Попълни</em></a><div id="acct-page"></div></div></section>
 </main>
 """ + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/report.js', 'js/tools.js'])
 write('profil.html', prof_pg)
 
 tablo_pg = head('Табло – Сметко', 'Табло за учителя: ученици с име и парола, домашни, отчет по теми, класация и грамоти.', 'tablo.html', [], 'tablo-page', noindex=True) + header() + """
 <main id="main">
-<section class="section tb-main"><div class="wrap"><div id="tablo"></div></div></section>
+<section class="section tb-main"><div class="wrap"><a class="survey-cta" href="anketa.html" data-survey-cta hidden><span aria-hidden="true">📝</span><span><b>Анкета за затворения тест</b><small>3 минути – помогнете ни да решим какво да подобрим и какви да са абонаментите.</small></span><em>Попълни</em></a><div id="tablo"></div></div></section>
 </main>
 """ + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/report.js', 'js/diploma.js', 'js/tools.js', 'js/a11y.js', 'js/tablo.js'])
 write('tablo.html', tablo_pg)
@@ -888,5 +888,6 @@ nf = head('Страницата не е намерена – Сметко', 'С�
 write('404.html', nf)
 
 legal.build()
+import survey  # noqa: анкета за затворения тест (anketa.html + api/survey_q.json)
 import seo  # noqa: страници по теми, помагала, sitemap-pages.xml
 print('ok')
