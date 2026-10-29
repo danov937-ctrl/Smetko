@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Генерира основните страници на smetko.com. Стартиране: python3 tools/build.py"""
-import os, sys
+import os, sys, subprocess
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from seo_content import TOPICS  # noqa
 from common import *  # noqa
@@ -891,6 +891,7 @@ nf = head('Страницата не е намерена – Сметко', 'С�
 write('404.html', nf)
 
 legal.build()
+subprocess.run(['node', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'admin_names.js')], check=True)  # имена на мисии и задачи за админ → Активност
 import survey  # noqa: анкета за затворения тест (anketa.html + api/survey_q.json)
 import seo  # noqa: страници по теми, помагала, sitemap-pages.xml
 print('ok')
