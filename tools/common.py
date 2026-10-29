@@ -13,11 +13,11 @@ SALES_OPEN = False
 # Собственик на Сметко – физическо лице (без фирма). Продажбите минават през Paddle като търговец (Merchant of Record).
 # Попълнете името и адреса за кореспонденция → python3 tools/build.py. Докато са празни, в документите стои „[ПОПЪЛНЕТЕ…]“
 # (може да се попълнят и от админ → Настройки → „Собственик“, но за одобрението от Paddle е по-добре да са тук – в самия HTML).
-OWNER_NAME = ''   # напр. 'Иван Петров Иванов'
-OWNER_ADDR = ''   # напр. 'гр. София, ул. „…“ № …' (адрес за кореспонденция)
+OWNER_NAME = 'Александър Драгомиров Данов'
+OWNER_ADDR = ''   # адрес за кореспонденция (напр. пощенска кутия или виртуален офис); празно → „България, адресът се предоставя при поискване“
 TERMS_DATE = '29.10.2026'
 F_NAME = f'<span>{OWNER_NAME}</span>' if OWNER_NAME else '<span data-co="name"><mark class="fill">[ПОПЪЛНЕТЕ: име и фамилия на собственика]</mark></span>'
-F_ADDR = f'<span>{OWNER_ADDR}</span>' if OWNER_ADDR else '<span data-co="addr"><mark class="fill">[ПОПЪЛНЕТЕ: адрес за кореспонденция]</mark></span>'
+F_ADDR = f'<span>{OWNER_ADDR}</span>' if OWNER_ADDR else f'<span>България (пълният адрес за кореспонденция се предоставя при поискване на <a href="mailto:{EMAIL}">{EMAIL}</a>)</span>'
 F_DATE = TERMS_DATE
 PADDLE = 'Paddle.com Market Limited (30 Old Bailey, Лондон EC4M 7AU, Великобритания, рег. № 08172165)'
 PADDLE_TERMS = 'https://www.paddle.com/legal/buyer-terms'
