@@ -433,6 +433,17 @@ function clean_nick(string $n): string {
 }
 
 /* ---------- настройки на сайта (редактират се от админ панела) ---------- */
+const PADDLE_KEYS = ['token' => '', 'secret' => '', 'apiKey' => '', 'prices' => ['single6' => '', 'single12' => '', 'family6' => '', 'family12' => '', 'class6' => '', 'class12' => '']];
+/* Настройките на Paddle за текущия режим (sandbox или live). */
+function paddle_cfg(?array $c = null): array {
+    $p = ($c ?? site_config())['paddle'] ?? [];
+    $env = ($p['env'] ?? 'sandbox') === 'live' ? 'live' : 'sandbox';
+    $k = array_merge(PADDLE_KEYS, is_array($p[$env] ?? null) ? $p[$env] : []);
+    $k['prices'] = array_merge(PADDLE_KEYS['prices'], is_array($k['prices'] ?? null) ? $k['prices'] : []);
+    $k['env'] = $env;
+    return $k;
+}
+
 const DEFAULT_CONFIG = [
     'paywall' => true, 'freeMissions' => 3, 'freePractice' => 20, 'questions' => 10, 'contactEmail' => 'info@smetko.com',
     'prices' => ['single6' => '10', 'single12' => '18', 'family6' => '18', 'family12' => '30', 'class6' => '45', 'class12' => '80', 'disc3' => '15', 'disc8' => '25'],
@@ -443,7 +454,7 @@ const DEFAULT_CONFIG = [
     'diplomas' => 'auto', // грамоти: auto = от 1 юни до 30 септември, on = винаги, off = никога
     'google' => ['gsc' => '', 'ga' => '', 'clientId' => ''], // Search Console (файл за потвърждение), Google Analytics (G-…), вход с Google (Client ID)
     // Paddle – търговец (Merchant of Record) за плащанията. token и prices са публични; secret и apiKey не излизат от сървъра.
-    'paddle' => ['env' => 'sandbox', 'token' => '', 'secret' => '', 'apiKey' => '', 'prices' => ['single6' => '', 'single12' => '', 'family6' => '', 'family12' => '', 'class6' => '', 'class12' => '']],
+    'paddle' => ['env' => 'sandbox', 'sandbox' => PADDLE_KEYS, 'live' => PADDLE_KEYS],
 ];
 function site_config(): array {
     $c = json_decode((string)setting('site_config', '{}'), true) ?: [];

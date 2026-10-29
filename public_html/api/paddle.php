@@ -10,7 +10,7 @@ require_once __DIR__ . '/mail.php';
 
 const PADDLE_MONTHS = [6 => '+6 months', 12 => '+1 year'];
 
-function pd_cfg(): array { return site_config()['paddle'] ?? []; }
+function pd_cfg(): array { return paddle_cfg(); }
 function pd_api(): string { return (pd_cfg()['env'] ?? 'sandbox') === 'live' ? 'https://api.paddle.com' : 'https://sandbox-api.paddle.com'; }
 function pd_log(string $id, string $kind, string $txn, string $status, string $note = ''): void {
     db()->prepare('INSERT OR REPLACE INTO paddle_events(id, kind, txn, at, status, note) VALUES(?, ?, ?, ?, ?, ?)')->execute([$id, $kind, $txn, now(), $status, mb_substr($note, 0, 400)]);
