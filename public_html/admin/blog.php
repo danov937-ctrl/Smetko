@@ -6,6 +6,8 @@ require __DIR__ . '/../api/blog_seed.php';
 require_admin();
 $pdo = db();
 blog_seed($pdo);
+blog_seed2($pdo);
+blog_seed3($pdo);
 $action = $_POST['action'] ?? '';
 $id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
 

@@ -1769,3 +1769,13 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .ser-step:hover { transform: translateY(-2px); border-color: var(--c); }
 .ser-step.on { background: var(--c); border-color: var(--c); pointer-events: none; }
 .ser-step.on b, .ser-step.on span { color: #fff; }
+
+/* ================= Блог: съдържание, автор ================= */
+.bp-toc { background: var(--bg-soft); border-radius: 20px; padding: 16px 20px; margin: 22px 0 26px; }
+.bp-toc > b { display: block; color: var(--navy); margin-bottom: 8px; font-size: .95rem; text-transform: uppercase; letter-spacing: .04em; }
+.bp-toc ol { margin: 0; padding-left: 20px; }
+.bp-toc li { margin: 5px 0; }
+.bp-toc a { font-weight: 700; }
+.bp-upd { color: var(--muted); }
+.bp-author { margin: 26px 0 0; padding-top: 16px; border-top: 2px solid var(--line); color: var(--muted); font-size: .95rem; }
+.bp-body h2 { scroll-margin-top: 84px; }

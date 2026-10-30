@@ -76,6 +76,8 @@ function db(): PDO {
     // седмичен имейл до родителя (api/weekly.php): включен по подразбиране, отписване с един клик
     foreach (['weekly INTEGER DEFAULT 1', 'weekly_sent TEXT'] as $col) if (!$has('accounts', strtok($col, ' '))) $pdo->exec('ALTER TABLE accounts ADD COLUMN ' . $col);
     if (!$has('accounts', 'google_sub')) { $pdo->exec('ALTER TABLE accounts ADD COLUMN google_sub TEXT'); $pdo->exec('CREATE INDEX IF NOT EXISTS idx_acc_gsub ON accounts(google_sub)'); }
+    // отпечатък на статия, писана от нас: по него се познава дали е пипана от админ панела (api/blog_posts.php)
+    if (!$has('posts', 'seed_hash')) $pdo->exec('ALTER TABLE posts ADD COLUMN seed_hash TEXT');
     return $pdo;
 }
 
@@ -260,7 +262,8 @@ function md_to_html(string $md): string {
     foreach ($lines as $l) {
         $t = trim($l);
         if ($t === '') { $flush(); $close(); continue; }
-        if (preg_match('/^(#{2,4})\s+(.+)$/', $t, $m)) { $flush(); $close(); $n = strlen($m[1]); $out[] = "<h$n>" . md_inline($m[2]) . "</h$n>"; continue; }
+        // заглавията получават адрес (id), за да работят съдържанието и връзките към раздел
+        if (preg_match('/^(#{2,4})\s+(.+)$/', $t, $m)) { $flush(); $close(); $n = strlen($m[1]); $id = slugify(strip_tags(html_entity_decode($m[2], ENT_QUOTES, 'UTF-8'))); if (ctype_digit($id[0] ?? 'a')) $id = 't-' . $id; $out[] = "<h$n id=\"$id\">" . md_inline($m[2]) . "</h$n>"; continue; }
         if (preg_match('/^&gt;\s?(.*)$/', $t, $m)) { $flush(); $close(); $out[] = '<blockquote>' . md_inline($m[1]) . '</blockquote>'; continue; }
         if (preg_match('/^[-*•]\s+(.+)$/u', $t, $m)) { $flush(); if ($list !== 'ul') { $close(); $out[] = '<ul>'; $list = 'ul'; } $out[] = '<li>' . md_inline($m[1]) . '</li>'; continue; }
         if (preg_match('/^\d+[.)]\s+(.+)$/', $t, $m)) { $flush(); if ($list !== 'ol') { $close(); $out[] = '<ol>'; $list = 'ol'; } $out[] = '<li>' . md_inline($m[1]) . '</li>'; continue; }
