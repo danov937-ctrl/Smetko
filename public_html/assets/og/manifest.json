@@ -24,7 +24,7 @@
 "tablica-za-umnozhenie": "18084d0afc1c88ef22c70771471642f9",
 "rimski-cifri": "e84320112d60f82d4ebdc241d7e2086a",
 "merni-edinici": "f6100f558fed56a4bddecabbf121c593",
-"nvo-4-klas-matematika": "8433edcad6264c3c2c806a200e479e18",
+"nvo-4-klas-matematika": "d1a3344c21363919ab0e398da9648b01",
 "vhodno-nivo-matematika": "72defd600c16047adc2d2ef5a3c07972",
 "izhodno-nivo-matematika": "cb001a63825ff870bdfa382554e7df79",
 "testove-po-matematika": "4b08ce14a45a99ff536fd155ed7cc976",
@@ -32,5 +32,11 @@
 "matematika-2-klas": "31c302510dd63d019eaa6bce2dcbf619",
 "matematika-3-klas": "e6e524753ddcc52e9bdab83b5d3c2c7d",
 "matematika-4-klas": "70835305a4d9cea46a38648e04aa540b",
-"deca-sas-sop": "e461f1c27c7d61a087a636fe1dd5bb56"
+"deca-sas-sop": "e461f1c27c7d61a087a636fe1dd5bb56",
+"nvo-4-klas-zadachi-s-izbor": "cc86ab0a190296a9ae67651497f8b667",
+"nvo-4-klas-kratak-otgovor": "54f0d3fded5fdf341e39420315e30f06",
+"nvo-4-klas-razshiren-otgovor": "f2f5c0ad28625e03788aa973690cdc1c",
+"nvo-4-klas-probni-testove": "29d34e019dff718bda1fe22f8a2dc2dd",
+"podgotovka-nvo-3-klas": "02be945cb8dbeb5f32b02d5a16541477",
+"nvo-4-klas-priem-5-klas": "c9ef3ec02c7d3dc6a75ec2c3296071ce"
 }

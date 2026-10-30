@@ -5,6 +5,7 @@
 import json, os, re, subprocess, datetime, html as H
 from common import head, header, FOOTER, scripts, write, crumbs, faq, faq_ld, page_hero, SITE, ORG, OUT
 from seo_content import TOPICS
+import nvo
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 subprocess.run(['node', os.path.join(HERE, 'examples.js')], check=True, stdout=subprocess.DEVNULL)
@@ -91,6 +92,9 @@ for g, tids in GRADE_TOPICS.items():
             rel.append(('tablica-za-umnozhenie.html', 'Помагало', 'Таблица за умножение с тест', '#8E6CF0'))
         if g == 4:
             rel.append(('nvo-4-klas-matematika.html', 'Подготовка', 'НВО по математика 4. клас', '#8E6CF0'))
+            rel.append(('nvo-4-klas-probni-testove.html', 'Подготовка', 'Пробни тестове за НВО с часовник', '#4CBB4A'))
+        if g == 3:
+            rel.append(('podgotovka-nvo-3-klas.html', 'Подготовка', 'Подготовка за НВО от 3. клас', '#FF9F1C'))
         if tid == 'g4t1':
             rel.append(('rimski-cifri.html', 'Помагало', 'Римски цифри – таблица и преобразувател', '#19B5A5'))
         if tid in ('g2t1', 'g3t2', 'g3t5', 'g4t4'):
@@ -301,61 +305,10 @@ mu_page = head('Мерни единици – таблици за дължина
 write('merni-edinici.html', mu_page)
 SITEMAP.append(('merni-edinici.html', '0.8', 'yearly'))
 
-# ======================================================================= НВО 4. клас
-faq_nvo = [('Кога е НВО по математика в 4. клас?', 'Обикновено в началото на юни. През 2026 г. изпитът беше на 4 юни. Точният график за всяка година се обявява от МОН със заповед в началото на учебната година.'),
-           ('Колко задачи има и колко време е изпитът?', 'По модела на МОН тестът има 25 задачи и продължава 60 минути (за ученици със СОП – с 30 минути повече). Максимумът е 100 точки.'),
-           ('Какви са задачите?', '16 задачи с избор на един верен отговор от няколко, 4 задачи с кратък свободен отговор, 4 задачи с разширен свободен отговор и 1 задача с разширен отговор с три подточки.'),
-           ('Може ли калкулатор?', 'Не. Учениците решават задачите на ръка, с химикал и линия. Затова бързото и точно смятане е важно.'),
-           ('Официален ли е тренировъчният тест на тази страница?', 'Не. Това е тренировъчен тест в стила на НВО, генериран автоматично от задачите в Сметко. За официалните материали вижте сайта на МОН.'),
-           ('Влияе ли резултатът от НВО в 4. клас на приема в 5. клас?', 'Зависи от училището. Някои училища с прием в 5. клас използват резултатите от НВО в 4. клас като критерий. Проверете правилата на конкретното училище.')]
-desc_nvo = 'НВО по математика за 4. клас: формат (25 задачи, 60 минути, 100 точки), какво се проверява, как да се подготвим и безплатен тренировъчен онлайн тест с часовник.'
-nvo_page = head('НВО по математика 4. клас – формат, подготовка и тренировъчен тест | Сметко', desc_nvo, 'nvo-4-klas-matematika.html',
-                [crumbs([('Начало', ''), ('НВО 4. клас математика', 'nvo-4-klas-matematika.html')]),
-                 learning_ld('Тренировъчен тест за НВО по математика – 4. клас', desc_nvo, 'nvo-4-klas-matematika.html', '4. клас', ['Подготовка за НВО по математика в 4. клас'], ('Тест', 'Упражнение')), faq_ld(faq_nvo)], 'pillar-page', og=og('nvo-4-klas-matematika', 'НВО по математика 4. клас', 'Тренировъчен тест: 25 задачи, 60 минути', '#8E6CF0', 'cheer')) + header() + page_hero(
-    'НВО по математика в 4. клас', 'Как изглежда изпитът, какво се проверява и как да се подготвим спокойно. С безплатен тренировъчен тест – 25 задачи и 60 минути.', 'НВО 4. клас', 'cheer',
-    '<div class="hero-cta"><a class="btn btn-lg btn-green" href="#test">⏱️ Тренировъчен тест</a><a class="btn btn-white" href="#format">Форматът на изпита</a></div>') + f'''
-<main id="main">
-<section class="section" id="format"><div class="wrap">
-  <div class="section-head"><h2 class="lined">Изпитът накратко</h2><p>По модела на МОН за националното външно оценяване по математика в IV клас.</p></div>
-  <div class="facts">
-    <div><b>25</b><span>задачи</span></div><div><b>60</b><span>минути</span></div><div><b>100</b><span>точки максимум</span></div><div><b>юни</b><span>обикновено в началото на месеца</span></div>
-  </div>
-  <div class="prose" style="margin-top:28px">
-    <h3>Видове задачи</h3>
-    <ul class="check-list"><li><b>16 задачи с избор</b> на верен отговор</li><li><b>4 задачи с кратък свободен отговор</b> – пишете само числото</li><li><b>4 задачи с разширен свободен отговор</b> – с решение</li><li><b>1 задача с три подточки</b> – обикновено практическа ситуация</li></ul>
-    <p class="hint">Източник: модел на НВО по математика в IV клас, публикуван от <a href="https://www.mon.bg/nfs/2025/09/model-nvo_4kl_matematika-2026_12092025.pdf" rel="noopener" target="_blank">Министерството на образованието и науката</a>. Моделът може да се променя – проверявайте актуалната информация на сайта на МОН.</p>
-  </div>
-</div></section>
-<section class="section soft"><div class="wrap prose">
-  <h2>Какво се проверява</h2>
-  <p>Изпитът обхваща наученото от 1. до 4. клас, с акцент върху материала от 3. и 4. клас:</p>
-  <ul class="check-list">
-    <li><b>Числа:</b> четене, писане и сравняване на многоцифрени числа, римски цифри – <a href="{topic_url('g4t1')}">упражнение</a></li>
-    <li><b>Действия:</b> събиране, изваждане, умножение и деление на многоцифрени числа, ред на действията – <a href="{topic_url('g4t6')}">умножение</a>, <a href="{topic_url('g4t7')}">деление с двуцифрено число</a></li>
-    <li><b>Неизвестен компонент:</b> уравнения от вида ? · 24 = 576 и 8 470 − ? = 3 250</li>
-    <li><b>Геометрия:</b> видове ъгли и триъгълници, обиколка, лице на правоъгълник и квадрат, геометрични тела</li>
-    <li><b>Мерни единици:</b> дължина, маса, време, лице – <a href="merni-edinici.html">таблици</a></li>
-    <li><b>Текстови задачи:</b> с пари, време, покупки и пътуване – с едно и повече действия</li>
-  </ul>
-  <h2>Как да се подготвим – план за 8 седмици</h2>
-  <ol class="steps-list">
-    <li><b>Седмици 1–2:</b> таблицата за умножение и деление трябва да е безгрешна. <a href="tablica-za-umnozhenie.html">Тест по таблицата</a>.</li>
-    <li><b>Седмици 3–4:</b> писмено събиране, изваждане, умножение и деление – по 3–5 задачи на ден, с проверка.</li>
-    <li><b>Седмица 5:</b> геометрия и мерни единици – обиколка, лице, превръщане.</li>
-    <li><b>Седмица 6:</b> текстови задачи – детето чете, подчертава данните и пише отговор с изречение.</li>
-    <li><b>Седмици 7–8:</b> по един тренировъчен тест седмично с часовник (тук, на тази страница) и преглед на грешките.</li>
-  </ol>
-  <div class="callout">В деня на изпита: добър сън, закуска, химикал, линия и молив. Задачите, които не върви – прескачаме и се връщаме накрая.</div>
-</div></section>
-<section class="section" id="test"><div class="wrap narrow-wrap">
-  <div class="section-head"><h2 class="lined">Тренировъчен тест в стила на НВО</h2><p>25 задачи от материала за 3. и 4. клас, първите 16 – с избор на отговор. Часовникът е 60 минути. Не е официален тест.</p></div>
-  {quiz(4, 'mix', 25, 3, 'Тренировъчен тест – НВО 4. клас', mix='3,4,4', mc=16, timer=60, lazy='25 задачи · 60 минути. Подгответе лист и химикал за пресмятанията.', cta='game.html?grade=4&mode=adventure')}
-</div></section>
-<section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Въпроси за НВО</h2></div>{faq(faq_nvo)}</div></section>
-</main>
-''' + FOOTER + scripts(QZ_JS)
-write('nvo-4-klas-matematika.html', nvo_page)
-SITEMAP.append(('nvo-4-klas-matematika.html', '0.9', 'monthly'))
+# ======================================================================= НВО 4. клас (раздел: tools/nvo.py)
+nvo.build(dict(head=head, header=header, page_hero=page_hero, faq=faq, faq_ld=faq_ld, crumbs=crumbs,
+               learning_ld=learning_ld, quiz=quiz, og=og, write=write, scripts=scripts, FOOTER=FOOTER,
+               SITEMAP=SITEMAP, QZ_JS=QZ_JS, topic_url=topic_url, related_cards=related_cards))
 
 # ======================================================================= Входно и изходно ниво
 def level_page(kind):
@@ -413,13 +366,14 @@ hub = head('Тестове и задачи по математика за 1.–4
            [crumbs([('Начало', ''), ('Тестове по математика', 'testove-po-matematika.html')]),
             {"@context": "https://schema.org", "@type": "ItemList", "name": "Онлайн тестове по математика", "itemListElement": [
                 {"@type": "ListItem", "position": i + 1, "url": SITE + '/' + u, "name": n} for i, (u, n) in enumerate(
-                    [('nvo-4-klas-matematika.html', 'НВО 4. клас'), ('vhodno-nivo-matematika.html', 'Входно ниво'), ('izhodno-nivo-matematika.html', 'Изходно ниво'), ('tablica-za-umnozhenie.html', 'Таблица за умножение')] +
+                    [('nvo-4-klas-matematika.html', 'НВО 4. клас'), ('nvo-4-klas-probni-testove.html', 'Пробни тестове за НВО'), ('vhodno-nivo-matematika.html', 'Входно ниво'), ('izhodno-nivo-matematika.html', 'Изходно ниво'), ('tablica-za-umnozhenie.html', 'Таблица за умножение')] +
                     [(topic_url(t), TOPICS[t]['h1']) for g in GRADE_TOPICS for t in GRADE_TOPICS[g]])]}], 'pillar-page', og=og('testove-po-matematika', 'Тестове по математика', '1.–4. клас · безплатно, онлайн', '#2F80ED', 'cheer')) + header() + page_hero(
     'Тестове и задачи по математика', 'Онлайн тестове с автоматична проверка за всяка тема от 1. до 4. клас. Безплатно, без регистрация – всеки път с нови задачи.', 'Тестове', 'cheer') + f'''
 <main id="main">
 <section class="section"><div class="wrap">
   <div class="hub-top">
     <a class="hub-card" href="nvo-4-klas-matematika.html" style="--c:#8E6CF0"><span>⏱️</span><b>НВО 4. клас</b><small>25 задачи, 60 минути</small></a>
+    <a class="hub-card" href="nvo-4-klas-probni-testove.html" style="--c:#4CBB4A"><span>📝</span><b>Пробни тестове за НВО</b><small>3 варианта с часовник</small></a>
     <a class="hub-card" href="vhodno-nivo-matematika.html" style="--c:#FF9F1C"><span>🌱</span><b>Входно ниво</b><small>Септември – октомври</small></a>
     <a class="hub-card" href="izhodno-nivo-matematika.html" style="--c:#4CBB4A"><span>🎓</span><b>Изходно ниво</b><small>Май – юни</small></a>
     <a class="hub-card" href="tablica-za-umnozhenie.html" style="--c:#FF5A5F"><span>✖️</span><b>Таблица за умножение</b><small>Изберете числата</small></a>

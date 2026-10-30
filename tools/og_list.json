@@ -176,10 +176,52 @@
 },
 {
 "slug": "nvo-4-klas-matematika",
-"title": "НВО по математика 4. клас",
-"sub": "Тренировъчен тест: 25 задачи, 60 минути",
+"title": "НВО по математика в 4. клас",
+"sub": "25 задачи · 60 минути · 100 точки",
 "color": "#8E6CF0",
 "pose": "cheer"
+},
+{
+"slug": "nvo-4-klas-zadachi-s-izbor",
+"title": "Задачите с избираем отговор",
+"sub": "18 от 25 задачи · стратегия и капани",
+"color": "#2F80ED",
+"pose": "think"
+},
+{
+"slug": "nvo-4-klas-kratak-otgovor",
+"title": "Задачите с кратък отговор",
+"sub": "5 задачи · пише се само отговорът",
+"color": "#19B5A5",
+"pose": "happy"
+},
+{
+"slug": "nvo-4-klas-razshiren-otgovor",
+"title": "Задачите, в които се пише решение",
+"sub": "Решени примери стъпка по стъпка",
+"color": "#FF7A1A",
+"pose": "hero"
+},
+{
+"slug": "nvo-4-klas-probni-testove",
+"title": "Пробни тестове за НВО",
+"sub": "3 варианта · 25 задачи · 60 минути",
+"color": "#4CBB4A",
+"pose": "cheer"
+},
+{
+"slug": "podgotovka-nvo-3-klas",
+"title": "Подготовка за НВО от 3. клас",
+"sub": "В 3. клас няма НВО – ето какво помага",
+"color": "#FF9F1C",
+"pose": "happy"
+},
+{
+"slug": "nvo-4-klas-priem-5-klas",
+"title": "НВО и приемът в 5. клас",
+"sub": "Кога резултатът има значение",
+"color": "#19B5A5",
+"pose": "think"
 },
 {
 "slug": "vhodno-nivo-matematika",

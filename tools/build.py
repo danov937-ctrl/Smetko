@@ -159,7 +159,8 @@ index = head('Сметко – математика като игра за 1.–
     <div class="hub-top">
       <a class="hub-card" href="testove-po-matematika.html" style="--c:#2F80ED"><span>✏️</span><b>Тестове по математика</b><small>За всяка тема от 1. до 4. клас</small></a>
       <a class="hub-card" href="tablica-za-umnozhenie.html" style="--c:#FF5A5F"><span>✖️</span><b>Таблица за умножение</b><small>За печат, трикове и тест</small></a>
-      <a class="hub-card" href="nvo-4-klas-matematika.html" style="--c:#8E6CF0"><span>⏱️</span><b>НВО 4. клас</b><small>Тренировъчен тест с часовник</small></a>
+      <a class="hub-card" href="nvo-4-klas-matematika.html" style="--c:#8E6CF0"><span>⏱️</span><b>НВО 4. клас</b><small>Форматът и тренировъчен тест</small></a>
+      <a class="hub-card" href="nvo-4-klas-probni-testove.html" style="--c:#4CBB4A"><span>📝</span><b>Пробни тестове за НВО</b><small>3 варианта, 25 задачи, 60 мин.</small></a>
       <a class="hub-card" href="vhodno-nivo-matematika.html" style="--c:#FF9F1C"><span>🌱</span><b>Входно ниво</b><small>Тестове за 1.–4. клас</small></a>
       <a class="hub-card" href="rimski-cifri.html" style="--c:#19B5A5"><span>Ⅻ</span><b>Римски цифри</b><small>Таблица и преобразувател</small></a>
       <a class="hub-card" href="merni-edinici.html" style="--c:#4CBB4A"><span>📏</span><b>Мерни единици</b><small>Дължина, маса, време, лице</small></a>
@@ -306,6 +307,25 @@ game = head('Математически игри онлайн за 1.–4. кл�
 write('game.html', game)
 
 # ================= class pages =================
+def nvo_band(g):
+    """Лента към раздела за НВО – само за 3. и 4. клас, където е по темата."""
+    if g == 4:
+        return '''<section class="section"><div class="wrap"><div class="nvo-band">
+  <div class="owl" data-owl="cheer"></div>
+  <div><span class="eyebrow">Национално външно оценяване</span><h2>НВО по математика в 4. клас</h2>
+  <p>Изпитът е в началото на юни: 25 задачи, 60 минути, 100 точки. Вижте точния формат по модела на МОН, план за подготовка и пробни тестове с часовник.</p>
+  <div class="hero-cta"><a class="btn btn-lg btn-green" href="nvo-4-klas-matematika.html">📋 Форматът на изпита</a><a class="btn btn-white" href="nvo-4-klas-probni-testove.html">⏱️ Пробни тестове</a></div></div>
+</div></div></section>'''
+    if g == 3:
+        return '''<section class="section"><div class="wrap"><div class="nvo-band">
+  <div class="owl" data-owl="happy"></div>
+  <div><span class="eyebrow">Поглед напред</span><h2>В 3. клас няма НВО – но тази година го решава</h2>
+  <p>Националното външно оценяване е в 4., 7. и 10. клас. Материалът от 3. клас обаче е основата на изпита догодина. Вижте какво наистина помага сега – по 10 минути на ден.</p>
+  <div class="hero-cta"><a class="btn btn-lg btn-green" href="podgotovka-nvo-3-klas.html">🌱 Подготовка от 3. клас</a></div></div>
+</div></div></section>'''
+    return ''
+
+
 for g, d in GRADES.items():
     items = ''.join(f'''<div class="topic-item" style="--c:{d['color']}"><span class="t-ico">{i + 1}</span><a class="t-link" href="{TOPICS[tid]['slug']}.html">{name}<small>Тема {i + 1} · обяснение, задачи и онлайн тест</small></a><a class="t-play" href="game.html?grade={g}&amp;mode=practice&amp;topic={tid}" aria-label="Тренировка: {name}">▶</a></div>''' for i, (tid, name) in enumerate(d['topics']))
     exs = ''.join(f'<li><b>{e}</b></li>' for e in d['ex'])
@@ -342,6 +362,7 @@ for g, d in GRADES.items():
     <div class="callout">Съвет: 10 минути на ден са по-полезни от един час веднъж седмично. Сметко отбелязва поредните дни игра с огънче 🔥.</div>
   </div>
 </section>
+{nvo_band(g)}
 <section class="section"><div class="wrap"><div class="section-head"><h2 class="lined">Въпроси</h2></div>{faq(faqs)}</div></section>
 <section class="section soft">
   <div class="wrap" style="text-align:center">

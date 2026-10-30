@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '28'
+VER = '29'
 EMAIL = 'info@smetko.com'
 # Продажбите (цени, поръчки) са спрени до края на проучването. За пускане: True тук и SALES_OPEN в public_html/api/lib.php, после build.
 SALES_OPEN = False
@@ -163,6 +163,8 @@ FOOTER = '''<footer class="site-footer">
         <li><a href="testove-po-matematika.html">Тестове по математика</a></li>
         <li><a href="tablica-za-umnozhenie.html">Таблица за умножение</a></li>
         <li><a href="nvo-4-klas-matematika.html">НВО 4. клас математика</a></li>
+        <li><a href="nvo-4-klas-probni-testove.html">Пробни тестове за НВО</a></li>
+        <li><a href="podgotovka-nvo-3-klas.html">Подготовка за НВО от 3. клас</a></li>
         <li><a href="vhodno-nivo-matematika.html">Входно ниво</a> · <a href="izhodno-nivo-matematika.html">Изходно ниво</a></li>
         <li><a href="rimski-cifri.html">Римски цифри</a></li>
         <li><a href="merni-edinici.html">Мерни единици</a></li>
