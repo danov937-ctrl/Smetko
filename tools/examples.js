@@ -12,13 +12,16 @@ const strip = s => String(s).replace(/<br\s*\/?>/g, ' ').replace(/<[^>]+>/g, '')
 const out = {};
 for (const g of [1, 2, 3, 4]) {
   for (const t of E.GRADES[g].topics) {
-    const seen = new Set(), list = [];
+    const seen = new Set(), tpl = new Set(), list = [];
     for (const lv of [1, 2, 3]) {
       let n = 0, guard = 0;
       while (n < (lv === 1 ? 5 : lv === 2 ? 5 : 4) && guard++ < 400) {
         const k = E.generate(g, t.id, lv);
         if (k.figure || k.dots || k.kind !== 'number' && !(k.kind === 'choice' && Array.isArray(k.choices) && typeof k.choices[0] === 'string')) continue;
         const q = strip(k.q); if (seen.has(q) || q.length > 230) continue;
+        // текстовите задачи да не се повтарят с едно и също условие и различни числа
+        const sig = q.replace(/\d+/g, 'N');
+        if (sig.length > 40) { if (tpl.has(sig)) continue; tpl.add(sig); }
         seen.add(q); n++;
         list.push({ q, a: String(k.answer), full: strip(k.full), word: !!k.word || q.length > 60, lv, skill: k.skill });
       }

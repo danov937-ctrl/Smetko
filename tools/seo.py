@@ -5,6 +5,7 @@
 import json, os, re, subprocess, datetime, html as H
 from common import head, header, FOOTER, scripts, write, crumbs, faq, faq_ld, page_hero, SITE, ORG, OUT
 from seo_content import TOPICS
+from seo_deep import SOLVED, MORE_FAQ, TERMS, CHECK, SERIES_OF
 import nvo
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -52,6 +53,60 @@ def examples_block(tid, n=14):
 <details class="ex-ans"><summary>Покажи отговорите</summary><ol>{ans}</ol></details>'''
 
 
+def solved_block(tid, name):
+    """Решени примери стъпка по стъпка – най-полезното за родителя, който обяснява у дома."""
+    items = SOLVED.get(tid, [])
+    if not items:
+        return ''
+    arts = ''
+    for i, (t, cond, steps, note) in enumerate(items):
+        st = ''.join(f'<li><b>{a}</b><div>{b}</div></li>' for a, b in steps)
+        arts += (f'<article class="solve"><h3>{i + 1}. {t}</h3><div class="solve-task">{cond}</div>'
+                 f'<ol class="solve-steps">{st}</ol><p class="solve-note">💡 {note}</p></article>')
+    return f'''<section class="section soft"><div class="wrap narrow-wrap">
+  <div class="section-head"><h2 class="lined">Решени примери стъпка по стъпка</h2><p>Точно така се записва решението на лист. Покажете го на детето веднъж бавно, после го оставете да реши подобна задача само.</p></div>
+  {arts}
+</div></section>'''
+
+
+def terms_block(tid):
+    """Кратък речник на термините по темата – родителите често не помнят как се казва кое."""
+    items = TERMS.get(tid, [])
+    if not items:
+        return ''
+    return '<h3>Думите, които детето ще чуе</h3><dl class="terms">' + ''.join(
+        f'<dt>{t}</dt><dd>{d}</dd>' for t, d in items) + '</dl>'
+
+
+def check_block(tid, nxt):
+    """Проверка за родителя: усвоена ли е темата, преди да се мине нататък."""
+    items = CHECK.get(tid, [])
+    if not items:
+        return ''
+    li = ''.join(f'<li>{x}</li>' for x in items)
+    more = f' Ако всичко е наред, следващата тема е <a href="{topic_url(nxt)}">{TOPICS[nxt]["h1"]}</a>.' if nxt else ''
+    return f'''<h3>Готово ли е детето за нататък</h3>
+  <p>Четири кратки проверки. Задайте ги като разговор, не като изпит – за няколко минути става ясно кое трябва да се повтори.{more}</p>
+  <ul class="check-list">{li}</ul>'''
+
+
+def series_block(tid):
+    """Как темата се развива от 1. до 4. клас – пътека между свързаните страници."""
+    if tid not in SERIES_OF:
+        return ''
+    name, key, ids = SERIES_OF[tid]
+    steps = ''
+    for t in ids:
+        g = grade_of(t)
+        cur = ' aria-current="page"' if t == tid else ''
+        steps += (f'<a class="ser-step{" on" if t == tid else ""}" href="{topic_url(t)}"{cur} style="--c:{GCOL[g]}">'
+                  f'<b>{g}. клас</b><span>{TOPICS[t]["h1"]}</span></a>')
+    return f'''<section class="section"><div class="wrap">
+  <div class="section-head"><h2 class="lined">{name}</h2><p>Всяка тема стъпва на предишната. Ако нещо тук не върви, върнете се една стъпка назад – почти винаги проблемът е там.</p></div>
+  <div class="ser-line">{steps}</div>
+</div></section>'''
+
+
 def quiz(grade, topic='mix', n=10, level=2, title='Онлайн тест', **extra):
     attrs = ''.join(f' data-{k}="{H.escape(str(v))}"' for k, v in extra.items())
     return f'<div class="qz panel" data-grade="{grade}" data-topic="{topic}" data-n="{n}" data-level="{level}" data-title="{H.escape(title)}"{attrs}><noscript>За онлайн теста е нужен JavaScript.</noscript><p class="qz-loading">Зареждам задачите…</p></div>'
@@ -81,7 +136,7 @@ for g, tids in GRADE_TOPICS.items():
         learn = ''.join(f'<li>{x}</li>' for x in d['learn'])
         expl = ''.join(f'<li>{x}</li>' for x in d['explain'])
         mist = ''.join(f'<li>{x}</li>' for x in d['mistakes'])
-        faqs = d['faq'] + [('Безплатен ли е тестът?', 'Да. Онлайн тестът и работните листове са безплатни и без регистрация. Всеки път задачите са нови, защото се генерират автоматично по темата.')]
+        faqs = d['faq'] + MORE_FAQ.get(tid, []) + [('Безплатен ли е тестът?', 'Да. Онлайн тестът и работните листове са безплатни и без регистрация. Всеки път задачите са нови, защото се генерират автоматично по темата.')]
         prev_t = tids[i - 1] if i > 0 else None
         next_t = tids[i + 1] if i + 1 < len(tids) else None
         rel = []
@@ -133,18 +188,22 @@ for g, tids in GRADE_TOPICS.items():
   <ul class="warn-list">{mist}</ul>
   <div class="callout">Съвет: 10 минути на ден са по-полезни от един час веднъж седмично. Кратко, редовно и с похвала за усилието.</div>
 </div></section>
+{solved_block(tid, name)}
 <section class="section soft"><div class="wrap prose">
   <h2>Примерни задачи с отговори</h2>
   <p>Задачи по темата „{e(name)}“ – от лесни към по-трудни. Решете ги заедно с детето, после проверете отговорите.</p>
   {examples_block(tid)}
+  {terms_block(tid)}
+  {check_block(tid, next_t)}
   <div class="tool-row">
     <a class="tool-card" href="{ws}"><span>🖨️</span><b>Работен лист за печат</b><small>20 нови задачи по темата + отговори</small></a>
     <a class="tool-card" href="{game}"><span>🎮</span><b>Тренировка в Сметко</b><small>Без часовник, с обяснение при грешка</small></a>
     <a class="tool-card" href="uchilishta.html#domashna"><span>🔗</span><b>Линк за домашна</b><small>За учители – темата с един линк</small></a>
   </div>
 </div></section>
-<section class="section"><div class="wrap"><div class="section-head"><h2 class="lined">Въпроси от родители</h2></div>{faq(faqs)}</div></section>
-<section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Още по темата</h2></div>{related_cards(rel)}</div></section>
+{series_block(tid)}
+<section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Въпроси от родители</h2></div>{faq(faqs)}</div></section>
+<section class="section"><div class="wrap"><div class="section-head"><h2 class="lined">Още по темата</h2></div>{related_cards(rel)}</div></section>
 </main>
 ''' + FOOTER + scripts(QZ_JS)
         write(url, body)
