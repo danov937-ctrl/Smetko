@@ -896,7 +896,7 @@ ws = head('Работни листове по математика 1.–4. кл�
 <main id="main">
 <section class="section ws-controls">
   <div class="wrap">
-    <div class="breadcrumbs"><a href="index.html">Начало</a> › Работни листове</div>
+    <div class="breadcrumbs"><a href="/">Начало</a> › Работни листове</div>
     <h1>Работни листове</h1>
     <p class="lead-dark">Изберете клас и тема – Сметко генерира задачи за печат. Всеки път са нови.</p>
     <div class="panel tool-panel">
@@ -918,7 +918,7 @@ write('rabotni-listove.html', ws)
 # ================= 404 =================
 nf = head('Страницата не е намерена – Сметко', 'Страницата не е намерена.', '404.html', noindex=True).replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<base href="/">') + header() + page_hero(
     'Ох! 404', 'Сметко претърси навсякъде, но тази страница я няма. Може би е отлетяла?', '404', 'think',
-    '<div class="hero-cta"><a class="btn btn-lg" href="index.html">Към началото</a><a class="btn btn-white" href="game.html">Играй</a></div>') + '<main id="main"></main>' + FOOTER + scripts()
+    '<div class="hero-cta"><a class="btn btn-lg" href="/">Към началото</a><a class="btn btn-white" href="game.html">Играй</a></div>') + '<main id="main"></main>' + FOOTER + scripts()
 write('404.html', nf)
 
 legal.build()

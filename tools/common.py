@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '31'
+VER = '32'
 EMAIL = 'info@smetko.com'
 # Продажбите (цени, поръчки) са спрени до края на проучването. За пускане: True тук и SALES_OPEN в public_html/api/lib.php, после build.
 SALES_OPEN = False
@@ -23,7 +23,7 @@ PADDLE = 'Paddle.com Market Limited (30 Old Bailey, Лондон EC4M 7AU, Ве�
 PADDLE_TERMS = 'https://www.paddle.com/legal/buyer-terms'
 PADDLE_PRIVACY = 'https://www.paddle.com/legal/privacy'
 
-LOGO = ('<a class="logo" href="index.html" aria-label="Сметко – начало"><span class="owl-mini" data-owl="idle"></span>'
+LOGO = ('<a class="logo" href="/" aria-label="Сметко – начало"><span class="owl-mini" data-owl="idle"></span>'
         '<span class="logo-word"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></span></a>')
 
 
@@ -234,7 +234,7 @@ def page_hero(title, lead, crumb, owl='hello', extra=''):
   <span class="cloud c1"></span><span class="cloud c2"></span>
   <div class="wrap">
     <div>
-      <div class="breadcrumbs"><a href="index.html">Начало</a> › {crumb}</div>
+      <div class="breadcrumbs"><a href="/">Начало</a> › {crumb}</div>
       <h1>{title}</h1>
       <p class="lead">{lead}</p>
       {extra}
@@ -250,7 +250,7 @@ def doc_page(name, title, desc, crumb, body, owl='think'):
     html = head(title + ' – Сметко', desc, name) + header() + f'''
 <main id="main">
 <section class="section doc"><div class="wrap prose">
-<div class="breadcrumbs"><a href="index.html">Начало</a> › <a href="pravna-informacia.html">Правна информация</a> › {crumb}</div>
+<div class="breadcrumbs"><a href="/">Начало</a> › <a href="pravna-informacia.html">Правна информация</a> › {crumb}</div>
 {body}
 <p class="doc-actions"><button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Печат / PDF</button> <a class="btn btn-ghost btn-sm" href="pravna-informacia.html">Всички документи</a></p>
 </div></section>

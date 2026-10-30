@@ -23,7 +23,7 @@ function render(string $title, string $desc, string $canon, string $body, string
     exit;
 }
 function hero(string $h1, string $lead, string $crumb): string {
-    return '<section class="page-hero"><span class="cloud c1"></span><span class="cloud c2"></span><div class="wrap"><div><div class="breadcrumbs"><a href="index.html">Начало</a> › ' . $crumb . '</div><h1>' . $h1 . '</h1><p class="lead">' . $lead . '</p></div><div class="owl" data-owl="think"></div></div></section>';
+    return '<section class="page-hero"><span class="cloud c1"></span><span class="cloud c2"></span><div class="wrap"><div><div class="breadcrumbs"><a href="/">Начало</a> › ' . $crumb . '</div><h1>' . $h1 . '</h1><p class="lead">' . $lead . '</p></div><div class="owl" data-owl="think"></div></div></section>';
 }
 function card(array $p): string {
     $img = $p['image'] ? '<img src="' . e($p['image']) . '" alt="" loading="lazy">' : '<span class="bc-emo">' . e($p['emoji'] ?: '🦉') . '</span>';
@@ -61,7 +61,7 @@ if ($slug !== '') {
         ['@type' => 'ListItem', 'position' => 1, 'name' => 'Начало', 'item' => SITE_URL . '/'],
         ['@type' => 'ListItem', 'position' => 2, 'name' => 'Блог', 'item' => SITE_URL . '/blog/'],
         ['@type' => 'ListItem', 'position' => 3, 'name' => $p['title'], 'item' => $url]]];
-    $body = '<article class="section"><div class="wrap prose blog-post"><div class="breadcrumbs dark"><a href="index.html">Начало</a> › <a href="blog/">Блог</a> › ' . e($p['category']) . '</div>' .
+    $body = '<article class="section"><div class="wrap prose blog-post"><div class="breadcrumbs dark"><a href="/">Начало</a> › <a href="blog/">Блог</a> › ' . e($p['category']) . '</div>' .
         '<p class="bp-meta">' . $meta . '</p><h1>' . ($p['image'] ? '' : '<span class="bp-emo">' . e($p['emoji']) . '</span> ') . e($p['title']) . '</h1>' .
         '<p class="bp-lead">' . e($p['excerpt']) . '</p>' . ($p['image'] ? '<img class="bp-cover" src="' . e($p['image']) . '" alt="">' : '') . $toc . '<div class="bp-body">' . $html . '</div>' .
         '<p class="bp-author">✍️ Написано от екипа на <a href="za-nas.html">Сметко</a> – математика като игра за 1.–4. клас.</p>' .

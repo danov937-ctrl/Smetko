@@ -162,7 +162,7 @@ for g, tids in GRADE_TOPICS.items():
   <span class="cloud c1"></span><span class="cloud c2"></span>
   <div class="wrap">
     <div>
-      <div class="breadcrumbs"><a href="index.html">Начало</a> › <a href="{class_url(g)}">{g}. клас</a> › Тема {i + 1}</div>
+      <div class="breadcrumbs"><a href="/">Начало</a> › <a href="{class_url(g)}">{g}. клас</a> › Тема {i + 1}</div>
       <h1>{name} <span class="h1-sub">{g}. клас</span></h1>
       <p class="lead">{re.split(r'(?<![0-9])\. ', d['intro'])[0].rstrip('.')}.</p>
       <div class="hero-cta"><a class="btn btn-lg btn-green" href="#test">✏️ Онлайн тест</a><a class="btn btn-white" href="{game}">🎮 Упражнявай като игра</a></div>
