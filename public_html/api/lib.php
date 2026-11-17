@@ -8,7 +8,10 @@ date_default_timezone_set('Europe/Sofia');
 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // без O, 0, I, 1, L
 const CODE_PREFIX = 'SMET';
 const SITE_URL = 'https://smetko.com';
-const SALES_OPEN = false; // продажбите (цени и поръчки) са спрени до края на проучването; при пускане – true и SALES_OPEN в tools/common.py
+const SALES_OPEN = false; // продажбите (цени и поръчки) са спрени; при пускане – true и SALES_OPEN в tools/common.py
+/* Безплатен режим: всичко е отключено за всички, без код и без абонамент.
+   При изключване – false тук и FREE_MODE в tools/common.py, после build. */
+const FREE_MODE = true;
 
 function db(): PDO {
     static $pdo = null;
@@ -448,7 +451,7 @@ function paddle_cfg(?array $c = null): array {
 }
 
 const DEFAULT_CONFIG = [
-    'paywall' => true, 'freeMissions' => 3, 'freePractice' => 20, 'questions' => 10, 'contactEmail' => 'info@smetko.com',
+    'paywall' => false, 'freeMissions' => 3, 'freePractice' => 20, 'questions' => 10, 'contactEmail' => 'info@smetko.com',
     'prices' => ['single6' => '10', 'single12' => '18', 'family6' => '18', 'family12' => '30', 'class6' => '45', 'class12' => '80', 'disc3' => '15', 'disc8' => '25'],
     'planNames' => ['free' => 'Пухче', 'single' => 'Бухалче', 'family' => 'Гнездо', 'class' => 'Ято', 'school' => 'Гора'],
     'banner' => ['on' => false, 'text' => '', 'link' => '', 'linkText' => '', 'color' => 'orange'],
@@ -466,6 +469,7 @@ function site_config(): array {
         if (!array_key_exists($k, $c)) continue;
         $out[$k] = is_array($v) ? array_merge($v, is_array($c[$k]) ? $c[$k] : []) : $c[$k];
     }
+    if (FREE_MODE) $out['paywall'] = false;   // в безплатен режим няма заключено съдържание
     return $out;
 }
 function save_site_config(array $c): void { set_setting('site_config', json_encode($c, JSON_UNESCAPED_UNICODE)); }

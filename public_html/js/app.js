@@ -9,7 +9,7 @@
      пълният достъп се отключва с абонамент към акаунта (js/account.js, js/access.js, админ: /admin/).
      paywall: false → всичко е отключено за всички. */
   S.config = {
-    paywall: true,
+    paywall: false,   // в безплатен режим всичко е отключено; сървърът може да го включи обратно
     freeAdventureLevels: 3,
     freePracticePerDay: 20,
     trialDays: 14,
@@ -243,10 +243,11 @@
   function price(k) { var P = (S.siteConfig || {}).prices || {}; var v = parseFloat(P[k]); return isNaN(v) ? DEF_PRICES[k] : v; }
   // продажбите са спрени до края на проучването (meta smetko-sales в <head>)
   S.SALES = (function () { var m = document.querySelector('meta[name="smetko-sales"]'); return !!(m && m.content === '1'); })();
+  S.FREE = (function () { var m = document.querySelector('meta[name="smetko-free"]'); return !!(m && m.content === '1'); })();
   // затворен тест: пълният достъп е само с код за достъп (текстовете при катинарите)
-  S.PAID = S.SALES ? 'с абонамент' : 'с код за достъп';
-  S.PAID_URL = S.SALES ? 'pricing.html' : 'pricing.html#activate';
-  S.PAID_BTN = S.SALES ? 'Абонаменти' : '🔑 Имам код';
+  S.PAID = S.FREE ? 'безплатно' : (S.SALES ? 'с абонамент' : 'с код за достъп');
+  S.PAID_URL = (S.FREE || S.SALES) ? 'pricing.html' : 'pricing.html#activate';
+  S.PAID_BTN = S.FREE ? '🎁 Безплатно е' : (S.SALES ? 'Абонаменти' : '🔑 Имам код');
   S.soonModal = function () {
     S.modal('<div data-owl="happy"></div><h3>Очаквайте скоро!</h3><p>Абонаментите ще бъдат пуснати скоро. Сега Сметко е в затворен тест – пълният достъп е само с код за достъп от нас. Искате да участвате? Пишете ни на <a href="mailto:info@smetko.com?subject=Затворен%20тест">info@smetko.com</a>.</p>' +
       '<div class="modal-actions"><a class="btn btn-green" href="pricing.html#activate">🔑 Имам код</a><a class="btn btn-ghost" href="game.html">Безплатен план</a></div>');
@@ -313,6 +314,11 @@
     });
   };
   S.accessModal = function () {
+    if (S.FREE) {  // в безплатен режим няма заключени мисии – ако нещо все пак извика прозореца
+      S.modal('<div data-owl="cheer"></div><h3>Всичко е отключено</h3><p>Сметко е безплатен – всички мисии, тренировката и тестовете са отворени за всички. Ако мисия не тръгва, презаредете страницата.</p>' +
+        '<div class="modal-actions"><button class="btn btn-green" data-close>Разбрах</button></div>');
+      return;
+    }
     S.modal(
       '<div data-owl="encourage"></div><h3>Тази мисия е с пълен достъп</h3>' +
       '<p>В безплатния план са първите ' + S.config.freeAdventureLevels + ' мисии от всеки клас, „Бързо сметни“ и ' + S.config.freePracticePerDay + ' задачи на ден в „Тренировка“. ' +

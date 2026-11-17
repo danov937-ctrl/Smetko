@@ -14,6 +14,18 @@ if (!setting('news_seed_test')) {
     }
     $pdo->exec('COMMIT');
 }
+// новината за безплатния режим – старата за затворения тест се скрива
+if (FREE_MODE && !setting('news_seed_free')) {
+    $pdo = db(); $pdo->exec('BEGIN IMMEDIATE');
+    if (!setting('news_seed_free')) {
+        set_setting('news_seed_free', '1');
+        $pdo->prepare("UPDATE news SET active = 0, popup = 0 WHERE title = 'Сметко е в тестов период'")->execute();
+        $pdo->prepare('INSERT INTO news(emoji, title, body, link, link_text, starts, ends, active, popup, created_at) VALUES(?, ?, ?, ?, ?, ?, NULL, 1, 1, ?)')->execute(['🎁', 'Сметко вече е безплатен за всички',
+            "Затвореният тест свърши и Сметко е отворен за всички – без код, без абонамент и без карта.\n\nВсички мисии по учебника, „Бързо сметни“, неограничена „Тренировка“, точките, значките, гардеробът, класациите, онлайн тестовете, работните листове и отчетът за родителя са отключени. За неопределено време.\n\nБезплатно е и за училищата: учителят ни пише на info@smetko.com, получава код за класа си и създава учениците в „Табло“.",
+            'pricing.html', '🎁 Какво влиза', $t, now()]);
+    }
+    $pdo->exec('COMMIT');
+}
 $st = db()->prepare("SELECT id, emoji, title, body, link, link_text, popup, COALESCE(starts, substr(created_at, 1, 10)) AS d FROM news
     WHERE active = 1 AND (starts IS NULL OR starts = '' OR starts <= ?) AND (ends IS NULL OR ends = '' OR ends >= ?) ORDER BY d DESC, id DESC LIMIT 30");
 $st->execute([$t, $t]);

@@ -5,10 +5,13 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '34'
+VER = '35'
 EMAIL = 'info@smetko.com'
 # Продажбите (цени, поръчки) са спрени до края на проучването. За пускане: True тук и SALES_OPEN в public_html/api/lib.php, после build.
 SALES_OPEN = False
+# Безплатен режим: целият сайт е отворен за всички без код и без абонамент, за неопределено време.
+# При изключване – False тук и FREE_MODE в public_html/api/lib.php, после build.
+FREE_MODE = True
 
 # Собственик на Сметко – физическо лице (без фирма). Продажбите минават през Paddle като търговец (Merchant of Record).
 # Попълнете името и адреса за кореспонденция → python3 tools/build.py. Докато са празни, в документите стои „[ПОПЪЛНЕТЕ…]“
@@ -41,6 +44,7 @@ def head(title, desc, path, ld=None, body_class='', noindex=False, og=None):
 {robots}<link rel="canonical" href="{canon}">
 <meta name="theme-color" content="#3299FF">
 <meta name="smetko-sales" content="{1 if SALES_OPEN else 0}">
+<meta name="smetko-free" content="{1 if FREE_MODE else 0}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Сметко">
 <meta property="og:title" content="{title}">
@@ -269,3 +273,10 @@ def doc_page(name, title, desc, crumb, body, owl='think'):
 </main>
 ''' + FOOTER + scripts()
     write(name, html)
+
+
+# В безплатен режим „Абонаменти“ навсякъде става „Безплатно“
+if FREE_MODE:
+    NAV_HTML = NAV_HTML.replace('data-nav="pricing">Абонаменти<', 'data-nav="pricing">Безплатно<')
+    MOBILE_NAV = MOBILE_NAV.replace('>💶 Абонаменти<', '>🎁 Безплатно<')
+    FOOTER = FOOTER.replace('<a href="pricing.html">Абонаменти</a>', '<a href="pricing.html">Безплатно</a>')

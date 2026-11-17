@@ -1812,3 +1812,22 @@ input.sw:disabled { cursor: default; opacity: .75; }
   .nav { gap: 0; }
   .site-header .wrap { gap: 10px; }
 }
+
+/* ================= Безплатен режим ================= */
+.free-band { background: linear-gradient(135deg,#E8F8EC,#fff); border-color: #BFE8C9; }
+.free-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+.free-card { background: #fff; border: 2px solid var(--line); border-radius: 22px; padding: 18px 20px; box-shadow: var(--shadow-sm); }
+.free-card span { font-size: 1.8rem; display: block; line-height: 1; margin-bottom: 8px; }
+.free-card b { display: block; color: var(--navy); margin-bottom: 4px; }
+.free-card p { margin: 0; font-size: .94rem; line-height: 1.5; color: var(--ink); }
+
+/* При много тесни екрани чипчето с точките (в безплатен режим се вижда винаги)
+   не оставя място за „Вход“ – текстът се скрива и остава само иконата. */
+@media (max-width: 359px) {
+  .acct-btn:not(.in) .acct-txt { display: none; }
+  .header-actions { gap: 5px; }
+  .site-header .wrap { gap: 6px; }
+}
+/* В играта (wrap е до 1240px) бутонът „Регистрация“ не се побира, откакто точките се
+   показват на всички – остава достъпен от менюто и от бутона за акаунт. */
+@media (max-width: 1420px) { .game-header .btn-register { display: none !important; } }
