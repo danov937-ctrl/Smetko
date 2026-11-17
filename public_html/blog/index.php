@@ -50,7 +50,10 @@ if ($slug !== '') {
     $toc = '';
     if (count($hs) >= 3) {
         $li = '';
-        foreach ($hs as $h) $li .= '<li><a href="#' . $h[1] . '">' . strip_tags($h[2]) . '</a></li>';
+        // в оформлението има <base href="/">, затова връзката трябва да носи и пътя на статията,
+        // иначе „#раздел“ се разрешава спрямо началната страница
+        $self = '/blog/' . rawurlencode((string)$p['slug']);
+        foreach ($hs as $h) $li .= '<li><a href="' . $self . '#' . $h[1] . '">' . strip_tags($h[2]) . '</a></li>';
         $toc = '<nav class="bp-toc" aria-label="Съдържание на статията"><b>В статията</b><ol>' . $li . '</ol></nav>';
     }
     $ld = ['@context' => 'https://schema.org', '@type' => 'BlogPosting', 'headline' => $p['title'], 'description' => $p['excerpt'], 'datePublished' => $p['published_at'], 'dateModified' => $upd ?: $p['published_at'],

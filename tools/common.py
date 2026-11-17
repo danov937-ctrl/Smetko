@@ -5,7 +5,7 @@ import json, os, re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '33'
+VER = '34'
 EMAIL = 'info@smetko.com'
 # Продажбите (цени, поръчки) са спрени до края на проучването. За пускане: True тук и SALES_OPEN в public_html/api/lib.php, после build.
 SALES_OPEN = False
@@ -74,6 +74,16 @@ NAV_HTML = '''<nav class="nav" aria-label="Основно меню">
           <a href="testove-po-matematika.html"><b>✏️ Онлайн тестове</b><small>По теми, входно ниво, НВО 4. клас</small></a>
           <a href="tablica-za-umnozhenie.html"><b>✖️ Таблица за умножение</b><small>За печат, трикове и тест</small></a>
         </div></div>
+      <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="nvo">НВО <span class="chev">▾</span></button>
+        <div class="dd-panel">
+          <a href="nvo-4-klas-matematika.html"><b>Форматът на изпита</b><small>25 задачи, 60 минути, 100 точки</small></a>
+          <a href="nvo-4-klas-probni-testove.html"><b>⏱️ Пробни тестове</b><small>3 варианта с часовник</small></a>
+          <a href="nvo-sbornik.html"><b>📘 Сборник за печат</b><small>32 теста, 564 задачи, с отговори</small></a>
+          <a href="nvo-4-klas-zadachi-s-izbor.html"><b>18-те задачи с избор</b><small>Капаните и стратегията</small></a>
+          <a href="nvo-4-klas-razshiren-otgovor.html"><b>Задачите с решение</b><small>Как се пише решение</small></a>
+          <a href="podgotovka-nvo-3-klas.html"><b>🌱 Подготовка от 3. клас</b><small>В 3. клас НВО няма</small></a>
+          <a href="nvo-4-klas-priem-5-klas.html"><b>Приемът в 5. клас</b><small>Кога резултатът има значение</small></a>
+        </div></div>
       <div class="dd"><button class="dd-btn" aria-expanded="false" aria-haspopup="true" data-nav="ach">Класации <span class="chev">▾</span></button>
         <div class="dd-panel">
           <a href="liga.html"><b>Обща класация</b><small>Училища, класове, учители, ученици</small></a>
@@ -107,6 +117,8 @@ MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
     <a href="game.html">🎮 Мисии и игри</a>
     <div class="m-grades"><a href="matematika-1-klas.html">1. клас</a><a href="matematika-2-klas.html">2. клас</a><a href="matematika-3-klas.html">3. клас</a><a href="matematika-4-klas.html">4. клас</a></div>
     <a href="testove-po-matematika.html">✏️ Онлайн тестове</a>
+    <a href="nvo-4-klas-matematika.html">🎯 НВО 4. клас</a>
+    <div class="m-grades"><a href="nvo-4-klas-probni-testove.html">Пробни тестове</a><a href="nvo-sbornik.html">Сборник</a><a href="podgotovka-nvo-3-klas.html">От 3. клас</a></div>
     <a href="tablica-za-umnozhenie.html">✖️ Таблица за умножение</a>
     <a href="liga.html">🏆 Обща класация</a>
     <a href="achievements.html">⭐ Моите постижения</a>

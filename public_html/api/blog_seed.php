@@ -18,7 +18,7 @@ function blog_sync(PDO $pdo): void {
     static $done = false;
     if ($done) return;
     $done = true;
-    $rev = 'r5';                                   // вдигнете при промяна на текстовете
+    $rev = 'r6';                                   // вдигнете при промяна на текстовете
     if (setting('blog_rev') === $rev) return;
     $sel = $pdo->prepare('SELECT id, body, seed_hash FROM posts WHERE slug = ?');
     $ins = $pdo->prepare('INSERT INTO posts(slug, title, excerpt, body, emoji, category, published, published_at, created_at, updated_at, seed_hash) VALUES(?,?,?,?,?,?,1,?,?,?,?)');

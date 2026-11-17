@@ -440,7 +440,29 @@
     document.querySelectorAll('[data-survey-cta]').forEach(function (el) { el.hidden = svDone; });
     // запомнен клас → маркира бутона
     try { var lg = S.Game && S.Game.state.lastGrade; if (lg) { var gb = document.querySelector('.grade-btn.g' + lg); if (gb) gb.setAttribute('data-last', '1'); } } catch (e) {}
+    nvoDays();
   });
+
+  /* ---------- колко остава до НВО по математика в 4. клас ----------
+     Датата е от заповедта за учебното време; след изпита броенето минава към следващата година. */
+  function nvoDays() {
+    var els = document.querySelectorAll('[data-nvo-days]');
+    if (!els.length) return;
+    var DATES = { 2027: '2027-06-04' };                       // обявена дата
+    var now = new Date(), y = now.getFullYear();
+    var d = DATES[y] ? new Date(DATES[y] + 'T09:00:00') : null;
+    if (!d || d < now) { y += (d && d < now) ? 1 : 0; d = DATES[y] ? new Date(DATES[y] + 'T09:00:00') : new Date(y + '-06-04T09:00:00'); }
+    if (d < now) d = new Date((y + 1) + '-06-04T09:00:00');
+    var days = Math.max(0, Math.ceil((d - now) / 86400000));
+    var exact = !!DATES[d.getFullYear()];
+    els.forEach(function (el) {
+      el.textContent = days;
+      var w = el.closest('[data-nvo-when]');
+      if (w) w.querySelectorAll('[data-nvo-date]').forEach(function (x) {
+        x.textContent = exact ? '4 юни ' + d.getFullYear() + ' г.' : 'началото на юни ' + d.getFullYear() + ' г.';
+      });
+    });
+  }
 
   /* ---------- PWA ---------- */
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && location.hostname !== 'localhost') {

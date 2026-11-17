@@ -153,6 +153,27 @@ index = head('Сметко – математика като игра за 1.–
   </div>
 </section>
 
+<section class="section nvo-home"><div class="wrap">
+  <div class="nvo-hero" data-nvo-when>
+    <div class="nvo-hero-l">
+      <span class="eyebrow">Национално външно оценяване · 4. клас</span>
+      <h2>Остават <b data-nvo-days>—</b> дни до НВО по математика</h2>
+      <p>Изпитът е на <b data-nvo-date>4 юни 2027 г.</b>: 25 задачи, 60 минути, 100 точки. Всичко за подготовката –
+      форматът по модела на МОН, пробни тестове с часовник и сборник за печат с 32 теста – е събрано на едно място и е безплатно.</p>
+      <div class="hero-cta">
+        <a class="btn btn-lg btn-green" href="nvo-4-klas-matematika.html">🎯 Към подготовката за НВО</a>
+        <a class="btn btn-white" href="nvo-sbornik.html">📘 Сборник: 32 теста</a>
+      </div>
+    </div>
+    <div class="nvo-hero-r">
+      <a href="nvo-4-klas-probni-testove.html"><b>⏱️</b><span>Пробни тестове</span><small>3 варианта с часовник</small></a>
+      <a href="nvo-sbornik.html"><b>📘</b><span>Сборник за печат</span><small>32 теста, 564 задачи</small></a>
+      <a href="podgotovka-nvo-3-klas.html"><b>🌱</b><span>Подготовка от 3. клас</span><small>В 3. клас НВО няма</small></a>
+      <a href="nvo-4-klas-priem-5-klas.html"><b>🏫</b><span>Приемът в 5. клас</span><small>Кога има значение</small></a>
+    </div>
+  </div>
+</div></section>
+
 <section class="section">
   <div class="wrap">
     <div class="section-head"><h2 class="lined">Безплатни помагала</h2><p>Онлайн тестове с автоматична проверка, таблици и подготовка за НВО – без регистрация.</p></div>
@@ -161,6 +182,7 @@ index = head('Сметко – математика като игра за 1.–
       <a class="hub-card" href="tablica-za-umnozhenie.html" style="--c:#FF5A5F"><span>✖️</span><b>Таблица за умножение</b><small>За печат, трикове и тест</small></a>
       <a class="hub-card" href="nvo-4-klas-matematika.html" style="--c:#8E6CF0"><span>⏱️</span><b>НВО 4. клас</b><small>Форматът и тренировъчен тест</small></a>
       <a class="hub-card" href="nvo-4-klas-probni-testove.html" style="--c:#4CBB4A"><span>📝</span><b>Пробни тестове за НВО</b><small>3 варианта, 25 задачи, 60 мин.</small></a>
+      <a class="hub-card" href="nvo-sbornik.html" style="--c:#8E6CF0"><span>📘</span><b>Сборник за НВО</b><small>32 теста за печат, с отговори</small></a>
       <a class="hub-card" href="vhodno-nivo-matematika.html" style="--c:#FF9F1C"><span>🌱</span><b>Входно ниво</b><small>Тестове за 1.–4. клас</small></a>
       <a class="hub-card" href="rimski-cifri.html" style="--c:#19B5A5"><span>Ⅻ</span><b>Римски цифри</b><small>Таблица и преобразувател</small></a>
       <a class="hub-card" href="merni-edinici.html" style="--c:#4CBB4A"><span>📏</span><b>Мерни единици</b><small>Дължина, маса, време, лице</small></a>

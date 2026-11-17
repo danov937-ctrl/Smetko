@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="bg"><head><meta charset="utf-8">
+<title>Подготовка за НВО по математика – 4. клас (извадка)</title><style>/* Печатно оформление на сборника (А4). Използва се от tools/sbornik.js и tools/sbornik_pdf.js. */
+@page { size: A4; margin: 16mm 14mm 18mm; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  margin: 0; font-family: 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif;
+  font-size: 10.5pt; line-height: 1.45; color: #15223B;
+}
+.page { page-break-after: always; break-after: page; }
+.page:last-child { page-break-after: auto; }
+h2 { font-size: 16pt; margin: 0 0 10px; color: #15223B; }
+h3 { font-size: 12pt; margin: 18px 0 8px; }
+.part { color: #2F80ED; border-bottom: 2px solid #D9E4F5; padding-bottom: 4px; }
+.small { font-size: 9pt; color: #5A6780; }
+
+/* ---------- корица ---------- */
+.cover { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 250mm; }
+.cover-in { width: 100%; }
+.cover .brand { display: inline-block; font-size: 13pt; font-weight: 800; letter-spacing: .22em;
+  text-transform: uppercase; color: #2F80ED; border: 2px solid #2F80ED; border-radius: 999px; padding: 6px 22px; }
+.cover h1 { font-size: 34pt; line-height: 1.12; margin: 26px 0 6px; }
+.cover h1 span { color: #2F80ED; }
+.cover .cls { font-size: 18pt; font-weight: 700; color: #5A6780; margin: 0 0 30px; }
+.cover-facts { display: flex; justify-content: center; gap: 14px; margin: 0 0 30px; }
+.cover-facts div { border: 2px solid #D9E4F5; border-radius: 14px; padding: 12px 20px; min-width: 32mm; }
+.cover-facts b { display: block; font-size: 22pt; color: #2F80ED; line-height: 1; }
+.cover-facts span { font-size: 9pt; color: #5A6780; }
+.cover-sub { max-width: 120mm; margin: 0 auto; color: #3C4A66; }
+.cover-foot { margin-top: 34px; font-weight: 700; color: #2F80ED; }
+
+/* ---------- увод, съдържание ---------- */
+.cols { display: flex; gap: 12mm; }
+.cols > div { flex: 1; }
+table.fmt { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 9.5pt; }
+table.fmt th, table.fmt td { border: 1px solid #D9E4F5; padding: 5px 7px; text-align: left; }
+table.fmt th { background: #EEF4FD; }
+table.fmt tr.sum td { background: #F6F9FE; }
+table.wide td:first-child { white-space: nowrap; }
+table.track td { height: 9mm; }
+.plan { padding-left: 18px; }
+.plan li, .rules li { margin-bottom: 6px; }
+.rules { padding-left: 18px; }
+.toc-note { color: #3C4A66; margin-bottom: 14px; }
+.toc-list { padding-left: 20px; }
+.toc-list li { margin: 4px 0; }
+.toc-list span { color: #5A6780; font-size: 9pt; }
+
+/* ---------- разделители на частите ---------- */
+.part-title { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 230mm; }
+.part-title span { display: block; font-size: 11pt; letter-spacing: .25em; text-transform: uppercase; color: #2F80ED; }
+.part-title h2 { font-size: 26pt; margin: 8px 0 14px; }
+.part-title p { max-width: 115mm; margin: 0 auto; color: #3C4A66; }
+
+/* ---------- тест ---------- */
+.t-head { border-bottom: 3px solid #2F80ED; padding-bottom: 8px; margin-bottom: 10px; }
+.t-kind { display: inline-block; background: #2F80ED; color: #fff; font-size: 9pt; font-weight: 700;
+  padding: 3px 11px; border-radius: 999px; }
+.t-kind.exam { background: #15223B; }
+.t-head h2 { font-size: 14pt; margin: 7px 0 2px; }
+.t-sub { margin: 0; color: #5A6780; font-size: 9.5pt; }
+.t-hint { background: #F6F9FE; border-left: 4px solid #2F80ED; padding: 7px 10px; margin: 10px 0 14px;
+  font-size: 9.5pt; color: #3C4A66; }
+.tasks { list-style: none; margin: 0; padding: 0; counter-reset: none; }
+.task { display: flex; gap: 8px; margin-bottom: 11px; page-break-inside: avoid; break-inside: avoid; }
+.task .no { font-weight: 800; color: #2F80ED; min-width: 8mm; }
+.task .body { flex: 1; }
+.task .q { margin-bottom: 4px; }
+.opts { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 4px 0 0; padding: 0; }
+.opts li { min-width: 32mm; }
+.blank { display: inline-block; min-width: 18mm; border-bottom: 1.4px solid #15223B; }
+.ans-line { font-size: 9.5pt; color: #5A6780; }
+.ans-line .dots { display: inline-block; min-width: 42mm; border-bottom: 1.4px dotted #8A96AC; }
+.fig { margin: 3px 0; line-height: 0; }
+.fig svg { max-height: 20mm; max-width: 100%; width: auto; height: auto; display: block; }
+.work { height: 34mm; border: 1px dashed #C7D3E6; border-radius: 8px; margin-top: 6px; }
+.work.short { height: 20mm; }
+.subs { list-style: none; padding-left: 6px; margin: 6px 0 0; }
+.subs > li > b { color: #2F80ED; }
+.subs li { margin-bottom: 4px; }
+.t-foot { margin-top: 14px; text-align: right; font-weight: 700; color: #5A6780; }
+
+/* ---------- бланка ---------- */
+.blanka-wrap { margin-top: 14px; border: 2px solid #15223B; border-radius: 10px; padding: 8px 10px;
+  page-break-inside: avoid; break-inside: avoid; }
+.blanka { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.blanka td { border: 1px solid #C7D3E6; text-align: center; padding: 2px; width: 5.55%; }
+.blanka b { display: block; font-size: 7.5pt; color: #5A6780; }
+.blanka span { display: block; height: 7mm; }
+.blanka-wrap .hint { font-size: 8.5pt; color: #5A6780; margin: 6px 0 0; }
+
+/* ---------- отговори ---------- */
+.keys .key-grid { display: block; }
+.key { border: 1px solid #D9E4F5; border-radius: 8px; padding: 7px 10px; margin-bottom: 8px;
+  page-break-inside: avoid; break-inside: avoid; font-size: 9.5pt; }
+.key b { color: #15223B; }
+.key p { margin: 3px 0 0; color: #3C4A66; }
+.key .sol { background: #F6F9FE; padding: 5px 8px; border-radius: 6px; margin-top: 5px; }
+.key .crit { font-size: 9pt; color: #5A6780; border-top: 1px dashed #D9E4F5; padding-top: 5px; }
+</style></head><body>
+<section class="page cover"><div class="cover-in">
+  <span class="brand">Сметко</span>
+  <h1>Подготовка за НВО<br><span>по математика</span></h1>
+  <p class="cls">4. клас · безплатна извадка</p>
+  <div class="cover-facts"><div><b>2</b><span>от 30 теста</span></div><div><b>37</b><span>задачи</span></div>
+  <div><b>100</b><span>точки на изпитния</span></div></div>
+  <p class="cover-sub">Това са два теста от сборника – един тренировъчен и един примерен изпитен,
+  с верните отговори. Пълният сборник е с 32 теста и 564 задачи.</p>
+  <p class="cover-foot">smetko.com/nvo-sbornik.html</p>
+</div></section><section class="page intro"><h2>Как се работи със сборника</h2>
+<div class="cols">
+<div><h3>Форматът на изпита</h3>
+<table class="fmt"><tr><th>Вид задача</th><th>Брой</th><th>Точки</th></tr>
+<tr><td>С избираем отговор</td><td>16</td><td>48</td></tr>
+<tr><td>С кратък свободен отговор</td><td>4</td><td>16</td></tr>
+<tr><td>С разширен свободен отговор</td><td>4</td><td>20</td></tr>
+<tr><td>С разширен отговор с три подусловия</td><td>1</td><td>16</td></tr>
+<tr class="sum"><td><b>Общо</b></td><td><b>25</b></td><td><b>100</b></td></tr></table>
+<p class="small">Изпитът е 60 минути. Ученици със специални образователни потребности имат до 30 минути повече.
+Този модел е в сила <b>от учебната 2024/2025 г.</b> – до 2023/2024 задачите бяха 18 с избираем отговор, 5 с кратък,
+1 с разширен и 1 с три подусловия, затова по-старите помагала описват друго. Разпределението на точките по-горе е
+ориентировъчно: на изпита МОН определя точките според трудността на всяка задача. Моделът се обявява всяка
+година – преди учебната година сверявайте с mon.bg.</p></div>
+<div><h3>План за осем седмици</h3>
+<ol class="plan">
+<li><b>Седмици 1–2.</b> Тренировъчни тестове 1–6 (числа, римски цифри, събиране и изваждане), вариант А.</li>
+<li><b>Седмици 3–4.</b> Тренировъчни тестове 7–14 (умножение и деление), вариант А.</li>
+<li><b>Седмица 5.</b> Тренировъчни тестове 15–20 (лице, обиколка, мерни единици, геометрия).</li>
+<li><b>Седмица 6.</b> Варианти Б на темите, в които е имало грешки.</li>
+<li><b>Седмици 7–8.</b> По един изпитен тест в седмицата, с часовник и без помощ.</li>
+</ol>
+<h3>Правила за изпитните тестове</h3>
+<ul class="rules">
+<li>Маса без телефон, лист за чернова, химикал, линия и транспортир.</li>
+<li>Часовникът върви. 60 минути, без прекъсване.</li>
+<li>Родителят не подсказва, докато тестът тече.</li>
+<li>Прегледът е заедно, след това – всяка сгрешена задача се решава наново от детето.</li>
+</ul></div></div></section>
+<section class="test page"><header class="t-head"><span class="t-kind">Тренировъчен тест 5</span>
+  <h2>Умножение с едноцифрено число</h2><p class="t-sub">Вариант А · 12 задачи · около 20 минути</p></header>
+  <p class="t-hint">💡 Първо умножавам, после добавям пренесеното – никога обратното.</p>
+  <ol class="tasks"><li class="task"><span class="no">1.</span><div class="body"><div class="q">1659 · 9 = …</div><ol class="opts"><li>а) 14 933</li><li>б) 14 941</li><li>в) 14 931</li><li>г) 14 921</li></ol></div></li><li class="task"><span class="no">2.</span><div class="body"><div class="q">3276 · 5 = …</div><ol class="opts"><li>а) 16 381</li><li>б) 16 379</li><li>в) 16 380</li><li>г) 8190</li></ol></div></li><li class="task"><span class="no">3.</span><div class="body"><div class="q">3883 · 9 = …</div><ol class="opts"><li>а) 34 949</li><li>б) 34 948</li><li>в) 34 847</li><li>г) 34 947</li></ol></div></li><li class="task"><span class="no">4.</span><div class="body"><div class="q">4119 · 4 = …</div><ol class="opts"><li>а) 16 376</li><li>б) 16 477</li><li>в) 16 486</li><li>г) 16 476</li></ol></div></li><li class="task"><span class="no">5.</span><div class="body"><div class="q">5686 · 7 = …</div><ol class="opts"><li>а) 39 812</li><li>б) 39 800</li><li>в) 39 802</li><li>г) 39 803</li></ol></div></li><li class="task"><span class="no">6.</span><div class="body"><div class="q">6645 · 6 = …</div><ol class="opts"><li>а) 39 870</li><li>б) 39 970</li><li>в) 79 740</li><li>г) 39 860</li></ol></div></li><li class="task"><span class="no">7.</span><div class="body"><div class="q">1577 · 5 = …</div><ol class="opts"><li>а) 7885</li><li>б) 7886</li><li>в) 7785</li><li>г) 7875</li></ol></div></li><li class="task"><span class="no">8.</span><div class="body"><div class="q">3256 · 6 = …</div><ol class="opts"><li>а) 19 536</li><li>б) 9768</li><li>в) 63 591</li><li>г) 19 538</li></ol></div></li><li class="task"><span class="no">9.</span><div class="body"><div class="q">1534 · 5 = <span class="blank"></span></div></div></li><li class="task"><span class="no">10.</span><div class="body"><div class="q">8985 · 3 = <span class="blank"></span></div></div></li><li class="task"><span class="no">11.</span><div class="body"><div class="q">4405 · 5 = <span class="blank"></span></div></div></li><li class="task"><span class="no">12.</span><div class="body"><div class="q">Стая има форма на правоъгълник 5 м на 4 м. Колко квадратни метра е подът?<br><span class="ans-line">Отговор: <span class="blank"></span></span></div></div></li></ol>
+  <p class="t-foot">Верни отговори: ____ от 12</p></section>
+<section class="test page"><header class="t-head"><span class="t-kind exam">Примерен изпитен тест 1</span>
+  <h2>Национално външно оценяване · математика · 4. клас</h2>
+  <p class="t-sub">25 задачи · 100 точки · 60 минути (за ученици със СОП – до 30 минути повече)</p></header>
+  <p class="t-hint">Задачи <b>1–16</b> са с избираем отговор – отбелязва се един отговор (по 3 точки).
+  Задачи <b>17–20</b> са с кратък свободен отговор – записва се само отговорът (по 4 точки).
+  Задачи <b>21–24</b> искат записано решение (по 5 точки). Задача <b>25</b> е с три подусловия (16 точки).
+  <br><span class="small">Разпределението на точките е ориентировъчно – на изпита МОН ги определя според трудността на всяка задача.</span></p>
+  <ol class="tasks"><li class="task"><span class="no">1.</span><div class="body"><div class="q">2938 − 1704 = …</div><ol class="opts"><li>а) 1244</li><li>б) 1233</li><li>в) 1236</li><li>г) 1234</li></ol></div></li><li class="task"><span class="no">2.</span><div class="body"><div class="q">Правоъгълник има лице 18 кв. см и дължина 9 см. Ширината е … см.</div><div class="fig"><svg class="fig" viewBox="0 0 220 140" aria-hidden="true"><rect x="35" y="34" width="150" height="80" rx="3" fill="#E7F4FF" stroke="#2F80ED" stroke-width="4"/><text x="110" y="26" text-anchor="middle">9 см</text><text x="193" y="79">? см</text></svg></div><ol class="opts"><li>а) 12</li><li>б) 1</li><li>в) 2</li><li>г) 4</li></ol></div></li><li class="task"><span class="no">3.</span><div class="body"><div class="q">684 · 43 = …</div><ol class="opts"><li>а) 29 412</li><li>б) 29 410</li><li>в) 29 512</li><li>г) 29 414</li></ol></div></li><li class="task"><span class="no">4.</span><div class="body"><div class="q">2674 … 1000</div><ol class="opts"><li><</li><li>=</li><li>></li></ol></div></li><li class="task"><span class="no">5.</span><div class="body"><div class="q">1 т = … кг</div><ol class="opts"><li>а) 1002</li><li>б) 1000</li><li>в) 2000</li><li>г) 990</li></ol></div></li><li class="task"><span class="no">6.</span><div class="body"><div class="q">4622 + 4252 = …</div><ol class="opts"><li>а) 8874</li><li>б) 17 748</li><li>в) 8876</li><li>г) 8864</li></ol></div></li><li class="task"><span class="no">7.</span><div class="body"><div class="q">Кое число е <b>след</b> 9000? …</div><ol class="opts"><li>а) 8991</li><li>б) 9001</li><li>в) 9101</li><li>г) 9002</li></ol></div></li><li class="task"><span class="no">8.</span><div class="body"><div class="q">1 кв. дм = … кв. см</div><ol class="opts"><li>а) 101</li><li>б) 200</li><li>в) 50</li><li>г) 100</li></ol></div></li><li class="task"><span class="no">9.</span><div class="body"><div class="q">Колко ръба има правоъгълният паралелепипед? …</div><div class="fig"><svg class="fig solid" viewBox="0 0 100 100" aria-hidden="true"><polygon points="10,44 70,44 70,82 10,82" fill="#DCEBFF" stroke="#1D2B4F" stroke-width="3" stroke-linejoin="round"/><polygon points="10,44 26,28 86,28 70,44" fill="#DCEBFF" stroke="#1D2B4F" stroke-width="3" stroke-linejoin="round" fill-opacity=".7"/><polygon points="70,44 86,28 86,66 70,82" fill="#DCEBFF" stroke="#1D2B4F" stroke-width="3" stroke-linejoin="round" fill-opacity=".5"/></svg></div><ol class="opts"><li>а) 11</li><li>б) 12</li><li>в) 10</li><li>г) 6</li></ol></div></li><li class="task"><span class="no">10.</span><div class="body"><div class="q">Лицето на правоъгълник 7 см на 2 см е … кв. см.</div><div class="fig"><svg class="fig" viewBox="0 0 220 140" aria-hidden="true"><rect x="35" y="34" width="150" height="80" rx="3" fill="#E7F4FF" stroke="#2F80ED" stroke-width="4"/><text x="110" y="26" text-anchor="middle">7 см</text><text x="193" y="79">2 см</text></svg></div><ol class="opts"><li>а) 4</li><li>б) 28</li><li>в) 7</li><li>г) 14</li></ol></div></li><li class="task"><span class="no">11.</span><div class="body"><div class="q">497 038 … 497 028</div><ol class="opts"><li><</li><li>=</li><li>></li></ol></div></li><li class="task"><span class="no">12.</span><div class="body"><div class="q">Кое число е <b>след</b> 64 000? …</div><ol class="opts"><li>а) 63 991</li><li>б) 64 001</li><li>в) 128 002</li><li>г) 63 999</li></ol></div></li><li class="task"><span class="no">13.</span><div class="body"><div class="q">13 542 + 20 978 = …</div><ol class="opts"><li>а) 2543</li><li>б) 69 040</li><li>в) 34 518</li><li>г) 34 520</li></ol></div></li><li class="task"><span class="no">14.</span><div class="body"><div class="q">Правият ъгъл е … градуса.</div><ol class="opts"><li>а) 80</li><li>б) 45</li><li>в) 90</li><li>г) 89</li></ol></div></li><li class="task"><span class="no">15.</span><div class="body"><div class="q">5900 − … = 4600</div><ol class="opts"><li>а) 650</li><li>б) 1300</li><li>в) 1310</li><li>г) 31</li></ol></div></li><li class="task"><span class="no">16.</span><div class="body"><div class="q">7002 − 1515 = …</div><ol class="opts"><li>а) 5487</li><li>б) 7845</li><li>в) 5486</li><li>г) 10 974</li></ol></div></li></ol>
+  <h3 class="part">Задачи с кратък свободен отговор</h3>
+  <ol class="tasks" start="17"><li class="task"><span class="no">17.</span><div class="body"><div class="q">1865 : 5 = <span class="blank"></span></div></div></li><li class="task"><span class="no">18.</span><div class="body"><div class="q">1215 · 23 = <span class="blank"></span></div></div></li><li class="task"><span class="no">19.</span><div class="body"><div class="q">6416 : 2 = <span class="blank"></span></div></div></li><li class="task"><span class="no">20.</span><div class="body"><div class="q">Лицето на квадрат със страна 10 см е <span class="blank"></span> кв. см.</div><div class="fig"><svg class="fig" viewBox="0 0 220 140" aria-hidden="true"><rect x="62" y="26" width="96" height="96" rx="3" fill="#E7F4FF" stroke="#2F80ED" stroke-width="4"/><text x="110" y="18" text-anchor="middle">10 см</text><text x="166" y="79">10 см</text></svg></div></div></li></ol>
+  <h3 class="part">Задачи с разширен свободен отговор</h3>
+  <ol class="tasks" start="21"><li class="task"><span class="no">21.</span><div class="body">
+    <div class="q">Правоъгълна градина е с дължина 14 м и широчина 10 м. Намерете обиколката и лицето на градината. Запишете решението.</div><div class="work"></div></div></li><li class="task"><span class="no">22.</span><div class="body">
+    <div class="q">Едно дете купува 10 книги по 7 евро всяка и плаща с 90 евро. Колко евро ще му върнат? Запишете решението.</div><div class="work"></div></div></li><li class="task"><span class="no">23.</span><div class="body">
+    <div class="q">В склад има 90 кутии. Подреждат ги на рафтове по 7 кутии. Колко рафта ще се напълнят и колко кутии ще останат? Запишете решението.</div><div class="work"></div></div></li><li class="task"><span class="no">24.</span><div class="body">
+    <div class="q">Намерете неизвестното число: ако към него прибавим 1619, се получава 4674. Умножете намереното число с 3. Запишете решението.</div><div class="work"></div></div></li></ol>
+  <h3 class="part">Задача с разширен отговор с три подусловия</h3>
+  <ol class="tasks" start="25"><li class="task"><span class="no">25.</span><div class="body">
+    <div class="q">В магазин има 6 каси с по 25 кутии сок и още 29 кутии в склада.</div>
+    <ul class="subs"><li><b>а)</b> Колко кутии сок има в магазина?<div class="work short"></div></li><li><b>б)</b> През деня са продадени 118 кутии. Колко остават?<div class="work short"></div></li><li><b>в)</b> Останалите кутии се подреждат по 7 на рафт. Колко рафта са нужни?<div class="work short"></div></li></ul>
+  </div></li></ol>
+  <div class="blanka-wrap"><b>Бланка за отговори</b><table class="blanka"><tr><td><b>1</b><span></span></td><td><b>2</b><span></span></td><td><b>3</b><span></span></td><td><b>4</b><span></span></td><td><b>5</b><span></span></td><td><b>6</b><span></span></td><td><b>7</b><span></span></td><td><b>8</b><span></span></td><td><b>9</b><span></span></td><td><b>10</b><span></span></td><td><b>11</b><span></span></td><td><b>12</b><span></span></td><td><b>13</b><span></span></td><td><b>14</b><span></span></td><td><b>15</b><span></span></td><td><b>16</b><span></span></td></tr></table>
+  <p class="hint">Задачи 17–25 се оценяват по написаното в теста.</p></div>
+  <p class="t-foot">Точки: ____ от 100</p></section>
+<section class="page keys"><h2>Отговори</h2><h3 class="part">Част I · Тренировъчни тестове</h3><div class="key-grid"><div class="key"><b>Тест 1 · Умножение с едноцифрено число (вариант А)</b><p>1. в · 2. в · 3. г · 4. г · 5. в · 6. а · 7. а · 8. а · 9. 7670 · 10. 26 955 · 11. 22 025 · 12. 20</p></div></div><h3 class="part">Част II · Примерни изпитни тестове</h3><div class="key-grid"><div class="key"><b>Изпитен тест 1</b><p>1. г · 2. в · 3. а · 4. > · 5. б · 6. а · 7. б · 8. г · 9. б · 10. г · 11. > · 12. б · 13. г · 14. в · 15. б · 16. а · 17. 373 · 18. 27 945 · 19. 3208 · 20. 100</p><p class="sol"><b>21.</b> P = (14 + 10) · 2 = 24 · 2 = 48 м<br>S = 14 · 10 = 140 кв. м<br><b>Отговор: обиколката е 48 м, лицето е 140 кв. м.</b></p><p class="sol"><b>22.</b> 10 · 7 = 70 евро струват книгите<br>90 − 70 = 20 евро<br><b>Отговор: ще му върнат 20 евро.</b></p><p class="sol"><b>23.</b> 90 : 7 = 12 и остатък 6<br><b>Отговор: ще се напълнят 12 рафта и ще останат 6 кутии.</b></p><p class="sol"><b>24.</b> x + 1619 = 4674<br>x = 4674 − 1619 = 3055<br>3055 · 3 = 9165<br><b>Отговор: 9165.</b></p><p class="sol"><b>25.</b> а) 6 · 25 = 150; 150 + 29 = 179 кутии<br>б) 179 − 118 = 61 кутии<br>в) 61 : 7 = 8 и остатък 5; нужни са 9 рафта (остатъкът също иска рафт)</p><p class="crit"><b>Критерии за 21–24:</b> <b>21.</b> По 3 т. за всяко вярно пресметнато (обиколка и лице) и 2 т. за верни мерни единици и отговор с изречение. <b>22.</b> 4 т. за вярно намерена стойност на покупката, 2 т. за изваждането, 2 т. за отговор с изречение. <b>23.</b> 4 т. за вярно деление, 2 т. за вярно определен остатък, 2 т. за отговор с изречение. <b>24.</b> 4 т. за вярно намерено неизвестно число, 3 т. за умножението, 1 т. за отговор.<br><b>Критерии за 25:</b> по 5–6 точки за всяко подусловие – около две трети за вярно действие и пресмятане, останалото за отговор с изречение.</p></div></div></section>
+<section class="page scale"><h2>Скала за оценяване</h2>
+<p>Точките от изпитните тестове се превръщат в оценка по скалата по-долу. Тя е ориентировъчна – за
+националното външно оценяване в 4. клас резултатът се обявява в точки, а всяко училище решава само
+как да го използва.</p>
+<table class="fmt wide"><tr><th>Точки</th><th>Оценка</th><th>Какво означава</th></tr>
+<tr><td>0 – 29</td><td>Слаб (2)</td><td>Основите не са усвоени. Върнете се към темите от предишен клас.</td></tr>
+<tr><td>30 – 49</td><td>Среден (3)</td><td>Част от темите се знаят. Работете по тренировъчните тестове на сгрешените.</td></tr>
+<tr><td>50 – 69</td><td>Добър (4)</td><td>Материалът се владее, но има пропуски в по-сложните задачи.</td></tr>
+<tr><td>70 – 89</td><td>Много добър (5)</td><td>Уверено владеене. Работете върху скоростта и проверката.</td></tr>
+<tr><td>90 – 100</td><td>Отличен (6)</td><td>Отлична подготовка. Решавайте по-трудни задачи за поддържане.</td></tr>
+</table>
+<h3 class="part">Как се четат резултатите</h3>
+<p>По-полезно от сравнението със скалата е сравнението със самия себе си: с колко задачи повече се
+справя детето този месец спрямо миналия. Записвайте точките от всеки изпитен тест в таблицата отдолу.</p>
+<table class="fmt wide track"><tr><th>Тест</th><th>Дата</th><th>Точки</th><th>Най-много грешки в</th></tr><tr><td>Изпитен тест 1</td><td></td><td></td><td></td></tr><tr><td>Изпитен тест 2</td><td></td><td></td><td></td></tr><tr><td>Изпитен тест 3</td><td></td><td></td><td></td></tr><tr><td>Изпитен тест 4</td><td></td><td></td><td></td></tr><tr><td>Изпитен тест 5</td><td></td><td></td><td></td></tr><tr><td>Изпитен тест 6</td><td></td><td></td><td></td></tr><tr><td>Изпитен тест 7</td><td></td><td></td><td></td></tr><tr><td>Изпитен тест 8</td><td></td><td></td><td></td></tr><tr><td>Изпитен тест 9</td><td></td><td></td><td></td></tr><tr><td>Изпитен тест 10</td><td></td><td></td><td></td></tr><tr><td>Изпитен тест 11</td><td></td><td></td><td></td></tr><tr><td>Изпитен тест 12</td><td></td><td></td><td></td></tr></table></section>
+</body></html>
