@@ -4,9 +4,11 @@
 const path = require('path'), fs = require('fs');
 const { chromium } = require('playwright');
 
+const ASSETS = path.join('..', '..', 'public_html', 'assets');
 const JOBS = [
-  ['index.html', 'Sbornik-NVO-4-klas.pdf'],
-  ['sample.html', path.join('..', '..', 'public_html', 'assets', 'Smetko-NVO-4-klas-izvadka.pdf')],
+  /* целият сборник е безплатен – слага се направо в сайта */
+  ['index.html', path.join(ASSETS, 'Smetko-NVO-4-klas-sbornik.pdf')],
+  ['sample.html', path.join(ASSETS, 'Smetko-NVO-4-klas-izvadka.pdf')],
 ];
 (async () => {
   const dir = path.join(__dirname, 'sbornik');

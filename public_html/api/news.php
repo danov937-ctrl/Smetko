@@ -26,6 +26,17 @@ if (FREE_MODE && !setting('news_seed_free')) {
     }
     $pdo->exec('COMMIT');
 }
+// сборникът за НВО вече е свободен за сваляне
+if (!setting('news_seed_sbornik')) {
+    $pdo = db(); $pdo->exec('BEGIN IMMEDIATE');
+    if (!setting('news_seed_sbornik')) {
+        set_setting('news_seed_sbornik', '1');
+        $pdo->prepare('INSERT INTO news(emoji, title, body, link, link_text, starts, ends, active, popup, created_at) VALUES(?, ?, ?, ?, ?, ?, NULL, 1, 1, ?)')->execute(['📕', 'Сборникът за НВО е безплатен',
+            "Целият сборник за подготовка за НВО по математика в 4. клас се сваля свободно – 92 страници А4, 32 теста и 564 задачи.\n\nВътре има 20 тренировъчни теста по темите от програмата (всяка тема с два равностойни варианта – А и Б), 12 примерни изпитни теста по действащия модел на МОН и ключ с отговорите на всички задачи, решения, критерии за оценяване и скала точки → оценка.\n\nПечата се у дома, в училище или в копирен център, в колкото копия ви трябват. Без регистрация.",
+            'nvo-sbornik.html', '📕 Към сборника', $t, now()]);
+    }
+    $pdo->exec('COMMIT');
+}
 $st = db()->prepare("SELECT id, emoji, title, body, link, link_text, popup, COALESCE(starts, substr(created_at, 1, 10)) AS d FROM news
     WHERE active = 1 AND (starts IS NULL OR starts = '' OR starts <= ?) AND (ends IS NULL OR ends = '' OR ends >= ?) ORDER BY d DESC, id DESC LIMIT 30");
 $st->execute([$t, $t]);
