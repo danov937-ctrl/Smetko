@@ -76,8 +76,20 @@ function toMC(t) {
     choices: o.map((v, i) => AZ(i) + ') ' + fmt(v)) };
 }
 function clean(q, mc) {
-  // при задача с избор мястото за отговор не трябва – отговорът се отбелязва отдолу
-  return String(q).replace(/\{\?\}/g, mc ? '…' : '<span class="blank"></span>');
+  // при задача с избор мястото за отговор е квадратче, както на изпита
+  return String(q).replace(/\{\?\}/g, mc ? '<span class="box"></span>' : '<span class="blank"></span>');
+}
+
+/* Готовите отговори се номерират с а) б) в) г) – както в изпитните материали. */
+function lettered(t) {
+  if (t.kind !== 'choice' || !Array.isArray(t.choices)) return t;
+  if (typeof t.choices[0] === 'string' && /^[а-г]\)/.test(t.choices[0])) return t;   // вече са с букви
+  const vals = t.choices.map(c => (typeof c === 'object' ? c : { v: c, html: String(c) }));
+  const idx = vals.findIndex(c => String(c.v) === String(t.answer));
+  return Object.assign({}, t, {
+    answer: idx >= 0 ? AZ(idx) : t.answer,
+    choices: vals.map((c, i) => AZ(i) + ') ' + (c.html || c.v)),
+  });
 }
 
 /* взима годни задачи от списък умения, без повторения и без еднакви шаблони.
@@ -100,7 +112,12 @@ function take(st, skills, lv, n, want) {
   return out;
 }
 
-// ---------- задачи с разширен свободен отговор (пише се решение) ----------
+/* ---------- задачи с разширен свободен отговор (пише се решение) ----------
+   Групирани по темите на задачи 21–24 от модела:
+     model   – текстова задача от живота (илюстрация/схема)
+     geom    – обиколка и лице
+     table   – данни от таблица
+     compare – умножение и сравняване (колко повече/по-малко) */
 const EXT = [
   () => { const a = rnd(12, 28), b = rnd(6, 11);
     return { q: `Правоъгълна градина е с дължина ${a} м и широчина ${b} м. Намерете обиколката и лицето на градината. Запишете решението.`,
@@ -176,6 +193,50 @@ const EXT = [
     return { q: `Детска градина получава по ${per} кифли на ден, а децата изяждат по ${eat}. Колко кифли получава за ${d} дни и колко остават? Запишете решението.`,
       sol: `${per} · ${d} = ${per * d} получени кифли<br>${eat} · ${d} = ${eat * d} изядени<br>${per * d} − ${eat * d} = ${per * d - eat * d}<br><b>Отговор: получава ${per * d} кифли и остават ${per * d - eat * d}.</b>`,
       crit: '2 т. за всяко вярно умножение, 1 т. за изваждането и отговора.' }; },
+];
+
+
+/* Трите групи сочат към EXT по темите на задачи 21, 22 и 24 от модела:
+   21 – моделиране на житейска ситуация, 22 – обиколка и лице, 24 – умножение и сравняване. */
+const EXT_GEOM  = [0, 4, 13, 16].map(i => EXT[i]);
+const EXT_MODEL = [1, 2, 3, 5, 8, 10, 11, 14].map(i => EXT[i]);
+const EXT_CMP   = [6, 7, 9, 12, 15, 17].map(i => EXT[i]);
+
+// --- задачи с данни от таблица (както задача 23 на изпита) ---
+function tableHTML(head, rows) {
+  return '<table class="task-tbl"><thead><tr>' + head.map(function (h) { return '<th>' + h + '</th>'; }).join('') +
+    '</tr></thead><tbody>' + rows.map(function (r) {
+      return '<tr>' + r.map(function (c, i) { return i ? '<td class="num">' + c + '</td>' : '<td>' + c + '</td>'; }).join('') + '</tr>';
+    }).join('') + '</tbody></table>';
+}
+const EXT_TABLE = [
+  () => { const kids = ['Ани', 'Борис', 'Вера'], p1 = rnd(2, 5), p2 = rnd(3, 7);
+    const a = [rnd(2, 4), rnd(1, 3)], b = [rnd(1, 3), rnd(2, 4)];
+    const sumA = a[0] * p1 + a[1] * p2, sumB = b[0] * p1 + b[1] * p2;
+    return { q: 'Таблицата показва какво са купили три деца в сладкарницата. Един сладолед струва ' + p1 +
+        ' евро, а едно парче торта – ' + p2 + ' евро.' +
+        tableHTML(['Дете', 'Сладоледи', 'Торти'], [[kids[0], a[0], a[1]], [kids[1], b[0], b[1]]]) +
+        'Колко евро е платило всяко дете и кое е платило повече? Запишете решението.',
+      sol: kids[0] + ': ' + a[0] + ' · ' + p1 + ' + ' + a[1] + ' · ' + p2 + ' = ' + sumA + ' евро<br>' +
+        kids[1] + ': ' + b[0] + ' · ' + p1 + ' + ' + b[1] + ' · ' + p2 + ' = ' + sumB + ' евро<br>' +
+        '<b>Отговор: ' + (sumA > sumB ? kids[0] : kids[1]) + ' е платило повече – с ' + Math.abs(sumA - sumB) + ' евро.</b>',
+      crit: 'По 2 т. за всяка вярно пресметната сума и 1 т. за сравнението с отговор.' }; },
+  () => { const cls = ['4. а', '4. б', '4. в'], v = [rnd(18, 26), rnd(17, 25), rnd(19, 27)], abs = [rnd(1, 4), rnd(0, 3), rnd(2, 5)];
+    const tot = v[0] + v[1] + v[2], ab = abs[0] + abs[1] + abs[2];
+    return { q: 'Таблицата показва броя на учениците в три паралелки и колко от тях отсъстват днес.' +
+        tableHTML(['Паралелка', 'Ученици', 'Отсъстващи'], [[cls[0], v[0], abs[0]], [cls[1], v[1], abs[1]], [cls[2], v[2], abs[2]]]) +
+        'Колко ученици присъстват общо в трите паралелки? Запишете решението.',
+      sol: 'Общо ученици: ' + v.join(' + ') + ' = ' + tot + '<br>Общо отсъстващи: ' + abs.join(' + ') + ' = ' + ab +
+        '<br>' + tot + ' − ' + ab + ' = ' + (tot - ab) + '<br><b>Отговор: присъстват ' + (tot - ab) + ' ученици.</b>',
+      crit: '2 т. за общия брой ученици, 2 т. за отсъстващите, 1 т. за изваждането и отговора.' }; },
+  () => { const d = ['понеделник', 'вторник', 'сряда'], km = [rnd(120, 240), rnd(90, 210), rnd(140, 260)];
+    const tot = km[0] + km[1] + km[2];
+    return { q: 'Таблицата показва изминатите километри за три дни от една екскурзия.' +
+        tableHTML(['Ден', 'Километри'], [[d[0], km[0]], [d[1], km[1]], [d[2], km[2]]]) +
+        'Колко километра са изминати общо и в кой ден разстоянието е най-голямо? Запишете решението.',
+      sol: km.join(' + ') + ' = ' + fmt(tot) + ' км<br>Най-голямо разстояние: ' + d[km.indexOf(Math.max.apply(null, km))] +
+        ' – ' + Math.max.apply(null, km) + ' км<br><b>Отговор: общо ' + fmt(tot) + ' км; най-дълъг е ' + d[km.indexOf(Math.max.apply(null, km))] + '.</b>',
+      crit: '3 т. за вярно събиране, 2 т. за намиране на най-голямото и отговор с изречение.' }; },
 ];
 
 // ---------- текстова задача с три подусловия ----------
@@ -279,20 +340,31 @@ function training(theme, variant, idx) {
 
 function exam(i) {
   seed(90000 + i * 211);
-  const ALL = ['placeBig', 'cmpBig', 'nextPrevBig', 'romanRead', 'romanWrite', 'addBigNo', 'subBigNo',
-    'unkSubtrahend', 'addBigX', 'subBigX', 'mulBig1d', 'divBig1d', 'unkDivisor', 'mul2d', 'div2d',
-    'area', 'areaUnits', 'sideFromArea', 'degrees', 'solidsName', 'solidsCount', 'units3b', 'triAngles'];
   const st = newState();
-  const mc = take(st, ALL, 2, 16).map(t => t.kind === 'number' ? toMC(t) : t);
-  const short = take(st, ['addBigX', 'subBigX', 'mulBig1d', 'divBig1d', 'mul2d', 'div2d', 'area', 'units3b'], 3, 4, 'number');
-  // четири различни задачи с разширен свободен отговор
-  const ext = [];
-  const used = new Set();
-  for (let k = 0; k < 4; k++) {
-    let j = (i * 4 + k) % EXT.length, guard = 0;
-    while (used.has(j) && guard++ < EXT.length) j = (j + 1) % EXT.length;
-    used.add(j); ext.push(EXT[j]());
+  // задачи 1–20: точно по чертежа на модела (E.NVO4), в реда на изпита
+  const mc = [], short = [];
+  for (const pos of E.NVO4.plan) {
+    let t = null, guard = 0;
+    while (!t && guard++ < 80) {
+      const c = E.generateSkill(4, pick(pos.s), pos.n > 16 ? 3 : 2);
+      if (!c || c.dots) continue;
+      if (c.kind === 'choice' && Array.isArray(c.choices) && typeof c.choices[0] === 'object' && !c.choices[0].html) continue;
+      const key = String(c.q).replace(/<[^>]+>/g, '');
+      if (st.seen.has(key)) continue;
+      if (pos.free && c.kind !== 'number') continue;
+      st.seen.add(key); t = c;
+    }
+    if (!t) continue;
+    t.plan = pos;
+    (pos.free ? short : mc).push(pos.free ? t : (t.kind === 'number' ? toMC(t) : t));
   }
+  // задачи 21–24: по темите на модела – моделиране, измерване, таблица, сравняване
+  const ext = [
+    EXT_MODEL[(i * 3) % EXT_MODEL.length](),
+    EXT_GEOM[(i * 2) % EXT_GEOM.length](),
+    EXT_TABLE[i % EXT_TABLE.length](),
+    EXT_CMP[(i * 2 + 1) % EXT_CMP.length](),
+  ];
   const w3 = WORD3[i % WORD3.length]();
   return { kind: 'exam', no: i + 1, tasks: [...mc, ...short], ext, w3 };
 }
@@ -300,6 +372,7 @@ function exam(i) {
 // ---------- оформление ----------
 function taskHTML(t, n) {
   const mc = t.kind === 'choice';
+  t = lettered(t);
   let h = `<li class="task"><span class="no">${n}.</span><div class="body"><div class="q">${clean(t.q, mc)}</div>`;
   if (t.figure) h += `<div class="fig">${t.figure}</div>`;
   if (mc) {
@@ -352,7 +425,7 @@ function examHTML(t) {
 }
 
 function keyHTML(trains, exams) {
-  function ans(t) { return t.kind === 'choice' ? t.answer : fmt(t.answer); }
+  function ans(t) { return t.kind === 'choice' ? lettered(t).answer : fmt(t.answer); }
   let h = '<section class="page keys"><h2>Отговори</h2>';
   h += '<h3 class="part">Част I · Тренировъчни тестове</h3><div class="key-grid">';
   trains.forEach((t, i) => {

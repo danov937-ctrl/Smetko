@@ -32,12 +32,34 @@
     for (var i = 0; i < cand.length && opts.length < 4; i++) { var c = cand[i]; if (c >= 0 && !set[c] && isFinite(c)) { set[c] = 1; opts.push(c); } }
     while (opts.length < 4) { var x = a + rnd(3, 20); if (!set[x]) { set[x] = 1; opts.push(x); } }
     opts = shuffle(opts);
-    return { q: t.q, answer: String.fromCharCode(1072 + opts.indexOf(a)), kind: 'choice', full: t.full, figure: t.figure,
+    return { q: t.q, answer: String.fromCharCode(1072 + opts.indexOf(a)), kind: 'choice', full: t.full, figure: t.figure, plan: t.plan,
       choices: opts.map(function (o, i) { return { v: String.fromCharCode(1072 + i), html: String.fromCharCode(1072 + i) + ') ' + fmt(o) }; }), mc: true };
+  }
+
+  /* Тест точно по чертежа на НВО: всяка позиция има своята тема, в реда на изпита.
+     Проверяват се първите 20 задачи – останалите 5 искат записано решение. */
+  function buildPlan(el) {
+    var lv = +el.dataset.level || 3, P = E().NVO4, list = [], seen = {};
+    for (var i = 0; i < P.plan.length; i++) {
+      var p = P.plan[i], t = null, guard = 0;
+      while (!t && guard++ < 60) {
+        var c = E().generateSkill(4, p.s[rnd(0, p.s.length - 1)], lv);
+        if (!c || c.dots || seen[c.q]) { c = null; continue; }
+        if (c.kind === 'choice' && c.choices && typeof c.choices[0] === 'object' && !c.choices[0].html) { c = null; continue; }
+        if (p.free && c.kind !== 'number') { c = null; continue; }   // 17–20 се пишат, не се избират
+        t = c;
+      }
+      if (!t) continue;
+      seen[t.q] = 1;
+      t.plan = p;                                   // за надписа „Числа · Сравняване…“
+      list.push(i < P.mc && t.kind === 'number' ? toMC(t) : t);
+    }
+    return list;
   }
 
   function build(el) {
     var d = el.dataset, n = +d.n || 10, lv = +d.level || 2, grade = +d.grade || 1, seen = {}, list = [], guard = 0;
+    if (d.plan === 'nvo4') return buildPlan(el);
     var skills = d.skills ? d.skills.split(',') : null, mix = d.mix ? d.mix.split(',').map(Number) : null;
     var nums = el._nums || [2, 3, 4, 5, 6, 7, 8, 9, 10];
     while (list.length < n && guard++ < n * 80) {
@@ -60,11 +82,14 @@
     if (t.kind === 'choice') {
       var ch = t.choices.map(function (c) { var v = typeof c === 'object' ? c.v : c, h = typeof c === 'object' ? c.html : esc(c); return '<button type="button" class="qz-ch" data-v="' + esc(v) + '">' + h + '</button>'; }).join('');
       inp = t.mc ? '<span class="qz-blank">?</span>' : '<span class="qz-blank">?</span>';
-      return '<li class="qz-q" data-i="' + i + '"><div class="qz-text">' + t.q.replace('{?}', inp) + '</div>' + (t.figure ? '<div class="qz-fig">' + t.figure + '</div>' : '') + '<div class="qz-chs' + (t.mc ? ' mc' : '') + '">' + ch + '</div><div class="qz-fb" aria-live="polite"></div></li>';
+      return '<li class="qz-q" data-i="' + i + '">' + planTag(t) + '<div class="qz-text">' + t.q.replace('{?}', inp) + '</div>' + (t.figure ? '<div class="qz-fig">' + t.figure + '</div>' : '') + '<div class="qz-chs' + (t.mc ? ' mc' : '') + '">' + ch + '</div><div class="qz-fb" aria-live="polite"></div></li>';
     }
     inp = '<input class="qz-in" inputmode="numeric" autocomplete="off" aria-label="Отговор на задача ' + (i + 1) + '" maxlength="9">';
     var q = t.q.indexOf('{?}') >= 0 ? t.q.replace('{?}', inp) : t.q + ' ' + inp;
-    return '<li class="qz-q" data-i="' + i + '"><div class="qz-text">' + q + '</div>' + (t.figure ? '<div class="qz-fig">' + t.figure + '</div>' : '') + '<div class="qz-fb" aria-live="polite"></div></li>';
+    return '<li class="qz-q" data-i="' + i + '">' + planTag(t) + '<div class="qz-text">' + q + '</div>' + (t.figure ? '<div class="qz-fig">' + t.figure + '</div>' : '') + '<div class="qz-fb" aria-live="polite"></div></li>';
+  }
+  function planTag(t) {
+    return t.plan ? '<span class="qz-plan"><b>' + esc(t.plan.area) + '</b> · ' + esc(t.plan.what) + (t.plan.free ? ' · кратък отговор' : '') + '</span>' : '';
   }
 
   function play(el) {

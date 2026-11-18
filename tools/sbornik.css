@@ -96,3 +96,10 @@ table.track td { height: 9mm; }
 .key p { margin: 3px 0 0; color: #3C4A66; }
 .key .sol { background: #F6F9FE; padding: 5px 8px; border-radius: 6px; margin-top: 5px; }
 .key .crit { font-size: 9pt; color: #5A6780; border-top: 1px dashed #D9E4F5; padding-top: 5px; }
+
+/* таблица вътре в условие на задача (както задача 23 на изпита) */
+.task-tbl { border-collapse: collapse; margin: 7px 0; font-size: 9.5pt; min-width: 55mm; }
+.task-tbl th, .task-tbl td { border: 1px solid #C7D3E6; padding: 3px 9px; text-align: left; }
+.task-tbl th { background: #EEF4FD; font-size: 9pt; }
+.task-tbl td.num { text-align: center; }
+.box { display: inline-block; width: 9mm; height: 4.6mm; border: 1.4px solid #15223B; border-radius: 2px; vertical-align: -1mm; }

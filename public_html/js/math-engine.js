@@ -320,6 +320,58 @@
   S.addBigX = function () { var a, b; do { a = rnd(1000, 60000); b = rnd(1000, 99999 - a); } while (!hasCarry(a, b)); return expr(a, PLUS, b, a + b); };
   S.subBigX = function () { var a, b; do { a = rnd(2000, 99999); b = rnd(1000, a - 500); if (Math.random() < .3) { a = rnd(2, 9) * 1000 + rnd(0, 9); b = rnd(100, a - 100); } } while (!hasBorrow(a, b)); return expr(a, MINUS, b, a - b); };
   S.solidsName = function () { var names = ['куб', 'цилиндър', 'конус', 'пирамида', 'сфера', 'правоъгълен паралелепипед'], t = pick(names), others = shuffle(names.filter(function (n) { return n !== t; })).slice(0, 3); return choose('Кое тяло е <b>' + t + '</b>?', [t].concat(others).map(function (n) { return { v: n, html: solidFig(n) }; }), t, 'Това е ' + t + '.', { optFigs: true }); };
+  /* ---- задачи по модела на НВО за IV клас (виж E.NVO4 за реда на теста) ---- */
+  // 1. Записване на многоцифрено число по словесно описание на разрядите
+  S.nvoWrite = function (lv) {
+    var big = lv > 1, d = [];
+    var th = big ? rnd(10, 98) : rnd(1, 9);                  // хиляди
+    var h = rnd(0, 9), t = rnd(0, 9), u = rnd(0, 9);
+    var n = th * 1000 + h * 100 + t * 10 + u;
+    var parts = [];
+    if (big) { parts.push(Math.floor(th / 10) + ' десетици от хиляди'); parts.push((th % 10) + ' единици от хиляди'); }
+    else parts.push(th + ' единици от хиляди');
+    parts.push(h + ' стотици', t + ' десетици', u + ' единици');
+    var wrong = [n + (u < 5 ? 90 : -90), +String(n).split('').reverse().join(''), n + (h < 5 ? 1000 : -1000)];
+    var opts = [n];
+    for (var i = 0; i < wrong.length && opts.length < 4; i++)
+      if (wrong[i] > 0 && wrong[i] !== n && opts.indexOf(wrong[i]) < 0) opts.push(wrong[i]);
+    while (opts.length < 4) { var x = n + rnd(1, 9) * 10; if (opts.indexOf(x) < 0) opts.push(x); }
+    return choose('Кое число има ' + parts.join(', ') + '?',
+      opts.map(function (v) { return { v: v, html: fmt(v) }; }), n, 'Числото е ' + fmt(n) + '.');
+  };
+  // 2. „n пъти по-голямо / по-малко“ – както е формулирано на изпита
+  S.nvoTimes = function (lv) {
+    var k = rnd(2, 9), more = Math.random() < .5;
+    if (more) { var a = lv > 1 ? rnd(1001, 9999) : rnd(101, 999); return T('Кое число е ' + k + ' пъти по-голямо от ' + fmt(a) + '? {?}', a * k, fmt(a) + ' ' + TIMES + ' ' + k + ' = ' + fmt(a * k)); }
+    var r = lv > 1 ? rnd(101, 999) : rnd(11, 99), b = r * k;
+    return T('Кое число е ' + k + ' пъти по-малко от ' + fmt(b) + '? {?}', r, fmt(b) + ' ' + DIV + ' ' + k + ' = ' + fmt(r));
+  };
+  // 3. Ред на действията – пита се кое действие е първо, а не стойността
+  S.nvoOrder = function () {
+    var op = pick(['изваждане', 'събиране', 'умножение', 'деление']);
+    var a = rnd(12, 90), b = rnd(2, 9), c = rnd(11, 40), d = rnd(2, 9);
+    var make = {
+      'изваждане': '(' + (a + c) + ' − ' + c + ') ' + TIMES + ' ' + b,
+      'събиране': '(' + a + ' + ' + c + ') ' + DIV + ' ' + b,
+      'умножение': a + ' + ' + c + ' ' + TIMES + ' ' + b,
+      'деление': a + ' − ' + (c * d) + ' ' + DIV + ' ' + d
+    };
+    var keys = shuffle(Object.keys(make)), right = make[op];
+    var opts = [right];
+    for (var i = 0; i < keys.length && opts.length < 4; i++) if (keys[i] !== op) opts.push(make[keys[i]]);
+    return choose('В кой от изразите <b>първо</b> се извършва действие ' + op + '?', opts, right,
+      'В ' + right + ' първо се извършва ' + op + '. В израз без скоби първо са умножението и делението, а скобите изпреварват всичко.');
+  };
+  // 4. Разпределително свойство – кой израз пресмята същото
+  S.nvoSame = function () {
+    var a = rnd(11, 49), b = rnd(11, 49), k = rnd(11, 29);
+    var q = a + ' ' + TIMES + ' ' + k + ' + ' + b + ' ' + TIMES + ' ' + k;
+    var right = '(' + a + ' + ' + b + ') ' + TIMES + ' ' + k;
+    var opts = [right, '(' + a + ' + ' + b + ') ' + TIMES + ' ' + (k + k),
+      '(' + a + ' ' + TIMES + ' ' + b + ') ' + TIMES + ' ' + k, '(' + a + ' − ' + b + ') ' + TIMES + ' ' + k];
+    return choose('С кой израз може да се пресметне вярно ' + q + '?', opts, right,
+      'Общият множител ' + k + ' се изнася пред скобите: ' + right + ' = ' + fmt((a + b) * k) + '.');
+  };
   S.solidsCount = function () { var b = pick(['кубът', 'правоъгълният паралелепипед']), q = pick([['стени', 6], ['ръба', 12], ['върха', 8]]); return T('Колко ' + q[0] + ' има ' + b + '? {?}', q[1], b.charAt(0).toUpperCase() + b.slice(1) + ' има ' + q[1] + ' ' + q[0] + '.', { figure: solidFig(b === 'кубът' ? 'куб' : 'правоъгълен паралелепипед').replace('opt-fig', 'fig solid') }); };
   S.mulBig1d = function (lv) { var a = lv === 1 ? rnd(101, 999) : rnd(1001, 9999), b = rnd(2, 9); if (a * b > 99999) b = 2; return expr(a, TIMES, b, a * b); };
   S.area = function (lv) { var a = rnd(3, 15), b = rnd(2, 12); if (Math.random() < .35) return T('Лицето на квадрат със страна ' + a + ' см е {?} кв. см.', a * a, 'S = ' + a + ' ' + TIMES + ' ' + a + ' = ' + a * a + ' кв. см', { figure: rectFig(a + ' см', a + ' см', true) }); return T('Лицето на правоъгълник ' + a + ' см на ' + b + ' см е {?} кв. см.', a * b, 'S = ' + a + ' ' + TIMES + ' ' + b + ' = ' + a * b + ' кв. см', { figure: rectFig(a + ' см', b + ' см') }); };
@@ -489,6 +541,46 @@
 
   function topicName(grade, id) { if (id === 'mix' || !id) return 'Смесени задачи'; var t = findTopic(grade, id); return t ? t.name : ''; }
 
+
+  /* Чертеж на теста за НВО по математика в IV клас – редът и темите следват действащия модел на МОН
+     (в сила от 2024/2025) и реалните изпитни теми: 16 задачи с избираем отговор, 4 с кратък свободен
+     отговор, 4 с разширен свободен отговор и 1 с три подусловия.
+     Тук са само първите 20 – те могат да се проверяват автоматично. Задачи 21–25 искат записано
+     решение и са в сборника (tools/sbornik.js). */
+  var NVO4 = {
+    mc: 16, short: 4, written: 5, tasks: 25, points: 100, minutes: 60, sopExtra: 30,
+    plan: [
+      { n: 1, s: ['nvoWrite'], area: 'Числа', what: 'Записване на многоцифрено число по разряди' },
+      { n: 2, s: ['cmpBig'], area: 'Числа', what: 'Сравняване на многоцифрени числа' },
+      { n: 3, s: ['addBigX', 'addBigNo'], area: 'Числа', what: 'Събиране на многоцифрени числа' },
+      { n: 4, s: ['subBigX'], area: 'Числа', what: 'Изваждане на многоцифрени числа' },
+      { n: 5, s: ['subBigNo', 'subBigX'], area: 'Числа', what: 'Разлика на две числа' },
+      { n: 6, s: ['nvoTimes'], area: 'Числа', what: 'Число, n пъти по-голямо или по-малко' },
+      { n: 7, s: ['divRound10', 'mulRound10'], area: 'Числа', what: 'Умножение и деление с 10, 100, 1000' },
+      { n: 8, s: ['mulBig1d', 'mul2d'], area: 'Числа', what: 'Произведение на два множителя' },
+      { n: 9, s: ['divBig1d', 'div2d'], area: 'Числа', what: 'Частно на две числа' },
+      { n: 10, s: ['unkDivisor', 'unkDividend', 'unkFactor'], area: 'Числа', what: 'Намиране на неизвестно число' },
+      { n: 11, s: ['nvoOrder'], area: 'Числа', what: 'Ред на действията' },
+      { n: 12, s: ['nvoSame'], area: 'Числа', what: 'Разпределително свойство' },
+      { n: 13, s: ['degrees', 'angles', 'triAngles'], area: 'Фигури', what: 'Видове ъгли и триъгълници' },
+      { n: 14, s: ['sideFromArea', 'area'], area: 'Измерване', what: 'Лице и страна на правоъгълник' },
+      { n: 15, s: ['solidsName', 'solidsCount'], area: 'Фигури', what: 'Геометрични тела' },
+      { n: 16, s: ['circle'], area: 'Фигури', what: 'Окръжност, радиус и диаметър' },
+      { n: 17, s: ['perim2', 'units3b'], area: 'Измерване', what: 'Дължини и обиколка', free: true },
+      { n: 18, s: ['clockHM', 'time2', 'century'], area: 'Измерване', what: 'Време', free: true },
+      { n: 19, s: ['addBigX', 'subBigX'], area: 'Числа', what: 'Действия с многоцифрени числа', free: true },
+      { n: 20, s: ['unkSubtrahend', 'unkMinuend'], area: 'Числа', what: 'Неизвестно умаляемо или умалител', free: true }
+    ],
+    // задачите с решение – описание за страниците и за сборника
+    writtenPlan: [
+      { n: 21, area: 'Моделиране', what: 'Текстова задача с илюстрация или схема' },
+      { n: 22, area: 'Измерване', what: 'Обиколка и лице в практическа ситуация' },
+      { n: 23, area: 'Моделиране', what: 'Текстова задача с данни от таблица' },
+      { n: 24, area: 'Моделиране', what: 'Текстова задача с умножение и сравняване' },
+      { n: 25, area: 'Моделиране', what: 'Задача с три подусловия с различна трудност' }
+    ]
+  };
+
   window.Smetko = window.Smetko || {};
-  window.Smetko.MathEngine = { generate: generate, generateSkill: generateSkill, generateFrom: generateFrom, runSkill: runSkill, check: check, GRADES: GRADES, ADVENTURE: ADVENTURE, topicName: topicName, fmt: fmt, roman: roman, _S: S };
+  window.Smetko.MathEngine = { generate: generate, generateSkill: generateSkill, generateFrom: generateFrom, runSkill: runSkill, check: check, GRADES: GRADES, ADVENTURE: ADVENTURE, topicName: topicName, fmt: fmt, roman: roman, NVO4: NVO4, _S: S };
 })();
