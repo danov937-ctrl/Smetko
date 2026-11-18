@@ -3,6 +3,7 @@
 import os, sys, subprocess
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from seo_content import TOPICS  # noqa
+from icons import ico  # noqa
 from common import *  # noqa
 import legal  # noqa: правните страници
 
@@ -149,9 +150,9 @@ index = head('Сметко – математика като игра за 1.–
   <div class="wrap">
     <div class="section-head"><h2 class="lined">Три начина да играеш</h2><p>За бързи умове, за изследователи и за спокойна тренировка.</p></div>
     <div class="grid grid-3">
-      <article class="card mode-card quick"><div class="mode-ico">⚡</div><h3>Бързо сметни</h3><p>60 секунди, колкото можеш повече задачи. Бонус за бързина и рекорд за побиване.</p><a class="btn btn-sm" href="game.html?mode=quick&amp;start=0">Играй</a></article>
-      <article class="card mode-card adv"><div class="mode-ico">🗺️</div><h3>Приключение</h3><p>Мисии по пътеката към върха, подредени като уроците в учебника. До 3 звезди на мисия.</p><a class="btn btn-sm btn-green" href="game.html?mode=adventure&amp;start=0">Играй</a></article>
-      <article class="card mode-card prac"><div class="mode-ico">🧘</div><h3>Тренировка</h3><p>Без часовник и без стрес. При грешка Сметко показва правилното решение.</p><a class="btn btn-sm btn-purple" href="game.html?mode=practice&amp;start=0">Играй</a></article>
+      <article class="card mode-card quick"><div class="mode-ico">{ico('bolt')}</div><h3>Бързо сметни</h3><p>60 секунди, колкото можеш повече задачи. Бонус за бързина и рекорд за побиване.</p><a class="btn btn-sm" href="game.html?mode=quick&amp;start=0">Играй</a></article>
+      <article class="card mode-card adv"><div class="mode-ico">{ico('map')}</div><h3>Приключение</h3><p>Мисии по пътеката към върха, подредени като уроците в учебника. До 3 звезди на мисия.</p><a class="btn btn-sm btn-green" href="game.html?mode=adventure&amp;start=0">Играй</a></article>
+      <article class="card mode-card prac"><div class="mode-ico">{ico('leaf')}</div><h3>Тренировка</h3><p>Без часовник и без стрес. При грешка Сметко показва правилното решение.</p><a class="btn btn-sm btn-purple" href="game.html?mode=practice&amp;start=0">Играй</a></article>
     </div>
   </div>
 </section>
@@ -188,14 +189,14 @@ index = head('Сметко – математика като игра за 1.–
   <div class="wrap">
     <div class="section-head"><h2 class="lined">Безплатни помагала</h2><p>Онлайн тестове с автоматична проверка, таблици и подготовка за НВО – без регистрация.</p></div>
     <div class="hub-top">
-      <a class="hub-card" href="testove-po-matematika.html" style="--c:#2F80ED"><span>✏️</span><b>Тестове по математика</b><small>За всяка тема от 1. до 4. клас</small></a>
-      <a class="hub-card" href="tablica-za-umnozhenie.html" style="--c:#FF5A5F"><span>✖️</span><b>Таблица за умножение</b><small>За печат, трикове и тест</small></a>
-      <a class="hub-card" href="nvo-4-klas-matematika.html" style="--c:#8E6CF0"><span>⏱️</span><b>НВО 4. клас</b><small>Форматът и тренировъчен тест</small></a>
-      <a class="hub-card" href="nvo-4-klas-probni-testove.html" style="--c:#4CBB4A"><span>📝</span><b>Пробни тестове за НВО</b><small>3 варианта, 25 задачи, 60 мин.</small></a>
-      <a class="hub-card" href="nvo-sbornik.html" style="--c:#8E6CF0"><span>📘</span><b>Сборник за НВО</b><small>32 теста за печат – безплатен PDF</small></a>
-      <a class="hub-card" href="vhodno-nivo-matematika.html" style="--c:#FF9F1C"><span>🌱</span><b>Входно ниво</b><small>Тестове за 1.–4. клас</small></a>
+      <a class="hub-card" href="testove-po-matematika.html" style="--c:#2F80ED"><span>{ico('pencil')}</span><b>Тестове по математика</b><small>За всяка тема от 1. до 4. клас</small></a>
+      <a class="hub-card" href="tablica-za-umnozhenie.html" style="--c:#FF5A5F"><span>{ico('grid')}</span><b>Таблица за умножение</b><small>За печат, трикове и тест</small></a>
+      <a class="hub-card" href="nvo-4-klas-matematika.html" style="--c:#8E6CF0"><span>{ico('board')}</span><b>НВО 4. клас</b><small>Форматът и тренировъчен тест</small></a>
+      <a class="hub-card" href="nvo-4-klas-probni-testove.html" style="--c:#4CBB4A"><span>{ico('clock')}</span><b>Пробни тестове за НВО</b><small>3 варианта, 25 задачи, 60 мин.</small></a>
+      <a class="hub-card" href="nvo-sbornik.html" style="--c:#8E6CF0"><span>{ico('book')}</span><b>Сборник за НВО</b><small>32 теста за печат – безплатен PDF</small></a>
+      <a class="hub-card" href="vhodno-nivo-matematika.html" style="--c:#FF9F1C"><span>{ico('seed')}</span><b>Входно ниво</b><small>Тестове за 1.–4. клас</small></a>
       <a class="hub-card" href="rimski-cifri.html" style="--c:#19B5A5"><span>Ⅻ</span><b>Римски цифри</b><small>Таблица и преобразувател</small></a>
-      <a class="hub-card" href="merni-edinici.html" style="--c:#4CBB4A"><span>📏</span><b>Мерни единици</b><small>Дължина, маса, време, лице</small></a>
+      <a class="hub-card" href="merni-edinici.html" style="--c:#4CBB4A"><span>{ico('ruler')}</span><b>Мерни единици</b><small>Дължина, маса, време, лице</small></a>
     </div>
   </div>
 </section>
@@ -532,15 +533,15 @@ if FREE_MODE:  # всичко е безплатно за всички: стра�
 <section class="section soft"><div class="wrap">
   <div class="section-head"><h2 class="lined">Какво влиза</h2><p>Тоест всичко. Списъкът е тук само за да се види колко е.</p></div>
   <div class="free-grid">
-    <div class="free-card"><span>🗺️</span><b>Всички мисии</b><p>По уроците от учебника на детето – над 110 мисии за всеки клас, от 1. до 4.</p></div>
-    <div class="free-card"><span>⚡</span><b>Бързо сметни и Тренировка</b><p>Без дневен лимит и без ограничение по теми.</p></div>
-    <div class="free-card"><span>⭐</span><b>Точки, значки и гардероб</b><p>Задача на деня, серии, сезонни събития и всички дрешки за Сметко.</p></div>
-    <div class="free-card"><span>🏆</span><b>Класации</b><p>Класация на класа и общата класация на училищата от цялата страна.</p></div>
-    <div class="free-card"><span>📊</span><b>Отчет за родителя</b><p>Кои теми са сигурни и къде се запъва детето, плюс седмичен имейл.</p></div>
-    <div class="free-card"><span>📋</span><b>Табло за учителя</b><p>Ученици, домашни с краен срок, отчет по теми и карти за вход за печат.</p></div>
-    <div class="free-card"><span>✏️</span><b>Тестове и помагала</b><p>Онлайн тестове по теми, входно и изходно ниво, подготовка за НВО, работни листове.</p></div>
-    <div class="free-card"><span>📕</span><b>Сборникът за НВО</b><p>32 теста и 564 задачи за печат, с ключ и критерии – <a href="nvo-sbornik.html">целият PDF</a>, без регистрация.</p></div>
-    <div class="free-card"><span>🤝</span><b>Настройки за деца със СОП</b><p>Четене на глас, едър текст, по-малко задачи, спокойно темпо.</p></div>
+    <div class="free-card" style="--c:#2F80ED"><span>{ico('map')}</span><b>Всички мисии</b><p>По уроците от учебника на детето – над 110 мисии за всеки клас, от 1. до 4.</p></div>
+    <div class="free-card" style="--c:#FF7A1A"><span>{ico('bolt')}</span><b>Бързо сметни и Тренировка</b><p>Без дневен лимит и без ограничение по теми.</p></div>
+    <div class="free-card" style="--c:#E0A500"><span>{ico('star')}</span><b>Точки, значки и гардероб</b><p>Задача на деня, серии, сезонни събития и всички дрешки за Сметко.</p></div>
+    <div class="free-card" style="--c:#FF5A5F"><span>{ico('trophy')}</span><b>Класации</b><p>Класация на класа и общата класация на училищата от цялата страна.</p></div>
+    <div class="free-card" style="--c:#19B5A5"><span>{ico('chart')}</span><b>Отчет за родителя</b><p>Кои теми са сигурни и къде се запъва детето, плюс седмичен имейл.</p></div>
+    <div class="free-card" style="--c:#8E6CF0"><span>{ico('board')}</span><b>Табло за учителя</b><p>Ученици, домашни с краен срок, отчет по теми и карти за вход за печат.</p></div>
+    <div class="free-card"><span>{ico('pencil')}</span><b>Тестове и помагала</b><p>Онлайн тестове по теми, входно и изходно ниво, подготовка за НВО, работни листове.</p></div>
+    <div class="free-card" style="--c:#8E6CF0"><span>{ico('book')}</span><b>Сборникът за НВО</b><p>32 теста и 564 задачи за печат, с ключ и критерии – <a href="nvo-sbornik.html">целият PDF</a>, без регистрация.</p></div>
+    <div class="free-card" style="--c:#4CBB4A"><span>{ico('heart')}</span><b>Настройки за деца със СОП</b><p>Четене на глас, едър текст, по-малко задачи, спокойно темпо.</p></div>
   </div>
 </div></section>
 

@@ -11,6 +11,8 @@
     Измерване, Моделиране.
 Моделът се обновява всяка година – преди учебната година сверявайте с mon.bg."""
 
+from icons import ico
+
 MON_MODEL = 'https://www.mon.bg/nfs/2023/09/nvo_4kl_math_model-2024_15092023.pdf'
 MON_PROGRAM = 'https://www.mon.bg/nfs/2023/11/up_iv_math.pdf'
 
@@ -52,16 +54,16 @@ def build(C):
         SITEMAP.append((url, prio, freq))
 
     def nav(cur):
-        items = [('nvo-4-klas-matematika.html', '📋', 'Форматът на изпита'),
-                 ('nvo-4-klas-zadachi-s-izbor.html', '🔘', '16-те задачи с избор'),
-                 ('nvo-4-klas-kratak-otgovor.html', '✍️', '4-те с кратък отговор'),
-                 ('nvo-4-klas-razshiren-otgovor.html', '📝', 'Задачите с решение'),
-                 ('nvo-4-klas-probni-testove.html', '⏱️', 'Пробни варианти'),
-                 ('nvo-sbornik.html', '📘', 'Сборник за печат'),
-                 ('podgotovka-nvo-3-klas.html', '🌱', 'Подготовка от 3. клас'),
-                 ('nvo-4-klas-priem-5-klas.html', '🏫', 'Приемът в 5. клас')]
+        items = [('nvo-4-klas-matematika.html', 'board', 'Форматът на изпита'),
+                 ('nvo-4-klas-zadachi-s-izbor.html', 'radio', '16-те задачи с избор'),
+                 ('nvo-4-klas-kratak-otgovor.html', 'write', '4-те с кратък отговор'),
+                 ('nvo-4-klas-razshiren-otgovor.html', 'sheet', 'Задачите с решение'),
+                 ('nvo-4-klas-probni-testove.html', 'clock', 'Пробни варианти'),
+                 ('nvo-sbornik.html', 'book', 'Сборник за печат'),
+                 ('podgotovka-nvo-3-klas.html', 'seed', 'Подготовка от 3. клас'),
+                 ('nvo-4-klas-priem-5-klas.html', 'school', 'Приемът в 5. клас')]
         return '<nav class="nvo-nav" aria-label="НВО раздел">' + ''.join(
-            (f'<span class="nvo-cur"><b>{i}</b> {n}</span>' if u == cur else f'<a href="{u}"><b>{i}</b> {n}</a>') for u, i, n in items) + '</nav>'
+            (f'<span class="nvo-cur">{ico(i)} {n}</span>' if u == cur else f'<a href="{u}">{ico(i)} {n}</a>') for u, i, n in items) + '</nav>'
 
     src = (f'<p class="hint src-note">Данните за формата са от <a href="{MON_MODEL}" rel="noopener" target="_blank">модела на НВО по математика за IV клас</a> '
            f'и <a href="{MON_PROGRAM}" rel="noopener" target="_blank">учебната програма</a> на МОН. Моделът може да се променя – преди всяка учебна година проверявайте актуалния на mon.bg.</p>')

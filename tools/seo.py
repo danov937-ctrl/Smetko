@@ -4,6 +4,7 @@
 Стартира се от tools/build.py (накрая) или самостоятелно: python3 tools/seo.py"""
 import json, os, re, subprocess, datetime, html as H
 from common import head, header, FOOTER, scripts, write, crumbs, faq, faq_ld, page_hero, SITE, ORG, OUT
+from icons import ico  # noqa
 from seo_content import TOPICS
 from seo_deep import SOLVED, MORE_FAQ, TERMS, CHECK, SERIES_OF
 import nvo
@@ -431,13 +432,13 @@ hub = head('Тестове и задачи по математика за 1.–4
 <main id="main">
 <section class="section"><div class="wrap">
   <div class="hub-top">
-    <a class="hub-card" href="nvo-4-klas-matematika.html" style="--c:#8E6CF0"><span>⏱️</span><b>НВО 4. клас</b><small>25 задачи, 60 минути</small></a>
-    <a class="hub-card" href="nvo-4-klas-probni-testove.html" style="--c:#4CBB4A"><span>📝</span><b>Пробни тестове за НВО</b><small>3 варианта с часовник</small></a>
-    <a class="hub-card" href="vhodno-nivo-matematika.html" style="--c:#FF9F1C"><span>🌱</span><b>Входно ниво</b><small>Септември – октомври</small></a>
-    <a class="hub-card" href="izhodno-nivo-matematika.html" style="--c:#4CBB4A"><span>🎓</span><b>Изходно ниво</b><small>Май – юни</small></a>
-    <a class="hub-card" href="tablica-za-umnozhenie.html" style="--c:#FF5A5F"><span>✖️</span><b>Таблица за умножение</b><small>Изберете числата</small></a>
+    <a class="hub-card" href="nvo-4-klas-matematika.html" style="--c:#8E6CF0"><span>{ico('board')}</span><b>НВО 4. клас</b><small>25 задачи, 60 минути</small></a>
+    <a class="hub-card" href="nvo-4-klas-probni-testove.html" style="--c:#4CBB4A"><span>{ico('clock')}</span><b>Пробни тестове за НВО</b><small>3 варианта с часовник</small></a>
+    <a class="hub-card" href="vhodno-nivo-matematika.html" style="--c:#FF9F1C"><span>{ico('seed')}</span><b>Входно ниво</b><small>Септември – октомври</small></a>
+    <a class="hub-card" href="izhodno-nivo-matematika.html" style="--c:#4CBB4A"><span>{ico('cap')}</span><b>Изходно ниво</b><small>Май – юни</small></a>
+    <a class="hub-card" href="tablica-za-umnozhenie.html" style="--c:#FF5A5F"><span>{ico('grid')}</span><b>Таблица за умножение</b><small>Изберете числата</small></a>
     <a class="hub-card" href="rimski-cifri.html" style="--c:#19B5A5"><span>Ⅻ</span><b>Римски цифри</b><small>Преобразувател и тест</small></a>
-    <a class="hub-card" href="merni-edinici.html" style="--c:#2F80ED"><span>📏</span><b>Мерни единици</b><small>Таблици и тест</small></a>
+    <a class="hub-card" href="merni-edinici.html" style="--c:#2F80ED"><span>{ico('ruler')}</span><b>Мерни единици</b><small>Таблици и тест</small></a>
   </div>
 </div></section>
 <section class="section soft"><div class="wrap">
