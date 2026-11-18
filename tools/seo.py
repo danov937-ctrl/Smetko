@@ -383,10 +383,10 @@ def level_page(kind):
                 q = quiz(1, 'g1t1', 10, 1, 'Входно ниво – 1. клас', skills='count5,cmp5,add5,sub5,shapes,cmp10', cta='game.html?grade=1&mode=adventure')
                 txt = 'В началото на 1. клас учителят проверява готовността за училище: броене до 10, сравняване на количества, разпознаване на фигури и най-простите задачи за събиране и изваждане.'
             else:
-                q = quiz(g - 1, 'mix', 12, 2, f'Входно ниво – {g}. клас', cta=f'game.html?grade={g - 1}&mode=adventure')
+                q = quiz(g - 1, 'mix', 12, 2, f'Входно ниво – {g}. клас', plan='cover', cta=f'game.html?grade={g - 1}&mode=adventure')
                 txt = f'Входното ниво в {g}. клас проверява материала от {g - 1}. клас: ' + ', '.join(TOPICS[t]['h1'].lower() for t in GRADE_TOPICS[g - 1][-3:]) + '.'
         else:
-            q = quiz(g, 'mix', 15, 2, f'Изходно ниво – {g}. клас', cta=f'game.html?grade={g}&mode=adventure')
+            q = quiz(g, 'mix', 15, 2, f'Изходно ниво – {g}. клас', plan='cover', cta=f'game.html?grade={g}&mode=adventure')
             txt = f'Изходното ниво в {g}. клас обхваща всички теми от годината: ' + ', '.join(TOPICS[t]['h1'].lower() for t in GRADE_TOPICS[g]) + '.'
         secs += f'''<section class="section{' soft' if g % 2 else ''}" id="klas-{g}"><div class="wrap narrow-wrap">
   <div class="section-head"><h2 class="lined">{name} по математика – {g}. клас</h2><p>{txt}</p></div>

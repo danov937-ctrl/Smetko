@@ -57,9 +57,34 @@
     return list;
   }
 
+  /* Входно и изходно ниво: по една задача от всяка тема на класа, в реда на програмата –
+     така нито една тема не се пропуска и се вижда точно къде е пропускът. */
+  function buildCover(el) {
+    var d = el.dataset, grade = +d.grade || 1, lv = +d.level || 2, n = +d.n || 12;
+    var topics = (E().GRADES[grade] || {}).topics || [], list = [], seen = {}, round = 0;
+    while (list.length < n && round < 3) {
+      for (var i = 0; i < topics.length && list.length < n; i++) {
+        var tp = topics[i], t = null, guard = 0;
+        while (!t && guard++ < 40) {
+          var c = E().generate(grade, tp.id, Math.min(3, lv + round));
+          if (!c || c.dots || seen[c.q]) { c = null; continue; }
+          if (c.kind === 'choice' && c.choices && typeof c.choices[0] === 'object' && !c.choices[0].html) { c = null; continue; }
+          t = c;
+        }
+        if (!t) continue;
+        seen[t.q] = 1;
+        t.plan = { what: tp.short || tp.name };
+        list.push(t);
+      }
+      round++;
+    }
+    return list;
+  }
+
   function build(el) {
     var d = el.dataset, n = +d.n || 10, lv = +d.level || 2, grade = +d.grade || 1, seen = {}, list = [], guard = 0;
     if (d.plan === 'nvo4') return buildPlan(el);
+    if (d.plan === 'cover') return buildCover(el);
     var skills = d.skills ? d.skills.split(',') : null, mix = d.mix ? d.mix.split(',').map(Number) : null;
     var nums = el._nums || [2, 3, 4, 5, 6, 7, 8, 9, 10];
     while (list.length < n && guard++ < n * 80) {
@@ -89,7 +114,9 @@
     return '<li class="qz-q" data-i="' + i + '">' + planTag(t) + '<div class="qz-text">' + q + '</div>' + (t.figure ? '<div class="qz-fig">' + t.figure + '</div>' : '') + '<div class="qz-fb" aria-live="polite"></div></li>';
   }
   function planTag(t) {
-    return t.plan ? '<span class="qz-plan"><b>' + esc(t.plan.area) + '</b> · ' + esc(t.plan.what) + (t.plan.free ? ' · кратък отговор' : '') + '</span>' : '';
+    if (!t.plan) return '';
+    var a = t.plan.area ? '<b>' + esc(t.plan.area) + '</b> · ' : '';
+    return '<span class="qz-plan">' + a + esc(t.plan.what) + (t.plan.free ? ' · кратък отговор' : '') + '</span>';
   }
 
   function play(el) {

@@ -1847,3 +1847,18 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .mini-tbl { border-collapse: collapse; margin: 10px 0; font-size: .92rem; }
 .mini-tbl th, .mini-tbl td { border: 1px solid var(--line); padding: 5px 12px; text-align: center; }
 .mini-tbl th { background: var(--bg-soft); font-size: .85rem; }
+
+/* ---- контролни с два варианта и пробно НВО за печат ---- */
+.ws-page + .ws-page { margin-top: 36px; padding-top: 28px; border-top: 2px dashed var(--line); }
+.ws-note { font-size: .92rem; color: #444; background: #F3F7FE; border-left: 4px solid var(--blue); padding: 8px 12px; margin: 0 0 14px; font-weight: 600; }
+.ws-nvo { columns: 1; font-size: 1.02rem; }
+.ws-nvo li { padding: 7px 0; }
+.ws-tag { display: inline-block; font-size: .64rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+  color: #fff; background: var(--purple); border-radius: 999px; padding: 2px 8px; margin-right: 7px; vertical-align: 2px; }
+.ws-opts { display: flex; flex-wrap: wrap; gap: 4px 26px; margin-top: 5px; font-weight: 600; }
+.ws-opts span { min-width: 96px; }
+.ws-box { display: inline-block; width: 34px; height: 18px; border: 2px solid #111; border-radius: 3px; vertical-align: -3px; }
+.ws-fig { display: block; margin: 5px 0; }
+.ws-fig svg { max-height: 78px; width: auto; }
+.tool-grid label.is-off { opacity: .45; pointer-events: none; }
+@media print { .ws-break { break-before: page; page-break-before: always; margin-top: 0; padding-top: 0; border-top: 0; } }

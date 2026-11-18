@@ -604,7 +604,7 @@ about = head('За родители и учители – Сметко', 'Как
     <ul>
       <li><b>Загрявка в началото на часа.</b> „Бързо сметни“ на интерактивната дъска – целият клас решава заедно 60 секунди.</li>
       <li><b>Домашна работа с един линк.</b> Генерирайте линк към тема или мисия от <a href="uchilishta.html#domashna">страницата за училища</a>.</li>
-      <li><b>Работни листове.</b> <a href="rabotni-listove.html">Генерирайте задачи за печат</a> по тема, с отговори за учителя.</li>
+      <li><b>Работни листове и контролни.</b> <a href="rabotni-listove.html">Генерирайте задачи за печат</a> по тема – или <a href="rabotni-listove.html?kind=test">контролна работа с два равностойни варианта А и Б</a>, с готов ключ за проверка.</li>
       <li><b>По вашия учебник.</b> Мисиите следват уроците в учебника, по който работи класът.</li>
       <li><b>„Табло“ за учителя.</b> Ученици с име и парола, домашни със срок, отчет по теми и класация на класа – на <a href="tablo.html">smetko.com/tablo</a>.</li>
     </ul>
@@ -682,7 +682,7 @@ school = head('Сметко за училища – Табло за учител
 <section class="section">
   <div class="wrap">
     <div class="section-head"><h2 class="lined">Работни листове</h2><p>Задачи за печат по всяка тема от програмата, с отговори за учителя.</p></div>
-    <p style="text-align:center"><a class="btn btn-lg btn-green" href="rabotni-listove.html">🖨️ Създай работен лист</a></p>
+    <p style="text-align:center"><a class="btn btn-lg btn-green" href="rabotni-listove.html">🖨️ Създай работен лист</a> <a class="btn btn-white" href="rabotni-listove.html?kind=test">📄 Контролно с 2 варианта</a></p>
   </div>
 </section>
 <section class="section soft" id="dokumenti">
@@ -956,16 +956,17 @@ blog_layout += header('blog') + '<main id="main">{{BODY}}</main>\n' + FOOTER + s
 write('blog/_layout.html', blog_layout)
 
 # ================= rabotni-listove.html =================
-ws = head('Работни листове по математика 1.–4. клас – Сметко', 'Генератор на работни листове по математика за 1.–4. клас по темите на учебната програма, с отговори за учителя. Безплатно, за печат.',
+ws = head('Работни листове и контролни по математика 1.–4. клас за печат – Сметко', 'Генератор на работни листове, контролни работи с два варианта (А и Б) и пробни тестове за НВО по математика за 1.–4. клас. С отговори за учителя. Безплатно, за печат.',
           'rabotni-listove.html', [crumbs([('Начало', ''), ('Работни листове', 'rabotni-listove.html')])], 'ws-page') + header() + '''
 <main id="main">
 <section class="section ws-controls">
   <div class="wrap">
     <div class="breadcrumbs"><a href="/">Начало</a> › Работни листове</div>
-    <h1>Работни листове</h1>
-    <p class="lead-dark">Изберете клас и тема – Сметко генерира задачи за печат. Всеки път са нови.</p>
+    <h1>Работни листове и контролни</h1>
+    <p class="lead-dark">Изберете какво ви трябва – Сметко генерира задачите за печат. Всеки път са нови, а отговорите са на отделна страница.</p>
     <div class="panel tool-panel">
       <div class="tool-grid">
+        <label>Какво правим<select id="ws-kind" class="select"><option value="sheet">Работен лист</option><option value="test">Контролна работа · 2 варианта</option><option value="nvo">Пробен тест за НВО · 4. клас</option></select></label>
         <label>Клас<select id="ws-grade" class="select"><option value="1">1. клас</option><option value="2">2. клас</option><option value="3">3. клас</option><option value="4">4. клас</option></select></label>
         <label>Тема<select id="ws-topic" class="select"></select></label>
         <label>Трудност<select id="ws-level" class="select"><option value="1">Лесно</option><option value="2" selected>Средно</option><option value="3">Трудно</option></select></label>
