@@ -136,6 +136,19 @@ with sync_playwright() as p:
     tags = set(t.split('·')[0].strip().lower() for t in pg.eval_on_selector_all('.qz-plan', 'e=>e.map(x=>x.innerText)'))
     ok(tags and tags <= {'числа', 'фигури', 'измерване', 'моделиране'}, 'задачите сочат областта си: %s' % sorted(tags))
 
+    # ---------- отчетът за родителя дава какво да се направи
+    pg.goto(B + '/otchet.html'); pg.wait_for_timeout(1000)
+    txt = pg.evaluate("""()=>{const el=document.getElementById('rp-local');
+      const days={}; const d=new Date();
+      for(let i=0;i<6;i++){const x=new Date(d-i*864e5);
+        days[x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')]=[12,7];}
+      Smetko.Report.render(el,{nickname:'Мими',grade:2,answered:220,correct:160,stars:9,missions:5,
+        skills:{'add100x':[4,12],'mulTable':[18,20],'sub100x':[9,14]},days:days});
+      const p=document.querySelector('.rp-plan'); return p ? p.innerText : ''}""")
+    ok('Какво да направите' in txt, 'отчетът казва какво да се направи тази седмица')
+    ok('Въпрос към детето' in txt, 'и дава въпрос за детето')
+    ok('преминаване' in txt, 'сочи точно слабата тема: %s' % txt.split('\n')[1][:60])
+
     # ---------- задачи на дъската
     pg.goto(B + '/zadachi-na-daskata.html'); pg.wait_for_timeout(1600)
     ok(pg.locator('#bd-topic option').count() >= 4, 'темите на класа се зареждат (%d)' % pg.locator('#bd-topic option').count())

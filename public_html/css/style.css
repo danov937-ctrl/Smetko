@@ -1973,3 +1973,7 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .bd:fullscreen { border-radius: 0; border: 0; min-height: 100vh; padding: 40px; place-content: center; background: #fff; }
 .bd:fullscreen .bd-q { font-size: clamp(3rem, 11vw, 9rem); }
 .bd:fullscreen .bd-a { font-size: clamp(2.4rem, 7vw, 6rem); }
+.rp-plan { border-color: #F7D9AC; background: var(--cream); }
+.rp-plan ul { margin: 0; padding-left: 22px; list-style: disc; }
+.rp-plan li { margin-bottom: 8px; font-weight: 600; color: var(--ink); }
+.rp-ask { margin: 12px 0 0; padding-top: 12px; border-top: 2px dashed #EBD4AD; color: var(--navy); font-weight: 700; }

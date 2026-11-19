@@ -42,7 +42,7 @@
       '<div class="rp-two">' +
         '<div class="rp-card good"><h4>💪 Справя се отлично</h4>' + (strong.length ? '<ul>' + strong.map(function (k) { return '<li>' + esc(title(k)) + ' ' + bar(pct(skills[k][0], skills[k][1])) + '</li>'; }).join('') + '</ul>' : '<p>Още няма достатъчно задачи (поне 5 от вид).</p>') + '</div>' +
         '<div class="rp-card low"><h4>🎯 За упражнение</h4>' + (weak.length ? '<ul>' + weak.map(function (k) { return '<li>' + esc(title(k)) + ' ' + bar(pct(skills[k][0], skills[k][1])) + ' <a class="rp-go" href="' + practiceLink(k, r.grade) + '">Упражни →</a></li>'; }).join('') + '</ul>' : '<p>' + (enough.length ? 'Няма слаби теми – браво!' : 'Още няма достатъчно задачи (поне 5 от вид).') + '</p>') + '</div>' +
-      '</div>';
+      '</div>' + plan(r, { act7: act7, tasks7: tasks7, acc7: tasks7 ? pct(corr7, tasks7) : 0, weak: weak, enough: enough });
     if (keys.length) {
       var all = keys.sort(function (a, b) { return skills[b][1] - skills[a][1]; });
       h += '<details class="rp-card"><summary><b>Всички теми (' + all.length + ')</b></summary><table class="rp-table"><thead><tr><th>Тема</th><th>Задачи</th><th>Точност</th></tr></thead><tbody>' +
@@ -50,6 +50,32 @@
     }
     h += '<p class="rp-tip">💡 Най-добре работи по 10–15 минути на ден. Похвалете усилието, не само верните отговори, и упражнете заедно темите от „За упражнение“.</p></div>';
     el.innerHTML = h;
+  }
+
+  /* Един съвет, който родителят може да изпълни тази седмица – от същите данни. */
+  function plan(r, x) {
+    var g = r.grade || '', li = [], ask;
+    if (!x.act7) {
+      li.push('Детето не е играло през последните 7 дни. Започнете с <b>10 минути днес</b> – по-важно е да се върне ритъмът, отколкото колко задачи ще реши.');
+      ask = 'Какво решавахте по математика тази седмица?';
+    } else if (x.weak.length) {
+      li.push('Най-слабата тема в момента е <b>' + esc(title(x.weak[0])) + '</b> – десет минути на ден върху нея за една седмица вършат повече от час наведнъж.');
+      li.push('<a href="' + practiceLink(x.weak[0], g) + '">Упражнение точно по тази тема →</a>');
+      ask = 'Покажи ми една задача от „' + title(x.weak[0]) + '“ – как се решава?';
+    } else if (x.tasks7 && x.acc7 && x.acc7 < 70) {
+      li.push('Решава много, но бърка често (' + x.acc7 + '% верни за 7 дни). По-добре <b>по-малко задачи, но с проверка</b> накрая – бързината идва после.');
+      ask = 'Как провери, че отговорът е верен?';
+    } else if (x.act7 >= 4) {
+      li.push('Върви добре – ' + x.act7 + ' дни с игра и ' + (x.acc7 || 0) + '% верни. Вдигнете трудността или минете на следващата тема.');
+      ask = 'Коя задача тази седмица ти беше най-трудна?';
+    } else {
+      li.push('Започнало е, но още не е навик. Опитайте в един и същи час всеки ден – ' + (x.act7 === 1 ? 'един ден' : x.act7 + ' дни') + ' тази седмица са малко за запомняне.');
+      ask = 'Кога ти е най-удобно да решаваш – преди или след вечеря?';
+    }
+    li.push('Разпечатайте лист със задачи от <a href="rabotni-listove.html' + (g ? '?grade=' + g : '') + '">работните листове</a>, ако предпочитате на хартия.');
+    return '<div class="rp-card rp-plan"><h4>Какво да направите тази седмица</h4><ul>' +
+      li.map(function (t) { return '<li>' + t + '</li>'; }).join('') +
+      '</ul><p class="rp-ask"><b>Въпрос към детето:</b> „' + esc(ask) + '“</p></div>';
   }
 
   function topics(el, t) {
