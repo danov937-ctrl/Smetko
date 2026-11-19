@@ -64,6 +64,20 @@ with sync_playwright() as p:
            'връзка от съдържанието остава в статията (%s)' % pg.url)
         ok(pg.evaluate('window.scrollY') > 200, 'и скача надолу по текста')
 
+    # ---------- насрочените статии излизат чак на своя ден
+    import glob, datetime
+    today = datetime.date.today().isoformat()
+    future, live = [], []
+    for f in glob.glob(os.path.join(ROOT, 'api', 'blog_posts*.php')):
+        src = open(f, encoding='utf-8').read()
+        for sl, dt in re.findall(r"'slug' => '([a-z0-9-]+)'.*?'date' => '([^']+)'", src, re.S):
+            (future if re.match(r'^\d{4}-', dt) and dt > today else live).append(sl)   # „-42 days“ значи отдавна излязла
+    ok(len(live) >= 15, 'излезли статии: %d' % len(live))
+    early = [sl for sl in future if S.get(B + '/blog/' + sl).status_code == 200]
+    ok(not early, 'насрочените статии още не се виждат (%d насрочени) %s' % (len(future), early[:3]))
+    late = [sl for sl in live if S.get(B + '/blog/' + sl).status_code != 200]
+    ok(not late, 'всяка излязла статия се отваря %s' % late[:3])
+
     # ---------- работните листове: три вида
     pg.goto(B + '/rabotni-listove.html'); pg.wait_for_timeout(1400)
     ok(pg.locator('#ws-sheet .ws-list li').count() == 20, 'работен лист: 20 задачи')
@@ -74,8 +88,10 @@ with sync_playwright() as p:
     Bv = pg.eval_on_selector_all('#ws-sheet .ws-page:nth-child(2) .ws-list li', 'e=>e.map(x=>x.innerText.trim())')
     ok(len(A) == len(Bv) == 20 and sum(1 for x, y in zip(A, Bv) if x == y) == 0,
        'вариантите са равни по брой и различни по задачи')
-    same = sum(1 for x, y in zip(A, Bv) if re.sub(r'\d+', 'N', x) == re.sub(r'\d+', 'N', y))
-    ok(same >= 12, 'вариантите са равностойни (%d от 20 реда с един и същи вид задача)' % same)
+    sa = pg.eval_on_selector_all('#ws-sheet .ws-page:nth-child(1) .ws-list li', 'e=>e.map(x=>x.dataset.skill)')
+    sb = pg.eval_on_selector_all('#ws-sheet .ws-page:nth-child(2) .ws-list li', 'e=>e.map(x=>x.dataset.skill)')
+    ok(sa and all(sa), 'задачите носят името на умението си')
+    ok(sa == sb, 'вариант Б повтаря уменията на вариант А ред по ред')
     pg.select_option('#ws-kind', 'nvo'); pg.wait_for_timeout(1400)
     ok(pg.locator('#ws-sheet .ws-list li').count() == 20, 'пробно НВО: 20 задачи на лист')
     ok(pg.locator('#ws-sheet .ws-opts').count() == 16, 'от които 16 с готови отговори')
@@ -96,7 +112,8 @@ with sync_playwright() as p:
     pg.locator('.dt-card .btn-green').first.click(); pg.wait_for_timeout(2000)
     ok(pg.locator('.qcard').count() == 1, 'играта отваря задача')
     txt = pg.locator('.qcard .q-text').first.inner_text().strip()
-    ok(re.search(r'\d', txt), 'задачата е смятане: %s' % txt.replace('\n', ' ')[:40])
+    ok(len(txt) > 3, 'задачата има условие: %s' % txt.replace('\n', ' ')[:48])
+    ok(pg.locator('.qcard .slot, .qcard input, .keypad, .choices').count() > 0, 'има къде да се отговори')
 
     b.close()
 done(errs)

@@ -138,7 +138,7 @@
         var opts = k.kind === 'choice' && k.choices
           ? '<span class="ws-opts">' + k.choices.map(function (c) { return '<span>' + (typeof c === 'object' ? (c.html || c.v) : c) + '</span>'; }).join('') + '</span>' : '';
         var tag = nvo && k.plan ? '<span class="ws-tag">' + esc(k.plan.area) + '</span>' : '';
-        return '<li class="' + (k.word || k.figure || nvo ? 'ws-word' : '') + '">' + tag + q +
+        return '<li class="' + (k.word || k.figure || nvo ? 'ws-word' : '') + '"' + (k.skill ? ' data-skill="' + esc(k.skill) + '"' : '') + '>' + tag + q +
           (k.figure ? '<span class="ws-fig">' + k.figure + '</span>' : '') + opts +
           (k.kind !== 'choice' && String(k.q).indexOf('{?}') < 0 ? ' <span class="ws-blank"></span>' : '') + '</li>';
       }).join('') + '</ol>';
