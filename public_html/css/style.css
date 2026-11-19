@@ -1977,3 +1977,23 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .rp-plan ul { margin: 0; padding-left: 22px; list-style: disc; }
 .rp-plan li { margin-bottom: 8px; font-weight: 600; color: var(--ink); }
 .rp-ask { margin: 12px 0 0; padding-top: 12px; border-top: 2px dashed #EBD4AD; color: var(--navy); font-weight: 700; }
+
+/* ---------- Часовникът ---------- */
+.ck { display: grid; gap: 28px; align-items: center; }
+@media (min-width: 820px) { .ck { grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 40px; } }
+.ck-svg { width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto; touch-action: none; cursor: grab; }
+.ck-svg:focus-visible { outline: 3px solid var(--sky); outline-offset: 4px; border-radius: 50%; }
+.ck-svg [data-hand] { cursor: grab; }
+.ck-svg [data-hand]:active { cursor: grabbing; }
+.ck-n { font-family: inherit; font-weight: 900; font-size: 15px; fill: var(--navy); }
+.ck-task { font-size: 1.3rem; font-weight: 900; color: var(--navy); margin: 0 0 10px; }
+.ck-digi { font-size: clamp(2.4rem, 7vw, 3.6rem); font-weight: 900; color: var(--blue); margin: 0; letter-spacing: -.02em; }
+.ck-words { color: var(--muted); font-weight: 700; margin: 2px 0 18px; }
+/* при „Колко е часът?“ цифрите се крият – иначе отговорът стои на екрана */
+.ck.read-mode .ck-digi, .ck.read-mode .ck-words { visibility: hidden; }
+.ck-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ck-in { width: 120px; font: inherit; font-size: 1.2rem; font-weight: 800; text-align: center; padding: 10px 12px;
+  border: 2px solid var(--line); border-radius: var(--radius-sm); color: var(--navy); background: #fff; }
+.ck-in:focus { outline: 3px solid var(--sky); outline-offset: 1px; }
+.ck-fb { font-weight: 800; min-height: 1.3em; margin: 12px 0 6px; }
+.ck-fb.good { color: var(--green-dark); } .ck-fb.bad { color: var(--red); }

@@ -136,6 +136,35 @@ with sync_playwright() as p:
     tags = set(t.split('·')[0].strip().lower() for t in pg.eval_on_selector_all('.qz-plan', 'e=>e.map(x=>x.innerText)'))
     ok(tags and tags <= {'числа', 'фигури', 'измерване', 'моделиране'}, 'задачите сочат областта си: %s' % sorted(tags))
 
+    # ---------- часовникът
+    pg.goto(B + '/chasovnik.html'); pg.wait_for_timeout(1400)
+    ok(pg.locator('#ck-face').count() == 1 and pg.locator('#ck-h').count() == 1, 'часовникът се вижда със стрелките си')
+    ok(not pg.locator('#ck-digi').is_visible(), 'при „Колко е часът“ отговорът не стои на екрана')
+    tgt = pg.evaluate('Smetko.Clock.target()')
+    h = (tgt // 60) % 12 or 12
+    pg.fill('#ck-ans', '%d:%02d' % (h, tgt % 60)); pg.click('#ck-check'); pg.wait_for_timeout(400)
+    ok('Браво' in pg.inner_text('#ck-fb'), 'верният час се приема: %s' % pg.inner_text('#ck-fb'))
+    pg.select_option('#ck-mode', 'set'); pg.wait_for_timeout(600)
+    ok('Нагласи' in pg.inner_text('#ck-task'), 'вторият режим иска нагласяване: %s' % pg.inner_text('#ck-task'))
+    tgt = pg.evaluate('Smetko.Clock.target()')
+    pg.evaluate('t=>Smetko.Clock.set(t)', tgt); pg.click('#ck-check'); pg.wait_for_timeout(400)
+    ok('Браво' in pg.inner_text('#ck-fb'), 'нагласеният часовник се приема')
+    # стрелките се местят с влачене
+    box = pg.locator('#ck-face').bounding_box()
+    cx, cy = box['x'] + box['width'] / 2, box['y'] + box['height'] / 2
+    pg.evaluate('()=>Smetko.Clock.set(3*60)')
+    pg.mouse.move(cx, cy - box['height'] * 0.42); pg.mouse.down()
+    pg.mouse.move(cx + box['width'] * 0.42, cy, steps=6); pg.mouse.up(); pg.wait_for_timeout(200)
+    ok(pg.evaluate('Smetko.Clock.get()') == 195, 'влачене по ръба мести минутната стрелка (3:00 → 3:15)')
+    pg.evaluate('()=>Smetko.Clock.set(3*60)')
+    pg.mouse.move(cx, cy - box['height'] * 0.20); pg.mouse.down()
+    pg.mouse.move(cx, cy + box['height'] * 0.20, steps=6); pg.mouse.up(); pg.wait_for_timeout(200)
+    ok(pg.evaluate('Smetko.Clock.get()') == 360, 'влачене до центъра мести часовата стрелка (3:00 → 6:00)')
+
+    # как се казва часът на български
+    w = pg.evaluate('()=>[Smetko.Clock.words(7*60+45), Smetko.Clock.words(9*60+30), Smetko.Clock.words(3*60)]')
+    ok(w[0] == '8 без петнайсет' and w[1] == '9 и половина' and 'точно' in w[2], 'часът се казва правилно: %s' % w)
+
     # ---------- отчетът за родителя дава какво да се направи
     pg.goto(B + '/otchet.html'); pg.wait_for_timeout(1000)
     txt = pg.evaluate("""()=>{const el=document.getElementById('rp-local');

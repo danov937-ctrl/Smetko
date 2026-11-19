@@ -199,6 +199,7 @@ index = head('Сметко – математика като игра за 1.–
       <a class="hub-card" href="merni-edinici.html" style="--c:#4CBB4A"><span>{ico('ruler')}</span><b>Мерни единици</b><small>Дължина, маса, време, лице</small></a>
       <a class="hub-card" href="koleden-kalendar.html" style="--c:#E0452F"><span>{ico('star')}</span><b>Коледен календар</b><small>24 задачи за декември, с печат</small></a>
       <a class="hub-card" href="zadachi-na-daskata.html" style="--c:#2F80ED"><span>{ico('board')}</span><b>Задачи на дъската</b><small>За час – на цял екран, с отговор</small></a>
+      <a class="hub-card" href="chasovnik.html" style="--c:#19B5A5"><span>{ico('clock')}</span><b>Часовникът</b><small>Колко е часът – с подвижни стрелки</small></a>
     </div>
   </div>
 </section>
@@ -1083,6 +1084,75 @@ bd = head('Задачи на дъската – математика за 1.–4
 </main>
 """ + FOOTER + scripts(['js/math-engine.js', 'js/tools.js', 'js/board.js'])
 write('zadachi-na-daskata.html', bd)
+
+# ================= часовникът =================
+CK_FACE = """<svg id="ck-face" viewBox="0 0 200 200" class="ck-svg" tabindex="0" role="img" aria-label="Часовник – стрелките се местят с пръст, с мишка или със стрелките на клавиатурата"><circle cx="100" cy="100" r="96" fill="#fff" stroke="#1D2B4F" stroke-width="4"/><line x1="100" y1="8" x2="100" y2="18" stroke="#1D2B4F" stroke-width="3" stroke-linecap="round" transform="rotate(0 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(6 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(12 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(18 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(24 100 100)"/><line x1="100" y1="8" x2="100" y2="18" stroke="#1D2B4F" stroke-width="3" stroke-linecap="round" transform="rotate(30 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(36 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(42 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(48 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(54 100 100)"/><line x1="100" y1="8" x2="100" y2="18" stroke="#1D2B4F" stroke-width="3" stroke-linecap="round" transform="rotate(60 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(66 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(72 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(78 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(84 100 100)"/><line x1="100" y1="8" x2="100" y2="18" stroke="#1D2B4F" stroke-width="3" stroke-linecap="round" transform="rotate(90 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(96 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(102 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(108 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(114 100 100)"/><line x1="100" y1="8" x2="100" y2="18" stroke="#1D2B4F" stroke-width="3" stroke-linecap="round" transform="rotate(120 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(126 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(132 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(138 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(144 100 100)"/><line x1="100" y1="8" x2="100" y2="18" stroke="#1D2B4F" stroke-width="3" stroke-linecap="round" transform="rotate(150 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(156 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(162 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(168 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(174 100 100)"/><line x1="100" y1="8" x2="100" y2="18" stroke="#1D2B4F" stroke-width="3" stroke-linecap="round" transform="rotate(180 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(186 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(192 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(198 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(204 100 100)"/><line x1="100" y1="8" x2="100" y2="18" stroke="#1D2B4F" stroke-width="3" stroke-linecap="round" transform="rotate(210 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(216 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(222 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(228 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(234 100 100)"/><line x1="100" y1="8" x2="100" y2="18" stroke="#1D2B4F" stroke-width="3" stroke-linecap="round" transform="rotate(240 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(246 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(252 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(258 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(264 100 100)"/><line x1="100" y1="8" x2="100" y2="18" stroke="#1D2B4F" stroke-width="3" stroke-linecap="round" transform="rotate(270 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(276 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(282 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(288 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(294 100 100)"/><line x1="100" y1="8" x2="100" y2="18" stroke="#1D2B4F" stroke-width="3" stroke-linecap="round" transform="rotate(300 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(306 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(312 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(318 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(324 100 100)"/><line x1="100" y1="8" x2="100" y2="18" stroke="#1D2B4F" stroke-width="3" stroke-linecap="round" transform="rotate(330 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(336 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(342 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(348 100 100)"/><line x1="100" y1="11" x2="100" y2="14" stroke="#B9C8E0" stroke-width="1.6" stroke-linecap="round" transform="rotate(354 100 100)"/><text x="134.0" y="48.1" text-anchor="middle" class="ck-n">1</text><text x="158.9" y="73.0" text-anchor="middle" class="ck-n">2</text><text x="168.0" y="107.0" text-anchor="middle" class="ck-n">3</text><text x="158.9" y="141.0" text-anchor="middle" class="ck-n">4</text><text x="134.0" y="165.9" text-anchor="middle" class="ck-n">5</text><text x="100.0" y="175.0" text-anchor="middle" class="ck-n">6</text><text x="66.0" y="165.9" text-anchor="middle" class="ck-n">7</text><text x="41.1" y="141.0" text-anchor="middle" class="ck-n">8</text><text x="32.0" y="107.0" text-anchor="middle" class="ck-n">9</text><text x="41.1" y="73.0" text-anchor="middle" class="ck-n">10</text><text x="66.0" y="48.1" text-anchor="middle" class="ck-n">11</text><text x="100.0" y="39.0" text-anchor="middle" class="ck-n">12</text><g id="ck-h" data-hand="h"><line x1="100" y1="112" x2="100" y2="52" stroke="#1D2B4F" stroke-width="9" stroke-linecap="round"/><line x1="100" y1="112" x2="100" y2="52" stroke="transparent" stroke-width="26"/></g><g id="ck-m" data-hand="m"><line x1="100" y1="116" x2="100" y2="24" stroke="#2F80ED" stroke-width="6" stroke-linecap="round"/><line x1="100" y1="116" x2="100" y2="24" stroke="transparent" stroke-width="24"/></g><circle cx="100" cy="100" r="7" fill="#FF7A1A" stroke="#fff" stroke-width="2"/></svg>"""
+ck = head('Часовникът: как се чете часът – упражнения за 1.–4. клас | Сметко',
+          'Научете детето да чете часовника: подвижен часовник със стрелки, упражнения „Колко е часът“ и „Нагласи часовника“, цели часове, половин час и по пет минути. Безплатно, без регистрация.',
+          'chasovnik.html', [crumbs([('Начало', ''), ('Часовникът', 'chasovnik.html')])]) + header() + \
+    page_hero('Колко е часът?',
+              'Подвижен часовник за упражнение: стрелките се местят с пръст, с мишка или със стрелките на клавиатурата. Два вида задачи – да се прочете часът и да се нагласи часовникът.',
+              'Начало › Часовникът', 'hero',
+              '<div class="hero-cta"><a class="btn btn-lg btn-green" href="#clock">Към часовника</a>'
+              '<a class="btn btn-white" href="merni-edinici.html">Мерни единици</a></div>') + \
+    f"""
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="panel tool-panel">
+      <div class="tool-grid">
+        <label>Какво правим<select id="ck-mode" class="select"><option value="read">Колко е часът?</option><option value="set">Нагласи часовника</option></select></label>
+        <label>Точност<select id="ck-step" class="select"><option value="60">Цели часове</option><option value="30">И половина</option><option value="15">През 15 минути</option><option value="5" selected>През 5 минути</option><option value="1">Точна минута</option></select></label>
+      </div>
+    </div>
+    <div class="ck" id="clock">
+      <div class="ck-left">{CK_FACE}</div>
+      <div class="ck-right">
+        <p class="ck-task" id="ck-task"></p>
+        <p class="ck-digi" id="ck-digi">10:10</p>
+        <p class="ck-words" id="ck-words"></p>
+        <div class="ck-row">
+          <input id="ck-ans" class="ck-in" inputmode="numeric" autocomplete="off" placeholder="7:45" aria-label="Колко е часът">
+          <button type="button" class="btn btn-green" id="ck-check">Провери</button>
+          <button type="button" class="btn btn-white" id="ck-new">Нова задача</button>
+        </div>
+        <p class="ck-fb" id="ck-fb" aria-live="polite"></p>
+        <p class="hint">Малката стрелка показва часовете, голямата – минутите. Пипнете по-близо до центъра, за да местите часовата стрелка, и към ръба – за минутната.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section soft">
+  <div class="wrap prose">
+    <h2 class="lined">Как се чете часовникът</h2>
+    <p>Четенето на часовник е едно от малкото умения по математика, които се ползват всеки ден цял живот. В училище влиза в <b>1. клас</b> с целите часове, в <b>2. клас</b> идват половин час и петнайсетте минути, а в <b>3.–4. клас</b> се смята с часове и минути – колко време е минало и в колко часа ще бъде нещо.</p>
+    <h3>Първо голямата и малката стрелка</h3>
+    <p>Най-честото объркване е кое какво показва. Малката стрелка е дебела и къса – тя сочи <b>часа</b>. Голямата е дълга и тънка – тя сочи <b>минутите</b>. Ако детето ги бърка, сложете пръст върху малката и попитайте само „кой час е минала?“</p>
+    <h3>Числата значат две неща</h3>
+    <p>Това е истинската трудност: цифрата 3 значи „3 часа“ за малката стрелка и „15 минути“ за голямата. Броенето по пет – 5, 10, 15, 20 – е ключът и е добре да е наред, преди да се започне с минутите. Затова и часовникът се учи най-лесно след <a href="tablica-za-umnozhenie.html">таблицата за 5</a>.</p>
+    <h3>„Без петнайсет“ и „и половина“</h3>
+    <p>На български часът се казва по два начина: <b>7 и 40</b> или <b>8 без 20</b>. Детето трябва да разбира и двата, защото вкъщи се говори по единия, а в задачите се пише по другия. Правилото е просто: до 30 минути се казва „и“, след 30 – „без“, като часът става следващият.</p>
+    <h3>12 или 24 часа</h3>
+    <p>Часовникът със стрелки показва 12 часа, а разписанията и телефонът – 24. 15:30 на екрана е 3 и половина на стрелките. Най-лесно се обяснява с деня: след обяд се вади 12.</p>
+    <h3>Колко време мина</h3>
+    <p>В 3. и 4. клас задачите стават такива: „Филмът започва в 17:40 и трае 95 минути. В колко часа свършва?“ Тук се брои на части – първо до цял час, после остатъкът. 17:40 + 20 минути прави 18:00, остават още 75, значи 19:15. Същият тип задача се пада и на <a href="nvo-4-klas-matematika.html">НВО в 4. клас</a>.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Накъде оттук</h2><p>Часът върви заедно с мерните единици и с задачите за време.</p></div>
+    <div class="hub-top">
+      <a class="hub-card" href="merni-edinici.html" style="--c:#4CBB4A"><span>{ico('ruler')}</span><b>Мерни единици</b><small>Дължина, маса, време, лице</small></a>
+      <a class="hub-card" href="rabotni-listove.html" style="--c:#2F80ED"><span>{ico('sheet')}</span><b>Работни листове</b><small>Задачи за печат по тема</small></a>
+      <a class="hub-card" href="zadachi-na-daskata.html" style="--c:#8E6CF0"><span>{ico('board')}</span><b>Задачи на дъската</b><small>За час – на цял екран</small></a>
+    </div>
+  </div>
+</section>
+</main>
+""" + FOOTER + scripts(['js/clock.js'])
+write('chasovnik.html', ck)
 
 # ================= 404 =================
 nf = head('Страницата не е намерена – Сметко', 'Страницата не е намерена.', '404.html', noindex=True).replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<base href="/">') + header() + page_hero(
