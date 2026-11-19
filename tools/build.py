@@ -148,10 +148,10 @@ index = head('Сметко – математика като игра за 1.–
 
 <section class="section">
   <div class="wrap">
-    <div class="section-head"><h2 class="lined">Три начина да играеш</h2><p>За бързи умове, за изследователи и за спокойна тренировка.</p></div>
-    <div class="grid grid-3">
+    <div class="section-head"><h2 class="lined">Три начина да играеш</h2><p>Приключението следва учебника и е мястото, от което се започва. Другите два са за между другото – за състезание със себе си и за спокойно упражнение.</p></div>
+    <div class="mode-split">
+      <article class="card mode-card adv"><div class="mode-ico">{ico('map')}</div><h3>Приключение</h3><p>Основният начин: мисии по пътеката към върха, подредени като уроците в учебника – по една за всеки урок. До 3 звезди на мисия и ново ниво, когато стигнеш догоре.</p><a class="btn btn-green" href="game.html?mode=adventure&amp;start=0">Започни приключението</a></article>
       <article class="card mode-card quick"><div class="mode-ico">{ico('bolt')}</div><h3>Бързо сметни</h3><p>60 секунди, колкото можеш повече задачи. Бонус за бързина и рекорд за побиване.</p><a class="btn btn-sm" href="game.html?mode=quick&amp;start=0">Играй</a></article>
-      <article class="card mode-card adv"><div class="mode-ico">{ico('map')}</div><h3>Приключение</h3><p>Мисии по пътеката към върха, подредени като уроците в учебника. До 3 звезди на мисия.</p><a class="btn btn-sm btn-green" href="game.html?mode=adventure&amp;start=0">Играй</a></article>
       <article class="card mode-card prac"><div class="mode-ico">{ico('leaf')}</div><h3>Тренировка</h3><p>Без часовник и без стрес. При грешка Сметко показва правилното решение.</p><a class="btn btn-sm btn-purple" href="game.html?mode=practice&amp;start=0">Играй</a></article>
     </div>
   </div>

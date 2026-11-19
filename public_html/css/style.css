@@ -264,6 +264,20 @@ button { font-family: inherit; }
 .mode-card.adv .mode-ico { background: var(--green); box-shadow: 0 5px 0 var(--green-dark); }
 .mode-card.prac .mode-ico { background: var(--purple); box-shadow: 0 5px 0 var(--purple-dark); }
 .mode-card p { color: var(--muted); font-weight: 600; }
+/* Приключението е основният начин – заема цялата лява колона, другите два стоят до него */
+.mode-split { display: grid; gap: 16px; }
+@media (min-width: 880px) {
+  .mode-split { grid-template-columns: 1.15fr 1fr; align-items: stretch; }
+  .mode-split .mode-card.adv { grid-row: 1 / span 2; background: var(--cream); border-color: #F2E0BE; padding: 32px; }
+  .mode-split .mode-card.adv h3 { font-size: 1.9rem; }
+  .mode-split .mode-card.adv p { font-size: 1.08rem; }
+  .mode-split .mode-card.adv .mode-ico { width: 76px; height: 76px; }
+  .mode-split .mode-card.adv .mode-ico .ico { width: 38px; height: 38px; }
+  .mode-split .mode-card.quick, .mode-split .mode-card.prac { display: grid; grid-template-columns: 64px 1fr; column-gap: 18px; align-content: start; padding-top: 22px; }
+  .mode-split .mode-card.quick .mode-ico, .mode-split .mode-card.prac .mode-ico { grid-row: 1 / span 3; margin-bottom: 0; }
+  .mode-split .mode-card.quick h3, .mode-split .mode-card.prac h3 { margin-bottom: .2em; }
+  .mode-split .mode-card.quick .btn, .mode-split .mode-card.prac .btn { justify-self: start; margin-top: 12px; }
+}
 
 /* Класове */
 .class-card { --cc: var(--g1); --ccd: var(--g1d); border-top: 8px solid var(--cc); display: flex; flex-direction: column; }
@@ -1451,10 +1465,14 @@ dialog.ck-dialog { width: min(94vw, 560px); }
 .facts b { display: block; font-size: 2.2rem; font-weight: 900; color: var(--blue-dark); line-height: 1.1; }
 .facts span { font-weight: 800; color: var(--muted); }
 .grade-jump .btn { min-width: 0; }
-.hub-top { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 12px; }
-.hub-card { display: flex; flex-direction: column; gap: 2px; background: #fff; border: 2px solid var(--line); border-top: 6px solid var(--c); border-radius: 18px; padding: 16px; color: var(--navy); text-decoration: none !important; transition: transform .1s; }
-.hub-card:hover { transform: translateY(-2px); }
-.hub-card span { font-size: 1.8rem; font-weight: 900; color: var(--c); } .hub-card b { font-weight: 900; font-size: 1.1rem; } .hub-card small { color: var(--muted); font-weight: 700; }
+/* Помагалата са списък, а не купчина карти – четат се като съдържание на книга */
+.hub-top { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 0 40px; }
+.hub-card { display: grid; grid-template-columns: 42px 1fr; column-gap: 14px; align-items: center; padding: 14px 4px; border-bottom: 2px solid var(--line); color: var(--navy); text-decoration: none !important; }
+.hub-card span { grid-row: 1 / 3; justify-self: center; font-size: 1.5rem; font-weight: 900; color: var(--c); }
+.hub-card b { font-weight: 900; font-size: 1.08rem; align-self: end; }
+.hub-card small { color: var(--muted); font-weight: 700; align-self: start; }
+.hub-card:hover b { text-decoration: underline; }
+.hub-card:hover span { transform: translateX(2px); transition: transform .1s; }
 .hub-grades { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 14px; }
 .hub-grade { background: #fff; border: 2px solid var(--line); border-top: 6px solid var(--c); border-radius: 18px; padding: 16px 18px; }
 .hub-grade h3 { margin: 0 0 8px; } .hub-grade h3 a { color: var(--navy); }

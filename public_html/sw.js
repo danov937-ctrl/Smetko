@@ -1,12 +1,12 @@
 /* Сметко — Service Worker: офлайн игра и бързо зареждане.
    При всяка промяна на файловете увеличете VERSION, за да се обнови кешът. */
-const VERSION = 'smetko-v40';
+const VERSION = 'smetko-v41';
 const CORE = [
   '/', '/game.html', '/achievements.html', '/pricing.html', '/about.html', '/uchilishta.html', '/rabotni-listove.html',
   '/kod.html', '/klasaciya.html', '/liga.html', '/otchet.html', '/za-nas.html', '/novini.html', '/vhod.html', '/registracia.html', '/profil.html', '/tablo.html', '/matematika-1-klas.html', '/matematika-2-klas.html', '/matematika-3-klas.html', '/matematika-4-klas.html', '/404.html',
-  '/css/style.css?v=40', '/css/animations.css?v=40',
-  '/js/owl.js?v=40', '/js/gamification.js?v=40', '/js/audio.js?v=40', '/js/math-engine.js?v=40', '/js/lesson-map.js?v=40', '/js/textbooks.js?v=40',
-  '/js/access.js?v=40', '/js/account.js?v=40', '/js/paddle.js?v=40', '/js/app.js?v=40', '/js/a11y.js?v=40', '/js/wardrobe.js?v=40', '/js/game.js?v=40', '/js/achievements.js?v=40', '/js/tools.js?v=40', '/js/league.js?v=40', '/js/report.js?v=40', '/js/homework.js?v=40', '/js/tablo.js?v=40', '/js/challenge.js?v=40', '/js/quiz.js?v=40', '/tablica-za-umnozhenie.html', '/testove-po-matematika.html',
+  '/css/style.css?v=41', '/css/animations.css?v=41',
+  '/js/owl.js?v=41', '/js/gamification.js?v=41', '/js/audio.js?v=41', '/js/math-engine.js?v=41', '/js/lesson-map.js?v=41', '/js/textbooks.js?v=41',
+  '/js/access.js?v=41', '/js/account.js?v=41', '/js/paddle.js?v=41', '/js/app.js?v=41', '/js/a11y.js?v=41', '/js/wardrobe.js?v=41', '/js/game.js?v=41', '/js/achievements.js?v=41', '/js/tools.js?v=41', '/js/league.js?v=41', '/js/report.js?v=41', '/js/homework.js?v=41', '/js/tablo.js?v=41', '/js/challenge.js?v=41', '/js/quiz.js?v=41', '/tablica-za-umnozhenie.html', '/testove-po-matematika.html',
   '/assets/images/landscape.svg', '/assets/fonts/nunito.woff', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/manifest.json'
 ];
 
