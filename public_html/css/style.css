@@ -1997,3 +1997,17 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .ck-in:focus { outline: 3px solid var(--sky); outline-offset: 1px; }
 .ck-fb { font-weight: 800; min-height: 1.3em; margin: 12px 0 6px; }
 .ck-fb.good { color: var(--green-dark); } .ck-fb.bad { color: var(--red); }
+
+/* ---------- Текстови задачи стъпка по стъпка ---------- */
+.wt { display: grid; gap: 24px; }
+@media (min-width: 900px) { .wt { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 36px; align-items: start; } }
+.wt-main { background: var(--cream); border: 2px solid #F2E0BE; border-radius: var(--radius); padding: 26px; }
+.wt-q { font-size: 1.35rem; font-weight: 800; color: var(--navy); line-height: 1.45; margin: 0 0 18px; }
+.wt-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.wt-fb { font-weight: 800; min-height: 1.3em; margin: 14px 0 0; }
+.wt-fb.good { color: var(--green-dark); } .wt-fb.bad { color: var(--red); }
+.wt-steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+.wt-steps li { border-bottom: 2px solid var(--line); padding: 13px 4px; color: #9FB0CC; }
+.wt-steps li.on { color: var(--navy); }
+.wt-steps li b { display: block; font-size: 1.02rem; }
+.wt-steps li span { display: block; color: var(--muted); font-weight: 600; margin-top: 4px; }

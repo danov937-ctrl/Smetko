@@ -200,6 +200,7 @@ index = head('Сметко – математика като игра за 1.–
       <a class="hub-card" href="koleden-kalendar.html" style="--c:#E0452F"><span>{ico('star')}</span><b>Коледен календар</b><small>24 задачи за декември, с печат</small></a>
       <a class="hub-card" href="zadachi-na-daskata.html" style="--c:#2F80ED"><span>{ico('board')}</span><b>Задачи на дъската</b><small>За час – на цял екран, с отговор</small></a>
       <a class="hub-card" href="chasovnik.html" style="--c:#19B5A5"><span>{ico('clock')}</span><b>Часовникът</b><small>Колко е часът – с подвижни стрелки</small></a>
+      <a class="hub-card" href="tekstovi-zadachi.html" style="--c:#FF7A1A"><span>{ico('write')}</span><b>Текстови задачи</b><small>С подсказки стъпка по стъпка</small></a>
     </div>
   </div>
 </section>
@@ -1153,6 +1154,80 @@ ck = head('Часовникът: как се чете часът – упраж�
 </main>
 """ + FOOTER + scripts(['js/clock.js'])
 write('chasovnik.html', ck)
+
+# ================= текстови задачи =================
+wt = head('Текстови задачи по математика за 1.–4. клас – с решение стъпка по стъпка | Сметко',
+          'Текстови задачи по математика за 1., 2., 3. и 4. клас с подсказки стъпка по стъпка: как се намира въпросът, кое действие се избира и как се проверява отговорът. Безплатно, без регистрация.',
+          'tekstovi-zadachi.html', [crumbs([('Начало', ''), ('Текстови задачи', 'tekstovi-zadachi.html')])]) + header() + \
+    page_hero('Текстови задачи стъпка по стъпка',
+              'Мястото, където се къса при повечето деца – не в смятането, а в разбирането какво се пита. Тук задачата идва с пет стъпки, които се отварят една по една, когато потрябват.',
+              'Начало › Текстови задачи', 'hero',
+              '<div class="hero-cta"><a class="btn btn-lg btn-green" href="#wt">Към задачите</a>'
+              '<a class="btn btn-white" href="/blog/tekstovi-zadachi-5-stapki">Как се решават</a></div>') + \
+    f"""
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="panel tool-panel">
+      <div class="tool-grid">
+        <label>Клас<select id="wt-grade" class="select"><option value="1">1. клас</option><option value="2" selected>2. клас</option><option value="3">3. клас</option><option value="4">4. клас</option></select></label>
+      </div>
+      <p class="hint">Първо опитайте сами. „Подскажи“ отваря по една стъпка – не отговора.</p>
+    </div>
+    <div class="wt" id="wt">
+      <div class="wt-main">
+        <p class="wt-q" id="wt-q"></p>
+        <div class="wt-row">
+          <input id="wt-ans" class="ck-in" inputmode="numeric" autocomplete="off" aria-label="Отговор">
+          <button type="button" class="btn btn-green" id="wt-check">Провери</button>
+          <button type="button" class="btn btn-sm btn-white" id="wt-hint">Подскажи</button>
+          <button type="button" class="btn btn-sm btn-white" id="wt-new">Нова задача</button>
+        </div>
+        <p class="wt-fb" id="wt-fb" aria-live="polite"></p>
+      </div>
+      <ol class="wt-steps" id="wt-steps"></ol>
+    </div>
+  </div>
+</section>
+
+<section class="section soft">
+  <div class="wrap prose">
+    <h2 class="lined">Защо тъкмо текстовите задачи</h2>
+    <p>Дете, което смята безпогрешно, често се проваля на текстова задача. Причината почти никога не е смятането – то се проваля, преди да стигне до него: не е разбрало какво се пита или е избрало действието по усет, вместо по смисъл.</p>
+    <p>Затова и на <a href="nvo-4-klas-matematika.html">НВО в 4. клас</a> точно тези задачи носят най-много точки и се губят най-много точки. Последните пет задачи на изпита са текстови и искат записано решение, а не само отговор.</p>
+
+    <h3>Капаните, които хващат всички</h3>
+    <ul class="check-list">
+      <li><b>Думата вместо смисъла.</b> „Повече“ не значи винаги събиране. „Иван има 12 стикера, това е с 5 повече от Мария“ – тук се вади.</li>
+      <li><b>Отговор без въпрос.</b> Детето смята всичко, което може, и дава първото получено число. Проверката е едно изречение: „Това ли питаха?“</li>
+      <li><b>Забравена втора стъпка.</b> В задачите с две действия междинният отговор се взема за краен. Помага въпросът: „Това отговаря ли вече на въпроса?“</li>
+      <li><b>Липсваща мерна единица.</b> „24“ не е отговор на „колко метра“. На изпит това струва точка.</li>
+    </ul>
+
+    <h3>Какво се иска по класове</h3>
+    <p><b>1. клас.</b> Една стъпка, числата до 20. Задачите са кратки и почти винаги за събиране или изваждане.</p>
+    <p><b>2. клас.</b> Числата до 100 и първите задачи с две действия. Влиза и умножението – „по 4 в кутия, 5 кутии“.</p>
+    <p><b>3. клас.</b> Две действия стават правило, появява се деление с остатък и косвената форма („с 5 по-малко от…“).</p>
+    <p><b>4. клас.</b> Многоцифрени числа, задачи с данни от таблица, с обиколка и лице, с пари и време. И задачата с три подусловия, която на изпита носи най-много точки.</p>
+
+    <h3>Как да помогнете, без да решавате вместо детето</h3>
+    <p>Четирите въпроса вършат работа за почти всяка задача: <b>Какво знаем? Какво питат? Станаха ли повече, или по-малко? Можеш ли да го нарисуваш?</b> С времето детето започва да си ги задава само – а това е целта. Повече за това има в статията <a href="/blog/tekstovi-zadachi-5-stapki">как се решават текстови задачи в пет стъпки</a>.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Накъде оттук</h2><p>Текстовите задачи вървят с четенето на условие, с мерните единици и с подготовката за НВО.</p></div>
+    <div class="hub-top">
+      <a class="hub-card" href="rabotni-listove.html" style="--c:#2F80ED"><span>{ico('sheet')}</span><b>Работни листове</b><small>Задачи за печат по тема</small></a>
+      <a class="hub-card" href="nvo-4-klas-razshiren-otgovor.html" style="--c:#8E6CF0"><span>{ico('write')}</span><b>Задачите с решение на НВО</b><small>Как се пише решение за точки</small></a>
+      <a class="hub-card" href="chasovnik.html" style="--c:#19B5A5"><span>{ico('clock')}</span><b>Часовникът</b><small>Задачите за време започват оттук</small></a>
+    </div>
+  </div>
+</section>
+</main>
+""" + FOOTER + scripts(['js/math-engine.js', 'js/wordtask.js'])
+write('tekstovi-zadachi.html', wt)
 
 # ================= 404 =================
 nf = head('Страницата не е намерена – Сметко', 'Страницата не е намерена.', '404.html', noindex=True).replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<base href="/">') + header() + page_hero(

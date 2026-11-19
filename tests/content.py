@@ -136,6 +136,24 @@ with sync_playwright() as p:
     tags = set(t.split('·')[0].strip().lower() for t in pg.eval_on_selector_all('.qz-plan', 'e=>e.map(x=>x.innerText)'))
     ok(tags and tags <= {'числа', 'фигури', 'измерване', 'моделиране'}, 'задачите сочат областта си: %s' % sorted(tags))
 
+    # ---------- текстови задачи със стъпки
+    pg.goto(B + '/tekstovi-zadachi.html'); pg.wait_for_timeout(1500)
+    ok(pg.locator('.wt-steps li').count() == 5, 'петте стъпки са налице')
+    ok(pg.locator('.wt-steps li.on').count() == 0, 'в началото нито една стъпка не е отворена')
+    q0 = pg.inner_text('#wt-q')
+    ok(len(q0) > 30 and '?' in q0, 'задачата е текстова: %s' % q0[:50])
+    pg.click('#wt-hint'); pg.wait_for_timeout(200)
+    ok(pg.locator('.wt-steps li.on').count() == 1, 'подсказката отваря по една стъпка')
+    pg.fill('#wt-ans', '999999'); pg.click('#wt-check'); pg.wait_for_timeout(300)
+    ok('Не е това' in pg.inner_text('#wt-fb'), 'грешният отговор се отхвърля')
+    a = pg.evaluate('Smetko.WordTask.task().answer')
+    pg.fill('#wt-ans', str(a)); pg.click('#wt-check'); pg.wait_for_timeout(300)
+    ok('Браво' in pg.inner_text('#wt-fb'), 'верният отговор се приема: %s' % pg.inner_text('#wt-fb')[:40])
+    ok(pg.locator('.wt-steps li.on').count() == 5, 'накрая се вижда целият ред на работа')
+    for g in ('1', '3', '4'):
+        pg.select_option('#wt-grade', g); pg.wait_for_timeout(500)
+        ok(len(pg.inner_text('#wt-q')) > 25, '%s. клас също дава текстова задача' % g)
+
     # ---------- часовникът
     pg.goto(B + '/chasovnik.html'); pg.wait_for_timeout(1400)
     ok(pg.locator('#ck-face').count() == 1 and pg.locator('#ck-h').count() == 1, 'часовникът се вижда със стрелките си')
