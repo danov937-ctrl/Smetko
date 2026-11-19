@@ -37,6 +37,18 @@ if (!setting('news_seed_sbornik')) {
     }
     $pdo->exec('COMMIT');
 }
+// коледният календар – излиза сам на 1 декември и слиза след Коледа
+if (!setting('news_seed_advent')) {
+    $pdo = db(); $pdo->exec('BEGIN IMMEDIATE');
+    if (!setting('news_seed_advent')) {
+        set_setting('news_seed_advent', '1');
+        $y = (int)date('n') === 12 ? (int)date('Y') : (int)date('Y') + ((int)date('n') > 12 ? 1 : 0);
+        $pdo->prepare('INSERT INTO news(emoji, title, body, link, link_text, starts, ends, active, popup, created_at) VALUES(?, ?, ?, ?, ?, ?, ?, 1, 1, ?)')->execute(['🎄', 'Коледният календар е отворен',
+            "От 1 до 24 декември всеки ден се отваря по една врата с нова задача.\n\nЗадачата за деня е една и съща за всички в класа, става по-трудна към Коледа и остава със звезда, щом я решиш. Вратите на следващите дни се отварят на своя ден – без надничане.\n\nЗа вкъщи и за класната стая има и лист с 24-те задачи за печат, с отговорите най-отзад.",
+            'koleden-kalendar.html', '🎄 Към календара', $y . '-12-01', $y . '-12-26', now()]);
+    }
+    $pdo->exec('COMMIT');
+}
 $st = db()->prepare("SELECT id, emoji, title, body, link, link_text, popup, COALESCE(starts, substr(created_at, 1, 10)) AS d FROM news
     WHERE active = 1 AND (starts IS NULL OR starts = '' OR starts <= ?) AND (ends IS NULL OR ends = '' OR ends >= ?) ORDER BY d DESC, id DESC LIMIT 30");
 $st->execute([$t, $t]);

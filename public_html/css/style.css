@@ -231,6 +231,7 @@ button { font-family: inherit; }
 
 .card { background: #fff; border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); border: 2px solid var(--line); }
 .card h3 { letter-spacing: -.015em; }
+.card h3 .ico { width: 1.3em; height: 1.3em; vertical-align: -.28em; margin-right: .3em; }
 
 /* ---------- Икони (един набор, рисуван с една линия; цветът идва от текста) ---------- */
 .ico-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
@@ -789,6 +790,8 @@ body.game-page { background: linear-gradient(180deg, #3D98FF 0%, #A2D2FF 60%, #E
   .ws-answers { page-break-before: always; }
   .ws-answers[hidden] { display: none !important; }
   .section { padding: 0; }
+  /* на хартия от календара остават само задачите */
+  .ac-bar, #advent, .page-hero, .ac-sheet[hidden] { display: none !important; }
   a { color: #000; }
 }
 /* v2 корекции */
@@ -1911,3 +1914,47 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .ws-fig svg { max-height: 78px; width: auto; }
 .tool-grid label.is-off { opacity: .45; pointer-events: none; }
 @media print { .ws-break { break-before: page; page-break-before: always; margin-top: 0; padding-top: 0; border-top: 0; } }
+
+/* ---------- Коледен календар ---------- */
+.ac-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-bottom: 20px; }
+.ac-bar label { font-weight: 800; color: var(--navy); display: flex; align-items: center; gap: 8px; }
+.ac-bar .hint { margin: 0; }
+.ac-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 700px; }
+@media (min-width: 620px) { .ac-grid { grid-template-columns: repeat(6, 1fr); } }
+.ac-day { position: relative; aspect-ratio: 1; border: 2px solid var(--line); border-radius: var(--radius-sm); background: #fff;
+  display: grid; place-items: center; cursor: pointer; font-family: inherit; color: var(--navy); padding: 0;
+  box-shadow: var(--shadow-sm); transition: transform .1s; }
+.ac-day:hover { transform: translateY(-2px); border-color: var(--sky); }
+.ac-num { font-size: 1.7rem; font-weight: 900; color: var(--d, var(--navy)); }
+/* всяка врата със свой цвят – иначе календарът изглежда като таблица */
+.ac-day:nth-child(6n+1) { --d: #2F80ED; } .ac-day:nth-child(6n+2) { --d: #E0452F; }
+.ac-day:nth-child(6n+3) { --d: #4CBB4A; } .ac-day:nth-child(6n+4) { --d: #8E6CF0; }
+.ac-day:nth-child(6n+5) { --d: #FF7A1A; } .ac-day:nth-child(6n) { --d: #19B5A5; }
+.ac-day:not(.locked) { border-color: color-mix(in srgb, var(--d) 35%, #fff); }
+.ac-day:not(.locked):hover { border-color: var(--d); }
+.ac-day.locked .ac-num { color: #9FB0CC; }
+.ac-day.locked::after { content: '❄'; position: absolute; bottom: 4px; right: 7px; font-size: .85rem; color: #BBCBE4; }
+.ac-day.locked { cursor: not-allowed; background: var(--bg-soft); color: #9FB0CC; border-style: dashed; box-shadow: none; }
+.ac-day.locked:hover { transform: none; border-color: var(--line); }
+.ac-day.today { border-color: var(--orange); box-shadow: 0 3px 0 var(--orange-dark); }
+.ac-day.solved { background: #EAF7EA; border-color: #9BD69A; }
+.ac-tick { position: absolute; top: 5px; right: 8px; color: var(--yellow); font-size: 1.1rem; }
+.ac-count { margin: 16px 0 0; max-width: 700px; font-weight: 800; color: var(--muted); }
+.ac-all { margin-top: 14px; max-width: 700px; background: #EAF7EA; border: 2px solid #9BD69A; border-radius: var(--radius-sm); padding: 14px 18px; font-weight: 700; color: var(--navy); }
+.ac-panel { margin-top: 20px; max-width: 700px; border: 2px solid var(--line); border-radius: var(--radius); background: var(--cream); padding: 22px; }
+.ac-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.ac-head b { font-size: 1.15rem; color: var(--navy); }
+.ac-close { border: 0; background: none; font-size: 1.6rem; line-height: 1; cursor: pointer; color: var(--muted); padding: 0 4px; }
+.ac-q { font-size: 1.5rem; font-weight: 800; color: var(--navy); margin: 0 0 14px; }
+.ac-blank { display: inline-block; min-width: 2.2em; border-bottom: 3px solid var(--sky); text-align: center; color: var(--sky); }
+.ac-fig { margin-bottom: 14px; }
+.ac-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ac-in { width: 130px; font: inherit; font-size: 1.3rem; font-weight: 800; text-align: center; padding: 10px 12px;
+  border: 2px solid var(--line); border-radius: var(--radius-sm); color: var(--navy); background: #fff; }
+.ac-in:focus { outline: 3px solid var(--sky); outline-offset: 1px; }
+.ac-fb { margin: 12px 0 0; font-weight: 800; min-height: 1.2em; }
+.ac-fb.good { color: var(--green-dark); } .ac-fb.bad { color: var(--red); }
+.ac-ok { margin: 0; font-weight: 800; color: var(--green-dark); }
+.ac-sheet-list { columns: 2; column-gap: 28px; }
+.ac-sheet-list li { break-inside: avoid; margin-bottom: 14px; }
+@media (max-width: 420px) { .ac-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; } .ac-num { font-size: 1.3rem; } }

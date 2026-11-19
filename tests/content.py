@@ -98,6 +98,35 @@ with sync_playwright() as p:
     opts = pg.eval_on_selector_all('#ws-sheet .ws-opts', 'e=>e.map(x=>x.innerText.trim())')
     ok(all(o.startswith('а)') for o in opts), 'отговорите са с букви а) б) в) г)')
 
+    # ---------- коледният календар
+    pg.goto(B + '/koleden-kalendar.html'); pg.wait_for_timeout(1400)
+    ok(pg.locator('.ac-day').count() == 24, 'календарът има 24 врати')
+    import datetime
+    t = datetime.date.today()
+    want = 24 - t.day if t.month == 12 else 0
+    ok(pg.locator('.ac-day.locked').count() == max(0, want), 'заключени са само бъдещите дни (%d)' % pg.locator('.ac-day.locked').count())
+    pg.locator('.ac-day:not(.locked)').first.click(); pg.wait_for_timeout(600)
+    q1 = pg.locator('.ac-q').inner_text()
+    ok(len(q1) > 4, 'вратата отваря задача: %s' % q1[:40])
+    pg.reload(); pg.wait_for_timeout(1400)
+    pg.locator('.ac-day:not(.locked)').first.click(); pg.wait_for_timeout(600)
+    ok(pg.locator('.ac-q').inner_text() == q1, 'същият ден дава същата задача след презареждане')
+    pg.select_option('#ac-grade', '4'); pg.wait_for_timeout(700)
+    pg.locator('.ac-day:not(.locked)').first.click(); pg.wait_for_timeout(600)
+    ok(pg.locator('.ac-q').inner_text() != q1, 'другият клас получава друга задача')
+    # верен отговор се помни
+    pg.select_option('#ac-grade', '2'); pg.wait_for_timeout(700)
+    pg.locator('.ac-day:not(.locked)').first.click(); pg.wait_for_timeout(500)
+    pg.fill('.ac-in', '999999'); pg.click('.ac-check'); pg.wait_for_timeout(400)
+    ok('Не е това' in pg.inner_text('.ac-fb'), 'грешният отговор се отхвърля')
+    day = pg.eval_on_selector('.ac-panel', 'e=>e.dataset.day')
+    right = pg.evaluate('d=>String(Smetko.Advent.taskFor(+d, Smetko.Advent.grade()).answer)', day)
+    pg.fill('.ac-in', right); pg.click('.ac-check'); pg.wait_for_timeout(1500)
+    ok(pg.locator('.ac-day.solved').count() == 1, 'решеният ден получава звезда')
+    ok('1' in pg.inner_text('.ac-count'), 'броячът отчита решеното: %s' % pg.inner_text('.ac-count'))
+    pg.reload(); pg.wait_for_timeout(1300)
+    ok(pg.locator('.ac-day.solved').count() == 1, 'звездата остава след презареждане')
+
     # ---------- тестовете онлайн
     pg.goto(B + '/nvo-4-klas-probni-testove.html'); pg.wait_for_timeout(1800)
     ok(pg.locator('.qz').count() >= 3, 'страницата предлага %d пробни теста' % pg.locator('.qz').count())

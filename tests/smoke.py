@@ -43,7 +43,7 @@ for u in files:
 
 # ---------- вътрешните връзки водят донякъде
 seen, broken = set(), []
-for u in ['', 'nvo-4-klas-matematika.html', 'pricing.html', 'testove-po-matematika.html', 'uchiteli.html', 'za-nas.html']:
+for u in ['', 'nvo-4-klas-matematika.html', 'pricing.html', 'testove-po-matematika.html', 'uchilishta.html', 'za-nas.html', 'koleden-kalendar.html']:
     for href in set(re.findall(r'href="([^"#?:]+\.html|[a-z0-9-]+/)"', S.get(B + '/' + u).text)):
         if href.startswith(('http', '//')) or href in seen:
             continue
@@ -56,7 +56,8 @@ ok(S.get(B + '/matematika-2-klas', allow_redirects=False).status_code == 301, '�
 ok(S.get(B + '/nyama-takava-stranica.html').status_code == 404, 'несъществуваща страница дава 404')
 
 KEY = ['', 'game.html', 'pricing.html', 'nvo-4-klas-matematika.html', 'nvo-sbornik.html',
-       'rabotni-listove.html', 'testove-po-matematika.html', 'uchiteli.html', 'roditeli.html', 'blog/']
+       'rabotni-listove.html', 'testove-po-matematika.html', 'uchilishta.html', 'otchet.html',
+       'koleden-kalendar.html', 'deca-sas-sop.html', 'blog/']
 
 with sync_playwright() as p:
     b = p.chromium.launch()

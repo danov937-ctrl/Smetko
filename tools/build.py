@@ -197,6 +197,7 @@ index = head('Сметко – математика като игра за 1.–
       <a class="hub-card" href="vhodno-nivo-matematika.html" style="--c:#FF9F1C"><span>{ico('seed')}</span><b>Входно ниво</b><small>Тестове за 1.–4. клас</small></a>
       <a class="hub-card" href="rimski-cifri.html" style="--c:#19B5A5"><span>Ⅻ</span><b>Римски цифри</b><small>Таблица и преобразувател</small></a>
       <a class="hub-card" href="merni-edinici.html" style="--c:#4CBB4A"><span>{ico('ruler')}</span><b>Мерни единици</b><small>Дължина, маса, време, лице</small></a>
+      <a class="hub-card" href="koleden-kalendar.html" style="--c:#E0452F"><span>{ico('star')}</span><b>Коледен календар</b><small>24 задачи за декември, с печат</small></a>
     </div>
   </div>
 </section>
@@ -685,6 +686,7 @@ school = head('Сметко за училища – Табло за учител
   <div class="wrap">
     <div class="section-head"><h2 class="lined">Работни листове</h2><p>Задачи за печат по всяка тема от програмата, с отговори за учителя.</p></div>
     <p style="text-align:center"><a class="btn btn-lg btn-green" href="rabotni-listove.html">🖨️ Създай работен лист</a> <a class="btn btn-white" href="rabotni-listove.html?kind=test">📄 Контролно с 2 варианта</a></p>
+    <div class="callout" style="margin-top:22px">🎄 <b>За декември:</b> <a href="koleden-kalendar.html">коледният календар</a> дава по една задача на ден от 1 до 24 декември – една и съща за целия клас, удобна за дъската. Има и лист с 24-те задачи за печат, с отговорите най-отзад.</div>
   </div>
 </section>
 <section class="section soft" id="dokumenti">
@@ -982,6 +984,54 @@ ws = head('Работни листове и контролни по матема
 </main>
 ''' + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/tools.js'])
 write('rabotni-listove.html', ws)
+
+# ================= коледен календар =================
+adv = head('Коледен календар със задачи по математика – 24 дни | Сметко',
+           'Безплатен коледен календар със задачи по математика за 1.–4. клас: по една задача на ден от 1 до 24 декември, с проверка на отговора. И лист за печат, за да си направите календар у дома или в класа.',
+           'koleden-kalendar.html', [crumbs([('Начало', ''), ('Коледен календар', 'koleden-kalendar.html')])]) + header() + \
+    page_hero('Коледен календар със задачи',
+              'По една задача на ден от 1 до 24 декември. Всяка врата се отваря на своя ден, задачата е една и съща за всички в класа, а отговорът се проверява веднага.',
+              'Начало › Коледен календар', 'hero',
+              '<div class="hero-cta"><a class="btn btn-lg btn-green" href="#advent">Към календара</a>'
+              '<button type="button" class="btn btn-white" id="ac-print">🖨 Лист за печат</button></div>') + \
+    f"""
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="ac-bar">
+      <label>Клас <select id="ac-grade" class="select"><option value="1">1. клас</option><option value="2">2. клас</option><option value="3">3. клас</option><option value="4">4. клас</option></select></label>
+      <p class="hint">Задачите стават по-трудни към Коледа. Отворените дни се помнят в този браузър.</p>
+    </div>
+    <div id="advent" data-grade=""></div>
+  </div>
+</section>
+
+<section class="section soft">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Как се ползва</h2><p>Календарът е направен така, че да върши работа и у дома, и в клас, без да се превръща в домашно.</p></div>
+    <div class="grid grid-3">
+      <article class="card"><h3>{ico('star')} За децата</h3><p>Една врата на ден, не повече. Задачата е същата за всички съученици, така че има за какво да се спори на другия ден. Решените дни остават със звезда.</p></article>
+      <article class="card"><h3>{ico('heart')} За родителите</h3><p>Пет минути сутрин са достатъчни, за да не изстине смятането през декември. Ако задачата не става, решете я заедно – декември не е месец за битки.</p></article>
+      <article class="card"><h3>{ico('school')} За учителите</h3><p>Една задача на дъската като сутрешен ритуал. Листът за печат дава и 24-те задачи наведнъж, с отговорите най-отзад – изрязват се и се слагат в пликчета.</p></article>
+    </div>
+    <p class="center-note"><button type="button" class="btn btn-lg" onclick="document.getElementById('ac-print').click()">🖨 Свали 24-те задачи за печат</button></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Какво има вътре</h2><p>Задачите идват от същия генератор, който движи мисиите – по програмата на МОН за избрания клас.</p></div>
+    <div class="hub-top">
+      <a class="hub-card" href="game.html" style="--c:#4CBB4A"><span>{ico('map')}</span><b>Мисии по учебника</b><small>Ако детето иска повече от една задача</small></a>
+      <a class="hub-card" href="rabotni-listove.html" style="--c:#2F80ED"><span>{ico('sheet')}</span><b>Работни листове</b><small>Лист със задачи по тема, за печат</small></a>
+      <a class="hub-card" href="/blog/adventen-kalendar-zadachi" style="--c:#FF7A1A"><span>{ico('book')}</span><b>Как да си направим календар</b><small>24 идеи за задачи от всекидневието</small></a>
+    </div>
+  </div>
+</section>
+<section class="ws-sheet-wrap"><div class="ws-sheet" id="ac-sheet" hidden></div></section>
+</main>
+""" + FOOTER + scripts(['js/math-engine.js', 'js/advent.js'])
+write('koleden-kalendar.html', adv)
 
 # ================= 404 =================
 nf = head('Страницата не е намерена – Сметко', 'Страницата не е намерена.', '404.html', noindex=True).replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<base href="/">') + header() + page_hero(
