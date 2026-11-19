@@ -136,6 +136,19 @@ with sync_playwright() as p:
     tags = set(t.split('·')[0].strip().lower() for t in pg.eval_on_selector_all('.qz-plan', 'e=>e.map(x=>x.innerText)'))
     ok(tags and tags <= {'числа', 'фигури', 'измерване', 'моделиране'}, 'задачите сочат областта си: %s' % sorted(tags))
 
+    # ---------- задачи на дъската
+    pg.goto(B + '/zadachi-na-daskata.html'); pg.wait_for_timeout(1600)
+    ok(pg.locator('#bd-topic option').count() >= 4, 'темите на класа се зареждат (%d)' % pg.locator('#bd-topic option').count())
+    q1 = pg.inner_text('#bd-q')
+    ok(len(q1) > 2 and pg.locator('#bd-a').is_hidden(), 'показва задача, без отговора: %s' % q1[:30])
+    pg.keyboard.press(' '); pg.wait_for_timeout(300)
+    ok(not pg.locator('#bd-a').is_hidden() and len(pg.inner_text('#bd-a')) > 2, 'интервалът показва отговора: %s' % pg.inner_text('#bd-a')[:30])
+    pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(300)
+    ok(pg.locator('#bd-a').is_hidden(), 'стрелката дава нова задача и скрива отговора')
+    ok('2' in pg.inner_text('#bd-count'), 'задачите се броят: %s' % pg.inner_text('#bd-count'))
+    pg.select_option('#bd-grade', '4'); pg.wait_for_timeout(600)
+    ok(pg.locator('#bd-topic option').count() >= 4, 'смяната на класа сменя темите')
+
     # ---------- една игра от начало до край
     pg.goto(B + '/game.html'); pg.wait_for_timeout(2500)
     pg.locator('.dt-card .btn-green').first.click(); pg.wait_for_timeout(2000)

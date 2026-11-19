@@ -550,7 +550,7 @@ STATIC = [('', '1.0', 'weekly'), ('game.html', '0.9', 'weekly')] + [(class_url(g
     ('liga.html', '0.6', 'daily'), ('za-nas.html', '0.6', 'monthly'), ('otchet.html', '0.5', 'monthly'), ('novini.html', '0.4', 'weekly'),
     ('registracia.html', '0.5', 'yearly'), ('vhod.html', '0.4', 'yearly'), ('achievements.html', '0.3', 'monthly'),
     ('pravna-informacia.html', '0.3', 'yearly'), ('terms.html', '0.2', 'yearly'), ('privacy-policy.html', '0.2', 'yearly'), ('cookies.html', '0.2', 'yearly'),
-    ('koleden-kalendar.html', '0.6', 'monthly'), ('otkaz.html', '0.1', 'yearly'), ('vrashtane.html', '0.2', 'yearly'), ('dogovor-uchilishte.html', '0.3', 'yearly'), ('pismo-roditeli.html', '0.3', 'yearly'), ('dogovor-danni.html', '0.2', 'yearly'),
+    ('koleden-kalendar.html', '0.6', 'monthly'), ('zadachi-na-daskata.html', '0.7', 'monthly'), ('otkaz.html', '0.1', 'yearly'), ('vrashtane.html', '0.2', 'yearly'), ('dogovor-uchilishte.html', '0.3', 'yearly'), ('pismo-roditeli.html', '0.3', 'yearly'), ('dogovor-danni.html', '0.2', 'yearly'),
     # безплатните PDF-и се индексират сами по себе си
     ('assets/Smetko-NVO-4-klas-sbornik.pdf', '0.7', 'yearly'), ('assets/Smetko-NVO-4-klas-izvadka.pdf', '0.4', 'yearly')]
 xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(

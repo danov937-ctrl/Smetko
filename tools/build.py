@@ -198,6 +198,7 @@ index = head('Сметко – математика като игра за 1.–
       <a class="hub-card" href="rimski-cifri.html" style="--c:#19B5A5"><span>Ⅻ</span><b>Римски цифри</b><small>Таблица и преобразувател</small></a>
       <a class="hub-card" href="merni-edinici.html" style="--c:#4CBB4A"><span>{ico('ruler')}</span><b>Мерни единици</b><small>Дължина, маса, време, лице</small></a>
       <a class="hub-card" href="koleden-kalendar.html" style="--c:#E0452F"><span>{ico('star')}</span><b>Коледен календар</b><small>24 задачи за декември, с печат</small></a>
+      <a class="hub-card" href="zadachi-na-daskata.html" style="--c:#2F80ED"><span>{ico('board')}</span><b>Задачи на дъската</b><small>За час – на цял екран, с отговор</small></a>
     </div>
   </div>
 </section>
@@ -605,7 +606,7 @@ about = head('За родители и учители – Сметко', 'Как
     <span class="eyebrow">За учители</span>
     <h2>Сметко в класната стая</h2>
     <ul>
-      <li><b>Загрявка в началото на часа.</b> „Бързо сметни“ на интерактивната дъска – целият клас решава заедно 60 секунди.</li>
+      <li><b>Загрявка в началото на часа.</b> <a href="zadachi-na-daskata.html">„Задачи на дъската“</a> – по една задача на цял екран, целият клас отговаря заедно. Или „Бързо сметни“ за 60 секунди със състезателен дух.</li>
       <li><b>Домашна работа с един линк.</b> Генерирайте линк към тема или мисия от <a href="uchilishta.html#domashna">страницата за училища</a>.</li>
       <li><b>Работни листове и контролни.</b> <a href="rabotni-listove.html">Генерирайте задачи за печат</a> по тема – или <a href="rabotni-listove.html?kind=test">контролна работа с два равностойни варианта А и Б</a>, с готов ключ за проверка.</li>
       <li><b>По вашия учебник.</b> Мисиите следват уроците в учебника, по който работи класът.</li>
@@ -1032,6 +1033,56 @@ adv = head('Коледен календар със задачи по матем�
 </main>
 """ + FOOTER + scripts(['js/math-engine.js', 'js/advent.js'])
 write('koleden-kalendar.html', adv)
+
+# ================= на дъската =================
+bd = head('Задачи на дъската – математика за 1.–4. клас на интерактивна дъска | Сметко',
+          'Задачи по математика на цял екран за интерактивна дъска или проектор: избирате клас, тема и трудност, а Сметко показва по една задача. Интервал показва отговора. Безплатно и без регистрация.',
+          'zadachi-na-daskata.html', [crumbs([('Начало', ''), ('За учители', 'uchilishta.html'), ('На дъската', 'zadachi-na-daskata.html')])]) + header() + \
+    page_hero('Задачи на дъската',
+              'За фронтална работа в час: по една задача на цял екран, с голям шрифт. Интервал показва отговора, стрелка надясно дава следваща. Нищо не се записва и не се оценява.',
+              '<a href="uchilishta.html">За учители</a> › На дъската', 'hero',
+              '<div class="hero-cta"><a class="btn btn-lg btn-green" href="#bd">Започни</a>'
+              '<a class="btn btn-white" href="rabotni-listove.html">🖨 Работни листове</a></div>') + \
+    f"""
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="panel tool-panel bd-tools">
+      <div class="tool-grid">
+        <label>Клас<select id="bd-grade" class="select"><option value="1">1. клас</option><option value="2" selected>2. клас</option><option value="3">3. клас</option><option value="4">4. клас</option></select></label>
+        <label>Тема<select id="bd-topic" class="select"></select></label>
+        <label>Трудност<select id="bd-level" class="select"><option value="1">Лесно</option><option value="2" selected>Средно</option><option value="3">Трудно</option></select></label>
+      </div>
+      <p class="hint">Клавиши: <b>интервал</b> – отговорът, <b>→</b> – следваща задача.</p>
+    </div>
+
+    <div class="bd" id="bd">
+      <div class="bd-top"><span id="bd-count">Задача 1</span><button type="button" class="btn btn-sm btn-white" id="bd-full">⛶ Цял екран</button></div>
+      <p class="bd-q" id="bd-q"></p>
+      <div class="bd-fig" id="bd-fig" hidden></div>
+      <p class="bd-a" id="bd-a" hidden></p>
+      <div class="bd-btns">
+        <button type="button" class="btn btn-lg btn-green" id="bd-show">Покажи отговора</button>
+        <button type="button" class="btn btn-lg btn-white" id="bd-next">Пропусни</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section soft">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Как се ползва в час</h2><p>Измислено е за петте минути в началото на часа, но върши работа и при обобщение.</p></div>
+    <div class="grid grid-3">
+      <article class="card"><h3>{ico('bolt')} Загрявка</h3><p>Пет задачи по темата от миналия час, преди да се започне новото. Децата отговарят от място, без вдигане на ръка.</p></article>
+      <article class="card"><h3>{ico('radio')} Цял клас отговаря</h3><p>Всички пишат отговора на листче или на малка дъска и го вдигат едновременно. Виждате кой е схванал, без да изпитвате.</p></article>
+      <article class="card"><h3>{ico('target')} Състезание по редове</h3><p>Ред срещу ред, точка за всеки верен отговор. Трудността се вдига в движение от менюто горе.</p></article>
+    </div>
+    <p class="center-note"><a class="btn btn-lg" href="uchilishta.html">Какво още има за учители</a></p>
+  </div>
+</section>
+</main>
+""" + FOOTER + scripts(['js/math-engine.js', 'js/tools.js', 'js/board.js'])
+write('zadachi-na-daskata.html', bd)
 
 # ================= 404 =================
 nf = head('Страницата не е намерена – Сметко', 'Страницата не е намерена.', '404.html', noindex=True).replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<base href="/">') + header() + page_hero(
