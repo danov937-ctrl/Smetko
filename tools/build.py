@@ -201,6 +201,7 @@ index = head('Сметко – математика като игра за 1.–
       <a class="hub-card" href="zadachi-na-daskata.html" style="--c:#2F80ED"><span>{ico('board')}</span><b>Задачи на дъската</b><small>За час – на цял екран, с отговор</small></a>
       <a class="hub-card" href="chasovnik.html" style="--c:#19B5A5"><span>{ico('clock')}</span><b>Часовникът</b><small>Колко е часът – с подвижни стрелки</small></a>
       <a class="hub-card" href="tekstovi-zadachi.html" style="--c:#FF7A1A"><span>{ico('write')}</span><b>Текстови задачи</b><small>С подсказки стъпка по стъпка</small></a>
+      <a class="hub-card" href="obikolka-i-lice.html" style="--c:#4CBB4A"><span>{ico('grid')}</span><b>Обиколка и лице</b><small>Правоъгълник, който се тегли</small></a>
     </div>
   </div>
 </section>
@@ -1228,6 +1229,72 @@ wt = head('Текстови задачи по математика за 1.–4. 
 </main>
 """ + FOOTER + scripts(['js/math-engine.js', 'js/wordtask.js'])
 write('tekstovi-zadachi.html', wt)
+
+# ================= обиколка и лице =================
+ar = head('Обиколка и лице на правоъгълник – упражнения за 3. и 4. клас | Сметко',
+          'Обиколка и лице на правоъгълник и квадрат: подвижен правоъгълник на квадратчета, формулите с числа и упражнения. Защо обиколката е в сантиметри, а лицето в квадратни сантиметри.',
+          'obikolka-i-lice.html', [crumbs([('Начало', ''), ('Обиколка и лице', 'obikolka-i-lice.html')])]) + header() + \
+    page_hero('Обиколка и лице',
+              'Двете неща, които се бъркат най-много в 3. и 4. клас. Тук правоъгълникът се тегли с пръст по квадратчетата и се вижда разликата: обиколката е пътят отвън, лицето са квадратчетата вътре.',
+              'Начало › Обиколка и лице', 'hero',
+              '<div class="hero-cta"><a class="btn btn-lg btn-green" href="#ar">Към упражнението</a>'
+              '<a class="btn btn-white" href="merni-edinici.html">Мерни единици</a></div>') + \
+    f"""
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="panel tool-panel">
+      <div class="tool-grid">
+        <label>Какво търсим<select id="ar-mode" class="select"><option value="mix" selected>Разбъркано</option><option value="per">Обиколка</option><option value="area">Лице</option></select></label>
+      </div>
+      <p class="hint">Оранжевото кръгче тегли правоъгълника. Едно квадратче е 1 см.</p>
+    </div>
+    <div class="ar" id="ar">
+      <div class="ar-left"><svg id="ar-svg" class="ar-svg" role="img" aria-label="Правоъгълник на квадратчета"></svg></div>
+      <div class="ar-right">
+        <p class="ar-task" id="ar-task"></p>
+        <div class="ar-row">
+          <input id="ar-ans" class="ck-in" inputmode="numeric" autocomplete="off" aria-label="Отговор">
+          <button type="button" class="btn btn-green" id="ar-check">Провери</button>
+          <button type="button" class="btn btn-sm btn-white" id="ar-show">Покажи</button>
+          <button type="button" class="btn btn-sm btn-white" id="ar-new">Нов правоъгълник</button>
+        </div>
+        <p class="ar-fb" id="ar-fb" aria-live="polite"></p>
+        <div class="ar-out" id="ar-out"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section soft">
+  <div class="wrap prose">
+    <h2 class="lined">Как да не се бъркат</h2>
+    <p>Едно изречение върши повече от две формули: <b>обиколката е въжето около двора, лицето е тревата вътре.</b> Детето, което го е чуло така, спира да ги бърка.</p>
+    <h3>Обиколка</h3>
+    <p>Обиколката е сборът на всички страни. При правоъгълник всяка страна е по две, затова <b>P = 2 · (a + b)</b>. При квадрат и четирите са еднакви: <b>P = 4 · a</b>.</p>
+    <p>Най-честата грешка е да се съберат само двете различни страни. Проверката е проста: обиколката трябва да е повече от сбора на двете.</p>
+    <h3>Лице</h3>
+    <p>Лицето е колко квадратчета се побират вътре. Затова <b>S = a · b</b> – редове по колони. Начертайте правоъгълник 4 на 6 в тетрадката на квадратчета и ги пребройте: точно 24. Така формулата не се учи наизуст, а става очевидна.</p>
+    <h3>Мерните единици са част от отговора</h3>
+    <p>Обиколката се мери в сантиметри, защото е дължина. Лицето – в <b>квадратни</b> сантиметри, защото се брои на квадратчета. Отговор „24 см“ на задача за лице е грешен, дори числото да е вярно – а на <a href="nvo-4-klas-matematika.html">НВО в 4. клас</a> това струва точка.</p>
+    <h3>Обратната задача</h3>
+    <p>В 4. клас се пита и наобратно: „Лицето е 24 кв. см, едната страна е 4 см – колко е другата?“ Тук се дели: 24 : 4 = 6. Същото и с обиколката: ако P = 20 см и едната страна е 6 см, то двете страни правят 10, значи другата е 4.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Накъде оттук</h2><p>Геометрията в 4. клас е около една четвърт от изпита.</p></div>
+    <div class="hub-top">
+      <a class="hub-card" href="merni-edinici.html" style="--c:#4CBB4A"><span>{ico('ruler')}</span><b>Мерни единици</b><small>Дължина, маса, време, лице</small></a>
+      <a class="hub-card" href="nvo-4-klas-matematika.html" style="--c:#8E6CF0"><span>{ico('board')}</span><b>НВО 4. клас</b><small>Форматът и какво се пита</small></a>
+      <a class="hub-card" href="/blog/geometria-po-klasove" style="--c:#FF7A1A"><span>{ico('book')}</span><b>Геометрията по класове</b><small>Какво точно се иска кога</small></a>
+    </div>
+  </div>
+</section>
+</main>
+""" + FOOTER + scripts(['js/area.js'])
+write('obikolka-i-lice.html', ar)
 
 # ================= 404 =================
 nf = head('Страницата не е намерена – Сметко', 'Страницата не е намерена.', '404.html', noindex=True).replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<base href="/">') + header() + page_hero(

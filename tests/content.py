@@ -136,6 +136,20 @@ with sync_playwright() as p:
     tags = set(t.split('·')[0].strip().lower() for t in pg.eval_on_selector_all('.qz-plan', 'e=>e.map(x=>x.innerText)'))
     ok(tags and tags <= {'числа', 'фигури', 'измерване', 'моделиране'}, 'задачите сочат областта си: %s' % sorted(tags))
 
+    # ---------- обиколка и лице
+    pg.goto(B + '/obikolka-i-lice.html'); pg.wait_for_timeout(1400)
+    pg.evaluate('()=>Smetko.Area.set(6,4)')
+    ok(pg.evaluate('Smetko.Area.per()') == 20 and pg.evaluate('Smetko.Area.area()') == 24,
+       'правоъгълник 6 на 4: обиколка 20, лице 24')
+    want = pg.evaluate('Smetko.Area.want()')
+    swap = pg.evaluate('Smetko.Area.area()') if want == 'per' else pg.evaluate('Smetko.Area.per()')
+    pg.fill('#ar-ans', str(swap)); pg.click('#ar-check'); pg.wait_for_timeout(300)
+    t1 = pg.inner_text('#ar-fb')
+    ok(('обиколката' in t1 or 'лицето' in t1) and 'Браво' not in t1, 'обърканото едно с друго се казва направо: %s' % t1[:50])
+    right = pg.evaluate('Smetko.Area.per()') if want == 'per' else pg.evaluate('Smetko.Area.area()')
+    pg.fill('#ar-ans', str(right)); pg.click('#ar-check'); pg.wait_for_timeout(300)
+    ok('Браво' in pg.inner_text('#ar-fb'), 'верният отговор се приема: %s' % pg.inner_text('#ar-fb')[:40])
+
     # ---------- текстови задачи със стъпки
     pg.goto(B + '/tekstovi-zadachi.html'); pg.wait_for_timeout(1500)
     ok(pg.locator('.wt-steps li').count() == 5, 'петте стъпки са налице')
