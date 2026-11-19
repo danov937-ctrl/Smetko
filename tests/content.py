@@ -1,0 +1,102 @@
+# -*- coding: utf-8 -*-
+"""Съдържанието: моделът на НВО, сборникът, блогът, работните листове,
+тестовете и една игра от начало до край.
+"""
+import json, os, re, subprocess, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import requests
+from playwright.sync_api import sync_playwright
+from lib import B, ROOT, TOOLS, INIT, ok, done, page
+
+errs = []
+
+# ---------- чертежът на изпита живее на едно място
+NODE = ("const fs=require('fs'),vm=require('vm');const ctx={window:{},Math,console};"
+        "vm.createContext(ctx);vm.runInContext(fs.readFileSync(%r,'utf8'),ctx);"
+        "console.log(JSON.stringify(ctx.window.Smetko.MathEngine.NVO4))" % os.path.join(os.path.abspath(ROOT), 'js', 'math-engine.js'))
+js = subprocess.run(['node', '-e', NODE], capture_output=True, text=True)
+N = json.loads(js.stdout or '{}')
+ok(N.get('mc') == 16 and N.get('short') == 4 and N.get('written') == 5, 'моделът е 16 с избор + 4 кратки + 5 с решение')
+ok(N.get('tasks') == 25 and N.get('points') == 100 and N.get('minutes') == 60, '25 задачи, 100 точки, 60 минути')
+ok(N.get('sopExtra') == 30, 'за деца със СОП има 30 минути повече')
+ok(len(N.get('plan', [])) == 20 and len(N.get('writtenPlan', [])) == 5, 'чертежът описва всичките 25 задачи')
+areas = {t['area'] for t in N['plan']} | {t['area'] for t in N['writtenPlan']}
+ok(areas == {'Числа', 'Фигури', 'Измерване', 'Моделиране'},
+   'четирите области са покрити: %s' % sorted(areas))
+
+S = requests.Session()
+# старият модел не бива да се среща никъде
+for u in ('nvo-4-klas-matematika.html', 'nvo-4-klas-zadachi-s-izbor.html', 'nvo-sbornik.html',
+          'nvo-4-klas-probni-testove.html', 'index.html'):
+    t = S.get(B + '/' + u).text
+    ok('18-те задачи' not in t and '18 задачи с избираем' not in t, '/%s не повтаря стария модел' % u)
+t = S.get(B + '/nvo-4-klas-matematika.html').text
+ok('4 юни 2027' in t, 'датата на изпита е вярна')
+ok('16' in t and '25 задачи' in t, 'страницата изброява задачите по модела')
+
+# ---------- сборникът е безплатен и цял
+pdf = os.path.join(ROOT, 'assets', 'Smetko-NVO-4-klas-sbornik.pdf')
+ok(os.path.exists(pdf) and os.path.getsize(pdf) > 1000000, 'сборникът е в сайта (%d kB)' % (os.path.getsize(pdf) // 1024 if os.path.exists(pdf) else 0))
+sb = S.get(B + '/nvo-sbornik.html').text
+ok(sb.count('Smetko-NVO-4-klas-sbornik.pdf') >= 2, 'сборникът се сваля от страницата')
+ok('Smetko-NVO-4-klas-izvadka.pdf' in sb, 'има и извадка')
+ok('не се продава' not in sb and 'когато излезе' not in sb, 'няма остатъци от „още не се продава“')
+ok('безплат' in sb.lower(), 'страницата казва, че е безплатен')
+ok('91 страници' not in sb, 'броят страници е верен')
+
+with sync_playwright() as p:
+    b = p.chromium.launch()
+    c = b.new_context(viewport={'width': 1280, 'height': 1000}); c.add_init_script(INIT)
+    pg = page(c, errs)
+
+    # ---------- блогът
+    pg.goto(B + '/blog/'); pg.wait_for_timeout(900)
+    n = pg.locator('.blog-card').count()
+    ok(n >= 10, 'блогът показва %d статии' % n)
+    pg.locator('.blog-card a, a.blog-card').first.click(); pg.wait_for_timeout(900)
+    url = pg.url
+    ok('/blog/' in url and not url.rstrip('/').endswith('blog'), 'статията се отваря на свой адрес: %s' % url)
+    ok(pg.locator('script[type="application/ld+json"]').count() >= 1, 'статията носи структурирани данни')
+    toc = pg.locator('.bp-toc a')
+    if ok(toc.count() >= 2, 'статията има съдържание с %d точки' % toc.count()):
+        toc.nth(1).click(); pg.wait_for_timeout(600)
+        ok(pg.url.split('#')[0].rstrip('/') == url.split('#')[0].rstrip('/'),
+           'връзка от съдържанието остава в статията (%s)' % pg.url)
+        ok(pg.evaluate('window.scrollY') > 200, 'и скача надолу по текста')
+
+    # ---------- работните листове: три вида
+    pg.goto(B + '/rabotni-listove.html'); pg.wait_for_timeout(1400)
+    ok(pg.locator('#ws-sheet .ws-list li').count() == 20, 'работен лист: 20 задачи')
+    ok(pg.locator('#ws-key li').count() == 20, 'и ключ с 20 отговора')
+    pg.select_option('#ws-kind', 'test'); pg.wait_for_timeout(1200)
+    ok(pg.locator('#ws-sheet .ws-page').count() == 2, 'контролно: два варианта')
+    A = pg.eval_on_selector_all('#ws-sheet .ws-page:nth-child(1) .ws-list li', 'e=>e.map(x=>x.innerText.trim())')
+    Bv = pg.eval_on_selector_all('#ws-sheet .ws-page:nth-child(2) .ws-list li', 'e=>e.map(x=>x.innerText.trim())')
+    ok(len(A) == len(Bv) == 20 and sum(1 for x, y in zip(A, Bv) if x == y) == 0,
+       'вариантите са равни по брой и различни по задачи')
+    same = sum(1 for x, y in zip(A, Bv) if re.sub(r'\d+', 'N', x) == re.sub(r'\d+', 'N', y))
+    ok(same >= 12, 'вариантите са равностойни (%d от 20 реда с един и същи вид задача)' % same)
+    pg.select_option('#ws-kind', 'nvo'); pg.wait_for_timeout(1400)
+    ok(pg.locator('#ws-sheet .ws-list li').count() == 20, 'пробно НВО: 20 задачи на лист')
+    ok(pg.locator('#ws-sheet .ws-opts').count() == 16, 'от които 16 с готови отговори')
+    opts = pg.eval_on_selector_all('#ws-sheet .ws-opts', 'e=>e.map(x=>x.innerText.trim())')
+    ok(all(o.startswith('а)') for o in opts), 'отговорите са с букви а) б) в) г)')
+
+    # ---------- тестовете онлайн
+    pg.goto(B + '/nvo-4-klas-probni-testove.html'); pg.wait_for_timeout(1800)
+    ok(pg.locator('.qz').count() >= 3, 'страницата предлага %d пробни теста' % pg.locator('.qz').count())
+    pg.locator('.qz button.btn-green').first.click(); pg.wait_for_timeout(1800)
+    q = pg.locator('.qz .qz-q')
+    ok(q.count() >= 20, 'пробният тест показва %d задачи' % q.count())
+    tags = set(t.split('·')[0].strip().lower() for t in pg.eval_on_selector_all('.qz-plan', 'e=>e.map(x=>x.innerText)'))
+    ok(tags and tags <= {'числа', 'фигури', 'измерване', 'моделиране'}, 'задачите сочат областта си: %s' % sorted(tags))
+
+    # ---------- една игра от начало до край
+    pg.goto(B + '/game.html'); pg.wait_for_timeout(2500)
+    pg.locator('.dt-card .btn-green').first.click(); pg.wait_for_timeout(2000)
+    ok(pg.locator('.qcard').count() == 1, 'играта отваря задача')
+    txt = pg.locator('.qcard .q-text').first.inner_text().strip()
+    ok(re.search(r'\d', txt), 'задачата е смятане: %s' % txt.replace('\n', ' ')[:40])
+
+    b.close()
+done(errs)
