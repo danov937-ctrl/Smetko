@@ -202,6 +202,7 @@ index = head('Сметко – математика като игра за 1.–
       <a class="hub-card" href="chasovnik.html" style="--c:#19B5A5"><span>{ico('clock')}</span><b>Часовникът</b><small>Колко е часът – с подвижни стрелки</small></a>
       <a class="hub-card" href="tekstovi-zadachi.html" style="--c:#FF7A1A"><span>{ico('write')}</span><b>Текстови задачи</b><small>С подсказки стъпка по стъпка</small></a>
       <a class="hub-card" href="obikolka-i-lice.html" style="--c:#4CBB4A"><span>{ico('grid')}</span><b>Обиколка и лице</b><small>Правоъгълник, който се тегли</small></a>
+      <a class="hub-card" href="geometria.html" style="--c:#E0452F"><span>{ico('ruler')}</span><b>Геометрия 1.–4. клас</b><small>Фигури, ъгли, тела – с тестове</small></a>
     </div>
   </div>
 </section>
@@ -1295,6 +1296,99 @@ ar = head('Обиколка и лице на правоъгълник – упр
 </main>
 """ + FOOTER + scripts(['js/area.js'])
 write('obikolka-i-lice.html', ar)
+
+# ================= геометрия =================
+def geo_skills():
+    """Геометричните умения по класове – четат се от js/math-engine.js, за да не се разминават."""
+    import json, subprocess, os as _os
+    root = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    GEO = ['shapes', 'lines', 'countShapes', 'ruler', 'polySides', 'segSum', 'cm20', 'perim2', 'triSides',
+           'triAngles', 'angles', 'degrees', 'rectProps', 'sideFromPerim', 'area', 'areaUnits',
+           'sideFromArea', 'compArea', 'perimArea2', 'circle', 'circleParts', 'solidsName', 'solidsCount']
+    js = ("const fs=require('fs'),vm=require('vm');const c={window:{},Math:Object.create(Math),console};"
+          "vm.createContext(c);vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),c);"
+          "const G=" + json.dumps(GEO) + ",E=c.window.Smetko.MathEngine,o={};"
+          "for(let g=1;g<=4;g++){const h=[];(E.GRADES[g].topics||[]).forEach(t=>t.skills.forEach(k=>"
+          "{if(G.includes(k[0])&&!h.includes(k[0]))h.push(k[0])}));o[g]=h;}"
+          "process.stdout.write(JSON.stringify(o));")
+    out = subprocess.run(['node', '-e', js, _os.path.join(root, 'public_html', 'js', 'math-engine.js')],
+                         capture_output=True, text=True, check=True)
+    return json.loads(out.stdout)
+
+GS = geo_skills()
+GEO_LEARN = {
+    '1': ('Разпознаване', ['точка, права и крива линия, отсечка', 'триъгълник, квадрат, правоъгълник и кръг',
+                           'намиране и броене на фигури в чертеж', 'сравняване по дължина – по-дълго и по-късо']),
+    '2': ('Измерване и чертане', ['отсечка с дадена дължина в сантиметри', 'измерване с линийка от нулата',
+                                  'многоъгълник: страни и върхове', 'обиколка на триъгълник, правоъгълник и квадрат',
+                                  'свойства на правоъгълника и квадрата']),
+    '3': ('Ъгли и триъгълници', ['прав, остър и тъп ъгъл', 'видове триъгълници по ъгли и по страни',
+                                 'обиколка и намиране на страна по обиколката', 'права, лъч и отсечка – разликата']),
+    '4': ('Лице, окръжност и тела', ['лице на правоъгълник и квадрат', 'страна по дадено лице',
+                                     'съставни фигури от два правоъгълника', 'окръжност: център, радиус и диаметър',
+                                     'куб, паралелепипед, цилиндър, конус, пирамида, сфера',
+                                     'квадратен сантиметър, квадратен метър, декар']),
+}
+geo_secs = ''
+for g in ('1', '2', '3', '4'):
+    ttl, items = GEO_LEARN[g]
+    geo_secs += f"""
+  <article class="geo-grade" id="klas-{g}">
+    <div class="section-head"><h2 class="lined">{g}. клас · {ttl}</h2><p>Какво се иска по програмата и тест, с който се проверява.</p></div>
+    <div class="geo-two">
+      <ul class="check-list">{''.join('<li>' + x + '</li>' for x in items)}</ul>
+      <div class="qz" data-grade="{g}" data-skills="{','.join(GS[g])}" data-n="8" data-level="2"
+           data-title="Тест по геометрия · {g}. клас"></div>
+    </div>
+  </article>"""
+
+ge = head('Геометрия за 1.–4. клас: фигури, ъгли, обиколка, лице и тела | Сметко',
+          'Геометрията в началното училище по класове: фигури и линии, измерване с линийка, ъгли и триъгълници, обиколка и лице, окръжност и геометрични тела. С безплатни тестове и задачи с чертежи.',
+          'geometria.html', [crumbs([('Начало', ''), ('Геометрия', 'geometria.html')])]) + header() + \
+    page_hero('Геометрия в началното училище',
+              'Малко часове, много загубени точки. Тук е подредено какво се учи във всеки клас, къде се къса и има тест с чертежи за всяка възраст.',
+              'Начало › Геометрия', 'hero',
+              '<div class="hero-cta"><a class="btn btn-lg btn-green" href="#klas-1">Към тестовете</a>'
+              '<a class="btn btn-white" href="rabotni-listove.html">🖨 Лист по геометрия</a></div>') + \
+    f"""
+<main id="main">
+<section class="section">
+  <div class="wrap">{geo_secs}
+  </div>
+</section>
+
+<section class="section soft">
+  <div class="wrap prose">
+    <h2 class="lined">Къде се къса най-често</h2>
+    <h3>Линийката се чете от нулата</h3>
+    <p>Най-честата грешка във 2. клас няма нищо общо с геометрията: детето слага началото на линийката до края ѝ, а не до нулата, или чете докъде свършва отсечката, вместо да извади началото. Ако отсечката започва на 3 и свършва на 11, тя е <b>8 см</b>, а не 11.</p>
+    <h3>Обиколка или лице</h3>
+    <p>Обиколката е въжето около двора, лицето е тревата вътре. Това е цялата разлика и тя се упражнява най-бързо на <a href="obikolka-i-lice.html">подвижния правоъгълник</a>, където квадратчетата се броят.</p>
+    <h3>Мерните единици са част от отговора</h3>
+    <p>Дължина и обиколка – в сантиметри. Лице – в <b>квадратни</b> сантиметри. Отговор с вярно число, но грешна единица, се брои за грешен на изпит.</p>
+    <h3>Две страни вместо четири</h3>
+    <p>При обиколка на правоъгълник децата събират само двете различни страни. Всяка от тях обаче е по две: P = 2 · (a + b).</p>
+    <h3>Тялото не е фигура</h3>
+    <p>Квадратът е фигура, кубът е тяло. В 4. клас се пита за стени, върхове и ръбове – кубът има 6 стени, 8 върха и 12 ръба.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Къде да упражнявате</h2><p>Геометрията се учи с ръце – с линийка, с квадратчета и с рисуване.</p></div>
+    <div class="hub-top">
+      <a class="hub-card" href="obikolka-i-lice.html" style="--c:#4CBB4A"><span>{ico('grid')}</span><b>Обиколка и лице</b><small>Правоъгълник, който се тегли</small></a>
+      <a class="hub-card" href="rabotni-listove.html" style="--c:#2F80ED"><span>{ico('sheet')}</span><b>Лист по геометрия</b><small>Изберете клас и тема „Геометрия“</small></a>
+      <a class="hub-card" href="merni-edinici.html" style="--c:#19B5A5"><span>{ico('ruler')}</span><b>Мерни единици</b><small>Дължина, лице, маса, време</small></a>
+      <a class="hub-card" href="nvo-4-klas-matematika.html" style="--c:#8E6CF0"><span>{ico('board')}</span><b>НВО 4. клас</b><small>Фигурите носят четвърт от точките</small></a>
+      <a class="hub-card" href="/blog/geometria-po-klasove" style="--c:#FF7A1A"><span>{ico('book')}</span><b>Геометрията по класове</b><small>Статия за родители</small></a>
+      <a class="hub-card" href="zadachi-na-daskata.html" style="--c:#E0452F"><span>{ico('board')}</span><b>Задачи на дъската</b><small>За час, на цял екран</small></a>
+    </div>
+  </div>
+</section>
+</main>
+""" + FOOTER + scripts(['js/math-engine.js', 'js/quiz.js'])
+write('geometria.html', ge)
 
 # ================= 404 =================
 nf = head('Страницата не е намерена – Сметко', 'Страницата не е намерена.', '404.html', noindex=True).replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<base href="/">') + header() + page_hero(

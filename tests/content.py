@@ -194,6 +194,17 @@ with sync_playwright() as p:
     tags = set(t.split('·')[0].strip().lower() for t in pg.eval_on_selector_all('.qz-plan', 'e=>e.map(x=>x.innerText)'))
     ok(tags and tags <= {'числа', 'фигури', 'измерване', 'моделиране'}, 'задачите сочат областта си: %s' % sorted(tags))
 
+    # ---------- страницата по геометрия
+    pg.goto(B + '/geometria.html'); pg.wait_for_timeout(1800)
+    ok(pg.locator('.geo-grade').count() == 4, 'геометрията е подредена по четирите класа')
+    ok(pg.locator('.qz').count() == 4, 'всеки клас има свой тест')
+    ok(pg.locator('.qz-q').count() >= 28, 'тестовете се зареждат с %d задачи' % pg.locator('.qz-q').count())
+    ok(pg.locator('.qz-fig').count() >= 12, 'задачите идват с чертежи (%d)' % pg.locator('.qz-fig').count())
+    for g in ('1', '2', '3', '4'):
+        ok(pg.locator('#klas-%s' % g).count() == 1, 'има раздел за %s. клас' % g)
+    skills = pg.eval_on_selector_all('.qz', 'e=>e.map(x=>x.dataset.skills||"")')
+    ok(all(len(x.split(',')) >= 3 for x in skills), 'всеки тест пита поне по три умения: %s' % [len(x.split(',')) for x in skills])
+
     # ---------- обиколка и лице
     pg.goto(B + '/obikolka-i-lice.html'); pg.wait_for_timeout(1400)
     pg.evaluate('()=>Smetko.Area.set(6,4)')
