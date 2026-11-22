@@ -3,13 +3,26 @@
   'use strict';
   var S = window.Smetko, E = S.MathEngine, B = S.Books;
   function $(id) { return document.getElementById(id); }
+  // уменията по геометрия – за отделен лист „Геометрия“ във всеки клас
+  var GEO_SKILLS = ['shapes', 'lines', 'countShapes', 'ruler', 'polySides', 'segSum', 'cm20', 'perim2',
+    'triSides', 'triAngles', 'angles', 'degrees', 'rectProps', 'sideFromPerim', 'area', 'areaUnits',
+    'sideFromArea', 'compArea', 'perimArea2', 'circle', 'circleParts', 'solidsName', 'solidsCount', 'wordArea'];
+  function geoSkills(g) {
+    var out = [];
+    (E.GRADES[g].topics || []).forEach(function (t) {
+      t.skills.forEach(function (k) { if (GEO_SKILLS.indexOf(k[0]) >= 0 && out.indexOf(k[0]) < 0) out.push(k[0]); });
+    });
+    return out;
+  }
   function topicOptions(g, withMix) {
     if (!E) return '';
     var h = withMix ? '<option value="mix">Всички теми (смесено)</option>' : '';
     E.GRADES[g].topics.forEach(function (t, i) { h += '<option value="' + t.id + '">' + (i + 1) + '. ' + t.name + '</option>'; });
+    if (geoSkills(g).length >= 3) h += '<option value="geo">Геометрия (всичко от класа)</option>';
     return h;
   }
   function base() { return /^https?:$/.test(location.protocol) ? location.origin : 'https://smetko.com'; }
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t2 = a[i]; a[i] = a[j]; a[j] = t2; } return a; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
   // ---------- Линк за домашна ----------
@@ -100,6 +113,25 @@
           }
           if (x) { seen[x.q] = 1; out.push(x); }
         });
+        return out;
+      }
+      // при „Геометрия“ чертежите и задачите с избор са самата цел, затова не се изхвърлят
+      if (t.value === 'geo') {
+        var gs = geoSkills(gr), order = [];
+        while (order.length < n) order = order.concat(shuffle(gs));   // всяко умение се изчерпва, преди да се повтори
+        for (var gi = 0; gi < order.length && out.length < n; gi++) {
+          var gq = null, gg = 0;
+          while (!gq && gg++ < 25) {
+            var cand = E.generateSkill(gr, order[gi], +lv.value);
+            if (cand && !cand.dots && !seen[cand.q]) gq = cand;
+          }
+          if (gq) { seen[gq.q] = 1; out.push(gq); }
+        }
+        // в по-малките класове геометричните умения са малко – допускаме повторение, за да е пълен листът
+        for (var gj = 0; out.length < n && gj < n * 4; gj++) {
+          var extra = E.generateSkill(gr, order[gj % order.length], +lv.value);
+          if (extra && !extra.dots) out.push(extra);
+        }
         return out;
       }
       while (out.length < n && guard++ < n * 60) {

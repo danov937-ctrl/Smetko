@@ -34,6 +34,52 @@ t = S.get(B + '/nvo-4-klas-matematika.html').text
 ok('4 юни 2027' in t, 'датата на изпита е вярна')
 ok('16' in t and '25 задачи' in t, 'страницата изброява задачите по модела')
 
+# ---------- геометрията: има я във всеки клас и чертежите отговарят на числата
+GEO = ['shapes', 'lines', 'countShapes', 'ruler', 'polySides', 'segSum', 'cm20', 'perim2', 'triSides',
+       'triAngles', 'angles', 'degrees', 'rectProps', 'sideFromPerim', 'area', 'areaUnits', 'sideFromArea',
+       'compArea', 'perimArea2', 'circle', 'circleParts', 'solidsName', 'solidsCount', 'wordArea']
+NODE_HEAD = ("const fs=require('fs'),vm=require('vm');const ctx={window:{},Math,console};vm.createContext(ctx);"
+             "vm.runInContext(fs.readFileSync(%r,'utf8'),ctx);const E=ctx.window.Smetko.MathEngine;"
+             % os.path.join(os.path.abspath(ROOT), 'js', 'math-engine.js'))
+
+def node(js):
+    r = subprocess.run(['node', '-e', NODE_HEAD + js], capture_output=True, text=True)
+    return (r.stdout or r.stderr).strip()
+
+per_grade = json.loads(node("const G=%s;const o={};for(let g=1;g<=4;g++){const h=new Set();"
+                            "(E.GRADES[g].topics||[]).forEach(t=>t.skills.forEach(k=>{if(G.includes(k[0]))h.add(k[0])}));"
+                            "o[g]=[...h]}console.log(JSON.stringify(o))" % json.dumps(GEO, ensure_ascii=False)))
+for g in '1234':
+    ok(len(per_grade[g]) >= 3, '%s. клас има %d геометрични умения: %s' % (g, len(per_grade[g]), ', '.join(per_grade[g])))
+ok(sum(len(v) for v in per_grade.values()) >= 24, 'общо поне 24 геометрични умения в мисиите (%d)'
+   % sum(len(v) for v in per_grade.values()))
+
+# чертежът на съставната фигура трябва да дава точно отговора, който се иска
+res = node("""let bad=0,n=0;
+for(let i=0;i<1500;i++){const x=E.generateSkill(4,'compArea',2);
+  const pts=/points="([^"]+)"/.exec(x.figure)[1].trim().split(/\s+/).map(p=>p.split(',').map(Number));
+  let A=0,P=0;for(let k=0;k<pts.length;k++){const a=pts[k],b=pts[(k+1)%pts.length];
+    A+=a[0]*b[1]-b[0]*a[1];P+=Math.hypot(b[0]-a[0],b[1]-a[1]);}
+  A=Math.abs(A)/2/121;P=P/11;const want=/лицето/.test(x.q)?A:P;n++;
+  if(Math.abs(want-x.answer)>0.001)bad++;}
+console.log(bad+'/'+n)""")
+ok(res.startswith('0/'), 'съставните фигури: чертежът дава отговора (%s разминавания)' % res)
+
+# линийката: нарисуваната отсечка е дълга точно колкото е отговорът
+res = node("""let bad=0;for(let i=0;i<800;i++){const t=E.generateSkill(2,'ruler',2);
+  const m=[...t.figure.matchAll(/<line x1="([\d.]+)" y1="46" x2="([\d.]+)" y2="46"/g)][0];
+  if(!m||Math.abs((m[2]-m[1])/18-t.answer)>0.001)bad++;}console.log(bad)""")
+ok(res == '0', 'линийката: отсечката е толкова дълга, колкото е отговорът (%s грешни)' % res)
+
+# всяко геометрично умение се генерира и има отговор
+res = node("""const G=%s;let bad=[];
+for(let g=1;g<=4;g++)(E.GRADES[g].topics||[]).forEach(t=>t.skills.forEach(k=>{if(!G.includes(k[0]))return;
+  for(let lv=1;lv<=3;lv++){const x=E.generateSkill(g,k[0],lv);
+    if(!x||x.answer===undefined||x.answer===null||String(x.answer)==='NaN')bad.push(g+':'+k[0]+':'+lv);
+    if(x&&x.figure&&/NaN|undefined/.test(x.figure))bad.push('чертеж '+k[0]);}}));
+console.log(JSON.stringify([...new Set(bad)].slice(0,5)))""" % json.dumps(GEO, ensure_ascii=False))
+ok(res == '[]', 'всички геометрични умения се генерират чисто %s' % res)
+
 # ---------- сборникът е безплатен и цял
 pdf = os.path.join(ROOT, 'assets', 'Smetko-NVO-4-klas-sbornik.pdf')
 ok(os.path.exists(pdf) and os.path.getsize(pdf) > 1000000, 'сборникът е в сайта (%d kB)' % (os.path.getsize(pdf) // 1024 if os.path.exists(pdf) else 0))
@@ -92,6 +138,18 @@ with sync_playwright() as p:
     sb = pg.eval_on_selector_all('#ws-sheet .ws-page:nth-child(2) .ws-list li', 'e=>e.map(x=>x.dataset.skill)')
     ok(sa and all(sa), 'задачите носят името на умението си')
     ok(sa == sb, 'вариант Б повтаря уменията на вариант А ред по ред')
+    # отделен лист само по геометрия, с чертежите
+    for g in ('1', '2', '3', '4'):
+        pg.goto(B + '/rabotni-listove.html?grade=' + g); pg.wait_for_timeout(1300)
+        ok(pg.locator('#ws-topic option[value="geo"]').count() == 1, '%s. клас: има лист „Геометрия“' % g)
+        pg.select_option('#ws-topic', 'geo'); pg.wait_for_timeout(1700)
+        n = pg.locator('#ws-sheet .ws-list li').count()
+        figs = pg.locator('#ws-sheet .ws-fig').count()
+        ok(n == 20 and pg.locator('#ws-key li').count() == 20, '%s. клас: 20 задачи и 20 отговора (%d)' % (g, n))
+        ok(figs >= 6, '%s. клас: чертежите стигат до листа (%d)' % (g, figs))
+        sk = pg.eval_on_selector_all('#ws-sheet .ws-list li', 'e=>e.map(x=>x.dataset.skill)')
+        ok(len(set(x for x in sk if x)) >= 4, '%s. клас: листът не се върти около едно умение (%d различни)' % (g, len(set(sk))))
+    pg.goto(B + '/rabotni-listove.html'); pg.wait_for_timeout(1300)
     pg.select_option('#ws-kind', 'nvo'); pg.wait_for_timeout(1400)
     ok(pg.locator('#ws-sheet .ws-list li').count() == 20, 'пробно НВО: 20 задачи на лист')
     ok(pg.locator('#ws-sheet .ws-opts').count() == 16, 'от които 16 с готови отговори')

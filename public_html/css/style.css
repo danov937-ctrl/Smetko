@@ -584,6 +584,11 @@ code { word-break: break-all; background: var(--bg-soft); padding: 2px 6px; bord
 .q-text.mid .slot { min-width: 2.2em; }
 .q-text .rom { font-family: Georgia, 'Times New Roman', serif; color: var(--blue); letter-spacing: .05em; }
 .fig.clock { width: 170px; }
+/* по-широките геометрични чертежи имат нужда от повече място */
+.fig.ruler { width: 300px; max-width: 100%; }
+.fig.scene { width: 280px; max-width: 100%; }
+.fig .rl { font: 700 11px var(--font); fill: #8A6A22; }
+.fig .pt { font: 900 14px var(--font); fill: var(--navy); }
 .fig .clk, .fig.clock text { font: 900 15px var(--font); fill: var(--navy); }
 .fig.ang { width: 150px; }
 .fig.solid { width: 120px; }
@@ -1911,7 +1916,8 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .ws-opts span { min-width: 96px; }
 .ws-box { display: inline-block; width: 34px; height: 18px; border: 2px solid #111; border-radius: 3px; vertical-align: -3px; }
 .ws-fig { display: block; margin: 5px 0; }
-.ws-fig svg { max-height: 78px; width: auto; }
+.ws-fig svg { max-height: 92px; width: auto; }
+.ws-list li .ws-fig svg.ruler, .ws-list li .ws-fig svg.scene { max-height: 70px; }
 .tool-grid label.is-off { opacity: .45; pointer-events: none; }
 @media print { .ws-break { break-before: page; page-break-before: always; margin-top: 0; padding-top: 0; border-top: 0; } }
 

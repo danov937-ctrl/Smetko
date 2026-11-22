@@ -136,6 +136,74 @@
   }
   function sidesTriFig(a, b, c) { return triFig(a + ' см', b + ' см', c + ' см'); }
 
+  /* ---- чертежи за геометрията ---- */
+  // разхвърляни фигури за броене
+  function sceneFig(items) {
+    var b = '';
+    items.forEach(function (it) {
+      var c = it.c, x = it.x, y = it.y, r = it.r, st = ' fill="' + c + '" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"';
+      if (it.k === 'триъгълник') b += '<polygon points="' + x + ',' + (y - r) + ' ' + (x + r) + ',' + (y + r * .8) + ' ' + (x - r) + ',' + (y + r * .8) + '"' + st + '/>';
+      else if (it.k === 'квадрат') b += '<rect x="' + (x - r) + '" y="' + (y - r) + '" width="' + (2 * r) + '" height="' + (2 * r) + '" rx="2"' + st + '/>';
+      else if (it.k === 'правоъгълник') b += '<rect x="' + (x - r * 1.4) + '" y="' + (y - r * .7) + '" width="' + (2.8 * r) + '" height="' + (1.4 * r) + '" rx="2"' + st + '/>';
+      else if (it.k === 'кръг') b += '<circle cx="' + x + '" cy="' + y + '" r="' + r + '"' + st + '/>';
+    });
+    return svg(300, 150, b, 'fig scene');
+  }
+  // линийка с отсечка отгоре
+  function rulerFig(from, to) {
+    var X = 16, U = 18, b = '<rect x="' + X + '" y="66" width="' + (15 * U) + '" height="42" rx="4" fill="#FFF3D6" stroke="#C99A3B" stroke-width="2"/>';
+    for (var i = 0; i <= 15; i++) {
+      var x = X + i * U, big = i % 5 === 0;
+      b += '<line x1="' + x + '" y1="66" x2="' + x + '" y2="' + (big ? 86 : 78) + '" stroke="#8A6A22" stroke-width="' + (big ? 2.4 : 1.4) + '"/>';
+      if (big) b += '<text x="' + x + '" y="102" text-anchor="middle" class="rl">' + i + '</text>';
+      if (i < 15) b += '<line x1="' + (x + U / 2) + '" y1="66" x2="' + (x + U / 2) + '" y2="74" stroke="#8A6A22" stroke-width="1.2"/>';
+    }
+    b += '<line x1="' + (X + from * U) + '" y1="46" x2="' + (X + from * U) + '" y2="70" stroke="#9FB6D8" stroke-width="1.4" stroke-dasharray="3 3"/>' +
+         '<line x1="' + (X + to * U) + '" y1="46" x2="' + (X + to * U) + '" y2="70" stroke="#9FB6D8" stroke-width="1.4" stroke-dasharray="3 3"/>' +
+         '<line x1="' + (X + from * U) + '" y1="46" x2="' + (X + to * U) + '" y2="46" stroke="#2F80ED" stroke-width="5" stroke-linecap="round"/>' +
+         '<circle cx="' + (X + from * U) + '" cy="46" r="5" fill="#2F80ED"/><circle cx="' + (X + to * U) + '" cy="46" r="5" fill="#2F80ED"/>' +
+         '<text x="' + (X + from * U) + '" y="34" text-anchor="middle" class="pt">A</text>' +
+         '<text x="' + (X + to * U) + '" y="34" text-anchor="middle" class="pt">B</text>';
+    return svg(16 + 15 * U + 16, 116, b, 'fig ruler');
+  }
+  // правилен многоъгълник с n страни
+  function polyFig(n) {
+    var pts = [], R = 52, cx = 70, cy = 70, off = n % 2 ? -Math.PI / 2 : -Math.PI / 2 + Math.PI / n;
+    for (var i = 0; i < n; i++) pts.push((cx + R * Math.cos(off + i * 2 * Math.PI / n)).toFixed(1) + ',' + (cy + R * Math.sin(off + i * 2 * Math.PI / n)).toFixed(1));
+    return svg(140, 140, '<polygon points="' + pts.join(' ') + '" fill="#E7F4FF" stroke="#2F80ED" stroke-width="4" stroke-linejoin="round"/>' +
+      pts.map(function (p) { var q = p.split(','); return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="4" fill="' + INK + '"/>'; }).join(''), 'fig');
+  }
+  // три точки на една права: A --a-- B --b-- C
+  function abcFig(la, lb) {
+    var X = 20, W = 260, m = X + Math.round((W - 2 * X) * .45);
+    var b = '<line x1="' + X + '" y1="60" x2="' + (W - X) + '" y2="60" stroke="' + INK + '" stroke-width="4"/>';
+    [[X, 'A'], [m, 'B'], [W - X, 'C']].forEach(function (p) {
+      b += '<circle cx="' + p[0] + '" cy="60" r="5" fill="' + INK + '"/><text x="' + p[0] + '" y="48" text-anchor="middle" class="pt">' + p[1] + '</text>';
+    });
+    b += '<text x="' + ((X + m) / 2) + '" y="84" text-anchor="middle">' + la + '</text>' +
+         '<text x="' + ((m + W - X) / 2) + '" y="84" text-anchor="middle">' + lb + '</text>';
+    return svg(W, 96, b, 'fig');
+  }
+  // съставна фигура от два правоъгълника (буквата Г)
+  function compFig(a, b, c, d) {
+    var u = 11, W = a * u + 96, H = (b + d) * u + 54, x0 = 46, y0 = 22;
+    var pts = [[x0, y0], [x0 + a * u, y0], [x0 + a * u, y0 + b * u], [x0 + c * u, y0 + b * u], [x0 + c * u, y0 + (b + d) * u], [x0, y0 + (b + d) * u]];
+    return svg(W, H, '<polygon points="' + pts.map(function (p) { return p[0] + ',' + p[1]; }).join(' ') + '" fill="#E3F6E0" stroke="#2E9440" stroke-width="4" stroke-linejoin="round"/>' +
+      '<text x="' + (x0 + a * u / 2) + '" y="' + (y0 - 6) + '" text-anchor="middle">' + a + ' см</text>' +
+      '<text x="' + (x0 + a * u + 6) + '" y="' + (y0 + b * u / 2 + 5) + '">' + b + ' см</text>' +
+      '<text x="' + (x0 + c * u / 2) + '" y="' + (y0 + (b + d) * u + 18) + '" text-anchor="middle">' + c + ' см</text>' +
+      '<text x="' + (x0 - 40) + '" y="' + (y0 + (b + d) * u / 2) + '">' + (b + d) + ' см</text>', 'fig');
+  }
+  // окръжност с означени център, радиус и диаметър
+  function circleFig(hi) {
+    var cx = 80, cy = 80, r = 58, col = '#FF7A1A';
+    var b = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="#FFF8EC" stroke="' + INK + '" stroke-width="4"/>';
+    b += '<line x1="' + (cx - r) + '" y1="' + cy + '" x2="' + (cx + r) + '" y2="' + cy + '" stroke="' + (hi === 'диаметър' ? col : '#B9C8E0') + '" stroke-width="' + (hi === 'диаметър' ? 5 : 3) + '"/>';
+    b += '<line x1="' + cx + '" y1="' + cy + '" x2="' + cx + '" y2="' + (cy - r) + '" stroke="' + (hi === 'радиус' ? col : '#B9C8E0') + '" stroke-width="' + (hi === 'радиус' ? 5 : 3) + '"/>';
+    b += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (hi === 'център' ? 7 : 4) + '" fill="' + (hi === 'център' ? col : INK) + '"/>';
+    return svg(160, 160, b, 'fig');
+  }
+
   // римски цифри
   function roman(n) {
     var map = [[100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']], s = '';
@@ -320,6 +388,108 @@
   S.addBigX = function () { var a, b; do { a = rnd(1000, 60000); b = rnd(1000, 99999 - a); } while (!hasCarry(a, b)); return expr(a, PLUS, b, a + b); };
   S.subBigX = function () { var a, b; do { a = rnd(2000, 99999); b = rnd(1000, a - 500); if (Math.random() < .3) { a = rnd(2, 9) * 1000 + rnd(0, 9); b = rnd(100, a - 100); } } while (!hasBorrow(a, b)); return expr(a, MINUS, b, a - b); };
   S.solidsName = function () { var names = ['куб', 'цилиндър', 'конус', 'пирамида', 'сфера', 'правоъгълен паралелепипед'], t = pick(names), others = shuffle(names.filter(function (n) { return n !== t; })).slice(0, 3); return choose('Кое тяло е <b>' + t + '</b>?', [t].concat(others).map(function (n) { return { v: n, html: solidFig(n) }; }), t, 'Това е ' + t + '.', { optFigs: true }); };
+  /* ---- геометрия ---- */
+  // Колко фигури от даден вид има на чертежа
+  S.countShapes = function (lv) {
+    var kinds = lv === 1 ? ['триъгълник', 'квадрат', 'кръг'] : ['триъгълник', 'квадрат', 'кръг', 'правоъгълник'];
+    var plural = { 'триъгълник': 'триъгълника', 'квадрат': 'квадрата', 'кръг': 'кръга', 'правоъгълник': 'правоъгълника' };
+    var target = pick(kinds), n = rnd(2, lv === 1 ? 4 : 5), used = [], others = [], i, j;
+    for (i = 0; i < n; i++) used.push(target);
+    kinds.forEach(function (k) { if (k !== target) for (j = rnd(0, 2); j > 0; j--) others.push(k); });
+    used = shuffle(used.concat(shuffle(others).slice(0, 5)));
+    var cols = Math.min(5, used.length), items = [];
+    for (i = 0; i < used.length; i++) {
+      items.push({ k: used[i], c: FILLS[i % FILLS.length], x: 34 + (i % cols) * 58 + rnd(-5, 5),
+                   y: 42 + Math.floor(i / cols) * 62 + rnd(-4, 4), r: rnd(14, 20) });
+    }
+    return T('Колко ' + plural[target] + ' има на чертежа? {?}', n, 'На чертежа има ' + n + ' ' + plural[target] + '.', { figure: sceneFig(items) });
+  };
+
+  // Измерване на отсечка с линийка (при по-трудното отсечката не започва от нулата)
+  S.ruler = function (lv) {
+    var len, from;
+    if (lv === 1) { from = 0; len = rnd(3, 12); }
+    else { from = rnd(1, 5); len = rnd(3, 15 - from); }
+    return T('Колко сантиметра е отсечката AB? {?} см', len,
+      from === 0 ? 'Отсечката свършва на ' + len + ' – дълга е ' + len + ' см.'
+                 : 'От ' + (from + len) + ' се вади ' + from + ': ' + (from + len) + ' ' + MINUS + ' ' + from + ' = ' + len + ' см. Мери се разликата, а не докъде свършва.',
+      { figure: rulerFig(from, from + len) });
+  };
+
+  // Многоъгълник: страни, върхове и име
+  S.polySides = function (lv) {
+    var names = { 3: 'триъгълник', 4: 'четириъгълник', 5: 'петоъгълник', 6: 'шестоъгълник' };
+    var n = rnd(3, lv === 1 ? 5 : 6), r = rnd(0, 2);
+    if (r === 0) return T('Колко страни има тази фигура? {?}', n, 'Фигурата има ' + n + ' страни – това е ' + names[n] + '.', { figure: polyFig(n) });
+    if (r === 1) return T('Колко върха има тази фигура? {?}', n, 'Върховете са толкова, колкото са страните: ' + n + '.', { figure: polyFig(n) });
+    return choose('Как се нарича тази фигура?', textOpts([names[3], names[4], names[5], names[6]]),
+      names[n], 'Фигура с ' + n + ' страни е ' + names[n] + '.', { figure: polyFig(n) });
+  };
+
+  // Сбор и разлика на отсечки: AB + BC = AC
+  S.segSum = function (lv) {
+    var a = rnd(2, lv === 1 ? 9 : 40), b = rnd(2, lv === 1 ? 9 : 40);
+    if (Math.random() < .5) return T('AB = ' + a + ' см, BC = ' + b + ' см. Колко см е AC? {?} см', a + b,
+      'AC = AB + BC = ' + a + ' + ' + b + ' = ' + (a + b) + ' см', { figure: abcFig(a + ' см', b + ' см') });
+    return T('AC = ' + (a + b) + ' см, AB = ' + a + ' см. Колко см е BC? {?} см', b,
+      'BC = AC ' + MINUS + ' AB = ' + (a + b) + ' ' + MINUS + ' ' + a + ' = ' + b + ' см', { figure: abcFig(a + ' см', '? см') });
+  };
+
+  // Страна по дадена обиколка
+  S.sideFromPerim = function (lv) {
+    var a = rnd(3, lv === 1 ? 12 : 30);
+    if (Math.random() < .45) return T('Квадрат има обиколка ' + 4 * a + ' см. Колко см е страната му? {?} см', a,
+      'При квадрата четирите страни са равни: ' + 4 * a + ' ' + DIV + ' 4 = ' + a + ' см', { figure: rectFig('? см', '? см', true) });
+    var b = rnd(2, lv === 1 ? 10 : 25);
+    return T('Правоъгълник има обиколка ' + 2 * (a + b) + ' см, а едната му страна е ' + a + ' см. Колко см е другата? {?} см', b,
+      'Половината обиколка е ' + (a + b) + ' см, значи другата страна е ' + (a + b) + ' ' + MINUS + ' ' + a + ' = ' + b + ' см',
+      { figure: rectFig(a + ' см', '? см') });
+  };
+
+  // Свойства на правоъгълника и квадрата
+  S.rectProps = function () {
+    var q = pick([
+      ['Кое е вярно за всеки правоъгълник?', ['Срещуположните страни са равни', 'Всички страни са равни', 'Има три страни', 'Има един остър ъгъл'], 'Срещуположните страни са равни', 'Правоъгълникът има по две равни срещуположни страни и четири прави ъгъла.'],
+      ['Колко прави ъгъла има правоъгълникът?', ['4', '2', '1', '0'], '4', 'И четирите ъгъла на правоъгълника са прави.'],
+      ['Кое е вярно за квадрата?', ['Всички страни са равни', 'Само две страни са равни', 'Няма прави ъгли', 'Има пет върха'], 'Всички страни са равни', 'Квадратът е правоъгълник, на който всички страни са равни.'],
+      ['Всеки квадрат е и правоъгълник. Вярно ли е?', ['Да, защото има четири прави ъгъла', 'Не, защото страните му са равни', 'Само ако е голям', 'Не, защото е квадрат'], 'Да, защото има четири прави ъгъла', 'Квадратът е правоъгълник с равни страни.']
+    ]);
+    return choose(q[0], textOpts(q[1]), q[2], q[3]);
+  };
+
+  // Съставна фигура: лице или обиколка (пада се на НВО)
+  S.compArea = function (lv) {
+    var a = rnd(5, lv === 1 ? 9 : 14), b = rnd(2, 5), c = rnd(2, a - 2), d = rnd(2, 5);
+    var fig = compFig(a, b, c, d);
+    if (Math.random() < .55) {
+      var s1 = a * b, s2 = c * d;
+      return T('Колко квадратни сантиметра е лицето на фигурата? {?} кв. см', s1 + s2,
+        'Разделя се на два правоъгълника: ' + a + ' ' + TIMES + ' ' + b + ' = ' + s1 + ' и ' + c + ' ' + TIMES + ' ' + d + ' = ' + s2 + '; общо ' + (s1 + s2) + ' кв. см', { figure: fig });
+    }
+    var P = 2 * (a + b + d);
+    return T('Колко сантиметра е обиколката на фигурата? {?} см', P,
+      'Обиколката е сборът на всички страни: ' + a + ' + ' + b + ' + ' + (a - c) + ' + ' + d + ' + ' + c + ' + ' + (b + d) + ' = ' + P + ' см', { figure: fig });
+  };
+
+  // Две стъпки: от лице към обиколка и обратно
+  S.perimArea2 = function () {
+    var a = rnd(3, 12);
+    if (Math.random() < .5) return T('Квадрат има лице ' + a * a + ' кв. см. Колко см е обиколката му? {?} см', 4 * a,
+      'Страната е ' + a + ' см, защото ' + a + ' ' + TIMES + ' ' + a + ' = ' + a * a + '. Обиколката е 4 ' + TIMES + ' ' + a + ' = ' + 4 * a + ' см', { figure: rectFig('? см', '? см', true) });
+    return T('Квадрат има обиколка ' + 4 * a + ' см. Колко кв. см е лицето му? {?} кв. см', a * a,
+      'Страната е ' + 4 * a + ' ' + DIV + ' 4 = ' + a + ' см. Лицето е ' + a + ' ' + TIMES + ' ' + a + ' = ' + a * a + ' кв. см', { figure: rectFig('? см', '? см', true) });
+  };
+
+  // Частите на окръжността по чертеж
+  S.circleParts = function () {
+    var k = pick(['радиус', 'диаметър', 'център']);
+    return choose('Какво е означено с оранжево?', textOpts(['радиус', 'диаметър', 'център']), k,
+      k === 'радиус' ? 'Радиусът свързва центъра с окръжността.'
+        : k === 'диаметър' ? 'Диаметърът минава през центъра и е два пъти по-дълъг от радиуса.'
+        : 'Центърът е точката в средата, на еднакво разстояние от всички точки на окръжността.',
+      { figure: circleFig(k) });
+  };
+
   /* ---- задачи по модела на НВО за IV клас (виж E.NVO4 за реда на теста) ---- */
   // 1. Записване на многоцифрено число по словесно описание на разрядите
   S.nvoWrite = function (lv) {
@@ -454,23 +624,23 @@
   var GRADES = {
     1: { name: '1. клас', color: '#FF5A5F', topics: [
       { id: 'g1t1', name: 'Числата до 5 и нула', short: 'До 5', skills: [['count5', 2, 1], ['add5', 3, 1], ['sub5', 3, 1], ['cmp5', 2, 1], ['shapes', 2, 1]] },
-      { id: 'g1t2', name: 'Числата до 10. Събиране и изваждане до 10', short: 'До 10', skills: [['add10', 3, 1], ['sub10', 3, 1], ['decomp10', 2, 2], ['three10', 1, 2], ['missing10', 2, 2], ['cmp10', 1, 1], ['coins10', 1, 2], ['kg10', 1, 3], ['word10', 2, 2]] },
-      { id: 'g1t3', name: 'Числата от 11 до 20', short: '11 до 20', skills: [['place20', 3, 1], ['nextPrev20', 2, 1], ['cmp20', 2, 1], ['cm20', 2, 2]] },
+      { id: 'g1t2', name: 'Числата до 10. Събиране и изваждане до 10', short: 'До 10', skills: [['add10', 3, 1], ['sub10', 3, 1], ['decomp10', 2, 2], ['three10', 1, 2], ['missing10', 2, 2], ['cmp10', 1, 1], ['coins10', 1, 2], ['kg10', 1, 3], ['word10', 2, 2], ['countShapes', 1, 1]] },
+      { id: 'g1t3', name: 'Числата от 11 до 20', short: '11 до 20', skills: [['place20', 3, 1], ['nextPrev20', 2, 1], ['cmp20', 2, 1], ['cm20', 2, 2], ['lines', 1, 1]] },
       { id: 'g1t4', name: 'Събиране и изваждане до 20 без преминаване', short: 'До 20 без преминаване', skills: [['add20no', 3, 1], ['sub20no', 3, 1], ['cmpExpr20', 1, 2], ['word20', 2, 1], ['shapes', 1, 2]] },
       { id: 'g1t5', name: 'Събиране и изваждане до 20 с преминаване', short: 'До 20 с преминаване', skills: [['add20x', 3, 1], ['sub20x', 3, 1], ['word20', 2, 2], ['clockHour', 1, 1]] },
       { id: 'g1t6', name: 'Числата 10, 20, 30, … 100', short: 'Кръгли десетици', skills: [['tens100', 4, 1], ['notes100', 1, 2]] }
     ] },
     2: { name: '2. клас', color: '#FF9F1C', topics: [
-      { id: 'g2t1', name: 'Числата до 100', short: 'До 100', skills: [['place100', 3, 1], ['cmp100', 2, 1], ['nextPrev100', 2, 1], ['units2', 2, 2]] },
-      { id: 'g2t2', name: 'Събиране и изваждане до 100 без преминаване', short: 'До 100 без преминаване', skills: [['add100no', 3, 1], ['sub100no', 3, 1], ['brackets', 2, 2], ['unkAddend', 2, 2]] },
+      { id: 'g2t1', name: 'Числата до 100', short: 'До 100', skills: [['place100', 3, 1], ['cmp100', 2, 1], ['nextPrev100', 2, 1], ['units2', 2, 2], ['ruler', 2, 1]] },
+      { id: 'g2t2', name: 'Събиране и изваждане до 100 без преминаване', short: 'До 100 без преминаване', skills: [['add100no', 3, 1], ['sub100no', 3, 1], ['brackets', 2, 2], ['unkAddend', 2, 2], ['polySides', 2, 1], ['segSum', 1, 1]] },
       { id: 'g2t3', name: 'Събиране и изваждане до 100 с преминаване', short: 'До 100 с преминаване', skills: [['add100x', 3, 1], ['sub100x', 3, 1], ['perim2', 2, 2], ['triSides', 1, 2], ['word2steps', 2, 3]] },
-      { id: 'g2t4', name: 'Таблично умножение и деление', short: 'Таблицата за умножение', skills: [['mulTable', 4, 1], ['divTable', 3, 1], ['unkFactor', 2, 2], ['evenOdd', 1, 1], ['timesWord', 2, 2], ['time2', 1, 2], ['clockHM', 1, 3]] }
+      { id: 'g2t4', name: 'Таблично умножение и деление', short: 'Таблицата за умножение', skills: [['mulTable', 4, 1], ['divTable', 3, 1], ['unkFactor', 2, 2], ['evenOdd', 1, 1], ['timesWord', 2, 2], ['time2', 1, 2], ['clockHM', 1, 3], ['rectProps', 1, 1]] }
     ] },
     3: { name: '3. клас', color: '#4CBB4A', topics: [
       { id: 'g3t1', name: 'Числата до 1000', short: 'До 1000', skills: [['place1000', 3, 1], ['cmp1000', 2, 1], ['nextPrev1000', 2, 1], ['lines', 1, 2]] },
       { id: 'g3t2', name: 'Събиране и изваждане до 1000 без преминаване', short: 'До 1000 без преминаване', skills: [['add1000no', 3, 1], ['sub1000no', 3, 1], ['unkMinuend', 2, 2], ['angles', 1, 1], ['units3a', 2, 2]] },
-      { id: 'g3t3', name: 'Събиране и изваждане до 1000 с преминаване', short: 'До 1000 с преминаване', skills: [['add1000x', 3, 1], ['sub1000x', 3, 1], ['triAngles', 1, 1], ['century', 1, 2], ['word3', 1, 3]] },
-      { id: 'g3t4', name: 'Умножение на двуцифрено и трицифрено число с едноцифрено', short: 'Умножение с едноцифрено', skills: [['mul1d', 4, 1], ['distrib', 2, 2], ['parts', 2, 2], ['word3', 1, 3]] },
+      { id: 'g3t3', name: 'Събиране и изваждане до 1000 с преминаване', short: 'До 1000 с преминаване', skills: [['add1000x', 3, 1], ['sub1000x', 3, 1], ['triAngles', 1, 1], ['century', 1, 2], ['word3', 1, 3], ['triAngles', 1, 1], ['sideFromPerim', 2, 2]] },
+      { id: 'g3t4', name: 'Умножение на двуцифрено и трицифрено число с едноцифрено', short: 'Умножение с едноцифрено', skills: [['mul1d', 4, 1], ['distrib', 2, 2], ['parts', 2, 2], ['word3', 1, 3], ['triSides', 1, 1], ['degrees', 1, 2]] },
       { id: 'g3t5', name: 'Деление на двуцифрено и трицифрено число с едноцифрено', short: 'Деление с едноцифрено', skills: [['div1d', 4, 1], ['unkDividend', 2, 2], ['units3b', 2, 2], ['word3', 1, 3]] }
     ] },
     4: { name: '4. клас', color: '#2F80ED', topics: [
@@ -478,9 +648,9 @@
       { id: 'g4t2', name: 'Събиране и изваждане на многоцифрени числа без преминаване', short: 'Многоцифрени без преминаване', skills: [['addBigNo', 3, 1], ['subBigNo', 3, 1], ['unkSubtrahend', 2, 2], ['degrees', 1, 1]] },
       { id: 'g4t3', name: 'Събиране и изваждане на многоцифрени числа с преминаване', short: 'Многоцифрени с преминаване', skills: [['addBigX', 3, 1], ['subBigX', 3, 1], ['solidsName', 1, 1], ['solidsCount', 1, 2], ['wordBig', 1, 3]] },
       { id: 'g4t4', name: 'Умножение на многоцифрено число с едноцифрено', short: 'Умножение с едноцифрено', skills: [['mulBig1d', 4, 1], ['area', 2, 1], ['areaUnits', 1, 2], ['wordArea', 1, 3]] },
-      { id: 'g4t5', name: 'Деление на многоцифрено число с едноцифрено', short: 'Деление с едноцифрено', skills: [['divBig1d', 4, 1], ['unkDivisor', 2, 2], ['sideFromArea', 1, 2], ['wordBig', 1, 3]] },
-      { id: 'g4t6', name: 'Умножение на многоцифрено число с двуцифрено', short: 'Умножение с двуцифрено', skills: [['mul2d', 4, 1], ['calcWord', 1, 2]] },
-      { id: 'g4t7', name: 'Деление на многоцифрено число с двуцифрено', short: 'Деление с двуцифрено', skills: [['div2d', 4, 1], ['wordBig', 1, 3]] }
+      { id: 'g4t5', name: 'Деление на многоцифрено число с едноцифрено', short: 'Деление с едноцифрено', skills: [['divBig1d', 4, 1], ['unkDivisor', 2, 2], ['sideFromArea', 1, 2], ['wordBig', 1, 3], ['circleParts', 1, 1], ['circle', 2, 1]] },
+      { id: 'g4t6', name: 'Умножение на многоцифрено число с двуцифрено', short: 'Умножение с двуцифрено', skills: [['mul2d', 4, 1], ['calcWord', 1, 2], ['compArea', 2, 2], ['perimArea2', 1, 2]] },
+      { id: 'g4t7', name: 'Деление на многоцифрено число с двуцифрено', short: 'Деление с двуцифрено', skills: [['div2d', 4, 1], ['wordBig', 1, 3], ['sideFromArea', 1, 1], ['areaUnits', 1, 2]] }
     ] }
   };
 
@@ -563,10 +733,10 @@
       { n: 11, s: ['nvoOrder'], area: 'Числа', what: 'Ред на действията' },
       { n: 12, s: ['nvoSame'], area: 'Числа', what: 'Разпределително свойство' },
       { n: 13, s: ['degrees', 'angles', 'triAngles'], area: 'Фигури', what: 'Видове ъгли и триъгълници' },
-      { n: 14, s: ['sideFromArea', 'area'], area: 'Измерване', what: 'Лице и страна на правоъгълник' },
+      { n: 14, s: ['sideFromArea', 'area', 'perimArea2'], area: 'Измерване', what: 'Лице и страна на правоъгълник' },
       { n: 15, s: ['solidsName', 'solidsCount'], area: 'Фигури', what: 'Геометрични тела' },
-      { n: 16, s: ['circle'], area: 'Фигури', what: 'Окръжност, радиус и диаметър' },
-      { n: 17, s: ['perim2', 'units3b'], area: 'Измерване', what: 'Дължини и обиколка', free: true },
+      { n: 16, s: ['circle', 'circleParts'], area: 'Фигури', what: 'Окръжност, радиус и диаметър' },
+      { n: 17, s: ['perim2', 'units3b', 'sideFromPerim'], area: 'Измерване', what: 'Дължини и обиколка', free: true },
       { n: 18, s: ['clockHM', 'time2', 'century'], area: 'Измерване', what: 'Време', free: true },
       { n: 19, s: ['addBigX', 'subBigX'], area: 'Числа', what: 'Действия с многоцифрени числа', free: true },
       { n: 20, s: ['unkSubtrahend', 'unkMinuend'], area: 'Числа', what: 'Неизвестно умаляемо или умалител', free: true }
