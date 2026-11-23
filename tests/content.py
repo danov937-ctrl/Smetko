@@ -172,6 +172,26 @@ with sync_playwright() as p:
     late = [sl for sl in live if S.get(B + '/blog/' + sl).status_code != 200]
     ok(not late, 'всяка излязла статия се отваря %s' % late[:3])
 
+    # ---------- връзките вътре в статиите водят донякъде (в оформлението има <base href="/">)
+    posts = {}
+    for f in glob.glob(os.path.join(ROOT, 'api', 'blog_posts*.php')):
+        src = open(f, encoding='utf-8').read()
+        for sl, body in re.findall(r"'slug' => '([a-z0-9-]+)'.*?<<<'MD'\n(.*?)\nMD\]", src, re.S):
+            posts[sl] = [h for h in re.findall(r'\]\(([^)]+)\)', body) if not h.startswith(('http', '#', 'mailto'))]
+    ok(len(posts) >= 30, 'статиите се четат от php файловете: %d' % len(posts))
+    bad = []
+    for sl, hs in posts.items():
+        for h in hs:
+            t = h.split('#')[0].lstrip('/')
+            if t.startswith('blog/'):
+                if t[5:] not in posts:
+                    bad.append((sl, h))
+            elif not os.path.exists(os.path.join(ROOT, t)):
+                bad.append((sl, h))
+    ok(not bad, 'връзките в статиите водят донякъде (%d проверени) %s' % (sum(len(v) for v in posts.values()), bad[:3]))
+    thin = [sl for sl, hs in posts.items() if len(hs) < 2]
+    ok(not thin, 'всяка статия сочи поне две вътрешни страници %s' % thin[:3])
+
     # ---------- работните листове: три вида
     pg.goto(B + '/rabotni-listove.html'); pg.wait_for_timeout(1400)
     ok(pg.locator('#ws-sheet .ws-list li').count() == 20, 'работен лист: 20 задачи')
