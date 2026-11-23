@@ -24,8 +24,8 @@
 <link rel="icon" href="assets/icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/nunito.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=57">
-<link rel="stylesheet" href="css/animations.css?v=57">
+<link rel="stylesheet" href="css/style.css?v=58">
+<link rel="stylesheet" href="css/animations.css?v=58">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Начало", "item": "https://smetko.com/"}, {"@type": "ListItem", "position": 2, "name": "Безплатно", "item": "https://smetko.com/pricing.html"}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Наистина ли всичко е безплатно?", "acceptedAnswer": {"@type": "Answer", "text": "Да. Всички мисии по учебника, „Бързо сметни“, неограничена „Тренировка“, точките, значките, гардеробът на Сметко, класациите, онлайн тестовете, работните листове, сборникът за НВО и отчетът за родителя са отворени за всички. Без код, без абонамент и без карта."}}, {"@type": "Question", "name": "За колко време?", "acceptedAnswer": {"@type": "Answer", "text": "За неопределено време. Няма краен срок и няма пробен период, който да изтече. Ако някога това се промени, ще го съобщим предварително в Новини и по имейл."}}, {"@type": "Question", "name": "Има ли нещо скрито – реклами, продажба на данни?", "acceptedAnswer": {"@type": "Answer", "text": "Не. В Сметко няма реклами и не продаваме данни. Събираме само това, което е нужно, за да работи играта – вижте Политиката за поверителност."}}, {"@type": "Question", "name": "Трябва ли ми регистрация?", "acceptedAnswer": {"@type": "Answer", "text": "Не е задължителна. Може да играете и без акаунт. С безплатен акаунт напредъкът се пази на всички устройства, а родителят получава отчет за детето."}}, {"@type": "Question", "name": "А за училища и класове?", "acceptedAnswer": {"@type": "Answer", "text": "Също безплатно. Учителят ни пише на info@smetko.com, получава код за класа си и в „Табло“ създава учениците – всеки с име и парола за печат. Вижте Сметко за училища."}}, {"@type": "Question", "name": "Защо е безплатно?", "acceptedAnswer": {"@type": "Answer", "text": "Защото в момента най-важното е Сметко да стигне до повече деца и да стане по-добър от обратната връзка. Ако някога има платени неща, те ще са допълнение, а не заключване на сегашното."}}]}</script>
 </head>
@@ -175,7 +175,7 @@
       <form id="act-form" autocomplete="off">
         <div class="act-ico">🔑</div><h2>Имате код за клас от учителя?</h2>
         <p class="hint" id="act-who">Влезте в акаунта си, за да активирате кода.</p>
-        <div class="act-row"><input id="act-code" class="input code-input" placeholder="SMET-XXXX-XXXX" maxlength="16" autocapitalize="characters" spellcheck="false" aria-label="Код за абонамент"><button class="btn btn-green btn-lg" type="submit">Активирай</button></div>
+        <div class="act-row"><input id="act-code" class="input code-input" placeholder="SMET-XXXX-XXXX" maxlength="16" autocapitalize="characters" spellcheck="false" aria-label="Код за клас"><button class="btn btn-green btn-lg" type="submit">Активирай</button></div>
         <p class="code-err" id="act-err" role="alert"></p>
         <div id="act-subs"></div>
         <p class="hint act-note">Код трябва само на учителите, които водят клас – с него в „Табло“ се създават учениците. За децата и родителите <b>код не е нужен</b>: всичко е отключено още с безплатната регистрация.</p>
@@ -184,12 +184,6 @@
     </div>
   </div>
 </section>
-<section class="section" id="paddle-test" data-paddle-test hidden><div class="wrap narrow-wrap">
-  <div class="panel"><h2>🧪 Проба на плащането (Paddle)</h2>
-  <p class="hint">Виждате това, защото отворихте <code>pricing.html?test=paddle</code>. Посетителите не го виждат – сайтът е безплатен и нищо не се продава. Плащането минава през тестовия (sandbox) режим на Paddle – истински пари не се теглят.</p>
-  <div class="hero-cta"><button class="btn btn-green" type="button" data-paddle-buy="single">Индивидуален</button><button class="btn btn-white" type="button" data-paddle-buy="family">Семеен</button><button class="btn btn-white" type="button" data-paddle-buy="class" data-qty="1">Цял клас</button></div>
-  <p class="hint">Тестова карта на Paddle: <b>4242 4242 4242 4242</b>, произволна бъдеща дата и CVC.</p></div>
-</div></section>
 <section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Въпроси</h2></div><div class="faq"><details><summary>Наистина ли всичко е безплатно?</summary><p>Да. Всички мисии по учебника, „Бързо сметни“, неограничена „Тренировка“, точките, значките, гардеробът на Сметко, класациите, онлайн тестовете, работните листове, <a href="nvo-sbornik.html">сборникът за НВО</a> и отчетът за родителя са отворени за всички. Без код, без абонамент и без карта.</p></details><details><summary>За колко време?</summary><p>За неопределено време. Няма краен срок и няма пробен период, който да изтече. Ако някога това се промени, ще го съобщим предварително в <a href="novini.html">Новини</a> и по имейл.</p></details><details><summary>Има ли нещо скрито – реклами, продажба на данни?</summary><p>Не. В Сметко няма реклами и не продаваме данни. Събираме само това, което е нужно, за да работи играта – вижте <a href="privacy-policy.html">Политиката за поверителност</a>.</p></details><details><summary>Трябва ли ми регистрация?</summary><p>Не е задължителна. Може да играете и без акаунт. С безплатен акаунт напредъкът се пази на всички устройства, а родителят получава отчет за детето.</p></details><details><summary>А за училища и класове?</summary><p>Също безплатно. Учителят ни пише на <a href="mailto:info@smetko.com?subject=Клас%20в%20Сметко">info@smetko.com</a>, получава код за класа си и в <a href="tablo.html">„Табло“</a> създава учениците – всеки с име и парола за печат. Вижте <a href="uchilishta.html">Сметко за училища</a>.</p></details><details><summary>Защо е безплатно?</summary><p>Защото в момента най-важното е Сметко да стигне до повече деца и да стане по-добър от обратната връзка. Ако някога има платени неща, те ще са допълнение, а не заключване на сегашното.</p></details></div></div></section>
 </main>
 <footer class="site-footer">
@@ -248,12 +242,11 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> Сметко · smetko.com</span><span>Без реклами. Без лични данни на децата.</span></div>
   </div>
 </footer>
-<script src="js/owl.js?v=57" defer></script>
-<script src="js/gamification.js?v=57" defer></script>
-<script src="js/audio.js?v=57" defer></script>
-<script src="js/access.js?v=57" defer></script>
-<script src="js/account.js?v=57" defer></script>
-<script src="js/paddle.js?v=57" defer></script>
-<script src="js/app.js?v=57" defer></script>
+<script src="js/owl.js?v=58" defer></script>
+<script src="js/gamification.js?v=58" defer></script>
+<script src="js/audio.js?v=58" defer></script>
+<script src="js/access.js?v=58" defer></script>
+<script src="js/account.js?v=58" defer></script>
+<script src="js/app.js?v=58" defer></script>
 </body>
 </html>

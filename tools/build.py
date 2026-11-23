@@ -511,6 +511,7 @@ if FREE_MODE:  # всичко е безплатно за всички: стра�
     import re as _re
     act = _re.search(r'<section class="section soft" id="activate">.*?</section>', pricing, _re.S).group(0)
     act = act.replace('<h2>Имате код за абонамент?</h2>', '<h2>Имате код за клас от учителя?</h2>')
+    act = act.replace('aria-label="Код за абонамент"', 'aria-label="Код за клас"')
     act = _re.sub(r'<p class="hint act-note">.*?</p>',
                   '<p class="hint act-note">Код трябва само на учителите, които водят клас – с него в „Табло“ се създават учениците. За децата и родителите <b>код не е нужен</b>: всичко е отключено още с безплатната регистрация.</p>', act, flags=_re.S)
     FAQ_FREE = [
@@ -567,12 +568,6 @@ if FREE_MODE:  # всичко е безплатно за всички: стра�
 </div></section>
 
 {act}
-<section class="section" id="paddle-test" data-paddle-test hidden><div class="wrap narrow-wrap">
-  <div class="panel"><h2>🧪 Проба на плащането (Paddle)</h2>
-  <p class="hint">Виждате това, защото отворихте <code>pricing.html?test=paddle</code>. Посетителите не го виждат – сайтът е безплатен и нищо не се продава. Плащането минава през тестовия (sandbox) режим на Paddle – истински пари не се теглят.</p>
-  <div class="hero-cta"><button class="btn btn-green" type="button" data-paddle-buy="single">Индивидуален</button><button class="btn btn-white" type="button" data-paddle-buy="family">Семеен</button><button class="btn btn-white" type="button" data-paddle-buy="class" data-qty="1">Цял клас</button></div>
-  <p class="hint">Тестова карта на Paddle: <b>4242 4242 4242 4242</b>, произволна бъдеща дата и CVC.</p></div>
-</div></section>
 <section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Въпроси</h2></div>{faq(FAQ_FREE)}</div></section>
 </main>
 ''' + FOOTER + scripts()
@@ -903,14 +898,14 @@ write('zabravena-parola.html', fp_pg)
 
 prof_pg = head('Моят профил – Сметко', 'Детски профили, абонамент и отчети.', 'profil.html', [], 'acct-page-body', noindex=True) + header() + """
 <main id="main">
-<section class="section acct-main"><div class="wrap"><a class="survey-cta" href="anketa.html" data-survey-cta hidden><span aria-hidden="true">📝</span><span><b>Анкета за затворения тест</b><small>3 минути – помогнете ни да решим какво да подобрим и какви да са абонаментите.</small></span><em>Попълни</em></a><div id="acct-page"></div></div></section>
+<section class="section acct-main"><div class="wrap"><a class="survey-cta" href="anketa.html" data-survey-cta hidden><span aria-hidden="true">📝</span><span><b>Анкета за Сметко</b><small>3 минути – помогнете ни да решим какво да подобрим.</small></span><em>Попълни</em></a><div id="acct-page"></div></div></section>
 </main>
 """ + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/report.js', 'js/tools.js'])
 write('profil.html', prof_pg)
 
 tablo_pg = head('Табло – Сметко', 'Табло за учителя: ученици с име и парола, домашни, отчет по теми, класация и грамоти.', 'tablo.html', [], 'tablo-page', noindex=True) + header() + """
 <main id="main">
-<section class="section tb-main"><div class="wrap"><a class="survey-cta" href="anketa.html" data-survey-cta hidden><span aria-hidden="true">📝</span><span><b>Анкета за затворения тест</b><small>3 минути – помогнете ни да решим какво да подобрим и какви да са абонаментите.</small></span><em>Попълни</em></a><div id="tablo"></div></div></section>
+<section class="section tb-main"><div class="wrap"><a class="survey-cta" href="anketa.html" data-survey-cta hidden><span aria-hidden="true">📝</span><span><b>Анкета за Сметко</b><small>3 минути – помогнете ни да решим какво да подобрим.</small></span><em>Попълни</em></a><div id="tablo"></div></div></section>
 </main>
 """ + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/report.js', 'js/diploma.js', 'js/tools.js', 'js/a11y.js', 'js/tablo.js'])
 write('tablo.html', tablo_pg)
@@ -1512,6 +1507,6 @@ write('404.html', nf)
 
 legal.build()
 subprocess.run(['node', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'admin_names.js')], check=True)  # имена на мисии и задачи за админ → Активност
-import survey  # noqa: анкета за затворения тест (anketa.html + api/survey_q.json)
+import survey  # noqa: анкетата (anketa.html + api/survey_q.json)
 import seo  # noqa: страници по теми, помагала, sitemap-pages.xml
 print('ok')

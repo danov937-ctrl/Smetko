@@ -147,6 +147,22 @@ with sync_playwright() as p:
         t = S.get(B + '/' + u).text
         ok('Кодът за абонамент' not in t, '/%s не говори за код за абонамент' % u)
 
+    # ---------- никъде по сайта няма цена, бутон „Поръчай“ или форма за плащане
+    MONEY = ('data-price=', 'data-subscribe', 'data-paddle-buy', 'js/paddle.js', 'paddle-test',
+             'Поръчай', 'class="price"', 'Честни цени', 'period-toggle')
+    money = {}
+    for u in pages:
+        t = S.get(B + '/' + u).text
+        hit = [m for m in MONEY if m in t]
+        if hit:
+            money[u] = hit
+    ok(not money, 'никоя страница не продава нищо %s' % list(money.items())[:3])
+    ok('paddle' not in S.get(B + '/sw.js').text, 'формата за плащане не се сваля предварително')
+    anket = S.get(B + '/anketa.html').text
+    ok('€' not in anket and 'платили' not in anket and 'цена' not in anket.lower(),
+       'анкетата не пита за цени')
+    ok('доброволен подарък' in anket, 'а пита как човек би искал да помогне')
+
     # ---------- безплатно
     pg.goto(B + '/pricing.html'); pg.wait_for_timeout(700)
     low = pg.inner_text('main').lower()

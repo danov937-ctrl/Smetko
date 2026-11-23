@@ -45,8 +45,9 @@ $n = count($rows);
 $cnt = fn(string $grp) => count(array_filter($rows, fn($r) => $r['grp'] === $grp));
 $npsVals = array_values(array_filter(array_map(fn($r) => $r['a']['nps'] ?? null, $rows), fn($v) => $v !== null));
 $nps = $npsVals ? round((count(array_filter($npsVals, fn($v) => $v >= 9)) - count(array_filter($npsVals, fn($v) => $v <= 6))) / count($npsVals) * 100) : null;
-$payQ = array_values(array_filter(array_map(fn($r) => $r['a']['p_pay'] ?? null, $rows), fn($v) => $v !== null));
-$payYes = $payQ ? round(count(array_filter($payQ, fn($v) => $v <= 1)) / count($payQ) * 100) : null;
+// „Как бихте искали да помогнете“ – отговор 0 е „Да го препоръчам на други“
+$supQ = array_values(array_filter(array_map(fn($r) => $r['a']['support'] ?? null, $rows), fn($v) => $v !== null));
+$supYes = $supQ ? round(count(array_filter($supQ, fn($v) => in_array(0, (array)$v))) / count($supQ) * 100) : null;
 $kpi = fn($v, $l, $s = '') => '<div class="kpi"><b>' . $v . '</b><span>' . $l . '</span>' . ($s ? '<small>' . $s . '</small>' : '') . '</div>';
 $url = SITE_URL . '/anketa.html';
 $body = '<div class="card"><h2>Линк към анкетата</h2><p>Пратете го на участниците в теста. Показва се и като покана в „Табло“, в профила на родителя и на страница „Абонаменти“.</p>' .
@@ -56,7 +57,7 @@ $body = '<div class="card"><h2>Линк към анкетата</h2><p>Прат�
     '<a class="btn sm ghost" href="?csv=1' . ($g ? '&g=' . $g : '') . '">⬇ CSV за Excel</a></div>' .
     '<div class="kpis">' . $kpi($n, 'отговора', $g ? '' : $cnt('parent') . ' родители · ' . $cnt('teacher') . ' учители') .
     $kpi($nps === null ? '–' : ($nps > 0 ? '+' : '') . $nps, 'NPS', $npsVals ? 'препоръка, от −100 до +100 (' . count($npsVals) . ' отг.)' : '') .
-    $kpi($payYes === null ? '–' : $payYes . '%', 'родители: биха платили', $payQ ? '„Да“ + „Може би“' : '') .
+    $kpi($supYes === null ? '–' : $supYes . '%', 'биха разказали на други', $supQ ? 'от отговорилите на въпроса за подкрепа' : '') .
     $kpi(count(array_filter($rows, fn($r) => (int)$r['access'] === 1)), 'с код за достъп', 'от участниците в теста') . '</div>';
 
 if (!$n) $body .= '<div class="card"><p class="muted">Още няма отговори.</p></div>';

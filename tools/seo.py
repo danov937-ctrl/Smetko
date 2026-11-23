@@ -565,7 +565,7 @@ print('SEO:', len(SITEMAP), 'страници;', len(STATIC + SITEMAP), 'адр�
 
 # ======================================================================= sw.js: версия и списък за офлайн кеша (от VER)
 import re
-from common import VER
+from common import VER, FREE_MODE
 swp = os.path.join(OUT, 'sw.js')
 sw = open(swp, encoding='utf-8').read()
 sw = re.sub(r"smetko-v\d+", 'smetko-v' + VER, sw)
@@ -574,7 +574,9 @@ for g in (1, 2, 3, 4):
     sw = sw.replace(f"'/class-{g}.html'", f"'/{class_url(g)}'")
 if "/js/quiz.js" not in sw:
     sw = sw.replace("'/js/challenge.js?v=" + VER + "',", "'/js/challenge.js?v=" + VER + "', '/js/quiz.js?v=" + VER + "', '/tablica-za-umnozhenie.html', '/testove-po-matematika.html',")
-if "/js/paddle.js" not in sw:
+if FREE_MODE:                                   # безплатен режим: формата за плащане не се сваля предварително
+    sw = sw.replace("'/js/paddle.js?v=" + VER + "', ", '')
+elif "/js/paddle.js" not in sw:
     sw = sw.replace("'/js/app.js?v=" + VER + "',", "'/js/paddle.js?v=" + VER + "', '/js/app.js?v=" + VER + "',")
 if "/js/wardrobe.js" not in sw:
     sw = sw.replace("'/js/game.js?v=" + VER + "',", "'/js/wardrobe.js?v=" + VER + "', '/js/game.js?v=" + VER + "',")
