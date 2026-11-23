@@ -512,13 +512,33 @@
       (rest >= to / 2 ? 'Остатъкът ' + rest + ' е половината или повече, затова се закръгля нагоре: ' + r
                       : 'Остатъкът ' + rest + ' е по-малко от половината, затова се закръгля надолу: ' + r) + '.');
   };
-  S.estimate = function () {
-    var a = rnd(11, 49) * 10 + rnd(1, 9), b = rnd(11, 49) * 10 + rnd(1, 9);
-    var ra = Math.round(a / 100) * 100, rb = Math.round(b / 100) * 100, sum = ra + rb;
-    var opts = [sum, sum + 100, sum - 100, a + b].filter(function (v, i, arr) { return v > 0 && arr.indexOf(v) === i; });
-    while (opts.length < 4) opts.push(sum + 100 * opts.length);
-    return choose('Кой е приблизителният сбор на ' + a + ' + ' + b + '?', textOpts(opts.slice(0, 4).map(String)),
-      String(sum), a + ' е около ' + ra + ', а ' + b + ' е около ' + rb + '. Приблизително ' + ra + ' + ' + rb + ' = ' + sum + '. (Точният сбор е ' + (a + b) + '.)');
+  S.estimate = function () {                       // приблизително пресмятане: сбор, разлика или произведение
+    var r = rnd(0, 2), a, b, ra, rb, v, q, why, opts, step;
+    if (r === 0) {
+      a = rnd(11, 49) * 10 + rnd(1, 9); b = rnd(11, 49) * 10 + rnd(1, 9);
+      ra = Math.round(a / 100) * 100; rb = Math.round(b / 100) * 100; v = ra + rb; step = 100;
+      q = 'Кой е приблизителният сбор на ' + a + ' + ' + b + '?';
+      why = a + ' е около ' + ra + ', а ' + b + ' е около ' + rb + '. Приблизително ' + ra + ' + ' + rb + ' = ' + v + '. (Точният сбор е ' + (a + b) + '.)';
+      opts = [v, v + step, v - step, a + b];
+    } else if (r === 1) {
+      do {                                         // закръглените трябва да се различават, иначе разликата е 0
+        a = rnd(31, 95) * 10 + rnd(1, 9); b = rnd(11, 25) * 10 + rnd(1, 9);
+        ra = Math.round(a / 100) * 100; rb = Math.round(b / 100) * 100; v = ra - rb;
+      } while (v < 100);
+      step = 100;
+      q = 'Коя е приблизителната разлика на ' + a + ' ' + MINUS + ' ' + b + '?';
+      why = a + ' е около ' + ra + ', а ' + b + ' е около ' + rb + '. Приблизително ' + ra + ' ' + MINUS + ' ' + rb + ' = ' + v + '. (Точната разлика е ' + (a - b) + '.)';
+      opts = [v, v + step, v - step, a - b];
+    } else {
+      a = rnd(21, 89); if (a % 10 === 0) a += rnd(1, 4);   // кръгло число прави двата отговора еднакви
+      b = rnd(3, 9); ra = Math.round(a / 10) * 10; v = ra * b; step = 10 * b;
+      q = 'Кое е приблизителното произведение на ' + a + ' ' + TIMES + ' ' + b + '?';
+      why = a + ' е около ' + ra + '. Приблизително ' + ra + ' ' + TIMES + ' ' + b + ' = ' + v + '. (Точното произведение е ' + (a * b) + '.)';
+      opts = [v, v + step, v - step, a * b];
+    }
+    opts = opts.filter(function (x, i, arr) { return x > 0 && arr.indexOf(x) === i; });
+    while (opts.length < 4) opts.push(v + step * opts.length);
+    return choose(q, textOpts(opts.slice(0, 4).map(String)), String(v), why);
   };
 
   /* ---- закономерности ---- */
@@ -813,8 +833,8 @@
     ] },
     4: { name: '4. клас', color: '#2F80ED', topics: [
       { id: 'g4t1', name: 'Числата над 1000', short: 'Над 1000', skills: [['placeBig', 3, 1], ['cmpBig', 2, 1], ['nextPrevBig', 2, 1], ['romanRead', 2, 1], ['romanWrite', 1, 2], ['roundTo', 2, 2], ['estimate', 1, 2]] },
-      { id: 'g4t2', name: 'Събиране и изваждане на многоцифрени числа без преминаване', short: 'Многоцифрени без преминаване', skills: [['addBigNo', 3, 1], ['subBigNo', 3, 1], ['unkSubtrahend', 2, 2], ['degrees', 1, 1], ['pattern', 1, 3], ['calendar', 1, 2]] },
-      { id: 'g4t3', name: 'Събиране и изваждане на многоцифрени числа с преминаване', short: 'Многоцифрени с преминаване', skills: [['addBigX', 3, 1], ['subBigX', 3, 1], ['solidsName', 1, 1], ['solidsCount', 1, 2], ['wordBig', 1, 3]] },
+      { id: 'g4t2', name: 'Събиране и изваждане на многоцифрени числа без преминаване', short: 'Многоцифрени без преминаване', skills: [['addBigNo', 3, 1], ['subBigNo', 3, 1], ['unkSubtrahend', 2, 2], ['degrees', 1, 1], ['triSides', 1, 1], ['pattern', 1, 3], ['calendar', 1, 2]] },
+      { id: 'g4t3', name: 'Събиране и изваждане на многоцифрени числа с преминаване', short: 'Многоцифрени с преминаване', skills: [['addBigX', 3, 1], ['subBigX', 3, 1], ['triAngles', 2, 1], ['solidsName', 1, 1], ['solidsCount', 1, 2], ['wordBig', 1, 3]] },
       { id: 'g4t4', name: 'Умножение на многоцифрено число с едноцифрено', short: 'Умножение с едноцифрено', skills: [['mulBig1d', 4, 1], ['area', 2, 1], ['areaUnits', 1, 2], ['wordArea', 1, 3], ['barChart', 2, 2], ['tableRead', 1, 2]] },
       { id: 'g4t5', name: 'Деление на многоцифрено число с едноцифрено', short: 'Деление с едноцифрено', skills: [['divBig1d', 4, 1], ['divRem', 2, 2], ['unkDivisor', 2, 2], ['sideFromArea', 1, 2], ['wordBig', 1, 3], ['circleParts', 1, 1], ['circle', 2, 1]] },
       { id: 'g4t6', name: 'Умножение на многоцифрено число с двуцифрено', short: 'Умножение с двуцифрено', skills: [['mul2d', 4, 1], ['calcWord', 1, 2], ['compArea', 2, 2], ['perimArea2', 1, 2]] },

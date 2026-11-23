@@ -65,6 +65,17 @@ seen = json.loads(node("const o={};for(let g=1;g<=4;g++){o[g]=[];"
 ok('divRem' in seen['3'] and 'divRem' in seen['4'], 'деление с остатък има в 3. и 4. клас')
 ok('parts' in seen['3'] and 'parts' in seen['4'], 'част от число има в 3. и 4. клас')
 ok('numLine' in seen['1'] and 'numLine' in seen['3'], 'числовата ос влиза и в мисиите, не само в отделната страница')
+ok(set(['degrees', 'triSides', 'triAngles']) <= set(seen['4']),
+   'ъглите и видовете триъгълници (задача 13 от НВО) се упражняват в 4. клас')
+
+# приблизителното пресмятане: верният отговор винаги е сред четирите, без повторения и без нули
+res = node("""let bad=0,k={};
+for(let i=0;i<6000;i++){const x=E._S.estimate();const o=x.choices.map(c=>c.v);
+  if(o.length!==4||new Set(o).size!==4||o.indexOf(x.answer)<0||o.some(v=>+v<=0))bad++;
+  k[x.q.split(' ')[2]]=1}
+console.log(bad+' '+Object.keys(k).length)""").split()
+ok(res[0] == '0', 'приблизителното пресмятане: %s грешни от 6000' % res[0])
+ok(res[1] == '3', 'и има три вида – сбор, разлика и произведение (%s)' % res[1])
 
 per_grade = json.loads(node("const G=%s;const o={};for(let g=1;g<=4;g++){const h=new Set();"
                             "(E.GRADES[g].topics||[]).forEach(t=>t.skills.forEach(k=>{if(G.includes(k[0]))h.add(k[0])}));"
