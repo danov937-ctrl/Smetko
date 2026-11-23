@@ -204,11 +204,12 @@ with sync_playwright() as p:
     ok(not late, 'всяка излязла статия се отваря %s' % late[:3])
 
     # ---------- връзките вътре в статиите водят донякъде (в оформлението има <base href="/">)
-    posts = {}
+    posts, dates = {}, {}
     for f in glob.glob(os.path.join(ROOT, 'api', 'blog_posts*.php')):
         src = open(f, encoding='utf-8').read()
-        for sl, body in re.findall(r"'slug' => '([a-z0-9-]+)'.*?<<<'MD'\n(.*?)\nMD\]", src, re.S):
+        for sl, dt, body in re.findall(r"'slug' => '([a-z0-9-]+)'.*?'date' => '([^']+)'.*?<<<'MD'\n(.*?)\nMD\]", src, re.S):
             posts[sl] = [h for h in re.findall(r'\]\(([^)]+)\)', body) if not h.startswith(('http', '#', 'mailto'))]
+            dates[sl] = dt
     ok(len(posts) >= 30, 'статиите се четат от php файловете: %d' % len(posts))
     bad = []
     for sl, hs in posts.items():
@@ -222,6 +223,11 @@ with sync_playwright() as p:
     ok(not bad, 'връзките в статиите водят донякъде (%d проверени) %s' % (sum(len(v) for v in posts.values()), bad[:3]))
     thin = [sl for sl, hs in posts.items() if len(hs) < 2]
     ok(not thin, 'всяка статия сочи поне две вътрешни страници %s' % thin[:3])
+    # статия не може да сочи към друга, която излиза след нея – връзката ще е счупена дни наред
+    ahead = [(sl, h) for sl, hs in posts.items() for h in hs
+             if h.lstrip('/').startswith('blog/') and re.match(r'^\d{4}-', dates.get(sl, ''))
+             and dates.get(h.split('#')[0].lstrip('/')[5:], '') > dates[sl]]
+    ok(not ahead, 'никоя статия не сочи към по-късно излизаща %s' % ahead[:3])
 
     # ---------- работните листове: три вида
     pg.goto(B + '/rabotni-listove.html'); pg.wait_for_timeout(1400)

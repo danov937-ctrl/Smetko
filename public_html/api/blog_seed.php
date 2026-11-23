@@ -9,6 +9,7 @@ require_once __DIR__ . '/blog_posts2.php';
 require_once __DIR__ . '/blog_posts3.php';
 require_once __DIR__ . '/blog_posts4.php';
 require_once __DIR__ . '/blog_posts5.php';
+require_once __DIR__ . '/blog_posts6.php';
 
 /* Отпечатъци на първите версии на статиите (качени, преди да има колоната seed_hash).
    Ако текстът в базата съвпада с някой от тях, статията не е пипана от човек и може да се обнови. */
@@ -20,7 +21,7 @@ function blog_sync(PDO $pdo): void {
     static $done = false;
     if ($done) return;
     $done = true;
-    $rev = 'r9';                                   // вдигнете при промяна на текстовете
+    $rev = 'r10';                                   // вдигнете при промяна на текстовете
     if (setting('blog_rev') === $rev) return;
     $sel = $pdo->prepare('SELECT id, body, seed_hash FROM posts WHERE slug = ?');
     $ins = $pdo->prepare('INSERT INTO posts(slug, title, excerpt, body, emoji, category, published, published_at, created_at, updated_at, seed_hash) VALUES(?,?,?,?,?,?,1,?,?,?,?)');

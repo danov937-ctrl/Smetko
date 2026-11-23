@@ -356,5 +356,5 @@ MD];
 > Целта на тези осем седмици не е повече точки. Целта е детето да влезе в залата със спокойното чувство, че е виждало такива задачи и преди.
 MD];
 
-    return array_merge($p, blog_posts2(), blog_posts3(), blog_posts4(), blog_posts5());
+    return array_merge($p, blog_posts2(), blog_posts3(), blog_posts4(), blog_posts5(), blog_posts6());
 }
