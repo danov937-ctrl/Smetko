@@ -185,7 +185,7 @@ index = head('Сметко – математика като игра за 1.–
   </div>
 </div></section>
 
-<section class="section">
+<section class="section" id="pomagala">
   <div class="wrap">
     <div class="section-head"><h2 class="lined">Безплатни помагала</h2><p>Онлайн тестове с автоматична проверка, таблици и подготовка за НВО – без регистрация.</p></div>
     <div class="hub-top">
@@ -865,7 +865,7 @@ reg_pg = head('Регистрация – Сметко', 'Безплатна р�
     <ul class="acct-benefits">
       <li><b>📱 Всяко устройство</b> Детето продължава от телефона, таблета или компютъра – звездите и точките не се губят.</li>
       <li><b>👧👦 До 4 деца</b> Отделен профил с име и картинка за всяко дете.</li>
-      <li><b>🔑 Един код – веднъж</b> Кодът за абонамент се въвежда само веднъж, в „Абонаменти“.</li>
+      <li><b>🎁 Безплатно, без карта</b> Всичко в Сметко е отворено – регистрацията е само за да се пази прогресът.</li>
       <li><b>📊 Отчети</b> Силни теми и теми за упражнение по уроците.</li>
       <li><b>👩‍🏫 За учители</b> „Табло“: ученици с име и парола, домашни със срок, отчет по теми и класация.</li>
     </ul>
@@ -1117,7 +1117,7 @@ ck = head('Часовникът: как се чете часът – упраж�
         <p class="ck-digi" id="ck-digi">10:10</p>
         <p class="ck-words" id="ck-words"></p>
         <div class="ck-row">
-          <input id="ck-ans" class="ck-in" inputmode="numeric" autocomplete="off" placeholder="7:45" aria-label="Колко е часът">
+          <input id="ck-ans" class="fld-in" inputmode="numeric" autocomplete="off" placeholder="7:45" aria-label="Колко е часът">
           <button type="button" class="btn btn-green" id="ck-check">Провери</button>
           <button type="button" class="btn btn-white" id="ck-new">Нова задача</button>
         </div>
@@ -1182,7 +1182,7 @@ wt = head('Текстови задачи по математика за 1.–4. 
       <div class="wt-main">
         <p class="wt-q" id="wt-q"></p>
         <div class="wt-row">
-          <input id="wt-ans" class="ck-in" inputmode="numeric" autocomplete="off" aria-label="Отговор">
+          <input id="wt-ans" class="fld-in" inputmode="numeric" autocomplete="off" aria-label="Отговор">
           <button type="button" class="btn btn-green" id="wt-check">Провери</button>
           <button type="button" class="btn btn-sm btn-white" id="wt-hint">Подскажи</button>
           <button type="button" class="btn btn-sm btn-white" id="wt-new">Нова задача</button>
@@ -1257,7 +1257,7 @@ ar = head('Обиколка и лице на правоъгълник – упр
       <div class="ar-right">
         <p class="ar-task" id="ar-task"></p>
         <div class="ar-row">
-          <input id="ar-ans" class="ck-in" inputmode="numeric" autocomplete="off" aria-label="Отговор">
+          <input id="ar-ans" class="fld-in" inputmode="numeric" autocomplete="off" aria-label="Отговор">
           <button type="button" class="btn btn-green" id="ar-check">Провери</button>
           <button type="button" class="btn btn-sm btn-white" id="ar-show">Покажи</button>
           <button type="button" class="btn btn-sm btn-white" id="ar-new">Нов правоъгълник</button>
@@ -1416,7 +1416,7 @@ nl = head('Числова ос: упражнения за 1.–4. клас | С�
       <p class="nl-task" id="nl-task"></p>
       <svg id="nl-svg" class="nl-svg" viewBox="0 0 600 110" role="img" aria-label="Числова ос"></svg>
       <div class="nl-row">
-        <input id="nl-ans" class="ck-in" inputmode="numeric" autocomplete="off" aria-label="Отговор">
+        <input id="nl-ans" class="fld-in" inputmode="numeric" autocomplete="off" aria-label="Отговор">
         <button type="button" class="btn btn-green" id="nl-check">Провери</button>
         <button type="button" class="btn btn-sm btn-white" id="nl-new">Нова задача</button>
       </div>
@@ -1479,7 +1479,7 @@ du = head('Двубой по математика: двама играчи на 
         <p class="du-q" id="du-q"></p>
         <div class="du-fig" id="du-fig" hidden></div>
         <div class="du-chs" id="du-chs" hidden></div>
-        <div class="du-row"><input id="du-ans" class="ck-in" inputmode="numeric" autocomplete="off" aria-label="Отговор">
+        <div class="du-row"><input id="du-ans" class="fld-in" inputmode="numeric" autocomplete="off" aria-label="Отговор">
           <button type="button" class="btn btn-green" id="du-ok">Отговори</button></div>
         <p class="du-fb" id="du-fb" aria-live="polite"></p>
       </div>

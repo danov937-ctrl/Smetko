@@ -53,7 +53,7 @@
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
-  margin: 0; font-family: var(--font); font-size: 17px; line-height: 1.55;
+  margin: 0; font-family: var(--font); font-size: 18px; line-height: 1.65;   /* деца четат по-лесно с по-едър текст и повече въздух */
   color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -1328,6 +1328,7 @@ dialog.tb-modal h3 { text-align: center; }
 /* ---------- банер за бисквитки ---------- */
 .cookie-bar { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 900; display: flex; justify-content: center; pointer-events: none; transform: translateY(140%); transition: transform .3s ease; padding-bottom: env(safe-area-inset-bottom); }
 .cookie-bar.show { transform: none; }
+/* вътрешната кутия на банера за бисквитки – да не се бърка с .fld-in */
 .ck-in { pointer-events: auto; max-width: 820px; width: 100%; background: #fff; border-radius: 22px; box-shadow: 0 14px 50px rgba(29,43,79,.28); padding: 16px 18px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; border: 2px solid var(--line); }
 .ck-txt { flex: 1 1 340px; min-width: 0; }
 .ck-txt b { color: var(--navy); font-size: 1.05rem; }
@@ -1336,7 +1337,17 @@ dialog.tb-modal h3 { text-align: center; }
 .ck-btns .btn { min-height: 44px; }
 .ck-btns .btn-white { box-shadow: inset 0 0 0 2px var(--line); }
 .ck-link { border: 0; background: none; font: inherit; font-weight: 800; color: var(--blue-dark); text-decoration: underline; cursor: pointer; padding: 10px 6px; }
-@media (max-width: 560px) { .ck-btns { width: 100%; } .ck-btns .btn { flex: 1 1 45%; } .ck-link { flex: 1 1 100%; text-align: center; padding: 4px; } .ck-txt p { font-size: .86rem; } }
+/* на телефон банерът не бива да изяжда половината екран */
+@media (max-width: 560px) {
+  .cookie-bar { left: 8px; right: 8px; bottom: 8px; }
+  .ck-in { padding: 12px 14px; gap: 10px; border-radius: 18px; }
+  .ck-btns { width: 100%; gap: 6px; }
+  .ck-btns .btn { flex: 1 1 45%; min-height: 42px; padding-left: 10px; padding-right: 10px; }
+  .ck-link { flex: 1 1 100%; text-align: center; padding: 2px; font-size: .9rem; }
+  .ck-txt b { font-size: .98rem; }
+  .ck-txt p { font-size: .82rem; line-height: 1.4; margin-top: 2px; }
+  .ck-txt p a { white-space: nowrap; }
+}
 dialog.ck-dialog { width: min(94vw, 560px); }
 .ck-modal { text-align: left; }
 .ck-modal h3 { text-align: center; }
@@ -1998,9 +2009,9 @@ input.sw:disabled { cursor: default; opacity: .75; }
 /* при „Колко е часът?“ цифрите се крият – иначе отговорът стои на екрана */
 .ck.read-mode .ck-digi, .ck.read-mode .ck-words { visibility: hidden; }
 .ck-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.ck-in { width: 120px; font: inherit; font-size: 1.2rem; font-weight: 800; text-align: center; padding: 10px 12px;
+.fld-in { width: 120px; font: inherit; font-size: 1.2rem; font-weight: 800; text-align: center; padding: 10px 12px;
   border: 2px solid var(--line); border-radius: var(--radius-sm); color: var(--navy); background: #fff; }
-.ck-in:focus { outline: 3px solid var(--sky); outline-offset: 1px; }
+.fld-in:focus { outline: 3px solid var(--sky); outline-offset: 1px; }
 .ck-fb { font-weight: 800; min-height: 1.3em; margin: 12px 0 6px; }
 .ck-fb.good { color: var(--green-dark); } .ck-fb.bad { color: var(--red); }
 
@@ -2090,3 +2101,22 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .du-final { display: flex; gap: 14px; justify-content: center; font-weight: 800; margin-bottom: 20px; }
 .du-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .du-setup .tool-grid label input.select { width: 100%; }
+.mobile-nav .m-head { display: block; margin: 16px 0 2px; padding: 0 4px; color: var(--muted); font-size: .88rem; font-weight: 900; }
+.mobile-nav .m-head:first-of-type { margin-top: 10px; }
+
+/* ---------- Долно меню: на телефон колоните се сгъват ---------- */
+.f-col > summary { list-style: none; cursor: default; }
+.f-col > summary::-webkit-details-marker { display: none; }
+.f-col > summary h4 { display: inline-block; margin: 0 0 10px; }
+.f-col > ul { display: block; }                       /* на голям екран колоните са винаги отворени */
+@media (max-width: 760px) {
+  .footer-grid { gap: 0; }
+  .f-about p { margin-bottom: 10px; }
+  .f-col > summary { cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 2px; border-bottom: 1px solid rgba(255,255,255,.14); }
+  .f-col > summary h4 { margin: 0; }
+  .f-col > summary::after { content: '▾'; transition: transform .15s; opacity: .7; }
+  .f-col[open] > summary::after { transform: rotate(180deg); }
+  .f-col:not([open]) > ul { display: none; }
+  .f-col > ul { padding-top: 8px; padding-bottom: 6px; }
+}

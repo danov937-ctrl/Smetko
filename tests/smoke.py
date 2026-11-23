@@ -99,6 +99,54 @@ with sync_playwright() as p:
         ok(not r['miss'], '/%s всички икони ги има в набора %s' % (u, r['miss']))
         ok(not r['box'], '/%s иконите се виждат (%d сплескани)' % (u, r['box']))
 
+    # ---------- новината не се връща след затваряне (беше: изскачаше на всяка страница)
+    import sqlite3
+    db = sqlite3.connect(os.path.join(ROOT, 'api', 'data', 'smetko.sqlite'))
+    db.execute("update news set popup=1 where id=(select max(id) from news where active=1"
+               " and starts<=date('now') and (ends is null or ends>=date('now')))")
+    db.commit(); db.close()
+    c2 = b.new_context(viewport={'width': 1280, 'height': 900})   # нов посетител, без нищо запазено
+    c2.add_init_script("try{localStorage.setItem('smetko.consent',JSON.stringify({v:1,stats:false,t:Date.now()}))}catch(e){}")
+    q = page(c2, errs)
+    q.goto(B + '/'); q.wait_for_timeout(2200)
+    first = q.locator('dialog.news-modal').count()
+    if first:
+        q.locator('dialog.news-modal .modal-close').click(); q.wait_for_timeout(400)
+    q.goto(B + '/testove-po-matematika.html'); q.wait_for_timeout(2200)
+    ok(first == 1, 'новината изскача веднъж на нов посетител')
+    ok(q.locator('dialog.news-modal').count() == 0, 'и не се връща на следващата страница след затваряне с ×')
+    c2.close()
+
+    # ---------- банерът за бисквитки не изяжда екрана на телефон
+    for w, h in ((320, 640), (390, 844)):
+        c3 = b.new_context(viewport={'width': w, 'height': h})
+        q = page(c3, errs)
+        q.goto(B + '/'); q.wait_for_timeout(2200)
+        bh = q.evaluate("()=>{const e=document.querySelector('#cookie-bar .ck-in');return e?Math.round(e.getBoundingClientRect().height):0}")
+        ok(0 < bh <= h * 0.4, '%dpx: банерът за бисквитки е %d px (под 40%% от екрана)' % (w, bh))
+        c3.close()
+
+    # ---------- менюто и долното меню
+    pg.goto(B + '/'); pg.wait_for_timeout(900)
+    top = pg.eval_on_selector_all('.nav > *', 'e=>e.map(x=>(x.querySelector("button")||x).innerText.trim())')
+    ok(len(top) <= 6, 'менюто е до 6 точки: %s' % top)
+    ok(any('Помагала' in t for t in top), 'помагалата са в менюто')
+    ok(pg.evaluate("()=>getComputedStyle(document.body).fontSize") == '18px', 'основният текст е 18px за деца')
+    c4 = b.new_context(viewport={'width': 390, 'height': 844}); c4.add_init_script(INIT)
+    q = page(c4, errs)
+    q.goto(B + '/'); q.wait_for_timeout(1200)
+    ok(q.eval_on_selector_all('footer a', 'e=>e.filter(x=>x.offsetParent).length') <= 2,
+       'на телефон долното меню е сгънато')
+    q.evaluate("()=>document.querySelectorAll('.f-col').forEach(d=>d.open=true)"); q.wait_for_timeout(200)
+    ok(q.eval_on_selector_all('footer a', 'e=>e.filter(x=>x.offsetParent).length') >= 20,
+       'и се отваря при докосване')
+    c4.close()
+
+    # ---------- не са останали текстове от платения модел
+    for u in ('registracia.html', 'profil.html', 'vhod.html'):
+        t = S.get(B + '/' + u).text
+        ok('Кодът за абонамент' not in t, '/%s не говори за код за абонамент' % u)
+
     # ---------- безплатно
     pg.goto(B + '/pricing.html'); pg.wait_for_timeout(700)
     low = pg.inner_text('main').lower()

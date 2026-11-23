@@ -124,11 +124,13 @@
     if (document.querySelector('dialog[open]') || /[?&]start=1/.test(location.search)) return;
     var seen = seenIds(), fresh = list.filter(function (x) { return x.popup && seen.indexOf(x.id) < 0; }).slice(0, 3);
     if (!fresh.length) return;
+    try { if (sessionStorage.getItem('smetko.newsShown')) return; sessionStorage.setItem('smetko.newsShown', '1'); } catch (e) {}
     var d = S.modal('<div class="news-pop"><div data-owl="cheer" class="news-owl"></div><h3>' + (fresh.length > 1 ? 'Новини от Сметко' : 'Новина от Сметко') + '</h3>' + fresh.map(newsCard).join('') +
       '<div class="modal-actions"><button class="btn btn-green" data-seen>✓ Видях го</button></div></div>');
     d.classList.add('news-modal');
-    d.querySelector('[data-seen]').addEventListener('click', function () { markSeen(fresh.map(function (x) { return x.id; })); d.close(); });
-    d.querySelectorAll('.news-item a').forEach(function (a) { a.addEventListener('click', function () { markSeen(fresh.map(function (x) { return x.id; })); }); });
+    // веднъж показана, новината се брои за видяна – както и да се затвори прозорецът
+    d.addEventListener('close', function () { markSeen(fresh.map(function (x) { return x.id; })); });
+    d.querySelector('[data-seen]').addEventListener('click', function () { d.close(); });
   }
   S.loadNews = function () {
     var cached = null; try { cached = JSON.parse(localStorage.getItem(NEWS_CACHE) || 'null'); } catch (e) {}
@@ -210,7 +212,7 @@
     if (c) { if (c.stats) { hit(); gaLoad(); } return; }
     if (navigator.webdriver && /[?&]noconsent=1/.test(location.search)) return;
     var bar = document.createElement('div'); bar.id = 'cookie-bar'; bar.className = 'cookie-bar'; bar.setAttribute('role', 'dialog'); bar.setAttribute('aria-label', 'Бисквитки');
-    bar.innerHTML = '<div class="ck-in"><div class="ck-txt"><b>🍪 Сметко използва бисквитки</b><p>Необходимите поддържат входа и пазят прогреса в играта. С ваше съгласие броим посещенията<span data-ga-txt>' + gaTxt() + '</span>, за да правим Сметко по-добър – без реклами. <a href="cookies.html">Научете повече</a></p></div>' +
+    bar.innerHTML = '<div class="ck-in"><div class="ck-txt"><b>🍪 Сметко използва бисквитки</b><p>Необходимите пазят входа и прогреса в играта. С ваше съгласие броим и посещенията<span data-ga-txt>' + gaTxt() + '</span> – без реклами. <a href="cookies.html">Повече</a></p></div>' +
       '<div class="ck-btns"><button class="btn btn-green btn-sm" data-ck="all">Приемам всички</button><button class="btn btn-white btn-sm" data-ck="min">Само необходимите</button><button class="ck-link" data-ck="set">Настройки</button></div></div>';
     document.body.appendChild(bar);
     requestAnimationFrame(function () { bar.classList.add('show'); });
