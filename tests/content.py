@@ -80,6 +80,41 @@ for(let g=1;g<=4;g++)(E.GRADES[g].topics||[]).forEach(t=>t.skills.forEach(k=>{if
 console.log(JSON.stringify([...new Set(bad)].slice(0,5)))""" % json.dumps(GEO, ensure_ascii=False))
 ok(res == '[]', 'всички геометрични умения се генерират чисто %s' % res)
 
+# ---------- работа с данни, закръгляване, редици и календар
+DATA = ['tableRead', 'barChart', 'roundTo', 'estimate', 'pattern', 'calendar']
+where = json.loads(node("const G=%s;const o={};for(let g=1;g<=4;g++){const h=[];"
+                        "(E.GRADES[g].topics||[]).forEach(t=>t.skills.forEach(k=>{if(G.includes(k[0])&&!h.includes(k[0]))h.push(k[0])}));"
+                        "o[g]=h}console.log(JSON.stringify(o))" % json.dumps(DATA)))
+ok(all(where[g] for g in '1234'), 'всеки клас има нещо от новите видове: %s' % {g: len(where[g]) for g in '1234'})
+ok(set(where['3']) >= {'tableRead', 'barChart'}, '3. клас чете таблица и диаграма')
+ok('roundTo' in where['4'] and 'estimate' in where['4'], '4. клас закръглява и прави приблизителна сметка')
+
+res = node("""let bad=0;
+for(let i=0;i<1200;i++){const t=E.generateSkill(4,'roundTo',1+i%3);
+  const m=/Закръгли (\\d+) до/.exec(t.q); const to=/десетици/.test(t.q)?10:/стотици/.test(t.q)?100:1000;
+  if(!m||+m[1]%to===0||Math.round(+m[1]/to)*to!==t.answer)bad++;}
+console.log(bad)""")
+ok(res == '0', 'закръгляването е вярно и числото не е вече закръглено (%s грешни)' % res)
+
+res = node("""let bad=0;
+for(let i=0;i<1200;i++){for(const sk of ['tableRead','barChart']){const t=E.generateSkill(4,sk,1+i%3);
+  if(t.kind==='choice'){const v=t.choices.map(c=>typeof c==='object'?c.v:c);
+    if(new Set(v).size!==v.length||v.length>4)bad++;}
+  if(!/dtbl|<svg/.test(t.figure||''))bad++;}}
+console.log(bad)""")
+ok(res == '0', 'таблиците и диаграмите идват с рисунка и с различни отговори (%s)' % res)
+
+res = node("""let bad=0;
+for(let i=0;i<1500;i++){const t=E.generateSkill(3,'pattern',1+i%3);
+  const m=/редицата: ([\\d, ]+),/.exec(t.q); if(!m){bad++;continue;}
+  const n=m[1].split(',').map(x=>+x.trim());
+  const d=n[1]-n[0], q=n[1]/n[0];
+  const okAdd=n.every((x,j)=>j===0||x-n[j-1]===d) && t.answer===n[3]+d;
+  const okMul=n.every((x,j)=>j===0||x/n[j-1]===q) && t.answer===n[3]*q;
+  if(!okAdd&&!okMul)bad++;}
+console.log(bad)""")
+ok(res == '0', 'редиците продължават по своето правило (%s грешни)' % res)
+
 # ---------- сборникът е безплатен и цял
 pdf = os.path.join(ROOT, 'assets', 'Smetko-NVO-4-klas-sbornik.pdf')
 ok(os.path.exists(pdf) and os.path.getsize(pdf) > 1000000, 'сборникът е в сайта (%d kB)' % (os.path.getsize(pdf) // 1024 if os.path.exists(pdf) else 0))

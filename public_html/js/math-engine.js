@@ -388,6 +388,131 @@
   S.addBigX = function () { var a, b; do { a = rnd(1000, 60000); b = rnd(1000, 99999 - a); } while (!hasCarry(a, b)); return expr(a, PLUS, b, a + b); };
   S.subBigX = function () { var a, b; do { a = rnd(2000, 99999); b = rnd(1000, a - 500); if (Math.random() < .3) { a = rnd(2, 9) * 1000 + rnd(0, 9); b = rnd(100, a - 100); } } while (!hasBorrow(a, b)); return expr(a, MINUS, b, a - b); };
   S.solidsName = function () { var names = ['куб', 'цилиндър', 'конус', 'пирамида', 'сфера', 'правоъгълен паралелепипед'], t = pick(names), others = shuffle(names.filter(function (n) { return n !== t; })).slice(0, 3); return choose('Кое тяло е <b>' + t + '</b>?', [t].concat(others).map(function (n) { return { v: n, html: solidFig(n) }; }), t, 'Това е ' + t + '.', { optFigs: true }); };
+  /* ---- работа с данни: таблици и диаграми ---- */
+  // таблица от редове [[име, число], ...]; прави се с решетка, за да стои и в карта, и на лист
+  function tableFig(head1, head2, rows, hi) {
+    var b = '<span class="dtbl" role="table"><span class="dtr dth" role="row"><span role="columnheader">' + head1 +
+      '</span><span role="columnheader">' + head2 + '</span></span>';
+    rows.forEach(function (r) {
+      b += '<span class="dtr' + (hi === r[0] ? ' on' : '') + '" role="row"><span role="cell">' + r[0] +
+        '</span><span role="cell">' + r[1] + '</span></span>';
+    });
+    return b + '</span>';
+  }
+  // стълбовидна диаграма
+  function barFig(rows) {
+    var W = 300, H = 170, pad = 26, bw = Math.floor((W - 2 * pad) / rows.length) - 10;
+    var max = Math.max.apply(null, rows.map(function (r) { return r[1]; })), unit = (H - 50) / max;
+    var b = '<line x1="' + (pad - 6) + '" y1="' + (H - 28) + '" x2="' + (W - 8) + '" y2="' + (H - 28) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    rows.forEach(function (r, i) {
+      var x = pad + i * (bw + 10), h = Math.max(6, r[1] * unit);
+      b += '<rect x="' + x + '" y="' + (H - 28 - h) + '" width="' + bw + '" height="' + h + '" rx="3" fill="' + FILLS[i % FILLS.length] + '" stroke="' + INK + '" stroke-width="2"/>' +
+           '<text x="' + (x + bw / 2) + '" y="' + (H - 32 - h) + '" text-anchor="middle" class="bn">' + r[1] + '</text>' +
+           '<text x="' + (x + bw / 2) + '" y="' + (H - 10) + '" text-anchor="middle" class="bl">' + r[0] + '</text>';
+    });
+    return svg(W, H, b, 'fig chart');
+  }
+
+  var DATA_SETS = [
+    ['Ден', 'Прочетени страници', ['пон.', 'вт.', 'ср.', 'чет.', 'пет.']],
+    ['Клас', 'Събрани капачки', ['1. а', '1. б', '2. а', '2. б']],
+    ['Месец', 'Валежни дни', ['март', 'април', 'май', 'юни']],
+    ['Ученик', 'Решени задачи', ['Мира', 'Иво', 'Дани', 'Ния']],
+    ['Плод', 'Продадени килограми', ['ябълки', 'круши', 'сливи', 'грозде']]
+  ];
+
+  function dataRows(lv) {
+    var d = pick(DATA_SETS), hi = lv === 1 ? 10 : lv === 2 ? 30 : 90, rows = [];
+    d[2].forEach(function (n) { rows.push([n, rnd(2, hi)]); });
+    return { h1: d[0], h2: d[1], rows: rows };
+  }
+
+  function dataAsk(d, fig) {
+    var rows = d.rows, tot = 0, max = rows[0], min = rows[0];
+    rows.forEach(function (r) { tot += r[1]; if (r[1] > max[1]) max = r; if (r[1] < min[1]) min = r; });
+    var same = rows.filter(function (r) { return r[1] === max[1]; }).length > 1 ||
+               rows.filter(function (r) { return r[1] === min[1]; }).length > 1;
+    var uniq = [], u;
+    for (u = 0; u < rows.length; u++) if (uniq.indexOf(rows[u][1]) < 0) uniq.push(rows[u][1]);
+    var r = same || uniq.length < 3 ? pick([0, 3]) : rnd(0, 3);
+    if (r === 0) return T('Колко са всички заедно? {?}', tot, 'Събират се всички числа: ' + rows.map(function (x) { return x[1]; }).join(' + ') + ' = ' + tot, { figure: fig });
+    if (r === 1) {
+      var vals = [], k;                                    // отговорите трябва да са различни
+      for (k = 0; k < rows.length; k++) if (vals.indexOf(rows[k][1]) < 0) vals.push(rows[k][1]);
+      vals = [max[1]].concat(shuffle(vals.filter(function (v) { return v !== max[1]; })).slice(0, 3));
+      return choose('Кое е най-голямото число?', textOpts(shuffle(vals).map(String)),
+        String(max[1]), 'Най-много е „' + max[0] + '“ с ' + max[1] + '.', { figure: fig });
+    }
+    if (r === 2) return T('С колко повече има „' + max[0] + '“ от „' + min[0] + '“? {?}', max[1] - min[1],
+      max[1] + ' ' + MINUS + ' ' + min[1] + ' = ' + (max[1] - min[1]), { figure: fig });
+    var one = pick(rows);
+    return T('Колко са при „' + one[0] + '“? {?}', one[1], 'Намира се редът „' + one[0] + '“ и се чете числото до него: ' + one[1] + '.', { figure: fig });
+  }
+
+  S.tableRead = function (lv) {
+    var d = dataRows(lv);
+    return dataAsk(d, tableFig(d.h1, d.h2, d.rows));
+  };
+  S.barChart = function (lv) {
+    var d = dataRows(lv);
+    return dataAsk(d, barFig(d.rows));
+  };
+
+  /* ---- закръгляване и приблизителна сметка ---- */
+  S.roundTo = function (lv) {
+    var to = lv === 1 ? 10 : pick([10, 100, lv === 3 ? 1000 : 100]);
+    var n = 0, g = 0;
+    do { n = to === 10 ? rnd(12, 99) : to === 100 ? rnd(120, 999) : rnd(1200, 9999); } while (n % to === 0 && g++ < 40);
+    var r = Math.round(n / to) * to, rest = n % to;
+    var word = { 10: 'десетици', 100: 'стотици', 1000: 'хиляди' }[to];
+    return T('Закръгли ' + n + ' до ' + word + ': {?}', r,
+      (rest >= to / 2 ? 'Остатъкът ' + rest + ' е половината или повече, затова се закръгля нагоре: ' + r
+                      : 'Остатъкът ' + rest + ' е по-малко от половината, затова се закръгля надолу: ' + r) + '.');
+  };
+  S.estimate = function () {
+    var a = rnd(11, 49) * 10 + rnd(1, 9), b = rnd(11, 49) * 10 + rnd(1, 9);
+    var ra = Math.round(a / 100) * 100, rb = Math.round(b / 100) * 100, sum = ra + rb;
+    var opts = [sum, sum + 100, sum - 100, a + b].filter(function (v, i, arr) { return v > 0 && arr.indexOf(v) === i; });
+    while (opts.length < 4) opts.push(sum + 100 * opts.length);
+    return choose('Кой е приблизителният сбор на ' + a + ' + ' + b + '?', textOpts(opts.slice(0, 4).map(String)),
+      String(sum), a + ' е около ' + ra + ', а ' + b + ' е около ' + rb + '. Приблизително ' + ra + ' + ' + rb + ' = ' + sum + '. (Точният сбор е ' + (a + b) + '.)');
+  };
+
+  /* ---- закономерности ---- */
+  S.pattern = function (lv) {
+    var start, step, kind = lv >= 2 && Math.random() < .35 ? 'mul' : 'add';
+    if (kind === 'mul') {
+      step = rnd(2, 3); start = rnd(1, 4);
+      var seq = [start], i;
+      for (i = 1; i < 5; i++) seq.push(seq[i - 1] * step);
+      return T('Продължи редицата: ' + seq.slice(0, 4).join(', ') + ', {?}', seq[4],
+        'Всяко число е ' + step + ' пъти по-голямо от предишното: ' + seq[3] + ' ' + TIMES + ' ' + step + ' = ' + seq[4] + '.');
+    }
+    step = lv === 1 ? rnd(1, 5) : lv === 2 ? rnd(2, 12) : rnd(11, 60);
+    start = lv === 1 ? rnd(1, 10) : rnd(5, 120);
+    var down = lv >= 2 && Math.random() < .4 && start > step * 5;
+    var s2 = [start], j;
+    for (j = 1; j < 5; j++) s2.push(down ? s2[j - 1] - step : s2[j - 1] + step);
+    return T('Продължи редицата: ' + s2.slice(0, 4).join(', ') + ', {?}', s2[4],
+      'Всяко следващо число е с ' + step + ' ' + (down ? 'по-малко' : 'по-голямо') + ': ' + s2[3] + ' ' + (down ? MINUS : PLUS) + ' ' + step + ' = ' + s2[4] + '.');
+  };
+
+  /* ---- календар ---- */
+  var MONTHS = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
+  var MDAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  S.calendar = function (lv) {
+    var r = rnd(0, 4), i = rnd(0, 11);
+    if (r === 0) return T('Колко дни има ' + MONTHS[i] + '? {?}', MDAYS[i],
+      MONTHS[i] + ' има ' + MDAYS[i] + ' дни.' + (i === 1 ? ' През високосна година има 29.' : ''));
+    if (r === 1) return T('Кой месец по ред е ' + MONTHS[i] + '? {?}', i + 1, MONTHS[i] + ' е ' + (i + 1) + '-ят месец.');
+    if (r === 2) { var k = rnd(2, lv === 1 ? 4 : 9); return T(k + ' седмици = {?} дни', k * 7, k + ' ' + TIMES + ' 7 = ' + k * 7 + ' дни'); }
+    if (r === 3) return T('1 година = {?} месеца', 12, 'Годината има 12 месеца.');
+    var d = rnd(8, 20), add = rnd(3, 10);
+    return T('Днес е ' + d + ' ' + MONTHS[i] + '. Коя дата ще бъде след ' + add + ' дни? {?} ' + MONTHS[i],
+      d + add <= MDAYS[i] ? d + add : d + add - MDAYS[i],
+      d + add <= MDAYS[i] ? d + ' + ' + add + ' = ' + (d + add) : 'Месецът свършва на ' + MDAYS[i] + ', затова се минава в следващия.');
+  };
+
   /* ---- геометрия ---- */
   // Колко фигури от даден вид има на чертежа
   S.countShapes = function (lv) {
@@ -626,28 +751,28 @@
       { id: 'g1t1', name: 'Числата до 5 и нула', short: 'До 5', skills: [['count5', 2, 1], ['add5', 3, 1], ['sub5', 3, 1], ['cmp5', 2, 1], ['shapes', 2, 1]] },
       { id: 'g1t2', name: 'Числата до 10. Събиране и изваждане до 10', short: 'До 10', skills: [['add10', 3, 1], ['sub10', 3, 1], ['decomp10', 2, 2], ['three10', 1, 2], ['missing10', 2, 2], ['cmp10', 1, 1], ['coins10', 1, 2], ['kg10', 1, 3], ['word10', 2, 2], ['countShapes', 1, 1]] },
       { id: 'g1t3', name: 'Числата от 11 до 20', short: '11 до 20', skills: [['place20', 3, 1], ['nextPrev20', 2, 1], ['cmp20', 2, 1], ['cm20', 2, 2], ['lines', 1, 1]] },
-      { id: 'g1t4', name: 'Събиране и изваждане до 20 без преминаване', short: 'До 20 без преминаване', skills: [['add20no', 3, 1], ['sub20no', 3, 1], ['cmpExpr20', 1, 2], ['word20', 2, 1], ['shapes', 1, 2]] },
+      { id: 'g1t4', name: 'Събиране и изваждане до 20 без преминаване', short: 'До 20 без преминаване', skills: [['add20no', 3, 1], ['sub20no', 3, 1], ['cmpExpr20', 1, 2], ['word20', 2, 1], ['shapes', 1, 2], ['pattern', 2, 1]] },
       { id: 'g1t5', name: 'Събиране и изваждане до 20 с преминаване', short: 'До 20 с преминаване', skills: [['add20x', 3, 1], ['sub20x', 3, 1], ['word20', 2, 2], ['clockHour', 1, 1]] },
       { id: 'g1t6', name: 'Числата 10, 20, 30, … 100', short: 'Кръгли десетици', skills: [['tens100', 4, 1], ['notes100', 1, 2]] }
     ] },
     2: { name: '2. клас', color: '#FF9F1C', topics: [
       { id: 'g2t1', name: 'Числата до 100', short: 'До 100', skills: [['place100', 3, 1], ['cmp100', 2, 1], ['nextPrev100', 2, 1], ['units2', 2, 2], ['ruler', 2, 1]] },
       { id: 'g2t2', name: 'Събиране и изваждане до 100 без преминаване', short: 'До 100 без преминаване', skills: [['add100no', 3, 1], ['sub100no', 3, 1], ['brackets', 2, 2], ['unkAddend', 2, 2], ['polySides', 2, 1], ['segSum', 1, 1]] },
-      { id: 'g2t3', name: 'Събиране и изваждане до 100 с преминаване', short: 'До 100 с преминаване', skills: [['add100x', 3, 1], ['sub100x', 3, 1], ['perim2', 2, 2], ['triSides', 1, 2], ['word2steps', 2, 3]] },
-      { id: 'g2t4', name: 'Таблично умножение и деление', short: 'Таблицата за умножение', skills: [['mulTable', 4, 1], ['divTable', 3, 1], ['unkFactor', 2, 2], ['evenOdd', 1, 1], ['timesWord', 2, 2], ['time2', 1, 2], ['clockHM', 1, 3], ['rectProps', 1, 1]] }
+      { id: 'g2t3', name: 'Събиране и изваждане до 100 с преминаване', short: 'До 100 с преминаване', skills: [['add100x', 3, 1], ['sub100x', 3, 1], ['perim2', 2, 2], ['triSides', 1, 2], ['word2steps', 2, 3], ['pattern', 1, 1], ['tableRead', 2, 1]] },
+      { id: 'g2t4', name: 'Таблично умножение и деление', short: 'Таблицата за умножение', skills: [['mulTable', 4, 1], ['divTable', 3, 1], ['unkFactor', 2, 2], ['evenOdd', 1, 1], ['timesWord', 2, 2], ['time2', 1, 2], ['clockHM', 1, 3], ['rectProps', 1, 1], ['calendar', 2, 1]] }
     ] },
     3: { name: '3. клас', color: '#4CBB4A', topics: [
-      { id: 'g3t1', name: 'Числата до 1000', short: 'До 1000', skills: [['place1000', 3, 1], ['cmp1000', 2, 1], ['nextPrev1000', 2, 1], ['lines', 1, 2]] },
-      { id: 'g3t2', name: 'Събиране и изваждане до 1000 без преминаване', short: 'До 1000 без преминаване', skills: [['add1000no', 3, 1], ['sub1000no', 3, 1], ['unkMinuend', 2, 2], ['angles', 1, 1], ['units3a', 2, 2]] },
+      { id: 'g3t1', name: 'Числата до 1000', short: 'До 1000', skills: [['place1000', 3, 1], ['cmp1000', 2, 1], ['nextPrev1000', 2, 1], ['lines', 1, 2], ['roundTo', 2, 2]] },
+      { id: 'g3t2', name: 'Събиране и изваждане до 1000 без преминаване', short: 'До 1000 без преминаване', skills: [['add1000no', 3, 1], ['sub1000no', 3, 1], ['unkMinuend', 2, 2], ['angles', 1, 1], ['units3a', 2, 2], ['pattern', 1, 2], ['calendar', 1, 2]] },
       { id: 'g3t3', name: 'Събиране и изваждане до 1000 с преминаване', short: 'До 1000 с преминаване', skills: [['add1000x', 3, 1], ['sub1000x', 3, 1], ['triAngles', 1, 1], ['century', 1, 2], ['word3', 1, 3], ['triAngles', 1, 1], ['sideFromPerim', 2, 2]] },
       { id: 'g3t4', name: 'Умножение на двуцифрено и трицифрено число с едноцифрено', short: 'Умножение с едноцифрено', skills: [['mul1d', 4, 1], ['distrib', 2, 2], ['parts', 2, 2], ['word3', 1, 3], ['triSides', 1, 1], ['degrees', 1, 2]] },
-      { id: 'g3t5', name: 'Деление на двуцифрено и трицифрено число с едноцифрено', short: 'Деление с едноцифрено', skills: [['div1d', 4, 1], ['unkDividend', 2, 2], ['units3b', 2, 2], ['word3', 1, 3]] }
+      { id: 'g3t5', name: 'Деление на двуцифрено и трицифрено число с едноцифрено', short: 'Деление с едноцифрено', skills: [['div1d', 4, 1], ['unkDividend', 2, 2], ['units3b', 2, 2], ['word3', 1, 3], ['tableRead', 2, 2], ['barChart', 2, 2]] }
     ] },
     4: { name: '4. клас', color: '#2F80ED', topics: [
-      { id: 'g4t1', name: 'Числата над 1000', short: 'Над 1000', skills: [['placeBig', 3, 1], ['cmpBig', 2, 1], ['nextPrevBig', 2, 1], ['romanRead', 2, 1], ['romanWrite', 1, 2]] },
-      { id: 'g4t2', name: 'Събиране и изваждане на многоцифрени числа без преминаване', short: 'Многоцифрени без преминаване', skills: [['addBigNo', 3, 1], ['subBigNo', 3, 1], ['unkSubtrahend', 2, 2], ['degrees', 1, 1]] },
+      { id: 'g4t1', name: 'Числата над 1000', short: 'Над 1000', skills: [['placeBig', 3, 1], ['cmpBig', 2, 1], ['nextPrevBig', 2, 1], ['romanRead', 2, 1], ['romanWrite', 1, 2], ['roundTo', 2, 2], ['estimate', 1, 2]] },
+      { id: 'g4t2', name: 'Събиране и изваждане на многоцифрени числа без преминаване', short: 'Многоцифрени без преминаване', skills: [['addBigNo', 3, 1], ['subBigNo', 3, 1], ['unkSubtrahend', 2, 2], ['degrees', 1, 1], ['pattern', 1, 3], ['calendar', 1, 2]] },
       { id: 'g4t3', name: 'Събиране и изваждане на многоцифрени числа с преминаване', short: 'Многоцифрени с преминаване', skills: [['addBigX', 3, 1], ['subBigX', 3, 1], ['solidsName', 1, 1], ['solidsCount', 1, 2], ['wordBig', 1, 3]] },
-      { id: 'g4t4', name: 'Умножение на многоцифрено число с едноцифрено', short: 'Умножение с едноцифрено', skills: [['mulBig1d', 4, 1], ['area', 2, 1], ['areaUnits', 1, 2], ['wordArea', 1, 3]] },
+      { id: 'g4t4', name: 'Умножение на многоцифрено число с едноцифрено', short: 'Умножение с едноцифрено', skills: [['mulBig1d', 4, 1], ['area', 2, 1], ['areaUnits', 1, 2], ['wordArea', 1, 3], ['barChart', 2, 2], ['tableRead', 1, 2]] },
       { id: 'g4t5', name: 'Деление на многоцифрено число с едноцифрено', short: 'Деление с едноцифрено', skills: [['divBig1d', 4, 1], ['unkDivisor', 2, 2], ['sideFromArea', 1, 2], ['wordBig', 1, 3], ['circleParts', 1, 1], ['circle', 2, 1]] },
       { id: 'g4t6', name: 'Умножение на многоцифрено число с двуцифрено', short: 'Умножение с двуцифрено', skills: [['mul2d', 4, 1], ['calcWord', 1, 2], ['compArea', 2, 2], ['perimArea2', 1, 2]] },
       { id: 'g4t7', name: 'Деление на многоцифрено число с двуцифрено', short: 'Деление с двуцифрено', skills: [['div2d', 4, 1], ['wordBig', 1, 3], ['sideFromArea', 1, 1], ['areaUnits', 1, 2]] }

@@ -2039,3 +2039,16 @@ input.sw:disabled { cursor: default; opacity: .75; }
 .geo-grade:last-child { border-bottom: 0; margin-bottom: 0; }
 .geo-two { display: grid; gap: 24px; align-items: start; }
 @media (min-width: 900px) { .geo-two { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 40px; } }
+
+/* ---------- Таблици и диаграми в задачите ---------- */
+.dtbl { display: inline-grid; grid-template-columns: auto auto; border: 2px solid var(--line);
+  border-radius: var(--radius-sm); overflow: hidden; margin: 6px 0; background: #fff; font-weight: 700; }
+.dtbl .dtr { display: contents; }
+.dtbl span span { padding: 7px 14px; border-top: 1px solid var(--line); color: var(--ink); }
+.dtbl .dtr:first-child span { border-top: 0; background: var(--bg-soft); color: var(--navy); font-weight: 900; }
+.dtbl .dtr span:last-child { text-align: right; border-left: 1px solid var(--line); }
+.dtbl .dtr.on span { background: #FFF4E2; }
+.fig.chart { width: 290px; max-width: 100%; }
+.fig .bn { font: 900 13px var(--font); fill: var(--navy); }
+.fig .bl { font: 700 12px var(--font); fill: var(--muted); }
+.ws-fig .dtbl { font-size: .92rem; }
