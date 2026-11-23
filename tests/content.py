@@ -46,6 +46,26 @@ def node(js):
     r = subprocess.run(['node', '-e', NODE_HEAD + js], capture_output=True, text=True)
     return (r.stdout or r.stderr).strip()
 
+# ---------- таблицата с умения: нищо не сочи в нищото и нищо не е записано два пъти
+chk = json.loads(node("""const miss=[],dup=[],nvo=[];
+for(let g=1;g<=4;g++)(E.GRADES[g].topics||[]).forEach(t=>{
+  const n=t.skills.map(k=>k[0]);
+  n.forEach((k,i)=>{ if(!E._S[k.split(':')[0]]) miss.push(t.id+' '+k); if(n.indexOf(k)!==i) dup.push(t.id+' '+k); });
+});
+(E.NVO4.plan||[]).forEach(p=>p.s.forEach(k=>{ if(!E._S[k.split(':')[0]]) nvo.push(p.n+' '+k) }));
+console.log(JSON.stringify({miss,dup,nvo}))"""))
+ok(not chk['miss'], 'всяко умение в мисиите го има в двигателя %s' % chk['miss'][:3])
+ok(not chk['dup'], 'нито едно умение не е записано два пъти в една тема %s' % chk['dup'][:3])
+ok(not chk['nvo'], 'всяко умение в плана за НВО го има в двигателя %s' % chk['nvo'][:3])
+
+# деление с остатък и част от число се срещат в мисиите, не само в учебниците
+seen = json.loads(node("const o={};for(let g=1;g<=4;g++){o[g]=[];"
+                       "(E.GRADES[g].topics||[]).forEach(t=>t.skills.forEach(k=>o[g].push(k[0])))}"
+                       "console.log(JSON.stringify(o))"))
+ok('divRem' in seen['3'] and 'divRem' in seen['4'], 'деление с остатък има в 3. и 4. клас')
+ok('parts' in seen['3'] and 'parts' in seen['4'], 'част от число има в 3. и 4. клас')
+ok('numLine' in seen['1'] and 'numLine' in seen['3'], 'числовата ос влиза и в мисиите, не само в отделната страница')
+
 per_grade = json.loads(node("const G=%s;const o={};for(let g=1;g<=4;g++){const h=new Set();"
                             "(E.GRADES[g].topics||[]).forEach(t=>t.skills.forEach(k=>{if(G.includes(k[0]))h.add(k[0])}));"
                             "o[g]=[...h]}console.log(JSON.stringify(o))" % json.dumps(GEO, ensure_ascii=False)))

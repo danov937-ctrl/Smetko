@@ -793,7 +793,7 @@
     1: { name: '1. клас', color: '#FF5A5F', topics: [
       { id: 'g1t1', name: 'Числата до 5 и нула', short: 'До 5', skills: [['count5', 2, 1], ['add5', 3, 1], ['sub5', 3, 1], ['cmp5', 2, 1], ['shapes', 2, 1]] },
       { id: 'g1t2', name: 'Числата до 10. Събиране и изваждане до 10', short: 'До 10', skills: [['add10', 3, 1], ['sub10', 3, 1], ['decomp10', 2, 2], ['three10', 1, 2], ['missing10', 2, 2], ['cmp10', 1, 1], ['coins10', 1, 2], ['kg10', 1, 3], ['word10', 2, 2], ['countShapes', 1, 1]] },
-      { id: 'g1t3', name: 'Числата от 11 до 20', short: '11 до 20', skills: [['place20', 3, 1], ['nextPrev20', 2, 1], ['cmp20', 2, 1], ['cm20', 2, 2], ['lines', 1, 1]] },
+      { id: 'g1t3', name: 'Числата от 11 до 20', short: '11 до 20', skills: [['place20', 3, 1], ['nextPrev20', 2, 1], ['cmp20', 2, 1], ['cm20', 2, 2], ['lines', 1, 1], ['numLine', 2, 1]] },
       { id: 'g1t4', name: 'Събиране и изваждане до 20 без преминаване', short: 'До 20 без преминаване', skills: [['add20no', 3, 1], ['sub20no', 3, 1], ['cmpExpr20', 1, 2], ['word20', 2, 1], ['shapes', 1, 2], ['pattern', 2, 1]] },
       { id: 'g1t5', name: 'Събиране и изваждане до 20 с преминаване', short: 'До 20 с преминаване', skills: [['add20x', 3, 1], ['sub20x', 3, 1], ['word20', 2, 2], ['clockHour', 1, 1]] },
       { id: 'g1t6', name: 'Числата 10, 20, 30, … 100', short: 'Кръгли десетици', skills: [['tens100', 4, 1], ['notes100', 1, 2]] }
@@ -805,20 +805,20 @@
       { id: 'g2t4', name: 'Таблично умножение и деление', short: 'Таблицата за умножение', skills: [['mulTable', 4, 1], ['divTable', 3, 1], ['unkFactor', 2, 2], ['evenOdd', 1, 1], ['timesWord', 2, 2], ['time2', 1, 2], ['clockHM', 1, 3], ['rectProps', 1, 1], ['calendar', 2, 1]] }
     ] },
     3: { name: '3. клас', color: '#4CBB4A', topics: [
-      { id: 'g3t1', name: 'Числата до 1000', short: 'До 1000', skills: [['place1000', 3, 1], ['cmp1000', 2, 1], ['nextPrev1000', 2, 1], ['lines', 1, 2], ['roundTo', 2, 2]] },
+      { id: 'g3t1', name: 'Числата до 1000', short: 'До 1000', skills: [['place1000', 3, 1], ['cmp1000', 2, 1], ['nextPrev1000', 2, 1], ['lines', 1, 2], ['roundTo', 2, 2], ['numLine', 2, 1]] },
       { id: 'g3t2', name: 'Събиране и изваждане до 1000 без преминаване', short: 'До 1000 без преминаване', skills: [['add1000no', 3, 1], ['sub1000no', 3, 1], ['unkMinuend', 2, 2], ['angles', 1, 1], ['units3a', 2, 2], ['pattern', 1, 2], ['calendar', 1, 2]] },
-      { id: 'g3t3', name: 'Събиране и изваждане до 1000 с преминаване', short: 'До 1000 с преминаване', skills: [['add1000x', 3, 1], ['sub1000x', 3, 1], ['triAngles', 1, 1], ['century', 1, 2], ['word3', 1, 3], ['triAngles', 1, 1], ['sideFromPerim', 2, 2]] },
+      { id: 'g3t3', name: 'Събиране и изваждане до 1000 с преминаване', short: 'До 1000 с преминаване', skills: [['add1000x', 3, 1], ['sub1000x', 3, 1], ['triAngles', 1, 1], ['century', 1, 2], ['word3', 1, 3], ['estimate', 1, 2], ['sideFromPerim', 2, 2]] },
       { id: 'g3t4', name: 'Умножение на двуцифрено и трицифрено число с едноцифрено', short: 'Умножение с едноцифрено', skills: [['mul1d', 4, 1], ['distrib', 2, 2], ['parts', 2, 2], ['word3', 1, 3], ['triSides', 1, 1], ['degrees', 1, 2]] },
-      { id: 'g3t5', name: 'Деление на двуцифрено и трицифрено число с едноцифрено', short: 'Деление с едноцифрено', skills: [['div1d', 4, 1], ['unkDividend', 2, 2], ['units3b', 2, 2], ['word3', 1, 3], ['tableRead', 2, 2], ['barChart', 2, 2]] }
+      { id: 'g3t5', name: 'Деление на двуцифрено и трицифрено число с едноцифрено', short: 'Деление с едноцифрено', skills: [['div1d', 4, 1], ['divRem', 2, 2], ['unkDividend', 2, 2], ['units3b', 2, 2], ['word3', 1, 3], ['tableRead', 2, 2], ['barChart', 2, 2]] }
     ] },
     4: { name: '4. клас', color: '#2F80ED', topics: [
       { id: 'g4t1', name: 'Числата над 1000', short: 'Над 1000', skills: [['placeBig', 3, 1], ['cmpBig', 2, 1], ['nextPrevBig', 2, 1], ['romanRead', 2, 1], ['romanWrite', 1, 2], ['roundTo', 2, 2], ['estimate', 1, 2]] },
       { id: 'g4t2', name: 'Събиране и изваждане на многоцифрени числа без преминаване', short: 'Многоцифрени без преминаване', skills: [['addBigNo', 3, 1], ['subBigNo', 3, 1], ['unkSubtrahend', 2, 2], ['degrees', 1, 1], ['pattern', 1, 3], ['calendar', 1, 2]] },
       { id: 'g4t3', name: 'Събиране и изваждане на многоцифрени числа с преминаване', short: 'Многоцифрени с преминаване', skills: [['addBigX', 3, 1], ['subBigX', 3, 1], ['solidsName', 1, 1], ['solidsCount', 1, 2], ['wordBig', 1, 3]] },
       { id: 'g4t4', name: 'Умножение на многоцифрено число с едноцифрено', short: 'Умножение с едноцифрено', skills: [['mulBig1d', 4, 1], ['area', 2, 1], ['areaUnits', 1, 2], ['wordArea', 1, 3], ['barChart', 2, 2], ['tableRead', 1, 2]] },
-      { id: 'g4t5', name: 'Деление на многоцифрено число с едноцифрено', short: 'Деление с едноцифрено', skills: [['divBig1d', 4, 1], ['unkDivisor', 2, 2], ['sideFromArea', 1, 2], ['wordBig', 1, 3], ['circleParts', 1, 1], ['circle', 2, 1]] },
+      { id: 'g4t5', name: 'Деление на многоцифрено число с едноцифрено', short: 'Деление с едноцифрено', skills: [['divBig1d', 4, 1], ['divRem', 2, 2], ['unkDivisor', 2, 2], ['sideFromArea', 1, 2], ['wordBig', 1, 3], ['circleParts', 1, 1], ['circle', 2, 1]] },
       { id: 'g4t6', name: 'Умножение на многоцифрено число с двуцифрено', short: 'Умножение с двуцифрено', skills: [['mul2d', 4, 1], ['calcWord', 1, 2], ['compArea', 2, 2], ['perimArea2', 1, 2]] },
-      { id: 'g4t7', name: 'Деление на многоцифрено число с двуцифрено', short: 'Деление с двуцифрено', skills: [['div2d', 4, 1], ['wordBig', 1, 3], ['sideFromArea', 1, 1], ['areaUnits', 1, 2]] }
+      { id: 'g4t7', name: 'Деление на многоцифрено число с двуцифрено', short: 'Деление с двуцифрено', skills: [['div2d', 4, 1], ['wordBig', 1, 3], ['parts', 2, 1], ['sideFromArea', 1, 1], ['areaUnits', 1, 2]] }
     ] }
   };
 
