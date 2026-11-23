@@ -671,6 +671,16 @@
     var qb = q.get('book'); if (qb && st.grade) { G.state.books = G.state.books || {}; G.state.books[st.grade] = qb; G.save(); }
     bind();
     renderSetup();
+    // точно след регистрация: кратко посрещане, за да не падне родителят в непознат екран
+    if (q.get('new')) {
+      if (history.replaceState) history.replaceState(null, '', 'game.html');
+      later(function () {
+        S.modal('<div data-owl="cheer"></div><h3>Всичко е готово!</h3>' +
+          '<p>Това е картата на детето. Мисиите вървят по уроците в учебника – отворени са първите три, а следващите се отключват, щом мине някоя от тях.</p>' +
+          '<p class="hint">Звездите и точките се пазят в профила, така че детето може да продължи и от телефона, и от таблета.</p>' +
+          '<div class="modal-actions"><button class="btn btn-green" data-close>▶ Да започваме</button></div>');
+      }, 500);
+    }
     // ученик от клас: помощните настройки от учителя се проверяват най-много веднъж на час
     if (S.Access && S.Access.isClass() && Date.now() - (G.state.adaptAt || 0) > 36e5) S.Access.sync(true);
     var hw = +q.get('hw');

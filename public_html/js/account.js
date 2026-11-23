@@ -435,26 +435,34 @@
   }
   function gradeSel(id, cur) { return '<select class="input" id="' + id + '">' + [1, 2, 3, 4].map(function (g) { return '<option value="' + g + '"' + (g === cur ? ' selected' : '') + '>' + g + '. клас</option>'; }).join('') + '</select>'; }
 
+  /* първото влизане след регистрация – запомня се веднъж, защото адресът после се изчиства */
+  var FIRST = null;
+  function firstRun(P) { if (FIRST === null) FIRST = !!(qs('new') && !(P || []).length); return FIRST; }
+
   function renderPage(j) {
     var box = $('acct-page'); if (!box) return;
     if (!j || !j.account) { location.replace('vhod.html?next=profil.html'); return; }
     var A = j.account, P = j.profiles || [], cur = c && c.pid, subs = (j.subs || []).filter(function (s) { return s.type !== 'class'; }), vsub = subs.filter(function (s) { return s.valid; })[0];
     var h = '<div class="acct-head panel"><div><h2>Здравейте, ' + esc(A.name.split(' ')[0]) + '! 👋</h2><p class="hint">' + esc(A.email) + ' · от ' + fmt(A.since) + '</p></div><button class="btn btn-ghost btn-sm" data-logout>🚪 Изход</button></div>';
-    var fresh = qs('new') && !P.length;
+    var fresh = firstRun(P);
     if (qs('new') && !fresh && history.replaceState) history.replaceState(null, '', 'profil.html');
-    if (fresh) h += '<div class="acct-welcome panel"><b>🎉 Акаунтът е създаден!</b> Добавете профил за детето си. Ако имате абонамент, активирайте кода в <a href="pricing.html#activate">„Абонаменти“</a> – той важи за детето на всяко устройство.</div>';
+    if (fresh) h += S.FREE
+      ? '<div class="acct-welcome panel"><b>🎉 Акаунтът е създаден!</b> Остават три неща: <b>1.</b> добавете детето с име и клас · <b>2.</b> изберете учебника му · <b>3.</b> играйте. Профилът пази звездите на всяко устройство.</div>'
+      : '<div class="acct-welcome panel"><b>🎉 Акаунтът е създаден!</b> Добавете профил за детето си. Ако имате абонамент, активирайте кода в <a href="pricing.html#activate">„Абонаменти“</a> – той важи за детето на всяко устройство.</div>';
     // абонамент
-    h += '<section class="acct-sec"><div class="sub-card panel' + (vsub ? ' on' : '') + '">' + (vsub
+    if (S.FREE && !vsub && !(j.classes && j.classes.length)) h += '';   // безплатно е – няма какво да се показва за абонамент
+    else h += '<section class="acct-sec"><div class="sub-card panel' + (vsub ? ' on' : '') + '">' + (vsub
       ? '<div><small>Абонамент</small><b>' + esc(plan(vsub.type)) + ' <span class="hint">(' + esc(vsub.typeName) + ')</span></b><span>до ' + fmt(vsub.expires) + ' · включени деца: ' + vsub.used + ' от ' + vsub.seats + '</span></div><a class="btn btn-sm btn-ghost" href="pricing.html">Поднови</a>'
       : '<div><small>Абонамент</small><b>Безплатен план</b><span>' + (subs.length ? 'Абонаментът изтече на ' + fmt(subs[0].expires) + '.' : 'Всички мисии, точки, значки и класации – ' + S.PAID + '.') + '</span></div><a class="btn btn-sm" href="' + S.PAID_URL + '">' + S.PAID_BTN + '</a>') + '</div>';
-    if (j.classes && j.classes.length) h += '<div class="sub-card panel on"><div><small>Класове</small><b>' + j.classes.length + (j.classes.length === 1 ? ' клас' : ' класа') + '</b><span>' + esc(j.classes.map(function (k) { return k.name; }).join(' · ')) + '</span></div><a class="btn btn-sm" href="tablo.html">📋 Табло</a></div>';
-    h += '</section>';
+    if (j.classes && j.classes.length && !(S.FREE && !vsub)) h += '<div class="sub-card panel on"><div><small>Класове</small><b>' + j.classes.length + (j.classes.length === 1 ? ' клас' : ' класа') + '</b><span>' + esc(j.classes.map(function (k) { return k.name; }).join(' · ')) + '</span></div><a class="btn btn-sm" href="tablo.html">📋 Табло</a></div>';
+    if (!(S.FREE && !vsub && !(j.classes && j.classes.length))) h += '</section>';
+    if (S.FREE && j.classes && j.classes.length) h += '<section class="acct-sec"><div class="sub-card panel on"><div><small>Класове</small><b>' + j.classes.length + (j.classes.length === 1 ? ' клас' : ' класа') + '</b><span>' + esc(j.classes.map(function (k) { return k.name; }).join(' · ')) + '</span></div><a class="btn btn-sm" href="tablo.html">📋 Табло</a></div></section>';
     var local = progressOf(G().state), canImport = !owner(G().state) && (local.answered > 0 || local.stars > 0);
     h += '<section class="acct-sec" id="kids"><h2 class="lined">👧 Детски профили <small>' + P.length + '/4</small></h2>' +
       '<div class="pf-grid">' + P.map(function (p) {
         var on = p.id === cur, inc = p.plan && p.plan.valid;
         return '<div class="pf-card panel' + (on ? ' on' : '') + '"><div class="pf-top"><span class="pf-av">' + esc(p.avatar) + '</span><div><b>' + esc(p.name) + '</b><small>' + p.grade + '. клас' + (on ? ' · <span class="tag">играе тук</span>' : '') + '</small></div><button class="icon-btn pf-edit" data-edit="' + p.id + '" aria-label="Редактирай профила">✏️</button></div>' +
-          (inc ? '<span class="pf-plan ok">✓ С абонамент</span>' : vsub ? '<span class="pf-plan free">Не е в абонамента</span>' : '<span class="pf-plan free">Безплатен план</span>') +
+          (S.FREE && !vsub ? '' : inc ? '<span class="pf-plan ok">✓ С абонамент</span>' : vsub ? '<span class="pf-plan free">Не е в абонамента</span>' : '<span class="pf-plan free">Безплатен план</span>') +
           '<div class="pf-stats"><span>★ ' + p.points + '</span><span>' + p.answered + ' задачи</span><span>' + (p.answered ? Math.round(p.correct / p.answered * 100) : 0) + '% точност</span></div>' +
           '<div class="pf-act"><button class="btn btn-sm btn-green" data-play="' + p.id + '">▶ Играй</button><button class="btn btn-sm btn-ghost" data-rep="' + p.id + '">📊 Отчет</button>' + (!inc && vsub ? '<button class="btn btn-sm btn-ghost" data-plan="' + p.id + '">Включи в абонамента</button>' : '') + '</div></div>';
       }).join('') +
@@ -506,6 +514,7 @@
         api(d).then(function (r) {
           applyMe(r);
           var go = imp || !c.pid ? selectProfile(r.id) : Promise.resolve(); // първият профил на устройството играе тук веднага
+          if (firstRun(P)) return go.then(function () { location.href = 'game.html?new=1'; });   // след регистрация: право на картата
           return go.then(function () { return api(); }).then(reload);
         }).catch(function (x) { err($('pf-err'), x); busy(b, false); });
       });

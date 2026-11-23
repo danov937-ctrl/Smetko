@@ -2,7 +2,7 @@
 """Съдържанието: моделът на НВО, сборникът, блогът, работните листове,
 тестовете и една игра от начало до край.
 """
-import json, os, re, subprocess, sys
+import json, os, re, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import requests
 from playwright.sync_api import sync_playwright
@@ -377,6 +377,29 @@ with sync_playwright() as p:
     ok('2' in pg.inner_text('#bd-count'), 'задачите се броят: %s' % pg.inner_text('#bd-count'))
     pg.select_option('#bd-grade', '4'); pg.wait_for_timeout(600)
     ok(pg.locator('#bd-topic option').count() >= 4, 'смяната на класа сменя темите')
+
+    # ---------- родителят се регистрира и стига до картата
+    c2 = b.new_context(viewport={'width': 1100, 'height': 950}); c2.add_init_script(INIT)
+    q = page(c2, errs)
+    q.goto(B + '/registracia.html'); q.wait_for_timeout(1200)
+    mail = 'rod%d@example.com' % int(time.time())
+    reg = q.evaluate('''async m=>{const r=await fetch('/api/account.php',{method:'POST',headers:{'Content-Type':'application/json'},
+      credentials:'same-origin',body:JSON.stringify({action:'register',email:m,name:'Мария Петрова',
+      password:'testtest123',role:'parent',terms:1})});return (await r.json()).ok===true}''', mail)
+    ok(reg, 'родителят се регистрира')
+    q.goto(B + '/profil.html?new=1'); q.wait_for_timeout(1800)
+    txt = q.inner_text('main')
+    ok('Акаунтът е създаден' in txt, 'първият екран посреща родителя')
+    ok('активирайте кода' not in txt and 'Абонаменти“' not in txt, 'не се говори за кодове и абонаменти')
+    ok(q.locator('.sub-card').count() == 0, 'няма карта за абонамент, щом всичко е безплатно')
+    ok(not q.locator('#pf-form').is_hidden(), 'формата за дете е отворена сама')
+    q.fill('#pf-name', 'Иво'); q.select_option('#pf-grade', '2')
+    q.locator('#pf-form button[type=submit]').click()
+    q.wait_for_timeout(3000)
+    ok('game.html' in q.url, 'след първото дете се отива право на картата (%s)' % q.url.split('/')[-1])
+    ok(q.locator('dialog.modal h3').count() and 'готово' in q.inner_text('dialog.modal h3').lower(),
+       'картата посреща с кратко обяснение')
+    c2.close()
 
     # ---------- картата: три мисии напред и ясен прогрес
     pg.goto(B + '/game.html?grade=2&mode=adventure'); pg.wait_for_timeout(2500)
