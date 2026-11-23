@@ -388,6 +388,49 @@
   S.addBigX = function () { var a, b; do { a = rnd(1000, 60000); b = rnd(1000, 99999 - a); } while (!hasCarry(a, b)); return expr(a, PLUS, b, a + b); };
   S.subBigX = function () { var a, b; do { a = rnd(2000, 99999); b = rnd(1000, a - 500); if (Math.random() < .3) { a = rnd(2, 9) * 1000 + rnd(0, 9); b = rnd(100, a - 100); } } while (!hasBorrow(a, b)); return expr(a, MINUS, b, a - b); };
   S.solidsName = function () { var names = ['куб', 'цилиндър', 'конус', 'пирамида', 'сфера', 'правоъгълен паралелепипед'], t = pick(names), others = shuffle(names.filter(function (n) { return n !== t; })).slice(0, 3); return choose('Кое тяло е <b>' + t + '</b>?', [t].concat(others).map(function (n) { return { v: n, html: solidFig(n) }; }), t, 'Това е ' + t + '.', { optFigs: true }); };
+  /* ---- числова ос ---- */
+  // ос от „from“ до „to“ със стъпка „step“ и стрелка на стойност „at“ (null – без стрелка)
+  function lineFig(from, to, step, at, marks) {
+    var W = 300, y = 62, X = 18, L = W - 2 * X, n = (to - from) / step;
+    var x = function (v) { return X + L * (v - from) / (to - from); };
+    var b = '<line x1="' + X + '" y1="' + y + '" x2="' + (W - X) + '" y2="' + y + '" stroke="' + INK + '" stroke-width="3"/>' +
+            '<polygon points="' + (W - X) + ',' + y + ' ' + (W - X - 9) + ',' + (y - 5) + ' ' + (W - X - 9) + ',' + (y + 5) + '" fill="' + INK + '"/>';
+    for (var i = 0; i <= n; i++) {
+      var v = from + i * step, big = marks ? marks.indexOf(v) >= 0 : true;
+      b += '<line x1="' + x(v) + '" y1="' + (y - (big ? 9 : 5)) + '" x2="' + x(v) + '" y2="' + (y + (big ? 9 : 5)) + '" stroke="' + INK + '" stroke-width="' + (big ? 2.4 : 1.4) + '"/>';
+      if (big) b += '<text x="' + x(v) + '" y="' + (y + 26) + '" text-anchor="middle" class="ln">' + v + '</text>';
+    }
+    if (at !== null && at !== undefined) {
+      b += '<polygon points="' + x(at) + ',' + (y - 12) + ' ' + (x(at) - 7) + ',' + (y - 26) + ' ' + (x(at) + 7) + ',' + (y - 26) + '" fill="#FF7A1A" stroke="#fff" stroke-width="1.5"/>';
+    }
+    return svg(W, 92, b, 'fig line');
+  }
+
+  S.numLine = function (lv) {
+    var span = lv === 1 ? 10 : lv === 2 ? 20 : pick([100, 1000]);
+    var step = span <= 20 ? 1 : span === 100 ? 10 : 100;
+    var marks = [], v;
+    for (v = 0; v <= span; v += step) if (span <= 20 ? v % (span === 10 ? 1 : 2) === 0 : true) marks.push(v);
+    var at;
+    if (span <= 20) at = rnd(1, span - 1);
+    else {
+      at = rnd(0, span / step - 1) * step;
+      if (Math.random() < .6) {                      // между две деления, но никога точно по средата
+        var off = rnd(1, step - 1);
+        while (off === step / 2) off = rnd(1, step - 1);
+        at += off;
+      }
+    }
+    var fig = lineFig(0, span, step, at, marks);
+    if (span > 20 && at % step !== 0) {
+      var lo = Math.floor(at / step) * step, hi = lo + step;
+      return choose('Към кое число е по-близо стрелката?', textOpts([String(lo), String(hi)]),
+        String(at - lo <= hi - at ? lo : hi),
+        'Стрелката сочи ' + at + '. До ' + lo + ' има ' + (at - lo) + ', а до ' + hi + ' има ' + (hi - at) + '.', { figure: fig });
+    }
+    return T('Кое число сочи стрелката? {?}', at, 'Стрелката сочи ' + at + '.', { figure: fig });
+  };
+
   /* ---- работа с данни: таблици и диаграми ---- */
   // таблица от редове [[име, число], ...]; прави се с решетка, за да стои и в карта, и на лист
   function tableFig(head1, head2, rows, hi) {

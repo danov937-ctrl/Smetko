@@ -115,6 +115,19 @@ for(let i=0;i<1500;i++){const t=E.generateSkill(3,'pattern',1+i%3);
 console.log(bad)""")
 ok(res == '0', 'редиците продължават по своето правило (%s грешни)' % res)
 
+# ---------- числовата ос: стрелката стои на мястото на отговора
+res = node("""let bad=0;
+for(let i=0;i<1200;i++){const t=E.generateSkill(3,'numLine',1+i%3);
+  const m=/Стрелката сочи (\\d+)/.exec(t.full||'');const at=m?+m[1]:t.answer;
+  const p=/<polygon points="([\\d., ]+)" fill="#FF7A1A"/.exec(t.figure);if(!p){bad++;continue;}
+  const x=+p[1].trim().split(/[ ]/)[0].split(',')[0];
+  const sp=/>(\\d+)<\\/text><\\/svg>|class="ln">(\\d+)</g;
+  const nums=[...t.figure.matchAll(/class="ln">(\\d+)</g)].map(z=>+z[1]);
+  const span=Math.max(...nums), X=18, L=300-2*X;
+  if(Math.abs(X+L*at/span-x)>0.6)bad++;}
+console.log(bad)""")
+ok(res == '0', 'числовата ос: стрелката сочи точно числото (%s разминавания)' % res)
+
 # ---------- сборникът е безплатен и цял
 pdf = os.path.join(ROOT, 'assets', 'Smetko-NVO-4-klas-sbornik.pdf')
 ok(os.path.exists(pdf) and os.path.getsize(pdf) > 1000000, 'сборникът е в сайта (%d kB)' % (os.path.getsize(pdf) // 1024 if os.path.exists(pdf) else 0))
@@ -239,6 +252,44 @@ with sync_playwright() as p:
         ok(pg.locator('#klas-%s' % g).count() == 1, 'има раздел за %s. клас' % g)
     skills = pg.eval_on_selector_all('.qz', 'e=>e.map(x=>x.dataset.skills||"")')
     ok(all(len(x.split(',')) >= 3 for x in skills), 'всеки тест пита поне по три умения: %s' % [len(x.split(',')) for x in skills])
+
+    # ---------- числовата ос на живо
+    pg.goto(B + '/chislova-os.html'); pg.wait_for_timeout(1400)
+    ok(pg.locator('#nl-svg').count() == 1, 'оста се показва')
+    tgt = pg.evaluate('Smetko.NumLine.target()')
+    pg.evaluate('v=>Smetko.NumLine.set(v)', tgt); pg.click('#nl-check'); pg.wait_for_timeout(400)
+    ok('Браво' in pg.inner_text('#nl-fb'), 'намереното число се приема: %s' % pg.inner_text('#nl-fb')[:40])
+    pg.wait_for_timeout(1600)
+    pg.select_option('#nl-mode', 'round'); pg.select_option('#nl-span', '100'); pg.wait_for_timeout(700)
+    t = pg.evaluate('Smetko.NumLine.target()'); st = pg.evaluate('Smetko.NumLine.step()')
+    lo = (t // st) * st
+    right = lo if t - lo < lo + st - t else lo + st
+    pg.fill('#nl-ans', str(right)); pg.click('#nl-check'); pg.wait_for_timeout(400)
+    ok('Браво' in pg.inner_text('#nl-fb'), 'закръгляването с оста работи (%d → %d)' % (t, right))
+
+    # ---------- двубой за двама
+    pg.goto(B + '/dvuboy.html'); pg.wait_for_timeout(1400)
+    pg.fill('#du-n1', 'Мира'); pg.fill('#du-n2', 'Иво'); pg.select_option('#du-rounds', '3')
+    pg.click('#du-start'); pg.wait_for_timeout(800)
+    ok(pg.inner_text('#du-who') == 'Мира', 'първи е на ход играчът, въведен първи')
+    turns = []
+    for _ in range(6):
+        a = pg.evaluate('()=>{const t=Smetko.Duel.task(); return t?String(t.answer):null}')
+        if a is None:
+            break
+        turns.append(pg.inner_text('#du-who'))
+        if pg.locator('#du-chs').is_visible():
+            pg.locator('.du-ch[data-v="%s"]' % a).first.click()
+        else:
+            pg.fill('#du-ans', a); pg.click('#du-ok')
+        pg.wait_for_timeout(1100)
+    ok(turns[:4] == ['Мира', 'Иво', 'Мира', 'Иво'], 'редът се сменя след всеки отговор: %s' % turns[:4])
+    sc = pg.evaluate('Smetko.Duel.score()')
+    ok(sc[0] > 0 and sc[1] > 0, 'верните отговори носят точки и на двамата: %s' % sc)
+    pg.wait_for_timeout(1800)
+    ok(not pg.locator('#du-over').is_hidden(), 'след последния рунд излиза краят')
+    ok('печели' in pg.inner_text('#du-over') or 'Равенство' in pg.inner_text('#du-over'),
+       'краят обявява победител: %s' % pg.inner_text('#du-over').split('\n')[0])
 
     # ---------- обиколка и лице
     pg.goto(B + '/obikolka-i-lice.html'); pg.wait_for_timeout(1400)

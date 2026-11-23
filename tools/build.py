@@ -203,6 +203,8 @@ index = head('Сметко – математика като игра за 1.–
       <a class="hub-card" href="tekstovi-zadachi.html" style="--c:#FF7A1A"><span>{ico('write')}</span><b>Текстови задачи</b><small>С подсказки стъпка по стъпка</small></a>
       <a class="hub-card" href="obikolka-i-lice.html" style="--c:#4CBB4A"><span>{ico('grid')}</span><b>Обиколка и лице</b><small>Правоъгълник, който се тегли</small></a>
       <a class="hub-card" href="geometria.html" style="--c:#E0452F"><span>{ico('ruler')}</span><b>Геометрия 1.–4. клас</b><small>Фигури, ъгли, тела – с тестове</small></a>
+      <a class="hub-card" href="chislova-os.html" style="--c:#2F80ED"><span>{ico('chart')}</span><b>Числова ос</b><small>Мястото на числото, с пръст</small></a>
+      <a class="hub-card" href="dvuboy.html" style="--c:#8E6CF0"><span>{ico('trophy')}</span><b>Двубой за двама</b><small>На едно устройство, с рундове</small></a>
     </div>
   </div>
 </section>
@@ -1389,6 +1391,117 @@ ge = head('Геометрия за 1.–4. клас: фигури, ъгли, о�
 </main>
 """ + FOOTER + scripts(['js/math-engine.js', 'js/quiz.js'])
 write('geometria.html', ge)
+
+# ================= числова ос =================
+nl = head('Числова ос: упражнения за 1.–4. клас | Сметко',
+          'Числовата ос на живо: намери числото, прочети къде сочи стрелката и закръгли с оста. За числата до 10, до 20, до 100 и до 1000. Безплатно, без регистрация.',
+          'chislova-os.html', [crumbs([('Начало', ''), ('Числова ос', 'chislova-os.html')])]) + header() + \
+    page_hero('Числовата ос',
+              'Числата не са само знаци – те имат място. Тук оста се пипа: стрелката се плъзга с пръст, а задачите са три вида, от броене до закръгляване.',
+              'Начало › Числова ос', 'hero',
+              '<div class="hero-cta"><a class="btn btn-lg btn-green" href="#nl">Към оста</a>'
+              '<a class="btn btn-white" href="geometria.html">Геометрия</a></div>') + \
+    f"""
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="panel tool-panel">
+      <div class="tool-grid">
+        <label>Какво правим<select id="nl-mode" class="select"><option value="find">Намери числото</option><option value="read">Кое число сочи стрелката</option><option value="round">Закръгли с оста</option></select></label>
+        <label>Докъде<select id="nl-span" class="select"><option value="10">До 10</option><option value="20" selected>До 20</option><option value="100">До 100</option><option value="1000">До 1000</option></select></label>
+      </div>
+      <p class="hint">Стрелката се плъзга с пръст или с мишка.</p>
+    </div>
+    <div class="nl" id="nl">
+      <p class="nl-task" id="nl-task"></p>
+      <svg id="nl-svg" class="nl-svg" viewBox="0 0 600 110" role="img" aria-label="Числова ос"></svg>
+      <div class="nl-row">
+        <input id="nl-ans" class="ck-in" inputmode="numeric" autocomplete="off" aria-label="Отговор">
+        <button type="button" class="btn btn-green" id="nl-check">Провери</button>
+        <button type="button" class="btn btn-sm btn-white" id="nl-new">Нова задача</button>
+      </div>
+      <p class="nl-fb" id="nl-fb" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
+<section class="section soft">
+  <div class="wrap prose">
+    <h2 class="lined">Защо оста помага</h2>
+    <p>Числото, написано на лист, е знак. На оста то е <b>място</b> – и изведнъж става ясно защо 7 е по-голямо от 4, какво значи „между“ и защо 68 се закръгля до 70, а не до 60.</p>
+    <h3>1. клас: броене и съседи</h3>
+    <p>Оста до 10 и до 20 показва кое число е преди и кое след, и че разстоянието между съседните числа е едно и също. Оттук се вижда и че събирането е движение надясно, а изваждането – наляво.</p>
+    <h3>2.–3. клас: десетици и стотици</h3>
+    <p>На оста до 100 делението вече е по 10. Числото 47 не стои върху деление – то е между 40 и 50, по-близо до 50. Точно тази картинка липсва на децата, които „сравняват“ числата по големината на цифрите.</p>
+    <h3>4. клас: закръгляване</h3>
+    <p>Закръгляването е правило, но на оста е очевидно: гледа се до кое кръгло число има по-малко. Ако е точно по средата – закръгля се нагоре. Повече упражнения има в <a href="geometria.html">геометрията</a> и в <a href="rabotni-listove.html">работните листове</a>.</p>
+    <h3>Къде се къса</h3>
+    <ul class="check-list">
+      <li>Броене на деленията вместо на разстоянията – ако оста започва от 0, числото е толкова, колкото са стъпките.</li>
+      <li>Оста не винаги започва от нула – на изпит може да тръгва от 200.</li>
+      <li>Делението не винаги е 1 – при ос до 1000 всяко деление е 100.</li>
+    </ul>
+  </div>
+</section>
+</main>
+""" + FOOTER + scripts(['js/numline.js'])
+write('chislova-os.html', nl)
+
+# ================= двубой =================
+du = head('Двубой по математика: двама играчи на едно устройство | Сметко',
+          'Игра за двама на един телефон или таблет: редувате се, задачите са от едно и също умение, бързият верен отговор носи двойно. Безплатно, без регистрация.',
+          'dvuboy.html', [crumbs([('Начало', ''), ('Двубой', 'dvuboy.html')])]) + header() + \
+    page_hero('Двубой',
+              'Двама на едно устройство. Телефонът се подава, задачите са от едно и също умение за двамата, а верният отговор под 10 секунди носи два пъти повече.',
+              'Начало › Двубой', 'hero',
+              '<div class="hero-cta"><a class="btn btn-lg btn-green" href="#du">Започнете</a>'
+              '<a class="btn btn-white" href="game.html">Сам срещу Сметко</a></div>') + \
+    f"""
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="du" id="du">
+      <div id="du-setup" class="du-setup">
+        <div class="tool-grid">
+          <label>Първи играч<input id="du-n1" class="select" maxlength="14" placeholder="Играч 1" autocomplete="off"></label>
+          <label>Втори играч<input id="du-n2" class="select" maxlength="14" placeholder="Играч 2" autocomplete="off"></label>
+          <label>Клас<select id="du-grade" class="select"><option value="1">1. клас</option><option value="2" selected>2. клас</option><option value="3">3. клас</option><option value="4">4. клас</option></select></label>
+          <label>Трудност<select id="du-level" class="select"><option value="1">Лесно</option><option value="2" selected>Средно</option><option value="3">Трудно</option></select></label>
+          <label>Рундове<select id="du-rounds" class="select"><option value="3">3</option><option value="5" selected>5</option><option value="10">10</option></select></label>
+        </div>
+        <p class="center-note"><button type="button" class="btn btn-lg btn-green" id="du-start">Започни двубоя</button></p>
+      </div>
+
+      <div id="du-play" class="du-play" hidden>
+        <div class="du-top"><span id="du-round"></span><span class="du-scores" id="du-score"></span></div>
+        <div class="du-turn">На ход е <span class="du-who" id="du-who"></span></div>
+        <div class="du-time"><span id="du-bar"></span></div>
+        <p class="du-q" id="du-q"></p>
+        <div class="du-fig" id="du-fig" hidden></div>
+        <div class="du-chs" id="du-chs" hidden></div>
+        <div class="du-row"><input id="du-ans" class="ck-in" inputmode="numeric" autocomplete="off" aria-label="Отговор">
+          <button type="button" class="btn btn-green" id="du-ok">Отговори</button></div>
+        <p class="du-fb" id="du-fb" aria-live="polite"></p>
+      </div>
+
+      <div id="du-over" class="du-over" hidden></div>
+    </div>
+  </div>
+</section>
+
+<section class="section soft">
+  <div class="wrap">
+    <div class="section-head"><h2 class="lined">Как се играе</h2><p>Измислено е за две деца у дома и за два отбора в клас.</p></div>
+    <div class="grid grid-3">
+      <article class="card"><h3>{ico('star')} Еднакви задачи</h3><p>Във всеки рунд двамата получават задача от едно и също умение, само с различни числа. Никой не може да каже, че другият е изтеглил по-лесното.</p></article>
+      <article class="card"><h3>{ico('bolt')} Бързината носи двойно</h3><p>Верен отговор под 10 секунди дава 2 точки вместо 1. Има 20 секунди на задача – достатъчно, за да се мисли, но не и да се брои на пръсти.</p></article>
+      <article class="card"><h3>{ico('school')} И за цял клас</h3><p>Два отбора, по един представител на рунд. На <a href="zadachi-na-daskata.html">дъската</a> върви и без телефон – там задачата е обща, а отговорите се вдигат на листчета.</p></article>
+    </div>
+  </div>
+</section>
+</main>
+""" + FOOTER + scripts(['js/math-engine.js', 'js/duel.js'])
+write('dvuboy.html', du)
 
 # ================= 404 =================
 nf = head('Страницата не е намерена – Сметко', 'Страницата не е намерена.', '404.html', noindex=True).replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<base href="/">') + header() + page_hero(
