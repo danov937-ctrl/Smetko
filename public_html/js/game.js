@@ -32,6 +32,13 @@
   // „.2“ = мисиите по уроци (от 10.2026); старите звезди остават в статистиката, но не се смесват с новата карта
   function advKey(g, id) { id = id || bookId(g); return String(g || st.grade) + '-' + id + '.2'; }
   function shortLabel(t) { return t.length > 34 ? t.slice(0, 32).replace(/[\s,.:–-]+$/, '') + '…' : t; }
+  /* Името на частта идва от урока в средата ѝ – „1–16“ не говори нищо на дете. */
+  function chapterName(levels, from, to) {
+    var mid = levels[Math.min(levels.length - 1, Math.floor((from + to) / 2))];
+    var t = (mid && mid[0] || '').replace(/^\d+\.\s*/, '').split(/[·,(]/)[0].trim();
+    t = t.replace(/\s*[–-]\s*(упражнение|трудни задачи|преговор).*$/i, '');
+    return t.length > 20 ? t.slice(0, 19).replace(/[\s,.:–-]+$/, '') + '…' : (t || (from + 1) + '–' + to);
+  }
   var play = null;          // текуща игра
   var timers = [];
   function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
@@ -167,7 +174,7 @@
   var CH = 16; // мисии в една част на картата
   function renderMap(chapter) {
     var book = curBook(), key = advKey(), all = book.missions, N = all.length, stars = G.stars(key);
-    var gcur = 0; for (var q = 0; q < N; q++) { if (G.isUnlocked(key, q)) gcur = q; }
+    var gcur = Math.max(0, Math.min(N - 1, G.frontier(key) + 1));   // бухалът стои на следващата мисия, не на последната отключена
     var nch = Math.ceil(N / CH);
     if (chapter === undefined || chapter === null) chapter = Math.floor(gcur / CH);
     chapter = Math.max(0, Math.min(nch - 1, chapter)); st.chapter = chapter;
@@ -192,6 +199,7 @@
       var paid = S.config.paywall && !S.hasAccess() && i >= S.config.freeAdventureLevels;
       var cls = 'map-node ' + (wide ? 'below-label' : p.x > 200 ? 'left-label' : 'right-label');
       if (!unlocked || paid) cls += ' locked'; else if (s > 0) cls += ' done';
+      if (!unlocked && !paid && i > G.frontier(key) + 7) cls += ' far';   // далечните само избледняват
       if (i === gcur && !paid) cls += ' current';
       var starStr = s ? '<span class="n-stars">' + '★★★'.slice(0, s) + '<span style="opacity:.35">' + '★★★'.slice(0, 3 - s) + '</span></span>' : '';
       html += '<button class="' + cls + '" data-i="' + i + '" style="left:' + (p.x / MAP_W * 100) + '%;top:' + (p.y / MAP_H * 100) + '%;" aria-label="Мисия ' + (i + 1) + ': ' + lv[0] + (unlocked ? '' : ' (заключена)') + '" title="' + lv[0] + '">' +
@@ -203,7 +211,9 @@
     map.innerHTML = html;
     S.renderOwls(map);
     $('#map-title').textContent = E.GRADES[st.grade].name + ' · ' + (book.id === 'mon' ? 'по програмата' : book.publisher);
-    $('#map-stars').textContent = '★ ' + total + ' / ' + (N * 3);
+    var pct = Math.round(total / (N * 3) * 100);
+    $('#map-stars').innerHTML = '<span class="ms-bar"><i style="width:' + pct + '%"></i></span>' +
+      '<b>' + pct + '%</b><small>★ ' + total + ' от ' + (N * 3) + '</small>';
     var chBox = $('#map-chapters');
     if (!chBox) { chBox = document.createElement('div'); chBox.id = 'map-chapters'; chBox.className = 'map-chapters'; map.parentNode.insertBefore(chBox, map); }
     var chHtml = '';
@@ -211,8 +221,9 @@
       var cs = 0, cdone = 0, from = c * CH, to = Math.min(N, from + CH);
       for (var k = from; k < to; k++) { cs += stars[k] || 0; if (stars[k]) cdone++; }
       var locked = !G.isUnlocked(key, from);
+      var cname = chapterName(all, from, to);
       chHtml += '<button class="ch' + (c === chapter ? ' on' : '') + (cdone === to - from ? ' full' : '') + (locked ? ' lk' : '') + '" data-ch="' + c + '" aria-pressed="' + (c === chapter) + '" title="Уроци ' + (from + 1) + '–' + to + '">' +
-        '<b>' + (locked ? '🔒' : c + 1) + '</b><small>' + (from + 1) + '–' + to + '</small>' + (cs ? '<i>★' + cs + '</i>' : '') + '</button>';
+        '<b>' + (locked ? '🔒' : c + 1) + '</b><small>' + cname + '</small>' + (cs ? '<i>★' + cs + '</i>' : '') + '</button>';
     }
     chBox.innerHTML = '<span class="ch-l">Части:</span>' + chHtml;
     $$('[data-ch]', chBox).forEach(function (b) { b.addEventListener('click', function () { A.click(); renderMap(+b.dataset.ch); window.scrollTo({ top: Math.max(0, chBox.getBoundingClientRect().top + window.scrollY - 90), behavior: 'smooth' }); }); });
@@ -289,6 +300,12 @@
     if (timed(play.mode)) w = play.timeLeft / (play.timeTotal || S.config.quickSeconds) * 100;
     else if (fixed(play.mode)) w = play.idx / play.total * 100;
     $('#progress i').style.width = Math.max(0, w) + '%';
+    var cnt = $('#q-count');                       // „задача 3 от 10“ – детето вижда докъде е
+    if (cnt) {
+      var show = fixed(play.mode) && play.total;
+      cnt.hidden = !show;
+      if (show) cnt.textContent = Math.min(play.idx + 1, play.total) + ' / ' + play.total;
+    }
     $('#level-pill').textContent = 'Трудност ' + play.level;
   }
 

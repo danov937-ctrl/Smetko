@@ -318,6 +318,7 @@ game = head('Математически игри онлайн за 1.–4. кл�
     <div class="play-top">
       <button class="icon-btn" id="exit-btn" aria-label="Изход">✕</button>
       <div class="progress" id="progress"><i></i></div>
+      <span class="q-count" id="q-count" hidden></span>
       <span class="timer-num" id="timer-num" hidden>60</span>
       <button class="btn btn-sm btn-purple" id="end-btn" hidden style="margin-left:auto">Край</button>
     </div>

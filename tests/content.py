@@ -378,6 +378,29 @@ with sync_playwright() as p:
     pg.select_option('#bd-grade', '4'); pg.wait_for_timeout(600)
     ok(pg.locator('#bd-topic option').count() >= 4, 'смяната на класа сменя темите')
 
+    # ---------- картата: три мисии напред и ясен прогрес
+    pg.goto(B + '/game.html?grade=2&mode=adventure'); pg.wait_for_timeout(2500)
+    free = pg.eval_on_selector_all('.map-node', 'e=>e.filter(x=>!x.classList.contains("locked")).length')
+    ok(free == 3, 'в началото са отворени три мисии, не само една (%d)' % free)
+    ok(pg.locator('.map-node.far').count() > 0, 'далечните мисии избледняват, вместо да са стена от катинари')
+    ok('%' in pg.inner_text('#map-stars'), 'прогресът се показва в проценти: %s' % pg.inner_text('#map-stars').replace('\n', ' '))
+    ok(pg.locator('#map-stars .ms-bar').count() == 1, 'има и лента за прогрес')
+    names = pg.eval_on_selector_all('.ch small', 'e=>e.map(x=>x.innerText)')
+    ok(names and not any(n.replace('–', '-').replace(' ', '').replace('…', '').isdigit() or '-' in n and n[0].isdigit() for n in names),
+       'частите са с имена, а не „1–16“: %s' % names[:3])
+    out = pg.evaluate("""()=>{const G=Smetko.Game,k='2-mon.2';for(let i=0;i<5;i++)G.setStars(k,i,3);
+      return {f:G.frontier(k),u:[5,6,7,8].map(i=>G.isUnlocked(k,i))}}""")
+    ok(out['f'] == 4 and out['u'] == [True, True, True, False], 'минатите мисии отключват следващите три: %s' % out)
+    pg.reload(); pg.wait_for_timeout(2300)
+    ok(pg.eval_on_selector_all('.map-node.current', 'e=>e.map(x=>x.dataset.i)') == ['5'],
+       'бухалът стои на следващата мисия, не на последната отключена')
+
+    # ---------- в задачата се вижда докъде е стигнало детето
+    pg.evaluate("()=>document.querySelector('.map-node:not(.locked)').click()"); pg.wait_for_timeout(2200)
+    ok(pg.locator('#screen-play').is_visible(), 'мисията се отваря')
+    ok(pg.locator('#q-count').is_visible() and ' / ' in pg.inner_text('#q-count'),
+       'показва се коя задача от колко: %s' % pg.inner_text('#q-count'))
+
     # ---------- една игра от начало до край
     pg.goto(B + '/game.html'); pg.wait_for_timeout(2500)
     pg.locator('.dt-card .btn-green').first.click(); pg.wait_for_timeout(2000)

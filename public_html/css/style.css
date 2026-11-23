@@ -2120,3 +2120,16 @@ input.sw:disabled { cursor: default; opacity: .75; }
   .f-col:not([open]) > ul { display: none; }
   .f-col > ul { padding-top: 8px; padding-bottom: 6px; }
 }
+
+/* ---------- Картата: прогрес с лента, избледняващи далечни мисии, именувани части ---------- */
+.map-stars { display: flex; align-items: center; gap: 8px; }
+.map-stars .ms-bar { display: block; width: 92px; height: 9px; border-radius: 999px; background: rgba(255,255,255,.35); overflow: hidden; }
+.map-stars .ms-bar i { display: block; height: 100%; background: var(--yellow); border-radius: 999px; transition: width .4s ease; }
+.map-stars b { font-size: 1rem; }
+.map-stars small { opacity: .8; font-weight: 700; }
+.map-node.far { opacity: .34; }
+.map-node.far .lock { opacity: 0; }
+.map-node.far .n-label { display: none; }
+.map-chapters .ch small { display: block; max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .72rem; }
+@media (max-width: 560px) { .map-stars .ms-bar { width: 60px; } .map-stars small { display: none; } }
+.q-count { font-weight: 900; color: var(--muted); font-size: .95rem; white-space: nowrap; }

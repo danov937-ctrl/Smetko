@@ -230,7 +230,14 @@
     for (var g in state.adventure) for (var i in state.adventure[g]) t += state.adventure[g][i];
     return t;
   }
-  function isUnlocked(grade, idx) { return idx === 0 || (stars(grade)[idx - 1] || 0) >= 1; }
+  /* Отключване: отворени са всички минати мисии и три напред.
+     Така детето не удря в стена, ако заседне на една мисия, и картата не е стена от катинари. */
+  function frontier(grade) {
+    var s = stars(grade) || {}, f = -1, k;
+    for (k in s) if (Object.prototype.hasOwnProperty.call(s, k) && (s[k] || 0) >= 1 && +k > f) f = +k;
+    return f;
+  }
+  function isUnlocked(grade, idx) { return idx <= frontier(grade) + 3; }
 
   function reset() { state = fresh(); save(); }
   function setSound(on) { state.settings.sound = !!on; save(); }
@@ -242,7 +249,7 @@
     startSession: startSession, answer: answer, addBonus: addBonus, endSession: endSession,
     awardBadge: function (id) { var nb = []; award(id, nb); checkAll(nb); save(); return nb; },
     event: function (k, n) { var nb = []; counter(k, n); checkAll(nb); save(); return nb; }, check: function () { var nb = checkAll([]); if (nb.length) save(); return nb; }, GROUPS: GROUPS,
-    earns: earns, stars: stars, setStars: setStars, totalStars: totalStars, isUnlocked: isUnlocked,
+    earns: earns, stars: stars, setStars: setStars, totalStars: totalStars, isUnlocked: isUnlocked, frontier: frontier,
     reset: reset, replace: replace, fresh: fresh, setSound: setSound, today: today,
     get session() { return session; }
   };
