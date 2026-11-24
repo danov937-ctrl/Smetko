@@ -546,7 +546,7 @@ SITEMAP.append(('deca-sas-sop.html', '0.8', 'monthly'))
 
 # ======================================================================= sitemap-pages.xml
 STATIC = [('', '1.0', 'weekly'), ('game.html', '0.9', 'weekly')] + [(class_url(g), '0.9', 'monthly') for g in (1, 2, 3, 4)] + [
-    ('uchilishta.html', '0.8', 'monthly'), ('rabotni-listove.html', '0.8', 'monthly'), ('pricing.html', '0.7', 'monthly'), ('about.html', '0.6', 'monthly'),
+    ('uchilishta.html', '0.8', 'monthly'), ('listovki.html', '0.6', 'yearly'), ('rabotni-listove.html', '0.8', 'monthly'), ('pricing.html', '0.7', 'monthly'), ('about.html', '0.6', 'monthly'),
     ('liga.html', '0.6', 'daily'), ('za-nas.html', '0.6', 'monthly'), ('otchet.html', '0.5', 'monthly'), ('novini.html', '0.4', 'weekly'),
     ('registracia.html', '0.5', 'yearly'), ('vhod.html', '0.4', 'yearly'), ('achievements.html', '0.3', 'monthly'),
     ('pravna-informacia.html', '0.3', 'yearly'), ('terms.html', '0.2', 'yearly'), ('privacy-policy.html', '0.2', 'yearly'), ('cookies.html', '0.2', 'yearly'),

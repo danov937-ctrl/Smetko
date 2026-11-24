@@ -275,6 +275,50 @@ case 'save_state': // {id, state, rev} – ако междувременно д�
     if (!$st->rowCount()) json_out(['ok' => true, 'conflict' => true, 'state' => null, 'rev' => -1]);
     json_out(['ok' => true, 'rev' => (int)$p['rev'] + 1]);
 
+case 'createClass': // учителят си прави клас сам – безплатно е, няма за какво да чака код по имейл
+    $a = need();
+    if (too_many('mkclass', 8, 3600)) json_out(['ok' => false, 'error' => 'Твърде много класове наведнъж. Опитайте след час.'], 429);
+    $cname = clean_name((string)($in['className'] ?? ''), 24);
+    $grade = max(1, min(4, (int)($in['grade'] ?? 0)));
+    $school = clean_name((string)($in['school'] ?? ''), 80);
+    $town = clean_name((string)($in['town'] ?? ''), 60);
+    if ($cname === '') json_out(['ok' => false, 'error' => 'Напишете кой клас водите, например „3. а“.', 'field' => 'className'], 400);
+    if (!$grade) json_out(['ok' => false, 'error' => 'Изберете клас от 1. до 4.', 'field' => 'grade'], 400);
+    if (count(acc_classes((int)$a['id'])) >= 8) json_out(['ok' => false, 'error' => 'Повече от осем класа в един акаунт не се поддържат. Пишете ни на info@smetko.com.'], 400);
+
+    $pdo->beginTransaction();
+    $sid = null;
+    if ($school !== '') {
+        $st = $pdo->prepare('SELECT id FROM schools WHERE name = ? AND COALESCE(town, \'\') = ?');
+        $st->execute([$school, $town]);
+        $sid = (int)$st->fetchColumn() ?: null;
+        if (!$sid) {
+            $pdo->prepare('INSERT INTO schools(name, town, created_at) VALUES(?, ?, ?)')->execute([$school, $town, now()]);
+            $sid = (int)$pdo->lastInsertId();
+        }
+    }
+    $exp = date('Y-m-d', strtotime('+5 years'));          // безплатно е – срокът е само за да не е празен
+    $seats = PLAN_SEATS['class'] ?? 30;
+    $pdo->prepare('INSERT INTO batches(label, type, max_uses, expires_at, created_at, school_id, class_name, grade, teacher_name, public, account_id)
+        VALUES(?, \'class\', ?, ?, ?, ?, ?, ?, ?, 1, ?)')
+        ->execute([$cname, $seats, $exp, now(), $sid, $cname, $grade, (string)$a['name'], (int)$a['id']]);
+    $bid = (int)$pdo->lastInsertId();
+    $code = ''; $guard = 0;
+    $ins = $pdo->prepare('INSERT OR IGNORE INTO codes(code, batch_id, type, max_uses, expires_at, label, created_at, role, account_id, activated_at)
+        VALUES(?, ?, \'class\', ?, ?, ?, ?, \'student\', ?, ?)');
+    while ($code === '' && $guard++ < 30) {
+        $c = random_code();
+        $ins->execute([$c, $bid, $seats, $exp, $cname, now(), (int)$a['id'], now()]);
+        if ($ins->rowCount()) $code = $c;
+    }
+    if ($code === '') { $pdo->rollBack(); json_out(['ok' => false, 'error' => 'Нещо се обърка. Опитайте пак.'], 500); }
+    if ($a['role'] !== 'teacher') $pdo->prepare("UPDATE accounts SET role = 'teacher' WHERE id = ?")->execute([(int)$a['id']]);
+    $pdo->commit();
+    audit_add('Нов клас', $cname . ($school ? ' · ' . $school : '') . ' · акаунт ' . (int)$a['id']);
+    $res = acc_me(auth_account(true));
+    $res['createdClass'] = ['id' => $bid, 'name' => $cname, 'grade' => $grade];
+    json_out($res);
+
 case 'activate': // код за абонамент – въвежда се веднъж, на страница „Абонаменти“, от влязъл акаунт
     $a = need();
     if (too_many('redeem_fail', 20, 900)) json_out(['ok' => false, 'error' => 'Твърде много грешни опити. Опитайте след 15 минути.'], 429);

@@ -68,6 +68,19 @@ with sync_playwright() as p:
                     clash += 1
         ok(clash == 0, '%s: думите не се застъпват (%d)' % (name, clash))
 
+    # листовете за родителска среща и за колега – по един на страница
+    pg.goto(B + '/listovki.html'); pg.wait_for_timeout(1200)
+    f = os.path.join(TMP, 'listovki.pdf')
+    pg.pdf(path=f, prefer_css_page_size=True, print_background=True)
+    pages, w, h = info(f)
+    ok(pages == 2 and abs(w - A4W) < 2 and abs(h - A4H) < 2, 'листовете са два, на A4 изправен (%d, %.0fx%.0f)' % (pages, w, h))
+    for n in (1, 2):
+        bb = boxes(f, n)
+        ok(bb and max(x[2] for x in bb) <= A4W - 18, 'лист %d: нищо не излиза встрани' % n)
+        ok(bb and max(x[3] for x in bb) <= A4H - 20, 'лист %d: нищо не слиза под полето' % n)
+    ok('smetko.com' in subprocess.run(['pdftotext', f, '-'], capture_output=True, text=True).stdout,
+       'адресът на сайта го пише и на двата листа')
+
     # грамотата е единствената на ширина
     pg.goto(B + '/gramota.html'); pg.wait_for_timeout(1200)
     f = os.path.join(TMP, 'gramota.pdf')

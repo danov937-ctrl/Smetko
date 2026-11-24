@@ -457,6 +457,19 @@
     if (j.classes && j.classes.length && !(S.FREE && !vsub)) h += '<div class="sub-card panel on"><div><small>Класове</small><b>' + j.classes.length + (j.classes.length === 1 ? ' клас' : ' класа') + '</b><span>' + esc(j.classes.map(function (k) { return k.name; }).join(' · ')) + '</span></div><a class="btn btn-sm" href="tablo.html">📋 Табло</a></div>';
     if (!(S.FREE && !vsub && !(j.classes && j.classes.length))) h += '</section>';
     if (S.FREE && j.classes && j.classes.length) h += '<section class="acct-sec"><div class="sub-card panel on"><div><small>Класове</small><b>' + j.classes.length + (j.classes.length === 1 ? ' клас' : ' класа') + '</b><span>' + esc(j.classes.map(function (k) { return k.name; }).join(' · ')) + '</span></div><a class="btn btn-sm" href="tablo.html">📋 Табло</a></div></section>';
+    // учител без клас: прави си го сам, тук и сега – безплатно е, няма защо да чака код по имейл
+    if (!(j.classes && j.classes.length)) h += '<section class="acct-sec" id="klas"><div class="panel mk-class">' +
+      '<h2 class="lined">🏫 Водя клас</h2>' +
+      '<p>Ако сте учител, направете класа си тук. Безплатно е, веднага, без код. Получавате „Табло“: списък с учениците, карти с потребител и парола за печат, домашни със срок и класация на класа.</p>' +
+      '<form id="mk-form" class="mk-grid" novalidate>' +
+      '<label>Кой клас водите<input id="mk-name" maxlength="24" placeholder="3. а" required></label>' +
+      '<label>Година<select id="mk-grade"><option value="1">1. клас</option><option value="2">2. клас</option><option value="3" selected>3. клас</option><option value="4">4. клас</option></select></label>' +
+      '<label>Училище <span class="hint">(по желание)</span><input id="mk-school" maxlength="80" placeholder="ОУ „Иван Вазов“"></label>' +
+      '<label>Град <span class="hint">(по желание)</span><input id="mk-town" maxlength="60" placeholder="Пловдив"></label>' +
+      '<p class="err" id="mk-err" hidden></p>' +
+      '<div class="mk-go"><button class="btn btn-green" type="submit">Създай класа</button>' +
+      '<a class="hint" href="uchilishta.html">Какво получава учителят →</a></div></form></div></section>';
+
     var local = progressOf(G().state), canImport = !owner(G().state) && (local.answered > 0 || local.stars > 0);
     h += '<section class="acct-sec" id="kids"><h2 class="lined">👧 Детски профили <small>' + P.length + '/4</small></h2>' +
       '<div class="pf-grid">' + P.map(function (p) {
@@ -502,6 +515,20 @@
     var box = $('acct-page'), P = j.profiles || [];
     function byId(id) { return P.filter(function (p) { return p.id === id; })[0]; }
     function reload(r) { applyMe(r); renderPage(r); }
+    var mk = $('mk-form');
+    if (mk) mk.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var e = $('mk-err'), b = mk.querySelector('button'), old = b.textContent;
+      e.hidden = true; b.disabled = true; b.textContent = 'Създавам…';
+      api({ action: 'createClass', className: $('mk-name').value, grade: $('mk-grade').value,
+            school: $('mk-school').value, town: $('mk-town').value })
+        .then(function (r) {
+          if (!r || r.error) { e.textContent = (r && r.error) || 'Нещо се обърка.'; e.hidden = false; b.disabled = false; b.textContent = old; return; }
+          location.href = 'tablo.html';
+        })
+        .catch(function () { e.textContent = 'Няма връзка. Опитайте пак.'; e.hidden = false; b.disabled = false; b.textContent = old; });
+    });
+
     var add = $('pf-add'), pf = $('pf-form');
     if (add) add.addEventListener('click', function () { pf.hidden = false; add.hidden = true; $('pf-name').focus(); pf.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
     if (pf) {

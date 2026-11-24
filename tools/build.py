@@ -687,8 +687,15 @@ school = head('Сметко за училища – Табло за учител
 </section>
 <section class="section">
   <div class="wrap">
-    <div class="section-head"><h2 class="lined">Работни листове</h2><p>Задачи за печат по всяка тема от програмата, с отговори за учителя.</p></div>
-    <p style="text-align:center"><a class="btn btn-lg btn-green" href="rabotni-listove.html">🖨️ Създай работен лист</a> <a class="btn btn-white" href="rabotni-listove.html?kind=test">📄 Контролно с 2 варианта</a></p>
+    <div class="section-head"><h2 class="lined">За час и за вкъщи</h2><p>Всичко се прави на място, за секунди, и излиза на A4 с отговори за вас.</p></div>
+    <div class="grid grid-3">
+      <a class="card" href="rabotni-listove.html"><b>🖨️ Работен лист</b><p>По всяка тема от програмата. Или <b>само събиране</b>, само изваждане, умножение, деление, текстови задачи, геометрия – когато куца едно нещо.</p></a>
+      <a class="card" href="rabotni-listove.html?kind=test"><b>📄 Контролно с 2 варианта</b><p>Двата варианта са равностойни: същите умения, други числа. С ключ за проверка.</p></a>
+      <a class="card" href="rabotni-listove.html?kind=week"><b>🗓️ Домашно за седмица</b><p>Пет дни по четири задачи на един лист, с квадратче за отмятане. За хладилника.</p></a>
+      <a class="card" href="zadachi-na-daskata.html"><b>🖥️ Задачи на дъската</b><p>Една задача на цял екран, с едри букви. Отговорът се показва с интервал. За петминутното начало на часа.</p></a>
+      <a class="card" href="nvo-sbornik.html"><b>📚 Сборник за НВО</b><p>95 страници: 32 теста, справочник с правилата от 1.–4. клас и карта на успеха по четирите области. Свободен за сваляне.</p></a>
+      <a class="card" href="dvuboy.html"><b>⚔️ Двубой</b><p>Двама на един екран, едни и същи задачи. Работи и на два отбора в класа.</p></a>
+    </div>
     <div class="callout" style="margin-top:22px">🎄 <b>За декември:</b> <a href="koleden-kalendar.html">коледният календар</a> дава по една задача на ден от 1 до 24 декември – една и съща за целия клас, удобна за дъската. Има и лист с 24-те задачи за печат, с отговорите най-отзад.</div>
   </div>
 </section>
@@ -696,6 +703,7 @@ school = head('Сметко за училища – Табло за учител
   <div class="wrap">
     <div class="section-head"><h2 class="lined">Документи за училището</h2><p>Образци, готови за печат. Преди подписване ги прегледайте с длъжностното лице по защита на данните на училището.</p></div>
     <div class="grid grid-3 docs-list">
+      <a class="card doc-card" href="listovki.html"><b>🖨️ Листове за печат</b><span>За родителска среща и за колега</span></a>
       <a class="card doc-card" href="dogovor-uchilishte.html"><b>📄 Договор за достъп за училище</b><small>Кодове за класовете, срок, цена, данни</small></a>
       <a class="card doc-card" href="pismo-roditeli.html"><b>✉️ Информационно писмо до родителите</b><small>С декларация за информираност</small></a>
       <a class="card doc-card" href="dogovor-danni.html"><b>🔒 Договор за обработване на лични данни</b><small>По чл. 28 от GDPR</small></a>
@@ -709,8 +717,118 @@ school = head('Сметко за училища – Табло за учител
 """ + FOOTER + scripts(['js/math-engine.js', 'js/lesson-map.js', 'js/textbooks.js', 'js/tools.js'])
 if not SALES_OPEN:
     school = school.replace('<h3>Абонамент за клас</h3><p>Поръчвате от <a href="pricing.html#plans">„Абонаменти“</a> и получавате <b>един код</b> по имейл. Активирате го веднъж в акаунта си.</p>',
-                            '<h3>Код за класа – безплатно</h3><p>Пишете ни на <a href="mailto:info@smetko.com?subject=Клас%20в%20Сметко">info@smetko.com</a> кое е училището и кой клас водите. Получавате <b>един код</b> по имейл и го активирате веднъж в акаунта си. Без плащане и без срок.</p>')
+                            '<h3>Направете си акаунт – за минута</h3><p><a href="registracia.html?role=teacher">Регистрирайте се като учител</a>, напишете кой клас водите и училището. Класът се създава <b>веднага</b> – без код, без имейл до нас и без плащане.</p>')
 write('uchilishta.html', school)
+
+# ================= listovki.html (листове за печат: за родителска среща и за колега) =================
+LEAF = head('Листове за печат – за родителска среща и за колеги | Сметко',
+            'Два готови листа A4 за печат: какво е Сметко – за раздаване на родителска среща, и какво дава Табло – за колега учител. Безплатно, без реклами.',
+            'listovki.html', [], 'leaf-page') + header() + """
+<main id="main">
+<section class="section">
+  <div class="wrap narrow">
+    <div class="breadcrumbs"><a href="/">Начало</a> › <a href="uchilishta.html">За учители</a> › Листове за печат</div>
+    <h1>Два листа за печат</h1>
+    <p class="lead-dark">Единият се раздава на родителска среща, другият се дава на колега. И двата излизат на една страница A4.
+    Напишете името си в празното поле – родителите четат по-внимателно лист, който идва от техния учител.</p>
+    <div class="leaf-tools noprint">
+      <label>Какво да се отпечата
+        <select id="leaf-pick" class="select">
+          <option value="all">И двата листа</option>
+          <option value="parents">Само за родителска среща</option>
+          <option value="teachers">Само за колега</option>
+        </select></label>
+      <button class="btn btn-green" onclick="window.print()">🖨️ Печат</button>
+    </div>
+  </div>
+</section>
+
+<section class="section soft"><div class="wrap narrow">
+<div class="leaf" data-leaf="parents">
+  <div class="leaf-head"><span class="leaf-logo">Сметко</span><span class="leaf-url">smetko.com</span></div>
+  <h2>Математика като игра – безплатно</h2>
+  <p class="leaf-lead">Сметко е българска игра за математика за 1.–4. клас. Задачите вървят по темите от учебника на детето.
+  Няма реклами, няма абонамент и няма вътрешни покупки.</p>
+
+  <div class="leaf-cols">
+    <div>
+      <h3>Какво прави детето</h3>
+      <ul>
+        <li><b>Мисии по учебника</b> – същите теми, които учим в час.</li>
+        <li><b>Бързо смятане</b> – 60 секунди, за таблицата за умножение.</li>
+        <li><b>Точки, значки и класация</b> – има за какво да се върне утре.</li>
+        <li><b>Десет минути на ден</b> стигат. Играта спира сама.</li>
+      </ul>
+      <h3>Какво виждате вие</h3>
+      <ul>
+        <li>Отчет <b>по теми</b>: кое върви и кое не.</li>
+        <li>Колко е играло и колко е познало – без да питате.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Как се започва</h3>
+      <ol class="leaf-steps">
+        <li>Отворете <b>smetko.com</b> на телефон, таблет или компютър.</li>
+        <li>Натиснете <b>Регистрация</b> и въведете имейл и парола.</li>
+        <li>Добавете детето с име и клас – и изберете учебника му.</li>
+      </ol>
+      <div class="leaf-url-big">smetko.com</div>
+      <p class="leaf-note">Детето не въвежда имейл и не пише фамилията си. Повече за данните: smetko.com/poveritelnost.html</p>
+    </div>
+  </div>
+  <div class="leaf-sign"><span>Раздадено от: <i></i></span><span>клас: <i></i></span></div>
+</div>
+
+<div class="leaf" data-leaf="teachers">
+  <div class="leaf-head"><span class="leaf-logo">Сметко</span><span class="leaf-url">smetko.com/uchilishta.html</span></div>
+  <h2>За колега: целият клас, за минута</h2>
+  <p class="leaf-lead">Сметко е безплатен и за учители. Правите си класа сам – без код, без имейл до никого и без плащане.</p>
+
+  <div class="leaf-cols">
+    <div>
+      <h3>Какво получавате</h3>
+      <ul>
+        <li><b>Табло</b>: списък с учениците, карти с потребител и парола за печат.</li>
+        <li><b>Домашно със срок</b> – виждате кой го е направил.</li>
+        <li><b>Отчет по теми</b> за целия клас: кое не е минало и за кого.</li>
+        <li><b>Класация</b> на класа и между училищата.</li>
+      </ul>
+      <h3>За час</h3>
+      <ul>
+        <li><b>Работни листове</b> по тема – или само събиране, само деление, геометрия.</li>
+        <li><b>Контролно с два равностойни варианта</b>, с ключ.</li>
+        <li><b>Задачи на дъската</b> – една задача на цял екран за петминутното начало.</li>
+        <li><b>Сборник за НВО</b>, 95 страници, свободен за сваляне.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Как се започва</h3>
+      <ol class="leaf-steps">
+        <li>smetko.com → <b>Регистрация</b> → избирате „Учител“.</li>
+        <li>Пишете кой клас водите и училището.</li>
+        <li>Класът се създава веднага – отваря се Табло.</li>
+      </ol>
+      <div class="leaf-url-big">smetko.com</div>
+      <p class="leaf-note">Учениците не въвеждат имейл и фамилия. Договор, информационно писмо до родителите и договор по чл. 28 от GDPR има готови на smetko.com/uchilishta.html</p>
+    </div>
+  </div>
+  <div class="leaf-sign"><span>От: <i></i></span><span>училище: <i></i></span></div>
+</div>
+</div></section>
+</main>
+""" + FOOTER + scripts()
+LEAF = LEAF.replace('</body>', """<script>
+(function () {
+  var sel = document.getElementById('leaf-pick');
+  if (!sel) return;
+  sel.addEventListener('change', function () {
+    document.querySelectorAll('.leaf').forEach(function (el) {
+      el.classList.toggle('skip-print', sel.value !== 'all' && el.getAttribute('data-leaf') !== sel.value);
+    });
+  });
+})();
+</script></body>""")
+write('listovki.html', LEAF)
 
 # ================= kod.html, klasaciya.html, otchet.html → пренасочване (стари връзки) =================
 def redirect_page(name, to, title):

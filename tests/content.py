@@ -565,6 +565,32 @@ with sync_playwright() as p:
     ok(len(txt) > 3, 'задачата има условие: %s' % txt.replace('\n', ' ')[:48])
     ok(pg.locator('.qcard .slot, .qcard input, .keypad, .choices').count() > 0, 'има къде да се отговори')
 
+    # ---------- учителят си прави клас сам, без код и без имейл до нас
+    tm = 'uch%d@example.com' % int(time.time())
+    ct = b.new_context(viewport={'width': 1100, 'height': 950}); ct.add_init_script(INIT)
+    tp = page(ct, errs)
+    tp.goto(B + '/registracia.html'); tp.wait_for_timeout(1100)
+    tp.evaluate('''async m=>{await fetch('/api/account.php',{method:'POST',headers:{'Content-Type':'application/json'},
+      credentials:'same-origin',body:JSON.stringify({action:'register',email:m,name:'Нина Иванова',
+      password:'testtest123',role:'teacher',terms:1})})}''', tm)
+    tp.goto(B + '/profil.html'); tp.wait_for_timeout(2000)
+    ok(tp.locator('#mk-form').count() == 1, 'учител без клас вижда формата за нов клас')
+    tp.fill('#mk-name', '3. а'); tp.select_option('#mk-grade', '3')
+    tp.fill('#mk-school', 'ОУ „Иван Вазов“'); tp.fill('#mk-town', 'Пловдив')
+    tp.locator('#mk-form button[type=submit]').click(); tp.wait_for_timeout(3000)
+    ok('tablo.html' in tp.url, 'класът се създава веднага и отваря Табло (%s)' % tp.url.split('/')[-1])
+    me = tp.evaluate("async()=>await (await fetch('/api/account.php',{credentials:'same-origin'})).json()")
+    ok(me.get('account', {}).get('role') == 'teacher', 'акаунтът става учителски')
+    ok(len(me.get('classes') or []) == 1 and me['classes'][0]['className'] == '3. а',
+       'класът е записан с името си %s' % (me.get('classes')))
+    ok(me['classes'][0]['students'] == 0 and me['classes'][0]['seats'] >= 30, 'класът има места за учениците')
+    tp.goto(B + '/profil.html'); tp.wait_for_timeout(1800)
+    ok(tp.locator('#mk-form').count() == 0, 'и формата вече не се показва')
+    ct.close()
+    sch = S.get(B + '/uchilishta.html').text
+    ok('Пишете ни на' not in sch, 'страницата за учители не ги праща да ни пишат имейл')
+    ok('listovki.html' in sch, 'и сочи листовете за печат')
+
     # ---------- грамоти от админ панела
     ca = b.new_context(viewport={'width': 1280, 'height': 1000})
     a = page(ca, errs)

@@ -6,7 +6,7 @@ from icons import SPRITE, ico  # наборът икони на Сметко
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '63'
+VER = '65'
 EMAIL = 'info@smetko.com'
 # Продажбите (цени, поръчки) са спрени до края на проучването. За пускане: True тук и SALES_OPEN в public_html/api/lib.php, после build.
 SALES_OPEN = False
@@ -133,6 +133,7 @@ MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
     <a href="about.html#roditeli">👨‍👩‍👧 За родители</a>
     <a href="otchet.html">📊 Отчет за родителя</a>
     <a href="uchilishta.html">🏫 За учители и училища</a>
+    <a href="listovki.html">🖨️ Листове за печат</a>
     <a href="tablo.html">📋 Табло за учители</a>
     <a href="deca-sas-sop.html">🤝 Деца със СОП</a>
     <b class="m-head">Още</b>
@@ -204,6 +205,7 @@ FOOTER = '''<footer class="site-footer">
         <li><a href="about.html#roditeli">За родители</a></li>
         <li><a href="otchet.html">Отчет за родителя</a></li>
         <li><a href="uchilishta.html">За учители и училища</a></li>
+        <li><a href="listovki.html">Листове за печат</a></li>
         <li><a href="tablo.html">Табло за учители</a></li>
         <li><a href="zadachi-na-daskata.html">Задачи на дъската</a></li>
         <li><a href="deca-sas-sop.html">Деца със СОП</a></li>
