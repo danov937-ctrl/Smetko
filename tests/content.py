@@ -245,6 +245,12 @@ with sync_playwright() as p:
     ok('data-copy="https://smetko.com/blog/' + one + '"' in t, 'и копиране на връзката')
     ok('connect.facebook.net' not in t and 'fbevents' not in t,
        'без чужди скриптове – Фейсбук не следи читателя преди да е натиснал')
+    fb = re.findall(r'facebook\.com/(?!sharer)[^"\']+', t)
+    ok(fb, 'статията сочи страницата на Сметко във Фейсбук')
+    home = S.get(B + '/').text
+    ok('"sameAs"' in home and fb and fb[0].rstrip('"') in home,
+       'и същата страница е в структурираните данни')
+    ok('Сметко във Facebook' in home, 'има връзка към страницата в долното меню')
     idx = S.get(B + '/blog/').text
     ok('<meta property="og:type" content="website">' in idx, 'самият блог си остава сайт, не статия')
 

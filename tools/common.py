@@ -6,8 +6,13 @@ from icons import SPRITE, ico  # наборът икони на Сметко
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '65'
+VER = '66'
 EMAIL = 'info@smetko.com'
+
+# Страницата във Фейсбук. Сменя се само тук – ползва се от долното меню, от статиите
+# (article:publisher) и от структурираните данни (sameAs). Ако страницата получи
+# постоянен адрес (facebook.com/<име>), той е по-добър от връзката „сподели“.
+FB_PAGE = 'https://www.facebook.com/share/19pdBnQ3Mh/'
 # Продажбите (цени, поръчки) са спрени до края на проучването. За пускане: True тук и SALES_OPEN в public_html/api/lib.php, после build.
 SALES_OPEN = False
 # Безплатен режим: целият сайт е отворен за всички без код и без абонамент, за неопределено време.
@@ -138,6 +143,7 @@ MOBILE_NAV = '''<nav class="mobile-nav" aria-label="Мобилно меню">
     <a href="deca-sas-sop.html">🤝 Деца със СОП</a>
     <b class="m-head">Още</b>
     <a href="blog/">✍️ Блог</a>
+    <a href="''' + FB_PAGE + '''" rel="noopener">📘 Сметко във Facebook</a>
     <a href="achievements.html">⭐ Моите постижения</a>
     <a href="novini.html">📰 Новини <b class="m-news" data-news-count hidden></b></a>
     <a href="za-nas.html">🦉 За нас</a>
@@ -211,6 +217,7 @@ FOOTER = '''<footer class="site-footer">
         <li><a href="deca-sas-sop.html">Деца със СОП</a></li>
         <li><a href="blog/">Блог</a> · <a href="novini.html">Новини</a></li>
         <li><a href="za-nas.html">За нас</a> · <a href="pricing.html">Абонаменти</a></li>
+        <li><a href="''' + FB_PAGE + '''" rel="noopener">Сметко във Facebook</a></li>
       </ul></details>
       <details class="f-col"><summary><h4>Правна информация</h4></summary><ul>
         <li><a href="terms.html">Общи условия</a></li>
@@ -242,7 +249,7 @@ def write(name, html):
 
 
 ORG = {"@context": "https://schema.org", "@type": "Organization", "name": "Сметко", "url": SITE,
-       "logo": SITE + "/assets/icons/icon-512.png", "email": EMAIL}
+       "logo": SITE + "/assets/icons/icon-512.png", "email": EMAIL, "sameAs": [FB_PAGE]}
 
 
 def crumbs(items):

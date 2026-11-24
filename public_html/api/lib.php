@@ -8,6 +8,8 @@ date_default_timezone_set('Europe/Sofia');
 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // без O, 0, I, 1, L
 const CODE_PREFIX = 'SMET';
 const SITE_URL = 'https://smetko.com';
+// страницата във Фейсбук – същата стойност като FB_PAGE в tools/common.py
+const FB_PAGE = 'https://www.facebook.com/share/19pdBnQ3Mh/';
 const SALES_OPEN = false; // продажбите (цени и поръчки) са спрени; при пускане – true и SALES_OPEN в tools/common.py
 /* Безплатен режим: всичко е отключено за всички, без код и без абонамент.
    При изключване – false тук и FREE_MODE в tools/common.py, после build. */

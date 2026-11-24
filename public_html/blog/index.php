@@ -98,6 +98,7 @@ if ($slug !== '') {
         . '<meta property="article:published_time" content="' . e($p['published_at']) . '">'
         . '<meta property="article:modified_time" content="' . e($upd ?: $p['published_at']) . '">'
         . '<meta property="article:section" content="' . e($p['category']) . '">'
+        . (FB_PAGE ? '<meta property="article:publisher" content="' . e(FB_PAGE) . '">' : '')
         . '<script type="application/ld+json">' . json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>'
         . '<script type="application/ld+json">' . json_encode($crumbLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>',
         200, 'article', $shareImg);
