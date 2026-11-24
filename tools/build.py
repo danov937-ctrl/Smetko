@@ -960,8 +960,24 @@ write('gramota.html', dipl_pg)
 os.makedirs(os.path.join(OUT, 'blog'), exist_ok=True)
 blog_layout = head('{{TITLE}}', '{{DESC}}', 'blog/', [], 'blog-page').replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<base href="/">', 1)
 blog_layout = blog_layout.replace('<link rel="canonical" href="https://smetko.com/blog/">', '<link rel="canonical" href="{{CANON}}">').replace('content="https://smetko.com/blog/"', 'content="{{CANON}}"').replace('</head>', '{{HEAD}}</head>', 1)
+# видът и картинката се сменят за всяка статия (blog/index.php ги попълва)
+blog_layout = blog_layout.replace('<meta property="og:type" content="website">', '<meta property="og:type" content="{{OGTYPE}}">')
+blog_layout = blog_layout.replace('<meta property="og:image" content="https://smetko.com/assets/images/og-image.png">',
+                                  '<meta property="og:image" content="{{OGIMG}}">')
 blog_layout += header('blog') + '<main id="main">{{BODY}}</main>\n' + FOOTER + scripts()
 write('blog/_layout.html', blog_layout)
+
+# статия без своя картинка се споделя с общата – напомняме да се пусне tools/og.py
+try:
+    import subprocess as _sp, json as _js
+    _posts = _js.loads(_sp.run(['php', '-r', "foreach (glob('%s/api/blog_posts*.php') as $f) require_once $f;"
+                                "echo json_encode(array_column(blog_posts(), 'slug'));" % os.path.abspath(OUT)],
+                               capture_output=True, text=True).stdout or '[]')
+    _miss = [x for x in _posts if not os.path.exists(os.path.join(OUT, 'assets', 'blog', x + '.jpg'))]
+    if _miss:
+        print('  ! %d статии са без картинка за споделяне – пуснете: python3 tools/og.py (%s)' % (len(_miss), ', '.join(_miss[:3])))
+except Exception:
+    pass
 
 # ================= rabotni-listove.html =================
 ws = head('Работни листове и контролни по математика 1.–4. клас за печат – Сметко', 'Генератор на работни листове, контролни работи с два варианта (А и Б) и пробни тестове за НВО по математика за 1.–4. клас. С отговори за учителя. Безплатно, за печат.',

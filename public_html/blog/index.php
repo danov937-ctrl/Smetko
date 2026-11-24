@@ -14,14 +14,33 @@ function bdate(?string $d): string {
     $m = ['', 'януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
     $t = strtotime($d); return (int)date('j', $t) . ' ' . $m[(int)date('n', $t)] . ' ' . date('Y', $t);
 }
-function render(string $title, string $desc, string $canon, string $body, string $headExtra = '', int $status = 200): void {
+function render(string $title, string $desc, string $canon, string $body, string $headExtra = '', int $status = 200,
+                string $ogType = 'website', string $ogImg = ''): void {
     http_response_code($status);
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: public, max-age=300');
     $tpl = (string)@file_get_contents(__DIR__ . '/_layout.html');
-    echo strtr($tpl, ['{{TITLE}}' => e($title), '{{DESC}}' => e($desc), '{{CANON}}' => e($canon), '{{HEAD}}' => $headExtra, '{{BODY}}' => $body]);
+    echo strtr($tpl, ['{{TITLE}}' => e($title), '{{DESC}}' => e($desc), '{{CANON}}' => e($canon),
+        '{{OGTYPE}}' => e($ogType), '{{OGIMG}}' => e($ogImg ?: SITE_URL . '/assets/images/og-image.png'),
+        '{{HEAD}}' => $headExtra, '{{BODY}}' => $body]);
     exit;
 }
+/* Споделяне – само връзки, без чужди скриптове: нито Фейсбук, нито някой друг
+   получава посетителя, докато той сам не натисне бутона. */
+function share_box(string $url, string $title): string {
+    $u = rawurlencode($url);
+    $t = rawurlencode($title . ' · Сметко');
+    return '<div class="bp-share"><b>Хареса ли ви? Споделете я:</b><div class="sh-row">'
+        . '<a class="sh fb" href="https://www.facebook.com/sharer/sharer.php?u=' . $u . '" target="_blank" rel="noopener nofollow"'
+        . ' onclick="window.open(this.href,\'share\',\'width=640,height=640\');return false" aria-label="Сподели във Facebook">'
+        . '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.79 8.44-4.94 8.44-9.94Z"/></svg>Facebook</a>'
+        . '<a class="sh vb" href="viber://forward?text=' . $t . '%20' . $u . '" rel="nofollow" aria-label="Сподели във Viber">'
+        . '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1C7.2 1 3.3 2.6 2.4 6.5c-.5 2.2-.5 5.6 0 7.8.6 2.6 2.6 4.2 4.6 4.7v3.3c0 .6.7.9 1.1.4l2.1-2.5c.6 0 1.2.1 1.8.1 4.8 0 8.7-1.6 9.6-5.5.5-2.2.5-5.6 0-7.8C20.7 2.6 16.8 1 12 1Zm3.6 13.4c-.3.6-1 .9-1.6.7-2.4-.7-4.5-2.5-5.6-4.8-.3-.6 0-1.4.6-1.7l.6-.3c.4-.2.8 0 1 .3l.7 1.2c.2.3.1.7-.2.9l-.4.3c.6 1.1 1.5 2 2.6 2.5l.3-.4c.2-.3.6-.4.9-.2l1.2.7c.3.2.4.6.3 1l-.4.8ZM12 5.6c2.8 0 5 2.2 5 5h-1.3c0-2-1.7-3.7-3.7-3.7V5.6Zm0 2.2c1.6 0 2.8 1.2 2.8 2.8h-1.3c0-.8-.7-1.5-1.5-1.5V7.8Z"/></svg>Viber</a>'
+        . '<button class="sh cp" type="button" data-copy="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">'
+        . '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.2 1.2a1 1 0 1 0 1.4 1.4l1.2-1.2a2 2 0 1 1 2.9 2.9l-3 3a2 2 0 0 1-2.9 0 1 1 0 0 0-1.4 1.4Z"/><path d="M13.4 10.6a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.2-1.2a1 1 0 1 0-1.4-1.4l-1.2 1.2a2 2 0 1 1-2.9-2.9l3-3a2 2 0 0 1 2.9 0 1 1 0 0 0 1.4-1.4Z"/></svg><span>Копирай връзката</span></button>'
+        . '</div><a class="bp-all" href="blog/">← Всички статии</a></div>';
+}
+
 function hero(string $h1, string $lead, string $crumb): string {
     return '<section class="page-hero"><span class="cloud c1"></span><span class="cloud c2"></span><div class="wrap"><div><div class="breadcrumbs"><a href="/">Начало</a> › ' . $crumb . '</div><h1>' . $h1 . '</h1><p class="lead">' . $lead . '</p></div><div class="owl" data-owl="think"></div></div></section>';
 }
@@ -39,6 +58,9 @@ if ($slug !== '') {
     $more = $pdo->prepare('SELECT * FROM posts WHERE published = 1 AND published_at <= ? AND id <> ? ORDER BY (category = ?) DESC, published_at DESC LIMIT 3'); $more->execute([today(), (int)$p['id'], $p['category']]);
     $rel = implode('', array_map('card', $more->fetchAll()));
     $url = SITE_URL . '/blog/' . $p['slug'];
+    $shareImg = is_file(__DIR__ . '/../assets/blog/' . $p['slug'] . '.jpg')
+        ? SITE_URL . '/assets/blog/' . $p['slug'] . '.jpg'
+        : SITE_URL . '/assets/images/og-image.png';
     $html = md_to_html((string)$p['body']);
     $words = count(preg_split('/\s+/u', trim(strip_tags($html))) ?: []);
     $mins = max(1, (int)round($words / 180));
@@ -69,11 +91,16 @@ if ($slug !== '') {
         '<p class="bp-lead">' . e($p['excerpt']) . '</p>' . ($p['image'] ? '<img class="bp-cover" src="' . e($p['image']) . '" alt="">' : '') . $toc . '<div class="bp-body">' . $html . '</div>' .
         '<p class="bp-author">✍️ Написано от екипа на <a href="za-nas.html">Сметко</a> – математика като игра за 1.–4. клас.</p>' .
         '<div class="bp-cta"><div data-owl="cheer" class="bp-owl"></div><div><b>Опитайте Сметко безплатно</b><p>Мисии по учебника на детето, бързо смятане и класации – без реклами.</p><a class="btn btn-green" href="game.html">🎮 Играй сега</a></div></div>' .
-        '<p class="bp-share"><button class="btn btn-ghost btn-sm" onclick="if(navigator.share){navigator.share({title:document.title,url:location.href})}else{navigator.clipboard.writeText(location.href);this.textContent=\'✓ Връзката е копирана\'}">🔗 Сподели</button> <a class="btn btn-ghost btn-sm" href="blog/">← Всички статии</a></p></div></article>' .
+        share_box($url, (string)$p['title']) . '</div></article>' .
         ($rel ? '<section class="section soft"><div class="wrap"><div class="section-head"><h2 class="lined">Още статии</h2></div><div class="blog-grid">' . $rel . '</div></div></section>' : '');
-    render($p['title'] . ' – Блог на Сметко', (string)$p['excerpt'], $url, $body, '<meta property="og:type" content="article">'
+    render($p['title'] . ' – Блог на Сметко', (string)$p['excerpt'], $url, $body,
+        '<meta property="og:image:alt" content="' . e($p['title']) . ' – блогът на Сметко">'
+        . '<meta property="article:published_time" content="' . e($p['published_at']) . '">'
+        . '<meta property="article:modified_time" content="' . e($upd ?: $p['published_at']) . '">'
+        . '<meta property="article:section" content="' . e($p['category']) . '">'
         . '<script type="application/ld+json">' . json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>'
-        . '<script type="application/ld+json">' . json_encode($crumbLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>');
+        . '<script type="application/ld+json">' . json_encode($crumbLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>',
+        200, 'article', $shareImg);
 }
 
 $cat = (string)($_GET['k'] ?? '');

@@ -221,6 +221,33 @@ with sync_playwright() as p:
             elif not os.path.exists(os.path.join(ROOT, t)):
                 bad.append((sl, h))
     ok(not bad, 'връзките в статиите водят донякъде (%d проверени) %s' % (sum(len(v) for v in posts.values()), bad[:3]))
+    # ---------- споделяне във Фейсбук: своя картинка и бутони на всяка статия
+    noimg = [sl for sl in posts if not os.path.exists(os.path.join(ROOT, 'assets', 'blog', sl + '.jpg'))]
+    ok(not noimg, 'всяка статия има своя картинка за споделяне (липсват %d) %s' % (len(noimg), noimg[:3]))
+    sizes = set()
+    for sl in list(posts)[:6]:
+        f = os.path.join(ROOT, 'assets', 'blog', sl + '.jpg')
+        if os.path.exists(f):
+            from PIL import Image
+            sizes.add(Image.open(f).size)
+    ok(sizes == {(1200, 630)}, 'картинките са 1200×630, както ги иска Фейсбук %s' % sizes)
+
+    one = live[0]
+    t = S.get(B + '/blog/' + one).text
+    ok('<meta property="og:type" content="article">' in t, 'статията се представя като статия, не като сайт')
+    ok('og:image" content="https://smetko.com/assets/blog/' + one + '.jpg"' in t,
+       'и сочи своята картинка')
+    ok(t.count('<meta property="og:image"') == 1, 'картинката за споделяне е една')
+    ok('article:published_time' in t and 'article:section' in t, 'има дата и рубрика за Фейсбук')
+    ok('facebook.com/sharer/sharer.php?u=https%3A%2F%2Fsmetko.com%2Fblog%2F' + one in t,
+       'бутонът за Фейсбук сочи самата статия')
+    ok('viber://forward?text=' in t, 'има и бутон за Viber')
+    ok('data-copy="https://smetko.com/blog/' + one + '"' in t, 'и копиране на връзката')
+    ok('connect.facebook.net' not in t and 'fbevents' not in t,
+       'без чужди скриптове – Фейсбук не следи читателя преди да е натиснал')
+    idx = S.get(B + '/blog/').text
+    ok('<meta property="og:type" content="website">' in idx, 'самият блог си остава сайт, не статия')
+
     thin = [sl for sl, hs in posts.items() if len(hs) < 2]
     ok(not thin, 'всяка статия сочи поне две вътрешни страници %s' % thin[:3])
     # статия не може да сочи към друга, която излиза след нея – връзката ще е счупена дни наред

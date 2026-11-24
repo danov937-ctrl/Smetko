@@ -71,6 +71,25 @@
   };
 
   /* ---------- Сметко ---------- */
+  /* Копиране на връзката към статия – бутонът в блога. Споделянето към Фейсбук и
+     Вайбър е обикновена връзка, затова тук няма нищо за тях. */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-copy]');
+    if (!b) return;
+    var done = function () {
+      var t = b.querySelector('span') || b, old = t.textContent;
+      t.textContent = '✓ Копирана';
+      b.classList.add('ok');
+      setTimeout(function () { t.textContent = old; b.classList.remove('ok'); }, 2200);
+    };
+    var url = b.getAttribute('data-copy');
+    if (navigator.share && matchMedia('(max-width: 760px)').matches) {
+      navigator.share({ title: document.title, url: url }).catch(function () {});
+      return;
+    }
+    try { navigator.clipboard.writeText(url).then(done, done); } catch (err) { done(); }
+  });
+
   S.renderOwls = function (root) {
     if (!S.owl) return;
     (root || document).querySelectorAll('[data-owl]').forEach(function (el) {

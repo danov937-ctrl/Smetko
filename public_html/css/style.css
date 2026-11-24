@@ -1012,6 +1012,24 @@ dialog.wide-modal { max-width: 820px; width: calc(100% - 24px); }
 .bp-cta p { margin: 4px 0 10px; }
 .bp-owl { width: 90px; flex: none; }
 @media (max-width: 520px) { .bp-cta { flex-direction: column; text-align: center; } }
+
+/* ---- споделяне на статия ---- */
+.bp-share { margin: 26px 0 0; padding-top: 18px; border-top: 2px solid var(--line); }
+.bp-share > b { display: block; color: var(--navy); margin-bottom: 10px; }
+.sh-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.sh { display: inline-flex; align-items: center; gap: 9px; font: inherit; font-weight: 800; font-size: 1rem;
+  color: #fff; background: var(--navy); border: 0; border-radius: 999px; padding: 11px 20px; cursor: pointer;
+  text-decoration: none; line-height: 1; transition: transform .12s ease, filter .12s ease; }
+.sh:hover { transform: translateY(-1px); filter: brightness(1.07); text-decoration: none; color: #fff; }
+.sh:active { transform: translateY(0); }
+.sh svg { width: 21px; height: 21px; fill: currentColor; flex: none; }
+.sh.fb { background: #1877F2; }
+.sh.vb { background: #7360F2; }
+.sh.cp { background: #fff; color: var(--navy); border: 2px solid var(--line); padding: 9px 18px; }
+.sh.cp:hover { color: var(--navy); background: var(--bg-soft); }
+.sh.cp.ok { border-color: var(--green); color: var(--green-dark); }
+.bp-all { display: inline-block; margin-top: 14px; font-weight: 800; }
+@media (max-width: 420px) { .sh { flex: 1 1 100%; justify-content: center; } }
 /* за нас */
 .about-story { max-width: 780px; }
 .values .card { text-align: center; } .values .v-ico { font-size: 2.2rem; display: block; margin-bottom: 4px; }

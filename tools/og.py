@@ -1,45 +1,111 @@
 # -*- coding: utf-8 -*-
-"""Картинки за споделяне (Open Graph, 1200×630) за страниците по теми и помагалата.
-Рисува ги с Playwright от tools/og_list.json (пише се от seo.py). Рисува само нови или променени.
-Стартиране: python3 tools/og.py  (нужен е локален сървър на :8093 с public_html)"""
-import json, os, hashlib, sys
-from playwright.sync_api import sync_playwright
-HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(HERE, '..', 'public_html', 'assets', 'og')
-os.makedirs(OUT, exist_ok=True)
-items = json.load(open(os.path.join(HERE, 'og_list.json'), encoding='utf-8'))
-mf = os.path.join(OUT, 'manifest.json'); done = json.load(open(mf)) if os.path.exists(mf) else {}
-BASE = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8093'
-TPL = '''<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="{base}/css/style.css"><style>
-@font-face{{font-family:Nunito;src:url({base}/assets/fonts/nunito.woff) format("woff");font-weight:600 900}}
-html,body{{margin:0;width:1200px;height:630px;overflow:hidden}}
-.og{{position:relative;width:1200px;height:630px;background:linear-gradient(160deg,#4AA8FF 0%,#7CC4FF 62%,#BFE5FF 100%);font-family:Nunito,sans-serif}}
-.og .hills{{position:absolute;left:0;right:0;bottom:0;height:150px;background:radial-gradient(120% 140px at 30% 150px,#5DBB3F 60%,transparent 61%),radial-gradient(120% 160px at 80% 170px,#4CAF37 60%,transparent 61%)}}
-.og .og-card{{position:absolute;left:64px;top:70px;width:700px}}
-.og .tag{{display:inline-block;background:{color};color:#fff;font-weight:900;font-size:30px;padding:8px 22px;border-radius:999px;box-shadow:0 4px 0 rgba(0,0,0,.15)}}
-.og h1{{margin:26px 0 18px;color:#fff;font-size:{fs}px;line-height:1.08;font-weight:900;text-shadow:0 4px 0 #1C64C8,0 10px 30px rgba(28,100,200,.35)}}
-.og p{{margin:0;color:#fff;font-size:34px;font-weight:800;text-shadow:0 2px 0 rgba(28,100,200,.6)}}
-.og .owl{{position:absolute;right:70px;top:90px;width:380px;height:410px}}
-.og .brand{{position:absolute;left:64px;bottom:34px;background:#fff;border-radius:22px;padding:10px 26px;font-size:40px;font-weight:900;box-shadow:0 6px 0 rgba(0,0,0,.12)}}
-.og .brand span:nth-child(1){{color:#FF5A5F}}.og .brand span:nth-child(2){{color:#FF9F1C}}.og .brand span:nth-child(3){{color:#4CBB4A}}.og .brand span:nth-child(4){{color:#19B5A5}}.og .brand span:nth-child(5){{color:#2F80ED}}.og .brand span:nth-child(6){{color:#8E6CF0}}
-.og .url{{position:absolute;right:70px;bottom:44px;color:#fff;font-weight:900;font-size:30px;text-shadow:0 2px 0 rgba(0,0,0,.2)}}
-</style></head><body><div class="og"><div class="hills"></div><div class="og-card"><span class="tag">{sub}</span><h1>{title}</h1></div>
-<div class="owl" id="owl"></div><div class="brand"><span>С</span><span>м</span><span>е</span><span>т</span><span>к</span><span>о</span></div><div class="url">smetko.com</div></div>
-<script src="{base}/js/owl.js"></script><script>document.getElementById('owl').innerHTML=Smetko.owl('{pose}')</script></body></html>'''
-todo = []
-for it in items:
-    key = hashlib.md5(json.dumps(it, sort_keys=True).encode()).hexdigest()
-    path = os.path.join(OUT, it['slug'] + '.jpg')
-    if done.get(it['slug']) == key and os.path.exists(path): continue
-    todo.append((it, key, path))
-if todo:
-    with sync_playwright() as p:
-        b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1200, 'height': 630}); pg.goto(BASE + '/robots.txt')  # същият произход – шрифтът се зарежда без CORS
-        for it, key, path in todo:
-            t = it['title'].replace('. клас', '.\u00a0клас'); fs = 76 if len(t) <= 26 else 64 if len(t) <= 44 else 54 if len(t) <= 70 else 46
-            pg.set_content(TPL.format(base=BASE, color=it['color'], fs=fs, sub=it['sub'], title=t, pose=it['pose']), wait_until='networkidle')
-            pg.evaluate('document.fonts.ready'); pg.wait_for_timeout(150)
-            pg.screenshot(path=path, type='jpeg', quality=80)
-            done[it['slug']] = key
-        b.close()
-json.dump(done, open(mf, 'w'), indent=0)
-print('OG:', len(todo), 'нови,', len(items), 'общо')
+"""Картинки за споделяне на статиите от блога (1200×630).
+
+Фейсбук показва og:image, не самата страница. Без отделна картинка всяка статия
+изглежда еднакво; с нея в емисията се вижда заглавието ѝ.
+
+Картата се рисува от истинския CSS и истинската сова на сайта – зарежда се от
+временен php сървър, за да се разрешат шрифтът, стиловете и js/owl.js.
+
+    python3 tools/og.py          # само липсващите
+    python3 tools/og.py --all    # всички наново
+"""
+import json, os, subprocess, sys, time
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+PUB = os.path.join(ROOT, '..', 'public_html')
+OUT = os.path.join(PUB, 'assets', 'blog')
+PORT = 8095
+SIZE = (1200, 630)
+
+CARD = """<!doctype html><html lang="bg"><head><meta charset="utf-8">
+<base href="http://127.0.0.1:%d/">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body { font-family: 'Nunito', system-ui, sans-serif; position: relative;
+         background: linear-gradient(180deg, #D7EDFF 0%%, #EFF8FF 58%%); }
+  .land { position: absolute; left: 0; right: 0; bottom: 0; height: 215px;
+          background: url(assets/images/landscape.svg) center bottom / cover no-repeat; }
+  .in { position: absolute; inset: 52px 60px 46px; display: grid;
+        grid-template-columns: 1fr 360px; grid-template-rows: auto 1fr auto; column-gap: 24px; }
+  .brand { display: flex; align-items: center; gap: 16px; font-size: 44px; font-weight: 900; letter-spacing: -.01em; }
+  .brand span { display: inline-block; text-shadow: 0 2px 0 rgba(0,0,0,.10); }
+  .c1 { color: #F0493F } .c2 { color: #FF7B00 } .c3 { color: #E9A700 }
+  .c4 { color: #27AE60 } .c5 { color: #3299FF } .c6 { color: #8E5BEA }
+  .tag { background: #fff; color: #C45A00; font-size: 21px; font-weight: 900; padding: 8px 20px;
+         border-radius: 999px; box-shadow: 0 4px 14px rgba(20,50,110,.13); }
+  h1 { grid-column: 1; grid-row: 2; align-self: center; margin: 0; color: #15306E; letter-spacing: -.025em;
+       font-weight: 900; line-height: 1.08; text-shadow: 0 2px 0 rgba(255,255,255,.65); }
+  .foot { grid-column: 1; grid-row: 3; justify-self: start; color: #3C5488; font-size: 23px; font-weight: 800;
+          background: #fff; padding: 9px 22px; border-radius: 999px; box-shadow: 0 4px 14px rgba(20,50,110,.13); }
+  .foot b { color: #15306E; }
+  .right { grid-column: 2; grid-row: 1 / -1; position: relative; }
+  .owl { position: absolute; right: -18px; bottom: -34px; width: 330px; }
+  .owl svg { width: 100%%; height: auto; display: block; }
+  .emo { position: absolute; left: 0; top: 96px; width: 150px; height: 150px; border-radius: 50%%;
+         background: #fff; box-shadow: 0 10px 28px rgba(20,50,110,.18); display: grid; place-items: center;
+         font-size: 84px; line-height: 1; }
+</style></head><body>
+<div class="land"></div>
+<div class="in">
+  <div class="brand"><span class="c1">С</span><span class="c2">м</span><span class="c3">е</span><span class="c4">т</span><span class="c5">к</span><span class="c6">о</span>
+    <span class="tag">%s</span></div>
+  <h1 id="t">%s</h1>
+  <div class="foot"><b>smetko.com</b> · блог за родители и учители</div>
+  <div class="right"><div class="emo">%s</div><div class="owl" data-owl="%s"></div></div>
+</div>
+<script src="js/owl.js"></script>
+<script>
+  document.querySelectorAll('[data-owl]').forEach(function (el) { el.innerHTML = window.Smetko.owl(el.getAttribute('data-owl'), {}); });
+  // заглавието слиза, докато се побере на три реда
+  var t = document.getElementById('t'), s = 70;
+  t.style.fontSize = s + 'px';
+  while (s > 32 && (t.scrollHeight > 3.3 * s * 1.08 || t.scrollWidth > t.clientWidth)) { s -= 2; t.style.fontSize = s + 'px'; }
+  document.documentElement.setAttribute('data-ready', '1');
+</script></body></html>"""
+
+POSE = {'Съвети за родители': 'encourage', 'Математика у дома': 'idle',
+        'Игри и идеи': 'cheer', 'За учители': 'think'}
+
+
+def posts():
+    php = ("foreach (glob('%s/api/blog_posts*.php') as $f) require_once $f; $o = [];"
+           "foreach (blog_posts() as $p) $o[] = ['slug' => $p['slug'], 'title' => $p['title'],"
+           "'emoji' => $p['emoji'] ?? '📘', 'cat' => $p['cat']];"
+           "echo json_encode($o, JSON_UNESCAPED_UNICODE);") % os.path.abspath(PUB)
+    return json.loads(subprocess.run(['php', '-r', php], capture_output=True, text=True, check=True).stdout)
+
+
+def main():
+    todo_all = '--all' in sys.argv
+    os.makedirs(OUT, exist_ok=True)
+    rows = posts()
+    jobs = [p for p in rows if todo_all or not os.path.exists(os.path.join(OUT, p['slug'] + '.jpg'))]
+    if not jobs:
+        print('картинките за споделяне са готови (%d)' % len(rows)); return
+
+    srv = subprocess.Popen(['php', '-S', '127.0.0.1:%d' % PORT, '-t', os.path.abspath(PUB)],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    time.sleep(1.2)
+    try:
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as pw:
+            b = pw.chromium.launch()
+            pg = b.new_page(viewport={'width': SIZE[0], 'height': SIZE[1]}, device_scale_factor=1)
+            for p in jobs:
+                esc = lambda x: str(x).replace('&', '&amp;').replace('<', '&lt;')
+                pg.set_content(CARD % (PORT, esc(p['cat']), esc(p['title']), p['emoji'],
+                                       POSE.get(p['cat'], 'wave')), wait_until='networkidle')
+                pg.wait_for_function("document.documentElement.dataset.ready === '1'")
+                pg.wait_for_timeout(120)
+                pg.screenshot(path=os.path.join(OUT, p['slug'] + '.jpg'), type='jpeg', quality=88)
+            b.close()
+    finally:
+        srv.terminate()
+    kb = sum(os.path.getsize(os.path.join(OUT, p['slug'] + '.jpg')) for p in jobs) / 1024
+    print('нарисувани картинки за споделяне: %d (%.0f KB)' % (len(jobs), kb))
+
+
+if __name__ == '__main__':
+    main()
