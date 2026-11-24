@@ -3,22 +3,20 @@
   'use strict';
   var S = window.Smetko, E = S.MathEngine, B = S.Books;
   function $(id) { return document.getElementById(id); }
-  // уменията по геометрия – за отделен лист „Геометрия“ във всеки клас
-  var GEO_SKILLS = ['shapes', 'lines', 'countShapes', 'ruler', 'polySides', 'segSum', 'cm20', 'perim2',
-    'triSides', 'triAngles', 'angles', 'degrees', 'rectProps', 'sideFromPerim', 'area', 'areaUnits',
-    'sideFromArea', 'compArea', 'perimArea2', 'circle', 'circleParts', 'solidsName', 'solidsCount', 'wordArea'];
-  function geoSkills(g) {
-    var out = [];
-    (E.GRADES[g].topics || []).forEach(function (t) {
-      t.skills.forEach(function (k) { if (GEO_SKILLS.indexOf(k[0]) >= 0 && out.indexOf(k[0]) < 0) out.push(k[0]); });
-    });
-    return out;
-  }
+  // наборите „само събиране“, „само деление“, „геометрия“ идват от двигателя
+  function setSkills(g, key) { return (E.setSkills && E.setSkills(g, key)) || []; }
+  function isSet(key) { return !!(E.SETS && E.SETS[key]); }
   function topicOptions(g, withMix) {
     if (!E) return '';
     var h = withMix ? '<option value="mix">Всички теми (смесено)</option>' : '';
     E.GRADES[g].topics.forEach(function (t, i) { h += '<option value="' + t.id + '">' + (i + 1) + '. ' + t.name + '</option>'; });
-    if (geoSkills(g).length >= 3) h += '<option value="geo">Геометрия (всичко от класа)</option>';
+    var ops = ['add', 'sub', 'mul', 'div', 'word'].filter(function (k) { return setSkills(g, k).length; });
+    if (ops.length) {
+      h += '<optgroup label="Един вид задачи наведнъж">';
+      ops.forEach(function (k) { h += '<option value="' + k + '">' + E.SETS[k].name + '</option>'; });
+      h += '</optgroup>';
+    }
+    if (setSkills(g, 'geo').length >= 3) h += '<option value="geo">' + E.SETS.geo.name + '</option>';
     return h;
   }
   function base() { return /^https?:$/.test(location.protocol) ? location.origin : 'https://smetko.com'; }
@@ -101,7 +99,7 @@
         });
         return out;
       }
-      var n = +cnt.value;
+      var n = mode() === 'week' ? 20 : +cnt.value;
       // При контролно вторият вариант повтаря същите умения с други числа – вариантите са равностойни.
       if (plan && plan.length) {
         plan.forEach(function (sk) {
@@ -115,9 +113,9 @@
         });
         return out;
       }
-      // при „Геометрия“ чертежите и задачите с избор са самата цел, затова не се изхвърлят
-      if (t.value === 'geo') {
-        var gs = geoSkills(gr), order = [];
+      // при напречните листове чертежите и задачите с избор са самата цел, затова не се изхвърлят
+      if (isSet(t.value)) {
+        var gs = setSkills(gr, t.value), order = [];
         while (order.length < n) order = order.concat(shuffle(gs));   // всяко умение се изчерпва, преди да се повтори
         for (var gi = 0; gi < order.length && out.length < n; gi++) {
           var gq = null, gg = 0;
@@ -164,7 +162,11 @@
     }
 
     function tasksHTML(tasks, nvo) {
-      return '<ol class="ws-list' + (nvo ? ' ws-nvo' : '') + '">' + tasks.map(function (k) {
+      // броят решава колко място за писане остава на реда при печат
+      return '<ol class="ws-list' + (nvo ? ' ws-nvo' : '') + '" data-n="' + tasks.length +
+        '" data-fig="' + (tasks.some(function (x) {
+          return x.figure || (x.choices && x.choices.some(function (c) { return c && c.html; }));
+        }) ? 1 : 0) + '">' + tasks.map(function (k) {
         k = lettered(k);
         var q = String(k.q).replace('{?}', k.kind === 'choice' ? '<span class="ws-box"></span>' : '<span class="ws-blank"></span>');
         var opts = k.kind === 'choice' && k.choices
@@ -183,12 +185,32 @@
       }).join('') + '</ol>';
     }
 
+    var DAYS = ['Понеделник', 'Вторник', 'Сряда', 'Четвъртък', 'Петък'];
+
+    /* Домашно за седмица: по четири задачи на ден на един лист – десетте минути,
+       за които пишем в блога, събрани в нещо, което се закача на хладилника. */
+    function weekHTML(tasks) {
+      return '<div class="ws-week">' + DAYS.map(function (d, i) {
+        var part = tasks.slice(i * 4, i * 4 + 4);
+        return '<section class="wk-day"><h3>' + d + '<span class="wk-box"></span></h3>' +
+          '<ol class="ws-list wk-list" start="1">' + part.map(function (k) {
+            k = lettered(k);
+            var q = String(k.q).replace('{?}', k.kind === 'choice' ? '<span class="ws-box"></span>' : '<span class="ws-blank"></span>');
+            var opts = k.kind === 'choice' && k.choices
+              ? '<span class="ws-opts">' + k.choices.map(function (c) { return '<span>' + (typeof c === 'object' ? (c.html || c.v) : c) + '</span>'; }).join('') + '</span>' : '';
+            return '<li' + (k.skill ? ' data-skill="' + esc(k.skill) + '"' : '') + '>' + q +
+              (k.figure ? '<span class="ws-fig">' + k.figure + '</span>' : '') + opts +
+              (k.kind !== 'choice' && String(k.q).indexOf('{?}') < 0 ? ' <span class="ws-blank"></span>' : '') + '</li>';
+          }).join('') + '</ol></section>';
+      }).join('') + '</div>';
+    }
+
     function render() {
       var gr = mode() === 'nvo' ? 4 : +g.value, seen = {};
-      var isTest = mode() === 'test', isNvo = mode() === 'nvo';
+      var isTest = mode() === 'test', isNvo = mode() === 'nvo', isWeek = mode() === 'week';
       var title = isNvo ? 'НВО · математика · 4. клас'
         : E.GRADES[gr].name + ' · ' + E.topicName(gr, t.value);
-      var label = isNvo ? 'Пробен тест за НВО' : (isTest ? 'Контролна работа' : 'Работен лист');
+      var label = isNvo ? 'Пробен тест за НВО' : (isTest ? 'Контролна работа' : (isWeek ? 'Домашно за седмица' : 'Работен лист'));
       var variants = isTest ? ['А', 'Б'] : [''];
       var sheet = '', key = '', plan = null;
       variants.forEach(function (v, vi) {
@@ -198,16 +220,19 @@
         sheet += '<div class="ws-page' + (vi ? ' ws-break' : '') + '">' + sheetHead(title, vlabel) +
           (isNvo ? '<p class="ws-note">Задачи 1–16 са с избираем отговор, 17–20 – с кратък свободен отговор. ' +
             'На изпита има още 5 задачи с решение (21–25).</p>' : '') +
-          tasksHTML(tasks, isNvo) +
-          '<div class="ws-foot">Решени верно: ______ от ' + tasks.length + (isNvo ? '' : ' &nbsp; ☆ ☆ ☆') + '</div></div>';
+          (isWeek ? '<p class="ws-note">По четири задачи на ден, около десет минути. Квадратчето до деня се отмята, когато денят е готов.</p>' : '') +
+          (isWeek ? weekHTML(tasks) : tasksHTML(tasks, isNvo)) +
+          '<div class="ws-foot">' + (isWeek ? 'Пет дни подред ☆ ☆ ☆ ☆ ☆' : 'Решени верно: ______ от ' + tasks.length + (isNvo ? '' : ' &nbsp; ☆ ☆ ☆')) + '</div></div>';
         key += '<div class="ws-page' + (vi ? ' ws-break' : '') + '"><div class="ws-head"><div class="ws-brand">Сметко</div>' +
-          '<div class="ws-title"><b>Отговори</b><span>' + esc(vlabel) + '</span></div></div>' + keyHTML(tasks) + '</div>';
+          '<div class="ws-title"><b>Отговори</b><span>' + esc(vlabel) + '</span></div></div>' +
+          (isWeek ? DAYS.map(function (d, i) { return '<h3 class="wk-key">' + d + '</h3>' + keyHTML(tasks.slice(i * 4, i * 4 + 4)); }).join('') : keyHTML(tasks)) + '</div>';
       });
       $('ws-sheet').innerHTML = sheet;
       $('ws-key').innerHTML = key;
       $('ws-key').hidden = !ans.checked;
       // при НВО темата и трудността не се избират
-      [t, lv, cnt].forEach(function (el) { el.disabled = isNvo; el.closest('label').classList.toggle('is-off', isNvo); });
+      [t, lv].forEach(function (el) { el.disabled = isNvo; el.closest('label').classList.toggle('is-off', isNvo); });
+      cnt.disabled = isNvo || isWeek; cnt.closest('label').classList.toggle('is-off', isNvo || isWeek);
       g.disabled = isNvo; g.closest('label').classList.toggle('is-off', isNvo);
     }
 

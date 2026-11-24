@@ -103,3 +103,13 @@ table.track td { height: 9mm; }
 .task-tbl th { background: #EEF4FD; font-size: 9pt; }
 .task-tbl td.num { text-align: center; }
 .box { display: inline-block; width: 9mm; height: 4.6mm; border: 1.4px solid #15223B; border-radius: 2px; vertical-align: -1mm; }
+
+/* ---- справочник и карта на успеха ---- */
+.ref h3, .karta h3.part { margin: 14px 0 6px; font-size: 11pt; color: #15223B; }
+.ref .cols { gap: 10mm; }
+.ref .fmt.wide { margin-bottom: 4px; }
+.ref .fmt td, .ref .fmt th { padding: 2.5px 5px; font-size: 8.6pt; }
+.ref .small { margin: 2px 0 0; line-height: 1.45; }
+.ref .t-foot { margin-top: 12px; }
+.karta-tbl td { height: 8mm; }
+.karta-tbl td:first-child { white-space: nowrap; }

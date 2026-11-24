@@ -4,7 +4,7 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 sh "$HERE/serve.sh" || exit 1
 python3 "$HERE/setup.py" >/dev/null 2>&1
 bad=0
-for t in smoke.py content.py; do
+for t in smoke.py content.py print.py; do
   out=$(python3 "$HERE/$t" 2>&1)
   p=$(printf '%s\n' "$out" | grep -c '^PASS')
   f=$(printf '%s\n' "$out" | grep -c '^FAIL ')

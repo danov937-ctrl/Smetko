@@ -13,10 +13,14 @@ for f in glob.glob(DB + '*'):
 
 s = requests.Session()
 s.post(B + '/api/config.php', json={})
-h = s.get(B + '/admin/').text
+# към index.php, не към папката: вграденият сървър на php пренасочва /admin/ и губи данните от формата
+h = s.get(B + '/admin/index.php').text
 csrf = re.search(r'name="csrf" value="([a-f0-9]+)"', h).group(1)
-r = s.post(B + '/admin/', data={'csrf': csrf, 'action': 'setup', 'key': KEY,
-                                'password': 'testtest123', 'password2': 'testtest123'})
+r = s.post(B + '/admin/index.php', data={'csrf': csrf, 'action': 'setup', 'key': KEY,
+                                         'password': 'testtest123', 'password2': 'testtest123'})
+import sqlite3 as _s
+_d = _s.connect(DB); _ok = _d.execute("select count(*) from settings where k='admin_hash'").fetchone()[0]; _d.close()
+assert _ok, 'администраторът не се създаде'
 s.get(B + '/api/news.php')               # пуска началните новини, за да не изскачат после
 d = sqlite3.connect(DB); d.execute('update news set popup=0'); d.commit(); d.close()
 print('настройка:', r.status_code)

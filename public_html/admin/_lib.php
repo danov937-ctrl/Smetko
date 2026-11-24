@@ -83,6 +83,7 @@ const NAV = [
     ['uchilishta.php', '🏫', 'Училища'],
     ['akaunti.php', '👤', 'Акаунти'],
     ['klasacii.php', '🏆', 'Класации'],
+    ['gramoti.php', '🎓', 'Грамоти'],
     ['predizvikatelstvo.php', '⚡', 'Предизвикателство'],
     ['novini.php', '📰', 'Новини'],
     ['sedmichen.php', '📬', 'Седмичен имейл'],

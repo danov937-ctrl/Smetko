@@ -868,10 +868,42 @@
     return t;
   }
 
+  /* Напречни листове: „само събиране“, „само деление“, „цялата геометрия“ – умения от
+     всички теми на класа, подбрани по вид, а не по урок. */
+  var SETS = {
+    geo: { name: 'Геометрия (всичко от класа)', s: ['shapes', 'lines', 'countShapes', 'ruler', 'polySides', 'segSum',
+      'cm20', 'perim2', 'triSides', 'triAngles', 'angles', 'degrees', 'rectProps', 'sideFromPerim', 'area', 'areaUnits',
+      'sideFromArea', 'compArea', 'perimArea2', 'circle', 'circleParts', 'solidsName', 'solidsCount', 'wordArea'] },
+    add: { name: 'Само събиране', s: ['add5', 'add10', 'three10', 'decomp10', 'missing10', 'add20no', 'add20x',
+      'add100no', 'add100x', 'unkAddend', 'add1000no', 'add1000x', 'addBigNo', 'addBigX'] },
+    sub: { name: 'Само изваждане', s: ['sub5', 'sub10', 'sub20no', 'sub20x', 'sub100no', 'sub100x', 'unkMinuend',
+      'sub1000no', 'sub1000x', 'subBigNo', 'subBigX', 'unkSubtrahend'] },
+    mul: { name: 'Само умножение', s: ['mulTable', 'timesWord', 'unkFactor', 'mul1d', 'distrib', 'mulBig1d', 'mul2d'] },
+    div: { name: 'Само деление', s: ['divTable', 'div1d', 'divRem', 'unkDividend', 'divBig1d', 'unkDivisor', 'div2d', 'parts'] },
+    word: { name: 'Само текстови задачи', s: ['word10', 'word20', 'word2steps', 'timesWord', 'word3', 'wordBig',
+      'wordArea', 'calcWord', 'century', 'parts'] }
+  };
+  function setSkills(grade, key) {
+    var want = SETS[key];
+    if (!want) return null;
+    var out = [];
+    (GRADES[grade] && GRADES[grade].topics || []).forEach(function (t) {
+      t.skills.forEach(function (k) { if (want.s.indexOf(k[0]) >= 0 && out.indexOf(k[0]) < 0) out.push(k[0]); });
+    });
+    return out;
+  }
+
   function findTopic(grade, id) { var ts = GRADES[grade].topics; for (var i = 0; i < ts.length; i++) if (ts[i].id === id) return ts[i]; return null; }
 
   function generate(grade, topicId, level) {
     grade = +grade || 1; level = +level || 1;
+    var set = SETS[topicId] ? setSkills(grade, topicId) : null;
+    if (set && set.length) {                       // напречен лист – умението се тегли от целия набор
+      var nm = pick(set), st = S[nm](level);
+      st.topic = topicId; st.skill = nm; st.grade = grade; st.level = level;
+      st.table = /^(mulTable|divTable|unkFactor)$/.test(nm);
+      return st;
+    }
     var topic = topicId && topicId !== 'mix' ? findTopic(grade, topicId) : null;
     var lvl = level;
     if (!topic) { topic = pick(GRADES[grade].topics); lvl = level >= 3 ? rnd(2, 3) : level; }
@@ -940,5 +972,5 @@
   };
 
   window.Smetko = window.Smetko || {};
-  window.Smetko.MathEngine = { generate: generate, generateSkill: generateSkill, generateFrom: generateFrom, runSkill: runSkill, check: check, GRADES: GRADES, ADVENTURE: ADVENTURE, topicName: topicName, fmt: fmt, roman: roman, NVO4: NVO4, _S: S };
+  window.Smetko.MathEngine = { SETS: SETS, setSkills: setSkills, generate: generate, generateSkill: generateSkill, generateFrom: generateFrom, runSkill: runSkill, check: check, GRADES: GRADES, ADVENTURE: ADVENTURE, topicName: topicName, fmt: fmt, roman: roman, NVO4: NVO4, _S: S };
 })();

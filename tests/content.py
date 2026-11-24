@@ -243,13 +243,35 @@ with sync_playwright() as p:
     sb = pg.eval_on_selector_all('#ws-sheet .ws-page:nth-child(2) .ws-list li', 'e=>e.map(x=>x.dataset.skill)')
     ok(sa and all(sa), 'задачите носят името на умението си')
     ok(sa == sb, 'вариант Б повтаря уменията на вариант А ред по ред')
+    # листове за едно действие наведнъж
+    OPS = {'add': ['add'], 'sub': ['sub', 'unkMinuend'], 'mul': ['mul', 'timesWord', 'unkFactor', 'distrib'],
+           'div': ['div', 'unkDiv', 'parts'], 'word': ['word', 'times', 'century', 'parts', 'calc']}
+    pg.goto(B + '/rabotni-listove.html?grade=3'); pg.wait_for_timeout(1400)
+    for op, pre in OPS.items():
+        ok(pg.locator('#ws-topic option[value="%s"]' % op).count() == 1, '3. клас: има лист „%s“' % op)
+        pg.select_option('#ws-topic', op); pg.wait_for_timeout(1500)
+        sk = pg.eval_on_selector_all('#ws-sheet .ws-list li', 'e=>e.map(x=>x.dataset.skill)')
+        bad = [x for x in sk if not any(p2.lower() in (x or '').lower() for p2 in pre)]
+        ok(len(sk) == 20 and not bad, 'листът „%s“ е само от този вид (%d задачи, чужди: %s)' % (op, len(sk), bad[:3]))
+    ok(pg.locator('#ws-grade').input_value() == '3', 'класът не се сменя сам')
+    pg.goto(B + '/rabotni-listove.html?grade=1'); pg.wait_for_timeout(1400)
+    ok(pg.locator('#ws-topic option[value="mul"]').count() == 0, '1. клас няма лист за умножение – не се учи')
+
+    # домашно за седмица: пет дни по четири задачи на един лист
+    pg.select_option('#ws-kind', 'week'); pg.wait_for_timeout(1600)
+    ok(pg.locator('.wk-day').count() == 5, 'седмичното домашно има пет дни')
+    ok(pg.locator('.wk-list li').count() == 20, 'по четири задачи на ден (%d)' % pg.locator('.wk-list li').count())
+    ok(pg.eval_on_selector('#ws-count', 'e=>e.disabled'), 'броят е заключен на 20')
+    ok(pg.locator('#ws-key .ws-keylist li').count() == 20, 'отговорите са по дни, но всички са там')
+    pg.select_option('#ws-kind', 'sheet'); pg.wait_for_timeout(1200)
+
     # отделен лист само по геометрия, с чертежите
     for g in ('1', '2', '3', '4'):
         pg.goto(B + '/rabotni-listove.html?grade=' + g); pg.wait_for_timeout(1300)
         ok(pg.locator('#ws-topic option[value="geo"]').count() == 1, '%s. клас: има лист „Геометрия“' % g)
         pg.select_option('#ws-topic', 'geo'); pg.wait_for_timeout(1700)
         n = pg.locator('#ws-sheet .ws-list li').count()
-        figs = pg.locator('#ws-sheet .ws-fig').count()
+        figs = pg.locator('#ws-sheet svg').count()   # в 1. клас чертежите са в самите отговори
         ok(n == 20 and pg.locator('#ws-key li').count() == 20, '%s. клас: 20 задачи и 20 отговора (%d)' % (g, n))
         ok(figs >= 6, '%s. клас: чертежите стигат до листа (%d)' % (g, figs))
         sk = pg.eval_on_selector_all('#ws-sheet .ws-list li', 'e=>e.map(x=>x.dataset.skill)')
@@ -435,6 +457,33 @@ with sync_playwright() as p:
     pg.select_option('#bd-grade', '4'); pg.wait_for_timeout(600)
     ok(pg.locator('#bd-topic option').count() >= 4, 'смяната на класа сменя темите')
 
+    # дъската не бива да показва задача без това, с което се отговаря
+    r = pg.evaluate("""()=>{const B=window.Smetko.Board, bd=document.getElementById('bd');
+      let out=0, figs=0, flat=0, opts=0, noOpts=0, sizes=[];
+      for(let i=0;i<120;i++){
+        B.next();
+        const t=B.task(), f=document.getElementById('bd-fig'), o=document.getElementById('bd-opts');
+        if(t.figure){ figs++; const s=f.querySelector('svg');          // таблиците са чертеж без svg
+          const h=(s||f).getBoundingClientRect().height; if(h<20) flat++; }
+        if(t.kind==='choice'){ opts++; if(o.hidden||o.children.length<2) noOpts++; }
+        if(bd.scrollHeight>bd.clientHeight+1) out++;
+        sizes.push(parseFloat(getComputedStyle(bd).getPropertyValue('--bq')));
+        B.reveal();
+        if(bd.scrollHeight>bd.clientHeight+1) out++;
+      }
+      const right=document.querySelectorAll('#bd-opts .bd-opt.right').length;
+      return {out, figs, flat, opts, noOpts, min:Math.min(...sizes), max:Math.max(...sizes), right}}""")
+    ok(r['opts'] >= 5 and r['noOpts'] == 0,
+       'задачите с избираем отговор показват и отговорите (%d от %d без)' % (r['noOpts'], r['opts']))
+    ok(r['figs'] >= 5 and r['flat'] == 0, 'чертежите не са сплескани (%d от %d)' % (r['flat'], r['figs']))
+    ok(r['out'] == 0, 'нищо не излиза извън кутията при 120 задачи (%d)' % r['out'])
+    ok(r['min'] >= 14 and r['max'] <= 320, 'шрифтът се нагажда към кутията (%.0f–%.0f px)' % (r['min'], r['max']))
+    big = pg.evaluate("""()=>{const bd=document.getElementById('bd');
+      bd.style.cssText+=';position:fixed;inset:0;height:100vh;padding:40px 36px 28px';
+      window.Smetko.Board.fit();
+      return {bq:parseFloat(getComputedStyle(bd).getPropertyValue('--bq')), out:bd.scrollHeight-bd.clientHeight}}""")
+    ok(big['out'] <= 1, 'и на цял екран задачата се побира')
+
     # ---------- родителят се регистрира и стига до картата
     c2 = b.new_context(viewport={'width': 1100, 'height': 950}); c2.add_init_script(INIT)
     q = page(c2, errs)
@@ -488,6 +537,28 @@ with sync_playwright() as p:
     txt = pg.locator('.qcard .q-text').first.inner_text().strip()
     ok(len(txt) > 3, 'задачата има условие: %s' % txt.replace('\n', ' ')[:48])
     ok(pg.locator('.qcard .slot, .qcard input, .keypad, .choices').count() > 0, 'има къде да се отговори')
+
+    # ---------- грамоти от админ панела
+    ca = b.new_context(viewport={'width': 1280, 'height': 1000})
+    a = page(ca, errs)
+    a.goto(B + '/admin/index.php'); a.wait_for_timeout(600)
+    a.fill('input[name=password]', 'testtest123'); a.locator('form button').first.click(); a.wait_for_timeout(900)
+    a.goto(B + '/admin/gramoti.php'); a.wait_for_timeout(700)
+    ok('Грамоти' in a.title(), 'админ панелът има страница за грамоти')
+    ok(a.locator('nav.side a[href="gramoti.php"]').count() == 1, 'и тя е в менюто')
+    a.fill('textarea[name=names]', 'Иван Петров\nМария Георгиева | за най-много решени задачи\nГеорги Стоянов')
+    a.fill('input[name=class_name]', '3. а'); a.fill('input[name=school]', 'ОУ „Иван Вазов“, Пловдив')
+    a.fill('input[name=sign1]', 'Н. Иванова'); a.check('input[name=places]')
+    a.locator('form.card button.btn').click(); a.wait_for_timeout(2500)
+    ok('gramota.html' in a.url, 'бутонът отваря грамотите (%s)' % a.url.split('/')[-1])
+    ok(a.locator('.dipl').count() == 3, 'по една грамота на име (%d)' % a.locator('.dipl').count())
+    names = a.eval_on_selector_all('.dp-name', 'e=>e.map(x=>x.innerText)')
+    ok(names == ['Иван Петров', 'Мария Георгиева', 'Георги Стоянов'], 'имената са на мястото си %s' % names)
+    ok(a.locator('.dp-place').count() == 3, 'първите трима получават място')
+    lines = a.eval_on_selector_all('.dp-line', 'e=>e.map(x=>x.innerText)')
+    ok('най-много решени' in lines[1], 'собственият текст след „|“ се запазва: %s' % lines[1])
+    ok('3. а' in a.inner_text('.dp-meta') and '2026/2027' in a.inner_text('.dp-meta'), 'класът и годината са отдолу')
+    ca.close()
 
     b.close()
 done(errs)

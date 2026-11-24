@@ -946,6 +946,7 @@ write('za-nas.html', about_us)
 
 # ================= gramota.html (грамоти за печат) =================
 dipl_pg = head('Грамоти – Сметко', 'Грамоти за печат от Сметко.', 'gramota.html', [], 'dipl-page', noindex=True) + """
+<style>@media print { @page { size: A4 landscape; margin: 0; } }</style>
 <div class="dipl-tools" id="dipl-tools">
   <div><b>🎓 Грамоти за печат</b><p>Може да поправите имената и подписите направо върху грамотата (докоснете текста). Печат: A4, хоризонтално, с фонови цветове, без полета.</p></div>
   <div class="dt-row" id="dipl-pick"><label>Кои грамоти <select id="dipl-which" class="select"><option value="all">Всички</option><option value="top">Само I, II и III място</option><option value="pick">Избрани от списъка</option></select></label><details><summary>Списък</summary><div id="dipl-list" class="dipl-list"></div></details></div>
@@ -973,7 +974,7 @@ ws = head('Работни листове и контролни по матема
     <p class="lead-dark">Изберете какво ви трябва – Сметко генерира задачите за печат. Всеки път са нови, а отговорите са на отделна страница.</p>
     <div class="panel tool-panel">
       <div class="tool-grid">
-        <label>Какво правим<select id="ws-kind" class="select"><option value="sheet">Работен лист</option><option value="test">Контролна работа · 2 варианта</option><option value="nvo">Пробен тест за НВО · 4. клас</option></select></label>
+        <label>Какво правим<select id="ws-kind" class="select"><option value="sheet">Работен лист</option><option value="test">Контролна работа · 2 варианта</option><option value="week">Домашно за седмица · 5 × 4 задачи</option><option value="nvo">Пробен тест за НВО · 4. клас</option></select></label>
         <label>Клас<select id="ws-grade" class="select"><option value="1">1. клас</option><option value="2">2. клас</option><option value="3">3. клас</option><option value="4">4. клас</option></select></label>
         <label>Тема<select id="ws-topic" class="select"></select></label>
         <label>Трудност<select id="ws-level" class="select"><option value="1">Лесно</option><option value="2" selected>Средно</option><option value="3">Трудно</option></select></label>
@@ -1062,6 +1063,7 @@ bd = head('Задачи на дъската – математика за 1.–4
       <div class="bd-top"><span id="bd-count">Задача 1</span><button type="button" class="btn btn-sm btn-white" id="bd-full">⛶ Цял екран</button></div>
       <p class="bd-q" id="bd-q"></p>
       <div class="bd-fig" id="bd-fig" hidden></div>
+      <div class="bd-opts" id="bd-opts" hidden></div>
       <p class="bd-a" id="bd-a" hidden></p>
       <div class="bd-btns">
         <button type="button" class="btn btn-lg btn-green" id="bd-show">Покажи отговора</button>
@@ -1300,14 +1302,10 @@ def geo_skills():
     """Геометричните умения по класове – четат се от js/math-engine.js, за да не се разминават."""
     import json, subprocess, os as _os
     root = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-    GEO = ['shapes', 'lines', 'countShapes', 'ruler', 'polySides', 'segSum', 'cm20', 'perim2', 'triSides',
-           'triAngles', 'angles', 'degrees', 'rectProps', 'sideFromPerim', 'area', 'areaUnits',
-           'sideFromArea', 'compArea', 'perimArea2', 'circle', 'circleParts', 'solidsName', 'solidsCount']
     js = ("const fs=require('fs'),vm=require('vm');const c={window:{},Math:Object.create(Math),console};"
           "vm.createContext(c);vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),c);"
-          "const G=" + json.dumps(GEO) + ",E=c.window.Smetko.MathEngine,o={};"
-          "for(let g=1;g<=4;g++){const h=[];(E.GRADES[g].topics||[]).forEach(t=>t.skills.forEach(k=>"
-          "{if(G.includes(k[0])&&!h.includes(k[0]))h.push(k[0])}));o[g]=h;}"
+          "const E=c.window.Smetko.MathEngine,o={};"
+          "for(let g=1;g<=4;g++)o[g]=E.setSkills(g,'geo');"
           "process.stdout.write(JSON.stringify(o));")
     out = subprocess.run(['node', '-e', js, _os.path.join(root, 'public_html', 'js', 'math-engine.js')],
                          capture_output=True, text=True, check=True)
