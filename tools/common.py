@@ -6,7 +6,7 @@ from icons import SPRITE, ico  # наборът икони на Сметко
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public_html')
 SITE = 'https://smetko.com'
-VER = '66'
+VER = '67'
 EMAIL = 'info@smetko.com'
 
 # Страницата във Фейсбук. Сменя се само тук – ползва се от долното меню, от статиите
